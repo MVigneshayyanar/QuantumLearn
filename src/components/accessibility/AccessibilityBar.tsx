@@ -112,10 +112,14 @@ export function AccessibilityBar() {
               className="bg-white border border-dark-200 text-dark-800 rounded px-2 py-0.5 text-xs font-medium cursor-pointer hover:border-dark-400 focus:ring-1 focus:ring-primary-500"
             >
               <option value="en">English (EN)</option>
+              <option value="hi">हिन्दी (Hindi)</option>
               <option value="es">Español (ES)</option>
               <option value="fr">Français (FR)</option>
               <option value="de">Deutsch (DE)</option>
-              <option value="hi">हिन्दी (Hindi)</option>
+              <option value="ta">தமிழ் (Tamil)</option>
+              <option value="te">తెలుగు (Telugu)</option>
+              <option value="ja">日本語 (Japanese)</option>
+              <option value="zh-CN">中文 (Chinese)</option>
             </select>
           </div>
 

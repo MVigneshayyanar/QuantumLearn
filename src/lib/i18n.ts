@@ -1,4 +1,4 @@
-export const translations = {
+const rawTranslations = {
   en: {
     nav: {
       brand: "QLearn",
@@ -455,3 +455,9 @@ export const translations = {
     },
   },
 };
+
+export const translations: Record<string, typeof rawTranslations.en> = new Proxy(rawTranslations, {
+  get(target: any, prop: string) {
+    return target[prop] || target.en;
+  }
+});

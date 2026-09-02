@@ -4,7 +4,7 @@ import React, { createContext, useContext, useState, useEffect, ReactNode } from
 
 export type FontSizeOption = 'sm' | 'md' | 'lg' | 'xl';
 export type ExplanationMode = 'simple' | 'technical';
-export type Language = 'en' | 'hi' | 'es' | 'fr' | 'de';
+export type Language = 'en' | 'hi' | 'es' | 'fr' | 'de' | 'ta' | 'te' | 'ja' | 'zh-CN';
 
 interface AccessibilityContextType {
   fontSize: FontSizeOption;

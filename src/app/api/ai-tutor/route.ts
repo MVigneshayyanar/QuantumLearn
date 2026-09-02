@@ -32,7 +32,11 @@ export async function POST(req: NextRequest) {
           hi: 'Hindi (हिन्दी)',
           es: 'Spanish (Español)',
           fr: 'French (Français)',
-          de: 'German (Deutsch)'
+          de: 'German (Deutsch)',
+          ta: 'Tamil (தமிழ்)',
+          te: 'Telugu (తెలుగు)',
+          ja: 'Japanese (日本語)',
+          'zh-CN': 'Simplified Chinese (简体中文)'
         };
         const activeLangName = langMap[language] || 'English';
 

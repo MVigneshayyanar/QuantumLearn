@@ -6,6 +6,7 @@ import { Navbar } from '@/components/navigation/Navbar';
 import { Footer } from '@/components/navigation/Footer';
 import { QubitPrimerModal } from '@/components/accessibility/QubitPrimerModal';
 import { AITutorDrawer } from '@/components/ai-tutor/AITutorDrawer';
+import { GoogleTranslator } from '@/components/accessibility/GoogleTranslator';
 
 export const metadata: Metadata = {
   title: 'QLearn | AI-Based Interactive Quantum Algorithm Learning Platform',
@@ -45,6 +46,9 @@ export default function RootLayout({
 
           {/* Socratic AI Tutor Drawer */}
           <AITutorDrawer />
+
+          {/* Hidden Google Translate Engine */}
+          <GoogleTranslator />
 
           {/* Footer */}
           <Footer />
