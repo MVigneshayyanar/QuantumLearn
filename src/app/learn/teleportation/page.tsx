@@ -1,0 +1,101 @@
+'use client';
+
+import React, { useState } from 'react';
+import { AlgorithmModuleView } from '@/components/algorithm-module/AlgorithmModuleView';
+
+export default function TeleportationPage() {
+  const [statePrep, setStatePrep] = useState<'plus' | 'one' | 't_state'>('plus');
+
+  const intuitionSimple = `Imagine Alice has a fragile soap bubble (an unknown quantum state |ψ⟩).
+If she tries to look at it or measure it, it pops (measurement collapse).
+Because of the No-Cloning Theorem, she cannot even make a photocopy of it!
+
+How can she send this exact bubble to Bob on the other side of the world?
+1. Alice and Bob first share an entangled pair of particles (Bell pair).
+2. Alice interacts her mystery bubble with her half of the entangled pair and measures them.
+3. This creates 2 classical bits (like a phone call message), and destroys Alice's original bubble.
+4. Alice calls Bob with the 2 bits. Bob uses these bits to rotate his entangled particle, and miraculously, Alice's exact bubble appears in Bob's hands!`;
+
+  const intuitionTechnical = `Quantum Teleportation (Bennett et al. 1993) accomplishes the exact state transfer $\\mathcal{T}: \\mathcal{H}_A \\to \\mathcal{H}_B$ for an arbitrary unknown state $|\\psi\\rangle = \\alpha|0\\rangle + \\beta|1\\rangle$ by utilizing 1 shared e-bit of entanglement ($|\\Phi^+\\rangle_{AB} = \\frac{|00\\rangle + |11\\rangle}{\\sqrt{2}}$) and consuming 2 classical bits (c-bits).
+
+The protocol obeys the No-Cloning Theorem because Alice's joint Bell-basis projective measurement completely destroys her local state. It obeys the No-Signaling Theorem because Bob's reduced density matrix prior to classical feedforward correction is maximally mixed $\\rho_B = \\frac{1}{2}I$, possessing zero accessible mutual information.`;
+
+  const mathWalkthrough = [
+    {
+      stepName: "Total 3-Qubit Composite State",
+      equation: "|\\psi_0\\rangle = \\underbrace{(\\alpha|0\\rangle + \\beta|1\\rangle)}_{\\text{Alice's message}} \\otimes \\underbrace{\\frac{|00\\rangle + |11\\rangle}{\\sqrt{2}}}_{\\text{Shared Bell pair}}",
+      descriptionSimple: "Alice holds Q0 ($|\\psi\\rangle$) and Q1. Bob holds Q2.",
+      descriptionTechnical: "Composite statevector in $\\mathcal{H}_A \\otimes \\mathcal{H}_{A'} \\otimes \\mathcal{H}_B = \\frac{1}{\\sqrt{2}}[\\alpha|000\\rangle + \\alpha|011\\rangle + \\beta|100\\rangle + \\beta|111\\rangle]$."
+    },
+    {
+      stepName: "Alice's Bell-Basis Transform",
+      equation: "(H_0 \\otimes I \\otimes I)(\\text{CNOT}_{0,1} \\otimes I)|\\psi_0\\rangle",
+      descriptionSimple: "Alice mixes her unknown state with her entangled particle using CNOT and Hadamard.",
+      descriptionTechnical: "Unitary mapping onto the 4 Bell basis states $\\{|\\Phi^+\\rangle, |\\Phi^-\\rangle, |\\Psi^+\\rangle, |\\Psi^-\\rangle\\}$ on Alice's subsystem."
+    },
+    {
+      stepName: "Bell Measurement & State Rearrangement",
+      equation: "= \\frac{1}{2}\\Big[|00\\rangle(\\alpha|0\\rangle+\\beta|1\\rangle) + |01\\rangle(\\alpha|1\\rangle+\\beta|0\\rangle) + |10\\rangle(\\alpha|0\\rangle-\\beta|1\\rangle) + |11\\rangle(\\alpha|1\\rangle-\\beta|0\\rangle)\\Big]",
+      descriptionSimple: "Depending on Alice's 2-bit measurement outcome (00, 01, 10, or 11), Bob's qubit is in one of 4 known rotations of $|\\psi\\rangle$.",
+      descriptionTechnical: "Projection onto Alice's computational basis leaves Bob's qubit in state $X^{b} Z^{a} |\\psi\\rangle$."
+    },
+    {
+      stepName: "Bob's Feedforward Correction",
+      equation: "Z^{m_0} X^{m_1} |\\psi_B\\rangle = |\\psi\\rangle \\quad (\\text{Fidelity } F = 1.0)",
+      descriptionSimple: "If Alice measures bit 1, Bob applies $X$ (bit flip). If Alice measures bit 0, Bob applies $Z$ (phase flip). Bob now has the exact state $|\\psi\\rangle$!",
+      descriptionTechnical: "Conditional unitary operations Pauli-$X$ and Pauli-$Z$ eliminate the Pauli byproduct operators, yielding exact fidelity $F = 1.0$."
+    }
+  ];
+
+  const paramControls = (
+    <div className="flex flex-wrap items-center justify-between gap-4 text-xs">
+      <div className="flex items-center gap-2">
+        <span className="font-bold text-dark-800">Mystery State Prepared by Alice:</span>
+        <div className="inline-flex rounded-lg border border-dark-200 p-0.5 bg-dark-50">
+          <button
+            onClick={() => setStatePrep('plus')}
+            className={`px-3 py-1.5 rounded-md font-medium transition-colors ${
+              statePrep === 'plus' ? 'bg-primary-600 text-white shadow-xs' : 'text-dark-700 hover:text-dark-900'
+            }`}
+          >
+            |+⟩ Superposition (H)
+          </button>
+          <button
+            onClick={() => setStatePrep('one')}
+            className={`px-3 py-1.5 rounded-md font-medium transition-colors ${
+              statePrep === 'one' ? 'bg-primary-600 text-white shadow-xs' : 'text-dark-700 hover:text-dark-900'
+            }`}
+          >
+            |1⟩ State (X)
+          </button>
+          <button
+            onClick={() => setStatePrep('t_state')}
+            className={`px-3 py-1.5 rounded-md font-medium transition-colors ${
+              statePrep === 't_state' ? 'bg-primary-600 text-white shadow-xs' : 'text-dark-700 hover:text-dark-900'
+            }`}
+          >
+            T-State (H + T)
+          </button>
+        </div>
+      </div>
+      <span className="text-dark-500 font-mono">Q0: Alice Message | Q1: Alice Entangled | Q2: Bob Target</span>
+    </div>
+  );
+
+  return (
+    <AlgorithmModuleView
+      moduleSlug="teleportation"
+      title="Quantum Teleportation"
+      subtitle="Transfer arbitrary quantum states across arbitrary distances without moving the physical particle."
+      category="Quantum Communication"
+      qubitCount={3}
+      speedup="Entanglement & Classical Feedforward"
+      intuitionSimple={intuitionSimple}
+      intuitionTechnical={intuitionTechnical}
+      mathWalkthrough={mathWalkthrough}
+      algorithmBackendId="teleportation"
+      defaultParams={{ state_prep: statePrep }}
+      paramControls={paramControls}
+    />
+  );
+}

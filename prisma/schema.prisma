@@ -1,0 +1,90 @@
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+enum Role {
+  STUDENT
+  EDUCATOR
+  ADMIN
+}
+
+enum DifficultyLevel {
+  BEGINNER
+  INTERMEDIATE
+  ADVANCED
+}
+
+model User {
+  id            String          @id @default(cuid())
+  name          String?
+  email         String          @unique
+  emailVerified DateTime?
+  image         String?
+  role          Role            @default(STUDENT)
+  streakDays    Int             @default(0)
+  lastActiveAt  DateTime        @default(now())
+  createdAt     DateTime        @default(now())
+  updatedAt     DateTime        @updatedAt
+
+  progress      UserProgress[]
+  quizAttempts  QuizAttempt[]
+  circuits      SavedCircuit[]
+  misconceptions MisconceptionLog[]
+}
+
+model UserProgress {
+  id             String    @id @default(cuid())
+  userId         String
+  user           User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  moduleSlug     String    // e.g. "deutsch-jozsa", "grover", "teleportation", "superdense-coding"
+  stageReached   Int       @default(1) // 1: Intuition, 2: Math, 3: Circuit, 4: Quiz
+  isCompleted    Boolean   @default(false)
+  masteryScore   Float     @default(0.0) // 0.0 to 100.0
+  timeSpentSeconds Int     @default(0)
+  lastVisitedAt  DateTime  @default(now())
+
+  @@unique([userId, moduleSlug])
+}
+
+model QuizAttempt {
+  id              String          @id @default(cuid())
+  userId          String
+  user            User            @relation(fields: [userId], references: [id], onDelete: Cascade)
+  moduleSlug      String
+  questionId      String
+  selectedAnswer  String
+  isCorrect       Boolean
+  timeTakenMs     Int
+  difficulty      DifficultyLevel
+  misconceptionTag String?
+  createdAt       DateTime        @default(now())
+}
+
+model MisconceptionLog {
+  id              String   @id @default(cuid())
+  userId          String
+  user            User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  misconceptionTag String  // e.g. "SUPERPOSITION_VS_CLASSICAL_PROB", "PHASE_KICKBACK_MISUNDERSTANDING"
+  occurrenceCount Int      @default(1)
+  isResolved      Boolean  @default(false)
+  lastFlaggedAt   DateTime @default(now())
+
+  @@unique([userId, misconceptionTag])
+}
+
+model SavedCircuit {
+  id          String   @id @default(cuid())
+  userId      String
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  name        String
+  numQubits   Int      @default(2)
+  circuitJson Json
+  qasmCode    String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
