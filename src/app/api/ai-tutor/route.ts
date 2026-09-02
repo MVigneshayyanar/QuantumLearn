@@ -47,10 +47,14 @@ PEDAGOGICAL RULES:
 3. If an active misconception is tagged, address it gently and constructively.
 4. Keep explanations engaging, concise, and physically accurate.`;
 
-        // Single model: gemini-3.6-flash
+        // High-speed low-latency model for instant responses
         const model = genAI.getGenerativeModel({ 
-          model: 'gemini-3.6-flash',
-          systemInstruction
+          model: 'gemini-3.1-flash-lite',
+          systemInstruction,
+          generationConfig: {
+            maxOutputTokens: 300,
+            temperature: 0.7
+          }
         });
 
         const result = await model.generateContent(query);
