@@ -424,12 +424,13 @@ export function CircuitBuilder() {
                 title={`${gate.desc} — Drag & drop onto wire or click to select`}
               >
                 <span
-                  className={`w-6 h-6 rounded-md flex items-center justify-center font-mono text-xs font-bold ${gate.color}`}
+                  className={`w-6 h-6 rounded-md flex items-center justify-center font-mono text-xs font-bold notranslate ${gate.color}`}
+                  translate="no"
                 >
                   {gate.name}
                 </span>
-                <span>{gate.type.toUpperCase()}</span>
-                {gate.multi && <span className="text-[10px] text-dark-400 uppercase font-mono">2Q</span>}
+                <span className="notranslate" translate="no">{gate.type.toUpperCase()}</span>
+                {gate.multi && <span className="text-[10px] text-dark-400 uppercase font-mono notranslate" translate="no">2Q</span>}
               </button>
             );
           })}
@@ -473,7 +474,7 @@ export function CircuitBuilder() {
           {Array.from({ length: numQubits }, (_, qIdx) => (
             <div key={qIdx} className="flex items-center gap-4">
               {/* Qubit Label */}
-              <div className="w-20 shrink-0 flex items-center gap-2">
+              <div className="w-20 shrink-0 flex items-center gap-2 notranslate" translate="no">
                 <span className="font-mono font-bold text-sm text-dark-800">q[{qIdx}]</span>
                 <span className="px-2 py-0.5 rounded bg-dark-100 font-mono text-xs text-dark-600">|0⟩</span>
               </div>
@@ -671,8 +672,10 @@ export function CircuitBuilder() {
         {/* State Vector Breakdown */}
         <div className="bg-white rounded-2xl border border-dark-200 p-5 shadow-xs space-y-4">
           <div className="flex items-center justify-between">
-            <h3 className="font-bold text-sm text-dark-900">Quantum State Vector |ψ⟩</h3>
-            <span className="font-mono text-xs text-primary-700 bg-primary-50 px-2 py-0.5 rounded">
+            <h3 className="font-bold text-sm text-dark-900">
+              Quantum State Vector <span className="notranslate" translate="no">|ψ⟩</span>
+            </h3>
+            <span className="font-mono text-xs text-primary-700 bg-primary-50 px-2 py-0.5 rounded notranslate" translate="no">
               Dimension 2^{numQubits} = {1 << numQubits}
             </span>
           </div>
@@ -684,17 +687,17 @@ export function CircuitBuilder() {
               return (
                 <div key={bitstr} className="p-3 rounded-xl bg-dark-50 border border-dark-100 flex items-center justify-between">
                   <div className="flex items-center gap-3">
-                    <span className="font-mono font-bold text-sm text-primary-700 bg-white px-2 py-1 rounded border border-dark-200 shadow-2xs">
+                    <span className="font-mono font-bold text-sm text-primary-700 bg-white px-2 py-1 rounded border border-dark-200 shadow-2xs notranslate" translate="no">
                       |{bitstr}⟩
                     </span>
                     <div className="text-xs">
                       <span className="text-dark-500">Amplitude: </span>
-                      <span className="font-mono font-bold text-dark-800">
+                      <span className="font-mono font-bold text-dark-800 notranslate" translate="no">
                         {amp.re >= 0 ? '+' : ''}{amp.re} {amp.im >= 0 ? '+' : ''}{amp.im}i
                       </span>
                     </div>
                   </div>
-                  <div className="text-right">
+                  <div className="text-right notranslate" translate="no">
                     <span className="text-xs font-mono font-bold text-dark-900 block">{prob.toFixed(1)}%</span>
                     <span className="text-[10px] text-dark-500">probability</span>
                   </div>
@@ -771,7 +774,7 @@ export function CircuitBuilder() {
                   {copiedPython ? 'Copied!' : 'Copy Python'}
                 </button>
               </div>
-              <pre className="p-3.5 rounded-xl bg-dark-900 text-dark-100 font-mono text-xs overflow-x-auto">
+              <pre className="p-3.5 rounded-xl bg-dark-900 text-dark-100 font-mono text-xs overflow-x-auto notranslate" translate="no">
                 {generatePythonQiskitCode()}
               </pre>
             </div>
@@ -779,7 +782,7 @@ export function CircuitBuilder() {
             {/* OpenQASM */}
             <div className="space-y-2">
               <div className="flex items-center justify-between">
-                <span className="font-bold text-xs text-dark-800 font-mono">OpenQASM 2.0</span>
+                <span className="font-bold text-xs text-dark-800 font-mono notranslate" translate="no">OpenQASM 2.0</span>
                 <button
                   onClick={copyQasmCode}
                   className="flex items-center gap-1 text-xs px-2.5 py-1 rounded bg-primary-50 text-primary-700 hover:bg-primary-100 font-medium"
@@ -788,7 +791,7 @@ export function CircuitBuilder() {
                   {copiedQasm ? 'Copied!' : 'Copy QASM'}
                 </button>
               </div>
-              <pre className="p-3.5 rounded-xl bg-dark-900 text-dark-100 font-mono text-xs overflow-x-auto">
+              <pre className="p-3.5 rounded-xl bg-dark-900 text-dark-100 font-mono text-xs overflow-x-auto notranslate" translate="no">
                 {simResult?.qasm || '// OpenQASM representation'}
               </pre>
             </div>

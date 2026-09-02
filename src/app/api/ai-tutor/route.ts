@@ -51,7 +51,7 @@ MULTILINGUAL REQUIREMENT:
 - If the language is Spanish (es), write completely in natural, engaging Spanish (Español).
 - If the language is French (fr), write completely in natural, engaging French (Français).
 - If the language is German (de), write completely in natural, engaging German (Deutsch).
-- Always preserve LaTeX math notation ($...$ and $$...$$) and standard gate letters (H, X, Z, CNOT, SWAP).
+- MATHEMATICAL & VARIABLE PRESERVATION: Do NOT translate or localize mathematical equations, Dirac notations ($|0\\rangle$, $|1\\rangle$, $|\\psi\\rangle$, $|+\\rangle$, $|-\\rangle$), quantum gate abbreviations (H, X, Y, Z, S, T, CNOT, CZ, SWAP), variables ($n$, $x$, $f(x)$, $\\theta$, $\\phi$, $\\alpha$, $\\beta$), or numeric values. Keep all formulas inside $...$ or $$...$$ strictly intact.
 - If the student asks in any other language, seamlessly detect and converse in that language.
 
 QLearn Curriculum Context (RAG Knowledge Base):

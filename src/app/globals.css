@@ -56,6 +56,18 @@ html[data-font-size="xl"] {
 .math-block-container .katex {
   color: #c7d2fe;
   font-size: 1.15em;
+  translate: no !important;
+}
+
+/* Strictly protect all LaTeX formulas and variables from browser translation */
+.katex,
+.katex-display,
+.katex-html,
+.math-block-container,
+.notranslate,
+code,
+pre {
+  translate: no !important;
 }
 
 .math-block-container .katex .mord,

@@ -317,13 +317,13 @@ export function BlochSphere3D({
         />
 
         {/* Pole Label Overlays */}
-        <div className="absolute top-2 left-1/2 -translate-x-1/2 text-xs font-mono font-bold text-primary-700 pointer-events-none bg-white/80 px-1.5 py-0.5 rounded">
+        <div className="absolute top-2 left-1/2 -translate-x-1/2 text-xs font-mono font-bold text-primary-700 pointer-events-none bg-white/80 px-1.5 py-0.5 rounded notranslate" translate="no">
           |0⟩ (+Z)
         </div>
-        <div className="absolute bottom-2 left-1/2 -translate-x-1/2 text-xs font-mono font-bold text-sky-700 pointer-events-none bg-white/80 px-1.5 py-0.5 rounded">
+        <div className="absolute bottom-2 left-1/2 -translate-x-1/2 text-xs font-mono font-bold text-sky-700 pointer-events-none bg-white/80 px-1.5 py-0.5 rounded notranslate" translate="no">
           |1⟩ (-Z)
         </div>
-        <div className="absolute right-4 top-1/2 -translate-y-1/2 text-xs font-mono font-bold text-dark-600 pointer-events-none bg-white/80 px-1.5 py-0.5 rounded">
+        <div className="absolute right-4 top-1/2 -translate-y-1/2 text-xs font-mono font-bold text-dark-600 pointer-events-none bg-white/80 px-1.5 py-0.5 rounded notranslate" translate="no">
           |+⟩ (+X)
         </div>
       </div>
@@ -335,7 +335,12 @@ export function BlochSphere3D({
           <div>
             <p className="font-semibold">Pure Bloch Vector Undefined</p>
             <p className="mt-0.5 text-amber-800 leading-relaxed">
-              {warning || `Qubit ${qubitIndex} is entangled with another qubit. Its reduced density matrix has purity Tr(ρ²) < 1.0, meaning quantum information is non-locally distributed.`}
+              {warning || (
+                <>
+                  Qubit {qubitIndex} is entangled with another qubit. Its reduced density matrix has purity{' '}
+                  <span className="notranslate font-mono font-semibold" translate="no">Tr(ρ²) &lt; 1.0</span>, meaning quantum information is non-locally distributed.
+                </>
+              )}
             </p>
           </div>
         </div>
@@ -343,7 +348,7 @@ export function BlochSphere3D({
 
       {/* Coordinates readout table */}
       {bloch && bloch.is_pure && (
-        <div className="w-full mt-3 grid grid-cols-3 gap-2 text-center text-xs">
+        <div className="w-full mt-3 grid grid-cols-3 gap-2 text-center text-xs notranslate" translate="no">
           <div className="p-2 bg-dark-50 rounded-lg border border-dark-100">
             <span className="text-dark-500 block text-[10px] uppercase font-mono">X / Y / Z</span>
             <span className="font-mono font-bold text-dark-800">

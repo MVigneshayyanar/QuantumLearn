@@ -92,7 +92,7 @@ function parseMathSegments(input: string): ParsedSegment[] {
  */
 function renderKatex(latex: string, displayMode: boolean): string {
   try {
-    return katex.renderToString(latex, {
+    const html = katex.renderToString(latex, {
       displayMode,
       throwOnError: false,
       strict: false,
@@ -104,9 +104,10 @@ function renderKatex(latex: string, displayMode: boolean): string {
         '\\tr': '\\operatorname{Tr}',
       }
     });
+    return `<span class="notranslate" translate="no">${html}</span>`;
   } catch {
     // Fallback: return the raw LaTeX in a code element
-    return `<code class="text-red-600 bg-red-50 px-1 rounded">${latex}</code>`;
+    return `<code class="text-red-600 bg-red-50 px-1 rounded notranslate" translate="no">${latex}</code>`;
   }
 }
 
@@ -138,14 +139,14 @@ export function MathRenderer({ text, className = '', displayMode = false }: Math
           // Parse markdown italic (*text*)
           content = content.replace(/(?<!\*)\*([^\*\n]+?)\*(?!\*)/g, '<em class="italic">$1</em>');
 
-          // Parse inline code (`code`)
-          content = content.replace(/`([^`]+)`/g, '<code class="px-1.5 py-0.5 rounded bg-dark-100 text-primary-700 font-mono text-[11px]">$1</code>');
+          // Parse inline code (`code`) — protect variables from translation
+          content = content.replace(/`([^`]+)`/g, '<code class="px-1.5 py-0.5 rounded bg-dark-100 text-primary-700 font-mono text-[11px] notranslate" translate="no">$1</code>');
 
           return content;
         } else if (seg.type === 'inline-math') {
-          return renderKatex(seg.content, false);
+          return `<span class="notranslate" translate="no">${renderKatex(seg.content, false)}</span>`;
         } else {
-          return renderKatex(seg.content, true);
+          return `<span class="notranslate" translate="no">${renderKatex(seg.content, true)}</span>`;
         }
       })
       .join('');
@@ -153,7 +154,8 @@ export function MathRenderer({ text, className = '', displayMode = false }: Math
 
   return (
     <span
-      className={`math-rendered ${className}`}
+      className={`math-rendered ${displayMode ? 'notranslate' : ''} ${className}`}
+      {...(displayMode ? { translate: 'no' } : {})}
       dangerouslySetInnerHTML={{ __html: rendered }}
     />
   );
@@ -173,7 +175,8 @@ export function MathBlock({ equation, className = '' }: MathBlockProps) {
 
   return (
     <div
-      className={`math-block-container overflow-x-auto ${className}`}
+      className={`math-block-container notranslate overflow-x-auto ${className}`}
+      translate="no"
       dangerouslySetInnerHTML={{ __html: html }}
     />
   );
