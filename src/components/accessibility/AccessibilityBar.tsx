@@ -102,7 +102,7 @@ export function AccessibilityBar() {
             <span>{t.a11y.reducedMotion}</span>
           </button>
 
-          {/* Language Switcher (EN / HI) */}
+          {/* Language Switcher (EN / ES / FR / DE / HI) */}
           <div className="flex items-center space-x-1">
             <Globe className="w-3.5 h-3.5 text-dark-500" />
             <select
@@ -112,6 +112,9 @@ export function AccessibilityBar() {
               className="bg-white border border-dark-200 text-dark-800 rounded px-2 py-0.5 text-xs font-medium cursor-pointer hover:border-dark-400 focus:ring-1 focus:ring-primary-500"
             >
               <option value="en">English (EN)</option>
+              <option value="es">Español (ES)</option>
+              <option value="fr">Français (FR)</option>
+              <option value="de">Deutsch (DE)</option>
               <option value="hi">हिन्दी (Hindi)</option>
             </select>
           </div>

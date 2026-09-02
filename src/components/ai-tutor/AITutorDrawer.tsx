@@ -92,11 +92,43 @@ export function AITutorDrawer() {
     }
   };
 
-  const quickPrompts = [
-    { label: '✨ Explain intuitively', prompt: 'Could you give me an intuitive everyday analogy to understand the active concept?' },
-    { label: '📐 Dirac math walkthrough', prompt: 'Can you walk me through the Dirac bra-ket mathematical notation and unitary matrices for this?' },
-    { label: '🎯 Give me a practice quiz', prompt: 'Could you create a challenging conceptual practice question for me on this topic?' }
-  ];
+  const localizedPrompts: Record<string, { label: string; prompt: string }[]> = {
+    hi: [
+      { label: '✨ सरल शब्दों में समझाएं', prompt: 'क्या आप मुझे इस अवधारणा को समझने के लिए एक सरल उदाहरण दे सकते हैं?' },
+      { label: '📐 डायराक गणितीय व्याख्या', prompt: 'क्या आप मुझे इसके लिए डायराक ब्रा-केट संकेतन और यूनिटरी मेट्रिक्स समझा सकते हैं?' },
+      { label: '🎯 अभ्यास प्रश्न दें', prompt: 'क्या आप मेरे लिए इस विषय पर एक वैचारिक प्रश्न बना सकते हैं?' }
+    ],
+    es: [
+      { label: '✨ Explicar intuitivamente', prompt: '¿Podrías darme una analogía cotidiana para entender este concepto cuántico?' },
+      { label: '📐 Notación matemática de Dirac', prompt: '¿Puedes explicarme la notación bra-ket de Dirac y las matrices unitarias para esto?' },
+      { label: '🎯 Ejercicio de práctica', prompt: '¿Podrías plantearme una pregunta conceptual de práctica sobre este tema?' }
+    ],
+    fr: [
+      { label: '✨ Expliquer simplement', prompt: 'Pouvez-vous me donner une analogie simple pour comprendre ce concept quantique ?' },
+      { label: '📐 Démonstration Dirac', prompt: 'Pouvez-vous m\'expliquer la notation bra-ket de Dirac et les matrices unitaires ?' },
+      { label: '🎯 Quiz d\'entraînement', prompt: 'Pourriez-vous me poser une question de réflexion sur ce sujet ?' }
+    ],
+    de: [
+      { label: '✨ Anschaulich erklären', prompt: 'Können Sie mir eine einfache Analogie geben, um dieses Quantenkonzept zu verstehen?' },
+      { label: '📐 Dirac-Mathematik', prompt: 'Können Sie mir die Dirac-Bra-Ket-Notation und unitäre Matrizen dazu erklären?' },
+      { label: '🎯 Übungsfrage', prompt: 'Könnten Sie mir eine knifflige konzeptionelle Übungsfrage dazu stellen?' }
+    ],
+    en: [
+      { label: '✨ Explain intuitively', prompt: 'Could you give me an intuitive everyday analogy to understand the active concept?' },
+      { label: '📐 Dirac math walkthrough', prompt: 'Can you walk me through the Dirac bra-ket mathematical notation and unitary matrices for this?' },
+      { label: '🎯 Give me a practice quiz', prompt: 'Could you create a challenging conceptual practice question for me on this topic?' }
+    ]
+  };
+
+  const quickPrompts = localizedPrompts[language] || localizedPrompts.en;
+
+  const placeholders: Record<string, string> = {
+    hi: 'एक प्रश्न पूछें या क्वांटम अवधारणा का पता लगाएं...',
+    es: 'Haga una pregunta o explore un concepto cuántico...',
+    fr: 'Posez une question ou explorez un concept quantique...',
+    de: 'Stellen Sie eine Frage oder erkunden Sie ein Quantenkonzept...',
+    en: 'Ask a question or explore a concept...'
+  };
 
   return (
     <aside
@@ -202,7 +234,7 @@ export function AITutorDrawer() {
           type="text"
           value={inputVal}
           onChange={(e) => setInputVal(e.target.value)}
-          placeholder="Ask a question or explore a concept..."
+          placeholder={placeholders[language] || placeholders.en}
           className="flex-1 px-3 py-2 rounded-xl border border-dark-200 text-xs text-dark-900 placeholder:text-dark-400 focus:ring-1 focus:ring-primary-500 focus:border-primary-500"
         />
         <button

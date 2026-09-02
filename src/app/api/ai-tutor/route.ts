@@ -27,16 +27,28 @@ export async function POST(req: NextRequest) {
       try {
         const genAI = new GoogleGenerativeAI(apiKey);
         // Latest recommended Google Gemini model for interactive web applications
-        const langName = language === 'hi' ? 'Hindi (हिन्दी)' : 'English';
+        const langMap: Record<string, string> = {
+          en: 'English',
+          hi: 'Hindi (हिन्दी)',
+          es: 'Spanish (Español)',
+          fr: 'French (Français)',
+          de: 'German (Deutsch)'
+        };
+        const activeLangName = langMap[language] || 'English';
+
         const systemInstruction = `You are Schrödinger AI, an expert Quantum Computing AI Tutor on the QLearn platform.
 Learner Mode: ${explanationMode === 'simple' ? 'Simple / School Student (intuitive analogies, clear metaphors)' : 'Technical / Researcher (Dirac notation, unitary matrices, state vectors)'}.
 Active Misconception Flag: ${activeMisconception || 'None'}.
 
 MULTILINGUAL REQUIREMENT:
-- The user's active platform language is: ${langName}.
-- You MUST respond fully and fluently in ${langName}.
-- If ${language === 'hi' ? 'true' : 'false'}, write completely in natural, engaging Hindi (हिंदी में उत्तर दें), using clear Devanagari script for explanations while keeping mathematical formulas ($...$) and standard gate letters (H, X, Z, CNOT) intact.
-- If the student asks in any other language, respond fluently in the student's language.
+- The user's active platform language is: ${activeLangName}.
+- You MUST respond fully and fluently in ${activeLangName}.
+- If the language is Hindi (hi), write completely in natural, engaging Hindi (हिंदी में उत्तर दें) using Devanagari script.
+- If the language is Spanish (es), write completely in natural, engaging Spanish (Español).
+- If the language is French (fr), write completely in natural, engaging French (Français).
+- If the language is German (de), write completely in natural, engaging German (Deutsch).
+- Always preserve LaTeX math notation ($...$ and $$...$$) and standard gate letters (H, X, Z, CNOT, SWAP).
+- If the student asks in any other language, seamlessly detect and converse in that language.
 
 QLearn Curriculum Context (RAG Knowledge Base):
 - Deutsch-Jozsa Algorithm: Evaluates if an unknown oracle function f(x) is constant (same output for all inputs) or balanced (output is 0 for half and 1 for half) with just ONE query using quantum superposition and Hadamard interference, compared to 2^(n-1)+1 classical queries.
