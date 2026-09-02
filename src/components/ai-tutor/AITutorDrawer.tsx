@@ -112,7 +112,7 @@ export function AITutorDrawer() {
           </div>
           <div>
             <h3 className="font-bold text-sm text-dark-900 flex items-center gap-1.5">
-              Schrödinger
+              Schrödinger AI
               <span className="text-[10px] px-2 py-0.5 rounded-full bg-primary-100 text-primary-800 font-mono">
                 {explanationMode.toUpperCase()}
               </span>

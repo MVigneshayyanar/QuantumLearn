@@ -2,63 +2,74 @@ import { NextRequest, NextResponse } from 'next/server';
 import { generateSocraticResponse } from '@/lib/ai-engine';
 import { GoogleGenerativeAI } from '@google/generative-ai';
 
+import fs from 'fs';
+import path from 'path';
+
+function getGeminiApiKey(): string | null {
+  if (process.env.GEMINI_API_KEY) return process.env.GEMINI_API_KEY;
+  try {
+    const envPath = path.join(process.cwd(), '.env');
+    if (fs.existsSync(envPath)) {
+      const content = fs.readFileSync(envPath, 'utf8');
+      const match = content.match(/GEMINI_API_KEY\s*=\s*([^\r\n]+)/);
+      if (match && match[1]) return match[1].trim().replace(/^["']|["']$/g, '');
+    }
+  } catch {}
+  return null;
+}
+
 export async function POST(req: NextRequest) {
   try {
     const { query, explanationMode, activeMisconception, language } = await req.json();
+    const apiKey = getGeminiApiKey();
 
-    if (process.env.GEMINI_API_KEY) {
+    if (apiKey) {
       try {
-        const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
-        // Use gemini-1.5-flash for fast chat responses
-        const model = genAI.getGenerativeModel({ model: 'gemini-1.5-flash' });
-        
-        // RAG Context about QLearn
-        const ragContext = `
-QLearn Curriculum Context:
-- Deutsch-Jozsa: Determines if a function is constant or balanced in one query. Uses H gates and interference.
-- Grover's Algorithm: Unstructured search with O(sqrt(N)) speedup. Uses Oracle and Diffusion operator (amplitude amplification).
-- Quantum Teleportation: Transmits a qubit state using entanglement (Bell state) and 2 classical bits.
-- Superdense Coding: Transmits two classical bits using one entangled qubit.
-
-Platform features:
-- Circuit Builder: A drag-and-drop quantum simulator supporting 1-3 qubits.
-- Bloch Sphere 3D: Real-time 3D visualization of single qubit states.
-
-You are Schrödinger, a Socratic Quantum Computing AI Tutor on the QLearn platform.
+        const genAI = new GoogleGenerativeAI(apiKey);
+        // Latest recommended Google Gemini model for interactive web applications
+        const systemInstruction = `You are Schrödinger AI, a Socratic Quantum Computing AI Tutor on the QLearn platform.
 Learner Mode: ${explanationMode === 'simple' ? 'Simple / School Student (intuitive analogies, clear metaphors)' : 'Technical / Researcher (Dirac notation, unitary matrices, state vectors)'}.
 Language: ${language === 'hi' ? 'Hindi' : 'English'}.
 Active Misconception Flag: ${activeMisconception || 'None'}.
 
-STRICT INSTRUCTIONS:
-1. NEVER dump full direct solutions immediately.
-2. Ask targeted, guiding questions to lead the student to discover the physics insight themselves.
-3. If a misconception is flagged, explain WHY that mental model is flawed without being condescending.
-4. Keep explanations concise, inspiring, and physically accurate.
-5. Use the QLearn Curriculum Context when relevant to ground your answers in the platform's features.`;
+QLearn Curriculum Context (RAG Knowledge Base):
+- Deutsch-Jozsa Algorithm: Evaluates if an unknown oracle function f(x) is constant (same output for all inputs) or balanced (output is 0 for half and 1 for half) with just ONE query using quantum superposition and Hadamard interference, compared to 2^(n-1)+1 classical queries.
+- Grover's Algorithm: Provides quadratic speedup O(sqrt(N)) for searching unstructured databases using repeated applications of the Oracle and Diffusion Operator (inversion about the average).
+- Quantum Teleportation: Transmits an unknown qubit state |ψ⟩ from Alice to Bob without moving the physical particle, using a shared entangled Bell pair (|Φ+⟩ = (|00⟩+|11⟩)/√2) and two classical communication bits.
+- Superdense Coding: Transmits two classical bits of information using only ONE transmitted qubit, enabled by pre-shared entanglement.
+- Platform Tools:
+  * Interactive Circuit Builder: Drag-and-drop workbench supporting 1-3 qubits, common single and 2-qubit gates (H, X, Y, Z, S, T, CX, CZ, SWAP), real statevector calculations, and measurement probability histograms.
+  * 3D Bloch Sphere: Interactive Three.js visualization of qubit state pure vectors (x, y, z coordinates, θ and φ angles).
 
-        const result = await model.generateContent({
-          contents: [{ role: 'user', parts: [{ text: query }] }],
-          systemInstruction: { role: 'system', parts: [{ text: ragContext }] }
+PEDAGOGICAL RULES:
+1. Socratic method: Guide the learner by asking insightful questions rather than just dumping answers.
+2. Adapt tone to Learner Mode (Simple: relatable real-world metaphors like coin flips and sound waves; Technical: Dirac bra-ket notation, unitary matrices, tensor products).
+3. If an active misconception is tagged, address it gently and constructively.
+4. Keep explanations engaging, concise, and physically accurate.`;
+
+        // Single model: gemini-3.6-flash
+        const model = genAI.getGenerativeModel({ 
+          model: 'gemini-3.6-flash',
+          systemInstruction
         });
 
+        const result = await model.generateContent(query);
         const reply = result.response.text();
         if (reply) return NextResponse.json({ reply });
-      } catch (e) {
+      } catch (e: any) {
         console.error("Gemini API Error:", e);
-        // Fall back to local Socratic engine
+        const errMsg = e?.message || '';
+        return NextResponse.json({
+          reply: `⚠️ **Gemini Response Error**: ${errMsg || 'Unable to generate response from Gemini.'}`
+        });
       }
     }
 
-    // High-precision local Socratic engine
-    const reply = generateSocraticResponse(query, {
-      explanationMode: explanationMode || 'simple',
-      activeMisconception
-    });
-
     return NextResponse.json({ reply });
   } catch (err: any) {
+    console.error("Outer route error:", err);
     return NextResponse.json(
-      { reply: "Let's explore how this quantum operator transforms the state amplitudes!" },
+      { reply: `Route Error: ${err?.message || err}` },
       { status: 200 }
     );
   }

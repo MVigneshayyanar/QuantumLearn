@@ -7,7 +7,7 @@ export const translations = {
       simulator: "Circuit Builder",
       blochSphere: "Bloch Sphere",
       dashboard: "Dashboard",
-      aiTutor: "Schrödinger",
+      aiTutor: "Schrödinger AI",
       primer: "What is a Qubit?",
     },
     a11y: {
