@@ -1,27 +1,30 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { generateSocraticResponse } from '@/lib/ai-engine';
+import { GoogleGenerativeAI } from '@google/generative-ai';
 
 export async function POST(req: NextRequest) {
   try {
     const { query, explanationMode, activeMisconception, language } = await req.json();
 
-    const apiKey = process.env.OPENAI_API_KEY || process.env.ANTHROPIC_API_KEY;
-
-    // If an external LLM key is configured in env, make a request with Socratic system prompt
-    if (process.env.OPENAI_API_KEY) {
+    if (process.env.GEMINI_API_KEY) {
       try {
-        const res = await fetch('https://api.openai.com/v1/chat/completions', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            Authorization: `Bearer ${process.env.OPENAI_API_KEY}`
-          },
-          body: JSON.stringify({
-            model: 'gpt-4o-mini',
-            messages: [
-              {
-                role: 'system',
-                content: `You are a Socratic Quantum Computing AI Tutor on the QuantumLearn platform.
+        const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
+        // Use gemini-1.5-flash for fast chat responses
+        const model = genAI.getGenerativeModel({ model: 'gemini-1.5-flash' });
+        
+        // RAG Context about QLearn
+        const ragContext = `
+QLearn Curriculum Context:
+- Deutsch-Jozsa: Determines if a function is constant or balanced in one query. Uses H gates and interference.
+- Grover's Algorithm: Unstructured search with O(sqrt(N)) speedup. Uses Oracle and Diffusion operator (amplitude amplification).
+- Quantum Teleportation: Transmits a qubit state using entanglement (Bell state) and 2 classical bits.
+- Superdense Coding: Transmits two classical bits using one entangled qubit.
+
+Platform features:
+- Circuit Builder: A drag-and-drop quantum simulator supporting 1-3 qubits.
+- Bloch Sphere 3D: Real-time 3D visualization of single qubit states.
+
+You are Schrödinger, a Socratic Quantum Computing AI Tutor on the QLearn platform.
 Learner Mode: ${explanationMode === 'simple' ? 'Simple / School Student (intuitive analogies, clear metaphors)' : 'Technical / Researcher (Dirac notation, unitary matrices, state vectors)'}.
 Language: ${language === 'hi' ? 'Hindi' : 'English'}.
 Active Misconception Flag: ${activeMisconception || 'None'}.
@@ -30,20 +33,18 @@ STRICT INSTRUCTIONS:
 1. NEVER dump full direct solutions immediately.
 2. Ask targeted, guiding questions to lead the student to discover the physics insight themselves.
 3. If a misconception is flagged, explain WHY that mental model is flawed without being condescending.
-4. Keep explanations concise, inspiring, and physically accurate.`
-              },
-              { role: 'user', content: query }
-            ],
-            max_tokens: 450
-          })
+4. Keep explanations concise, inspiring, and physically accurate.
+5. Use the QLearn Curriculum Context when relevant to ground your answers in the platform's features.`;
+
+        const result = await model.generateContent({
+          contents: [{ role: 'user', parts: [{ text: query }] }],
+          systemInstruction: { role: 'system', parts: [{ text: ragContext }] }
         });
 
-        if (res.ok) {
-          const data = await res.json();
-          const reply = data.choices?.[0]?.message?.content;
-          if (reply) return NextResponse.json({ reply });
-        }
-      } catch {
+        const reply = result.response.text();
+        if (reply) return NextResponse.json({ reply });
+      } catch (e) {
+        console.error("Gemini API Error:", e);
         // Fall back to local Socratic engine
       }
     }

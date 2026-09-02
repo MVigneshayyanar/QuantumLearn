@@ -10,6 +10,7 @@
     "start:sim": "python services/quantum-sim/main.py"
   },
   "dependencies": {
+    "@google/generative-ai": "^0.24.1",
     "@react-three/drei": "^9.120.4",
     "@react-three/fiber": "^8.17.10",
     "@types/three": "^0.170.0",
