@@ -65,6 +65,12 @@ PEDAGOGICAL RULES:
       }
     }
 
+    // Fallback local engine if no API key is present
+    const reply = generateSocraticResponse(query, {
+      explanationMode: explanationMode || 'simple',
+      activeMisconception
+    });
+
     return NextResponse.json({ reply });
   } catch (err: any) {
     console.error("Outer route error:", err);
