@@ -9,7 +9,7 @@ import { AITutorDrawer } from '@/components/ai-tutor/AITutorDrawer';
 
 export const metadata: Metadata = {
   title: 'QLearn | AI-Based Interactive Quantum Algorithm Learning Platform',
-  description: 'Master quantum algorithms through real Qiskit simulation, 3D Bloch spheres, and a Socratic AI tutor. Built for all learners from beginners to researchers.',
+  description: 'Master quantum algorithms through real Qiskit simulation, 3D Bloch spheres, and Schrödinger AI. Built for all learners from beginners to researchers.',
 };
 
 export default function RootLayout({

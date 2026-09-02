@@ -101,7 +101,7 @@ export function AITutorDrawer() {
   return (
     <aside
       role="dialog"
-      aria-label="Socratic AI Quantum Tutor"
+      aria-label="Schrödinger AI Quantum Tutor"
       className="fixed inset-y-0 right-0 z-50 w-full sm:w-[420px] bg-white shadow-2xl border-l border-dark-200 flex flex-col animate-slideLeft"
     >
       {/* Header */}

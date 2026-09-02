@@ -126,10 +126,22 @@ export function MathRenderer({ text, className = '', displayMode = false }: Math
       .map((seg, idx) => {
         if (seg.type === 'text') {
           // Escape HTML in text segments
-          return seg.content
+          let content = seg.content
             .replace(/&/g, '&amp;')
             .replace(/</g, '&lt;')
             .replace(/>/g, '&gt;');
+
+          // Parse markdown bold (**text** or __text__)
+          content = content.replace(/\*\*([\s\S]+?)\*\*/g, '<strong class="font-bold text-dark-900">$1</strong>');
+          content = content.replace(/__([\s\S]+?)__/g, '<strong class="font-bold text-dark-900">$1</strong>');
+
+          // Parse markdown italic (*text*)
+          content = content.replace(/(?<!\*)\*([^\*\n]+?)\*(?!\*)/g, '<em class="italic">$1</em>');
+
+          // Parse inline code (`code`)
+          content = content.replace(/`([^`]+)`/g, '<code class="px-1.5 py-0.5 rounded bg-dark-100 text-primary-700 font-mono text-[11px]">$1</code>');
+
+          return content;
         } else if (seg.type === 'inline-math') {
           return renderKatex(seg.content, false);
         } else {

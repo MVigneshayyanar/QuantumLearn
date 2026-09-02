@@ -22,7 +22,7 @@ export function Footer() {
               <span className="font-bold text-dark-900 text-base">{t.nav.brand}</span>
             </div>
             <p className="text-dark-500 leading-relaxed">
-              Interactive Quantum Algorithm Learning Platform powered by real Qiskit simulation and Socratic AI.
+              Interactive Quantum Algorithm Learning Platform powered by real Qiskit simulation and Schrödinger AI.
             </p>
           </div>
 

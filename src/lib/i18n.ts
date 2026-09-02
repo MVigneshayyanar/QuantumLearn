@@ -24,13 +24,13 @@ export const translations = {
     hero: {
       badge: "Real Qiskit 2.5 Simulation Backend",
       title: "Master Quantum Algorithms Hands-On",
-      subtitle: "Experience quantum physics directly. Build real circuits, rotate 3D Bloch spheres, and learn with an adaptive Socratic AI tutor designed for beginners through researchers.",
+      subtitle: "Experience quantum physics directly. Build real circuits, rotate 3D Bloch spheres, and learn with Schrödinger AI, an adaptive quantum tutor designed for beginners through researchers.",
       startLearning: "Start Learning Algorithms",
       openBuilder: "Open Circuit Builder",
       exploreBloch: "Explore Bloch Sphere",
       statsCircuits: "Real-time Statevector",
       statsBloch: "3D Entanglement Engine",
-      statsAI: "Socratic AI Tutor",
+      statsAI: "Schrödinger AI",
     },
     primer: {
       title: "Quantum Primer: What is a Qubit?",
@@ -98,7 +98,7 @@ export const translations = {
       simulator: "सर्किट बिल्डर (Circuit Builder)",
       blochSphere: "ब्लॉच स्फीयर (Bloch Sphere)",
       dashboard: "डैशबोर्ड (Dashboard)",
-      aiTutor: "एआई ट्यूटर (AI Tutor)",
+      aiTutor: "श्रोडिंगर एआई (Schrödinger AI)",
       primer: "क्यूबिट क्या है?",
     },
     a11y: {
@@ -115,13 +115,13 @@ export const translations = {
     hero: {
       badge: "सटीक Qiskit 2.5 सिमुलेशन इंजन",
       title: "क्वांटम एल्गोरिदम सीखें — इंटरैक्टिव और आसान",
-      subtitle: "वास्तविक क्वांटम सर्किट बनाएं, 3D ब्लॉच स्फीयर देखें, और हमारे अनुकूली सुकराती एआई ट्यूटर के साथ सीखें।",
+      subtitle: "वास्तविक क्वांटम सर्किट बनाएं, 3D ब्लॉच स्फीयर देखें, और हमारे अनुकूली श्रोडिंगर एआई (Schrödinger AI) के साथ सीखें।",
       startLearning: "एल्गोरिदम सीखना शुरू करें",
       openBuilder: "सर्किट बिल्डर खोलें",
       exploreBloch: "ब्लॉच स्फीयर देखें",
       statsCircuits: "वास्तविक स्टेटवेक्टर",
       statsBloch: "3D एंटैंगलमेंट इंजन",
-      statsAI: "सुकराती एआई ट्यूटर",
+      statsAI: "श्रोडिंगर एआई (Schrödinger AI)",
     },
     primer: {
       title: "क्वांटम प्राइमर: क्यूबिट क्या है?",

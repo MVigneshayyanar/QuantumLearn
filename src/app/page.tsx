@@ -134,7 +134,7 @@ export default function HomePage() {
                 <span className="text-dark-500">{t.hero.statsBloch}</span>
               </div>
               <div>
-                <span className="font-bold text-dark-900 text-sm block">Socratic</span>
+                <span className="font-bold text-dark-900 text-sm block">Schrödinger AI</span>
                 <span className="text-dark-500">{t.hero.statsAI}</span>
               </div>
             </div>
@@ -297,7 +297,7 @@ export default function HomePage() {
               <div className="w-10 h-10 rounded-xl bg-primary-100 text-primary-700 flex items-center justify-center">
                 <Bot className="w-5 h-5" />
               </div>
-              <h3 className="font-bold text-base text-dark-900">Socratic Misconception AI</h3>
+              <h3 className="font-bold text-base text-dark-900">Schrödinger Misconception AI</h3>
               <p className="text-xs text-dark-600 leading-relaxed">
                 Analyzes quiz mistakes to diagnose physics misconceptions (e.g. classical probability vs superposition) and guides learning.
               </p>

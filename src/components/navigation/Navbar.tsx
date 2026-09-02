@@ -135,7 +135,7 @@ export function Navbar() {
               type="button"
               onClick={() => setIsOpen(!isOpen)}
               className="flex items-center gap-2 px-3.5 py-2 rounded-lg bg-primary-600 hover:bg-primary-700 text-white text-sm font-semibold shadow-xs transition-all hover:shadow-card"
-              aria-label="Toggle Socratic AI Tutor"
+              aria-label="Toggle Schrödinger AI"
             >
               <Bot className="w-4 h-4" />
               <span>{t.nav.aiTutor}</span>

@@ -83,7 +83,7 @@ export function generateSocraticResponse(
     if (mode === 'simple') {
       return `Let's break down this idea together! 🌟\n\n**${guide.name}**\n\n${guide.hintSimple}\n\n*Think about this:* If you perform an experiment, what do you think would happen to the state immediately after you look at it?`;
     } else {
-      return `### Socratic Analysis: ${guide.name}\n\n${guide.hintTechnical}\n\n**Guiding Question:** How does this unitary transformation preserve normalization and unitarity across the tensor product space?`;
+      return `### Schrödinger AI Analysis: ${guide.name}\n\n${guide.hintTechnical}\n\n**Guiding Question:** How does this unitary transformation preserve normalization and unitarity across the tensor product space?`;
     }
   }
 

@@ -107,7 +107,7 @@ export function AdaptiveQuizEngine({ moduleSlug, onComplete }: AdaptiveQuizEngin
     const selectedOption = currentQ.options.find((o) => o.id === selectedOptionId);
     addMessage({
       role: 'user',
-      content: `I'm confused about this quiz question: "${currentQ.question}". I answered "${selectedOption?.text}", but that was marked incorrect. Could you help me understand why using a Socratic approach?`
+      content: `I'm confused about this quiz question: "${currentQ.question}". I answered "${selectedOption?.text}", but that was marked incorrect. Could you help me understand why and guide me through the physics?`
     });
     setAITutorOpen(true);
   };
@@ -146,7 +146,7 @@ export function AdaptiveQuizEngine({ moduleSlug, onComplete }: AdaptiveQuizEngin
             </p>
           ) : (
             <p>
-              Great effort! Review any flagged misconceptions with our Socratic AI Tutor to strengthen your conceptual foundation.
+              Great effort! Review any flagged misconceptions with Schrödinger AI to strengthen your conceptual foundation.
             </p>
           )}
         </div>
