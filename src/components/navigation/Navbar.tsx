@@ -6,7 +6,7 @@ import { usePathname } from 'next/navigation';
 import { useAccessibility } from '@/lib/accessibility-context';
 import { translations } from '@/lib/i18n';
 import { useAITutorStore } from '@/lib/state-store';
-import { Atom, Cpu, Globe, LayoutDashboard, Bot, Sparkles, BookOpen, Layers } from 'lucide-react';
+import { Atom, Cpu, Globe, LayoutDashboard, Bot, Sparkles, BookOpen, Layers, ChevronDown } from 'lucide-react';
 
 export function Navbar() {
   const pathname = usePathname();
@@ -18,11 +18,14 @@ export function Navbar() {
     { href: '/', label: 'Home', icon: Atom },
     { href: '/simulator', label: t.nav.simulator, icon: Cpu },
     { href: '/bloch-sphere', label: t.nav.blochSphere, icon: Globe },
+    { href: '/dashboard', label: t.nav.dashboard, icon: LayoutDashboard },
+  ];
+
+  const algoLinks = [
     { href: '/learn/deutsch-jozsa', label: 'Deutsch-Jozsa', icon: BookOpen },
     { href: '/learn/grover', label: 'Grover', icon: Sparkles },
     { href: '/learn/teleportation', label: 'Teleportation', icon: Layers },
     { href: '/learn/superdense-coding', label: 'Superdense', icon: Layers },
-    { href: '/dashboard', label: t.nav.dashboard, icon: LayoutDashboard },
   ];
 
   return (
@@ -65,6 +68,44 @@ export function Navbar() {
                 </Link>
               );
             })}
+
+            {/* Algorithms Dropdown */}
+            <div className="relative group">
+              <button
+                className={`px-3 py-2 rounded-lg text-sm font-medium transition-colors flex items-center gap-1.5 ${
+                  pathname.startsWith('/learn')
+                    ? 'bg-primary-50 text-primary-700 font-semibold'
+                    : 'text-dark-700 hover:text-dark-900 hover:bg-dark-50'
+                }`}
+              >
+                <BookOpen className={`w-4 h-4 ${pathname.startsWith('/learn') ? 'text-primary-600' : 'text-dark-500'}`} />
+                Algorithms
+                <ChevronDown className="w-3.5 h-3.5 text-dark-500 opacity-70 group-hover:rotate-180 transition-transform duration-200" />
+              </button>
+              
+              {/* Dropdown Menu */}
+              <div className="absolute top-full left-0 mt-1 w-52 bg-white border border-dark-200 rounded-xl shadow-card opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50 overflow-hidden transform origin-top scale-95 group-hover:scale-100">
+                <div className="py-1.5 flex flex-col">
+                  {algoLinks.map(algo => {
+                    const isAlgoActive = pathname === algo.href;
+                    return (
+                      <Link
+                        key={algo.href}
+                        href={algo.href}
+                        className={`px-4 py-2.5 text-sm flex items-center gap-2.5 transition-colors ${
+                          isAlgoActive 
+                            ? 'bg-primary-50 text-primary-700 font-semibold' 
+                            : 'text-dark-700 hover:bg-dark-50 hover:text-dark-900'
+                        }`}
+                      >
+                        <algo.icon className={`w-4 h-4 ${isAlgoActive ? 'text-primary-600' : 'text-dark-500'}`} />
+                        {algo.label}
+                      </Link>
+                    );
+                  })}
+                </div>
+              </div>
+            </div>
           </nav>
 
           {/* AI Tutor Drawer Button */}
