@@ -49,7 +49,7 @@ export function Navbar() {
 
           {/* Desktop Nav Items */}
           <nav className="hidden md:flex items-center space-x-1" aria-label="Main Navigation">
-            {navLinks.map((link) => {
+            {navLinks.slice(0, 2).map((link) => {
               const isActive = pathname === link.href || (link.href !== '/' && pathname.startsWith(link.href));
               const Icon = link.icon;
               return (
@@ -106,6 +106,26 @@ export function Navbar() {
                 </div>
               </div>
             </div>
+
+            {navLinks.slice(2).map((link) => {
+              const isActive = pathname === link.href || (link.href !== '/' && pathname.startsWith(link.href));
+              const Icon = link.icon;
+              return (
+                <Link
+                  key={link.href}
+                  href={link.href}
+                  className={`px-3 py-2 rounded-lg text-sm font-medium transition-colors flex items-center gap-1.5 ${
+                    isActive
+                      ? 'bg-primary-50 text-primary-700 font-semibold'
+                      : 'text-dark-700 hover:text-dark-900 hover:bg-dark-50'
+                  }`}
+                  aria-current={isActive ? 'page' : undefined}
+                >
+                  <Icon className={`w-4 h-4 ${isActive ? 'text-primary-600' : 'text-dark-500'}`} />
+                  {link.label}
+                </Link>
+              );
+            })}
           </nav>
 
           {/* AI Tutor Drawer Button */}
