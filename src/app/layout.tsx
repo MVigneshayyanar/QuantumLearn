@@ -8,7 +8,7 @@ import { QubitPrimerModal } from '@/components/accessibility/QubitPrimerModal';
 import { AITutorDrawer } from '@/components/ai-tutor/AITutorDrawer';
 
 export const metadata: Metadata = {
-  title: 'QuantumLearn | AI-Based Interactive Quantum Algorithm Learning Platform',
+  title: 'QLearn | AI-Based Interactive Quantum Algorithm Learning Platform',
   description: 'Master quantum algorithms through real Qiskit simulation, 3D Bloch spheres, and a Socratic AI tutor. Built for all learners from beginners to researchers.',
 };
 
@@ -19,7 +19,7 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en" data-font-size="md">
-      <body className="min-h-screen flex flex-col bg-[#FAFAFA] text-[#111827] antialiased">
+      <body className="min-h-screen flex flex-col bg-[#FAFAFA] text-[#111827] antialiased pb-16 md:pb-0">
         <AccessibilityProvider>
           {/* Skip link for keyboard accessibility WCAG 2.1 AA */}
           <a

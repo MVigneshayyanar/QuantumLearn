@@ -58,7 +58,7 @@ export function Footer() {
         </div>
 
         <div className="border-t border-dark-100 mt-8 pt-6 flex flex-col sm:flex-row items-center justify-between gap-4">
-          <p>© {new Date().getFullYear()} QuantumLearn. Built for quantum learners worldwide.</p>
+          <p>© {new Date().getFullYear()} QLearn. Built for quantum learners worldwide.</p>
           <p className="flex items-center gap-1">
             Built with <Heart className="w-3.5 h-3.5 text-red-500 fill-red-500" /> for quantum physics education.
           </p>

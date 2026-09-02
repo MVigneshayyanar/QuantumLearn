@@ -29,6 +29,7 @@ export function Navbar() {
   ];
 
   return (
+    <>
     <header className="bg-white border-b border-dark-200 sticky top-0 z-30 shadow-subtle">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-16">
@@ -143,5 +144,53 @@ export function Navbar() {
         </div>
       </div>
     </header>
+
+    {/* Mobile Bottom Navigation */}
+    <nav className="md:hidden fixed bottom-0 left-0 right-0 bg-white border-t border-dark-200 z-50 flex justify-around items-center h-16 pb-safe shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.05)]">
+      {navLinks.slice(0, 2).map((link) => {
+        const isActive = pathname === link.href || (link.href !== '/' && pathname.startsWith(link.href));
+        const Icon = link.icon;
+        return (
+          <Link
+            key={link.href}
+            href={link.href}
+            className={`flex flex-col items-center justify-center w-full h-full gap-1 transition-colors ${
+              isActive ? 'text-primary-600' : 'text-dark-500 hover:text-dark-700'
+            }`}
+          >
+            <Icon className="w-5 h-5" />
+            <span className="text-[10px] font-medium">{link.label}</span>
+          </Link>
+        );
+      })}
+
+      <Link
+        href="/learn/deutsch-jozsa"
+        className={`flex flex-col items-center justify-center w-full h-full gap-1 transition-colors ${
+          pathname.startsWith('/learn') ? 'text-primary-600' : 'text-dark-500 hover:text-dark-700'
+        }`}
+      >
+        <BookOpen className="w-5 h-5" />
+        <span className="text-[10px] font-medium">Algorithms</span>
+      </Link>
+
+      {navLinks.slice(2).map((link) => {
+        const isActive = pathname === link.href || (link.href !== '/' && pathname.startsWith(link.href));
+        const Icon = link.icon;
+        return (
+          <Link
+            key={link.href}
+            href={link.href}
+            className={`flex flex-col items-center justify-center w-full h-full gap-1 transition-colors ${
+              isActive ? 'text-primary-600' : 'text-dark-500 hover:text-dark-700'
+            }`}
+          >
+            <Icon className="w-5 h-5" />
+            <span className="text-[10px] font-medium">{link.label}</span>
+          </Link>
+        );
+      })}
+    </nav>
+    </>
   );
 }

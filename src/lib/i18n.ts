@@ -1,7 +1,7 @@
 export const translations = {
   en: {
     nav: {
-      brand: "QuantumLearn",
+      brand: "QLearn",
       tagline: "Interactive Quantum Computing",
       algorithms: "Algorithms",
       simulator: "Circuit Builder",
@@ -92,7 +92,7 @@ export const translations = {
   },
   hi: {
     nav: {
-      brand: "क्वांटमलर्न (QuantumLearn)",
+      brand: "क्यूलर्न (QLearn)",
       tagline: "इंटरैक्टिव क्वांटम कंप्यूटिंग",
       algorithms: "एल्गोरिदम (Algorithms)",
       simulator: "सर्किट बिल्डर (Circuit Builder)",
