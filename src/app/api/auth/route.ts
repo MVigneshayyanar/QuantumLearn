@@ -87,7 +87,7 @@ export async function POST(req: NextRequest) {
       });
     }
 
-    if (action === 'signin') {
+    if (action === 'signin' || action === 'login') {
       // Find user by email
       let user = await prisma.user.findUnique({
         where: { email: normalizedEmail }

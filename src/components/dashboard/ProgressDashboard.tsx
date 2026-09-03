@@ -60,6 +60,7 @@ export function ProgressDashboard() {
   // Fetch from DB on mount
   useEffect(() => {
     if (!userId) {
+      setSummary(null);
       setIsLoading(false);
       return;
     }

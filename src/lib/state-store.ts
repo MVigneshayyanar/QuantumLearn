@@ -38,6 +38,8 @@ interface UserProgressState {
   resolveMisconception: (tag: MisconceptionTag) => void;
   updateMastery: (concept: keyof ConceptMastery, delta: number) => void;
   incrementStreak: () => void;
+  resetProgress: () => void;
+  setProgress: (data: Partial<Omit<UserProgressState, 'markModuleComplete' | 'recordMisconception' | 'resolveMisconception' | 'updateMastery' | 'incrementStreak' | 'resetProgress' | 'setProgress'>>) => void;
 }
 
 interface AITutorState {
@@ -53,6 +55,7 @@ interface AITutorState {
   setContextPage: (page: string) => void;
   setActiveMisconception: (tag: string | null) => void;
   clearChat: () => void;
+  resetChat: () => void;
 }
 
 export const useCircuitStore = create<CircuitState>((set, get) => ({
@@ -155,24 +158,28 @@ export const useCircuitStore = create<CircuitState>((set, get) => ({
   }
 }));
 
+const INITIAL_PROGRESS_STATE = {
+  completedModules: {},
+  moduleScores: {},
+  streakDays: 0,
+  lastActiveDate: '',
+  conceptMastery: {
+    superposition: 0,
+    entanglement: 0,
+    phaseKickback: 0,
+    interference: 0,
+    measurement: 0
+  },
+  flaggedMisconceptions: {} as Record<MisconceptionTag, number>
+};
+
 // Progress store — provides optimistic local state for immediate UI feedback.
 // The DB (via API calls in api-helpers.ts) is the source of truth.
 // DO NOT re-add persist middleware — localStorage is NOT a data store for
 // learning data anymore.
 export const useProgressStore = create<UserProgressState>()(
   (set, get) => ({
-    completedModules: {},
-    moduleScores: {},
-    streakDays: 1,
-    lastActiveDate: new Date().toISOString().split('T')[0],
-    conceptMastery: {
-      superposition: 40,
-      entanglement: 30,
-      phaseKickback: 20,
-      interference: 35,
-      measurement: 50
-    },
-    flaggedMisconceptions: {} as Record<MisconceptionTag, number>,
+    ...INITIAL_PROGRESS_STATE,
 
     markModuleComplete: (slug: string, score: number) => {
       set({
@@ -213,20 +220,30 @@ export const useProgressStore = create<UserProgressState>()(
       if (today !== last) {
         set({ streakDays: get().streakDays + 1, lastActiveDate: today });
       }
+    },
+
+    resetProgress: () => {
+      set(INITIAL_PROGRESS_STATE);
+    },
+
+    setProgress: (data) => {
+      set((state) => ({ ...state, ...data }));
     }
   })
 );
 
+const INITIAL_AI_MESSAGES: ChatMessage[] = [
+  {
+    id: 'welcome-msg',
+    role: 'assistant',
+    content: "Hello! I'm Schrödinger AI, your Quantum Tutor on QLearn. As you build circuits or explore algorithms, feel free to ask questions. If you get stuck on a quiz or wonder why a qubit behaves a certain way, I'll guide you step-by-step through the physics!",
+    timestamp: Date.now()
+  }
+];
+
 export const useAITutorStore = create<AITutorState>((set, get) => ({
   isOpen: false,
-  messages: [
-    {
-      id: 'welcome-msg',
-      role: 'assistant',
-      content: "Hello! I'm Schrödinger AI, your Quantum Tutor on QLearn. As you build circuits or explore algorithms, feel free to ask questions. If you get stuck on a quiz or wonder why a qubit behaves a certain way, I'll guide you step-by-step through the physics!",
-      timestamp: Date.now()
-    }
-  ],
+  messages: INITIAL_AI_MESSAGES,
   isGenerating: false,
   contextPage: 'Home',
   activeMisconception: null,
@@ -243,5 +260,18 @@ export const useAITutorStore = create<AITutorState>((set, get) => ({
   setIsGenerating: (val) => set({ isGenerating: val }),
   setContextPage: (page) => set({ contextPage: page }),
   setActiveMisconception: (tag) => set({ activeMisconception: tag }),
-  clearChat: () => set({ messages: [] })
+  clearChat: () => set({ messages: [] }),
+  resetChat: () => set({
+    isOpen: false,
+    messages: [
+      {
+        id: `welcome-msg-${Date.now()}`,
+        role: 'assistant',
+        content: "Hello! I'm Schrödinger AI, your Quantum Tutor on QLearn. As you build circuits or explore algorithms, feel free to ask questions. If you get stuck on a quiz or wonder why a qubit behaves a certain way, I'll guide you step-by-step through the physics!",
+        timestamp: Date.now()
+      }
+    ],
+    isGenerating: false,
+    activeMisconception: null
+  })
 }));

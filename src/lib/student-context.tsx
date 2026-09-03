@@ -10,6 +10,7 @@
 'use client';
 
 import React, { createContext, useContext, useState, useEffect, useCallback, useRef } from 'react';
+import { useProgressStore, useAITutorStore, useCircuitStore } from '@/lib/state-store';
 
 export type UserRole = 'STUDENT' | 'EDUCATOR' | 'ADMIN';
 
@@ -54,6 +55,27 @@ const LS_STUDENT_NAME = 'ql_student_name';
 const LS_STUDENT_EMAIL = 'ql_student_email';
 const LS_STUDENT_ROLE = 'ql_student_role';
 
+async function syncUserProgressToStore(uid: string) {
+  try {
+    const res = await fetch(`/api/students/${uid}/summary`);
+    if (res.ok) {
+      const summary = await res.json();
+      useProgressStore.getState().setProgress({
+        completedModules: summary.completedModules || {},
+        moduleScores: summary.moduleScores || {},
+        conceptMastery: summary.conceptMastery || {
+          superposition: 0,
+          entanglement: 0,
+          phaseKickback: 0,
+          interference: 0,
+          measurement: 0,
+        },
+        streakDays: summary.student?.streakDays || 0,
+      });
+    }
+  } catch {}
+}
+
 export function StudentProvider({ children }: { children: React.ReactNode }) {
   const [userId, setUserId] = useState<string | null>(null);
   const [studentName, setStudentName] = useState<string | null>(null);
@@ -82,6 +104,7 @@ export function StudentProvider({ children }: { children: React.ReactNode }) {
         setStudentName(storedName || (storedEmail ? storedEmail.split('@')[0] : 'Student'));
         setStudentEmail(storedEmail || '');
         setRole(storedRole);
+        syncUserProgressToStore(storedId);
       }
     } catch {
       // localStorage not available
@@ -105,28 +128,20 @@ export function StudentProvider({ children }: { children: React.ReactNode }) {
 
     if (callback) {
       pendingActionRef.current = callback;
-    } else {
-      pendingActionRef.current = null;
     }
     setShowIdentityModal(true);
   }, []);
 
   const closeLoginModal = useCallback(() => {
-    pendingActionRef.current = null;
     setShowIdentityModal(false);
+    pendingActionRef.current = null;
   }, []);
 
-  const executePendingAction = (activeUserId: string) => {
+  const executePendingAction = (newUserId?: string) => {
     if (pendingActionRef.current) {
       const action = pendingActionRef.current;
       pendingActionRef.current = null;
-      setTimeout(() => {
-        try {
-          action(activeUserId);
-        } catch (e) {
-          console.error('Pending action execution error:', e);
-        }
-      }, 50);
+      action(newUserId);
     }
   };
 
@@ -134,7 +149,7 @@ export function StudentProvider({ children }: { children: React.ReactNode }) {
     const res = await fetch('/api/auth', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ action: 'signin', email, password }),
+      body: JSON.stringify({ action: 'login', email, password }),
     });
 
     const data = await res.json();
@@ -152,11 +167,12 @@ export function StudentProvider({ children }: { children: React.ReactNode }) {
     localStorage.setItem(LS_STUDENT_ROLE, returnedRole || 'STUDENT');
 
     setUserId(returnedId);
-    setStudentName(name || returnedEmail);
+    setStudentName(name || returnedEmail.split('@')[0]);
     setStudentEmail(returnedEmail);
     setRole(returnedRole || 'STUDENT');
     setShowIdentityModal(false);
 
+    syncUserProgressToStore(returnedId);
     executePendingAction(returnedId);
     return { isInstructor: Boolean(isInstructor), userId: returnedId };
   }, []);
@@ -187,20 +203,56 @@ export function StudentProvider({ children }: { children: React.ReactNode }) {
     setRole(returnedRole || 'STUDENT');
     setShowIdentityModal(false);
 
+    syncUserProgressToStore(returnedId);
     executePendingAction(returnedId);
     return { userId: returnedId };
   }, []);
 
   const logout = useCallback(() => {
     userIdRef.current = null;
+
+    // 1. Clear all authentication credentials from localStorage
     localStorage.removeItem(LS_STUDENT_ID);
     localStorage.removeItem(LS_STUDENT_NAME);
     localStorage.removeItem(LS_STUDENT_EMAIL);
     localStorage.removeItem(LS_STUDENT_ROLE);
+
+    // 2. Clear practice problem progress & history caches
+    localStorage.removeItem('ql_practice_solved');
+    localStorage.removeItem('ql_practice_attempted');
+
+    try {
+      for (let i = localStorage.length - 1; i >= 0; i--) {
+        const key = localStorage.key(i);
+        if (
+          key &&
+          (key.startsWith('ql_practice_history_') ||
+            key.startsWith('ql_temp_') ||
+            key.startsWith('ql_sim_'))
+        ) {
+          localStorage.removeItem(key);
+        }
+      }
+    } catch {}
+
+    // 3. Reset in-memory state stores to clean initial state
+    useProgressStore.getState().resetProgress();
+    useAITutorStore.getState().resetChat();
+    useCircuitStore.getState().clearCircuit();
+
+    // 4. Reset React context state
     setUserId(null);
     setStudentName(null);
     setStudentEmail(null);
     setRole(null);
+
+    // 5. If on protected route, redirect to home
+    if (typeof window !== 'undefined') {
+      const currentPath = window.location.pathname;
+      if (currentPath.startsWith('/dashboard') || currentPath.startsWith('/instructor')) {
+        window.location.href = '/';
+      }
+    }
   }, []);
 
   return (

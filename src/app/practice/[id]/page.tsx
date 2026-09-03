@@ -76,11 +76,17 @@ export default function PracticeDetailPage() {
   // Load history from localStorage on mount
   useEffect(() => {
     if (!problem) return;
+    if (!userId) {
+      setSubmissions([]);
+      return;
+    }
     try {
       const history = JSON.parse(localStorage.getItem(`ql_practice_history_${problem.id}`) || '[]');
       setSubmissions(history);
-    } catch {}
-  }, [problem]);
+    } catch {
+      setSubmissions([]);
+    }
+  }, [problem, userId]);
 
   if (!problem) {
     return (

@@ -20,7 +20,10 @@ import {
   Zap
 } from 'lucide-react';
 
+import { useStudentContext } from '@/lib/student-context';
+
 export default function PracticeListPage() {
+  const { userId } = useStudentContext();
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedDifficulty, setSelectedDifficulty] = useState<string>('All');
   const [selectedCategory, setSelectedCategory] = useState<string>('All');
@@ -29,12 +32,20 @@ export default function PracticeListPage() {
 
   useEffect(() => {
     try {
+      if (!userId) {
+        setSolvedIds([]);
+        setAttemptedIds([]);
+        return;
+      }
       const solved = JSON.parse(localStorage.getItem('ql_practice_solved') || '[]');
       const attempted = JSON.parse(localStorage.getItem('ql_practice_attempted') || '[]');
       setSolvedIds(solved);
       setAttemptedIds(attempted);
-    } catch {}
-  }, []);
+    } catch {
+      setSolvedIds([]);
+      setAttemptedIds([]);
+    }
+  }, [userId]);
 
   const categories = ['All', 'Quantum Parallelism', 'Single-Qubit Operations', 'Quantum Entanglement', 'Amplitude Amplification', 'Circuit Identities', 'Quantum Communication'];
 
