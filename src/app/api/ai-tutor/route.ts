@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { generateSocraticResponse } from '@/lib/ai-engine';
+import { generateSocraticResponse, generateSocraticCircuitFeedback } from '@/lib/ai-engine';
 import { GoogleGenerativeAI } from '@google/generative-ai';
 
 import fs from 'fs';
@@ -18,6 +18,51 @@ function getGeminiApiKey(): string | null {
   return null;
 }
 
+const CANDIDATE_MODELS = [
+  'gemini-3.5-flash-lite',
+  'gemini-flash-latest',
+  'gemini-3.6-flash',
+  'gemini-3.5-flash',
+  'gemini-2.5-pro',
+];
+
+async function callGeminiCascade(
+  genAI: GoogleGenerativeAI,
+  prompt: string,
+  options: { systemInstruction?: string; maxOutputTokens?: number; temperature?: number }
+): Promise<string | null> {
+  for (const modelName of CANDIDATE_MODELS) {
+    try {
+      const model = genAI.getGenerativeModel({
+        model: modelName,
+        systemInstruction: options.systemInstruction,
+        generationConfig: {
+          maxOutputTokens: options.maxOutputTokens || 800,
+          temperature: options.temperature ?? 0.7,
+        },
+      });
+
+      const generatePromise = model.generateContent(prompt);
+      const timeoutPromise = new Promise<null>((_, reject) =>
+        setTimeout(() => reject(new Error('Model timeout after 5s')), 5000)
+      );
+
+      const res = (await Promise.race([generatePromise, timeoutPromise])) as any;
+      if (res && res.response) {
+        const text = res.response.text();
+        if (text && text.trim().length > 20) {
+          return text.trim();
+        }
+      }
+    } catch (err: any) {
+      console.warn(`[Gemini Cascade] ${modelName} unavailable (${err?.status || err?.message?.slice(0, 50)}), trying fallback...`);
+    }
+  }
+  return null;
+}
+
+export const dynamic = 'force-dynamic';
+
 export async function POST(req: NextRequest) {
   try {
     const body = await req.json();
@@ -30,8 +75,7 @@ export async function POST(req: NextRequest) {
       if (apiKey) {
         try {
           const genAI = new GoogleGenerativeAI(apiKey);
-          const model = genAI.getGenerativeModel({
-            model: 'gemini-1.5-flash',
+          const genCode = await callGeminiCascade(genAI, `Generate circuit for: "${userPrompt}"`, {
             systemInstruction: `You are an expert quantum compiler on QLearn.
 Convert the user's natural language request into a valid, minimal Qiskit circuit using ONLY the following constrained Python syntax:
 - qc = QuantumCircuit(num_qubits) where num_qubits is 1, 2, or 3.
@@ -51,16 +95,15 @@ STRICT RULES:
 - Return ONLY valid Python code with brief comments.
 - Do NOT use markdown code blocks (\`\`\`python). Output pure executable code.
 - Always include qc.measure_all() at the end.`,
-            generationConfig: { maxOutputTokens: 250, temperature: 0.2 }
+            maxOutputTokens: 250,
+            temperature: 0.2,
           });
-          const res = await model.generateContent(`Generate circuit for: "${userPrompt}"`);
-          let genCode = res.response.text().trim();
-          // Strip any markdown backticks if model included them
-          genCode = genCode.replace(/^```(?:python)?\s*/i, '').replace(/```\s*$/i, '').trim();
-          if (genCode.includes('QuantumCircuit')) {
+
+          if (genCode && genCode.includes('QuantumCircuit')) {
+            const cleanCode = genCode.replace(/^```(?:python)?\s*/i, '').replace(/```\s*$/i, '').trim();
             return NextResponse.json({
-              code: genCode,
-              explanation: `Generated quantum circuit for: "${userPrompt}"`
+              code: cleanCode,
+              explanation: `Generated quantum circuit for: "${userPrompt}"`,
             });
           }
         } catch (err) {
@@ -80,8 +123,7 @@ STRICT RULES:
       if (apiKey) {
         try {
           const genAI = new GoogleGenerativeAI(apiKey);
-          const model = genAI.getGenerativeModel({
-            model: 'gemini-1.5-flash',
+          const debugResponse = await callGeminiCascade(genAI, `Code to debug:\n${circuitCode}\n\nErrors encountered:\n${errorList}`, {
             systemInstruction: `You are Schrödinger AI, debugging a quantum circuit on QLearn.
 Analyze the user's code and errors. Explain what went wrong in 2-3 concise sentences.
 Then provide the corrected circuit code using only the supported gates (H, X, Y, Z, S, T, CX, CZ, SWAP, measure_all) and max 3 qubits.
@@ -89,21 +131,23 @@ Format your output as:
 DIAGNOSIS: <brief explanation>
 FIXED_CODE:
 <the corrected python code without markdown formatting>`,
-            generationConfig: { maxOutputTokens: 300, temperature: 0.3 }
+            maxOutputTokens: 300,
+            temperature: 0.3,
           });
-          const res = await model.generateContent(`Code to debug:\n${circuitCode}\n\nErrors encountered:\n${errorList}`);
-          const text = res.response.text().trim();
-          const diagnosisMatch = text.match(/DIAGNOSIS:\s*([\s\S]*?)(?=FIXED_CODE:|$)/i);
-          const fixedCodeMatch = text.match(/FIXED_CODE:\s*([\s\S]*)/i);
 
-          const explanation = diagnosisMatch ? diagnosisMatch[1].trim() : text;
-          let fixedCode = fixedCodeMatch ? fixedCodeMatch[1].trim() : circuitCode;
-          fixedCode = fixedCode.replace(/^```(?:python)?\s*/i, '').replace(/```\s*$/i, '').trim();
+          if (debugResponse) {
+            const diagnosisMatch = debugResponse.match(/DIAGNOSIS:\s*([\s\S]*?)(?=FIXED_CODE:|$)/i);
+            const fixedCodeMatch = debugResponse.match(/FIXED_CODE:\s*([\s\S]*)/i);
 
-          return NextResponse.json({
-            explanation,
-            fixedCode
-          });
+            const explanation = diagnosisMatch ? diagnosisMatch[1].trim() : debugResponse;
+            let fixedCode = fixedCodeMatch ? fixedCodeMatch[1].trim() : circuitCode;
+            fixedCode = fixedCode.replace(/^```(?:python)?\s*/i, '').replace(/```\s*$/i, '').trim();
+
+            return NextResponse.json({
+              explanation,
+              fixedCode,
+            });
+          }
         } catch (err) {
           console.error("Gemini debugging error:", err);
         }
@@ -112,11 +156,18 @@ FIXED_CODE:
       // Fallback debugger
       return NextResponse.json({
         explanation: "Check that your circuit has between 1 and 3 qubits (`qc = QuantumCircuit(2)`), and all qubit indices are within [0, num_qubits - 1]. Ensure control and target qubits for CNOT are distinct.",
-        fixedCode: `qc = QuantumCircuit(2)\nqc.h(0)\nqc.cx(0, 1)\nqc.measure_all()`
+        fixedCode: `qc = QuantumCircuit(2)\nqc.h(0)\nqc.cx(0, 1)\nqc.measure_all()`,
       });
     }
 
-    // 3. Normal Socratic Tutor Chat
+    // 3. Socratic Tutor Chat & Build It Circuit Diagnosis
+    const isCircuitDiagnosis =
+      action === 'diagnose_build_it' ||
+      (query &&
+        (query.includes("Student's circuit gates") ||
+          query.includes("Build It") ||
+          query.includes("Observed Statevector Fidelity")));
+
     if (apiKey) {
       try {
         const genAI = new GoogleGenerativeAI(apiKey);
@@ -129,11 +180,19 @@ FIXED_CODE:
           ta: 'Tamil (தமிழ்)',
           te: 'Telugu (తెలుగు)',
           ja: 'Japanese (日本語)',
-          'zh-CN': 'Simplified Chinese (简体中文)'
+          'zh-CN': 'Simplified Chinese (简体中文)',
         };
         const activeLangName = langMap[language] || 'English';
 
-        const systemInstruction = `You are Schrödinger AI, an expert Quantum Computing AI Tutor on the QLearn platform.
+        const socraticSystemInstruction = isCircuitDiagnosis
+          ? `You are Schrödinger AI, an expert quantum physics coach on QLearn.
+The student submitted a circuit for a guided algorithm construction challenge that did not match the expected state.
+Your task:
+1. Specifically point out which qubit or gate placement in their circuit is diverging (e.g. they placed H on Q0, but X on Q1).
+2. Explain the physical effect of the gate they placed versus what state the algorithm actually needs at this stage.
+3. Ask an encouraging guiding question to help them fix it themselves.
+STRICT PEDAGOGICAL RULE: DO NOT give them the direct full answer or gate sequence. Guide them Socratically so they learn!`
+          : `You are Schrödinger AI, an expert Quantum Computing AI Tutor on the QLearn platform.
 Learner Mode: ${explanationMode === 'simple' ? 'Simple / School Student (intuitive analogies, clear metaphors)' : 'Technical / Researcher (Dirac notation, unitary matrices, state vectors)'}.
 Active Misconception Flag: ${activeMisconception || 'None'}.
 
@@ -147,24 +206,39 @@ QLEARN PLATFORM CAPABILITIES:
 - Multi-backend simulation (Qiskit Aer, PennyLane default.qubit, Cirq, qBraid cloud).
 - Socratic guided teaching.`;
 
-        const model = genAI.getGenerativeModel({ 
-          model: 'gemini-1.5-flash',
-          systemInstruction,
-          generationConfig: { maxOutputTokens: 300, temperature: 0.7 }
+        const reply = await callGeminiCascade(genAI, query, {
+          systemInstruction: socraticSystemInstruction,
+          maxOutputTokens: 1000,
+          temperature: isCircuitDiagnosis ? 0.4 : 0.7,
         });
 
-        const result = await model.generateContent(query);
-        const reply = result.response.text();
-        if (reply) return NextResponse.json({ reply });
+        if (reply) {
+          return NextResponse.json({ reply });
+        }
       } catch (e: any) {
         console.error("Gemini API Error:", e);
       }
     }
 
-    // Fallback local engine if no API key is present
+    // Fallback local Socratic engine (when offline or API experiencing spikes)
+    if (isCircuitDiagnosis) {
+      const userGateList = body.userGates?.map(
+        (g: any) => `${g.type.toUpperCase()}(Q${g.qubits.join(',')})`
+      );
+      const reply = generateSocraticCircuitFeedback({
+        moduleSlug: body.moduleSlug,
+        userGateList,
+        structuralDiff: body.structuralDiff,
+        fidelity: body.fidelity,
+        explanationMode: explanationMode || 'simple',
+        rawQuery: query,
+      });
+      return NextResponse.json({ reply });
+    }
+
     const reply = generateSocraticResponse(query, {
       explanationMode: explanationMode || 'simple',
-      activeMisconception
+      activeMisconception,
     });
 
     return NextResponse.json({ reply });

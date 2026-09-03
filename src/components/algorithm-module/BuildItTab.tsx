@@ -146,9 +146,14 @@ export function BuildItTab({ moduleSlug, onProceedToQuiz }: BuildItTabProps) {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
+              action: 'diagnose_build_it',
               query: evaluation.diagnosisPrompt,
-              explanationMode: 'simple'
-            })
+              moduleSlug,
+              userGates: gates,
+              structuralDiff: evaluation.structuralDiff,
+              fidelity: evaluation.fidelity,
+              explanationMode: 'simple',
+            }),
           });
           const data = await res.json();
           setAiCoachingMessage(data.reply || 'Check your gate sequence against the algorithm requirements.');
