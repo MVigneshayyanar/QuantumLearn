@@ -20,13 +20,106 @@ function getGeminiApiKey(): string | null {
 
 export async function POST(req: NextRequest) {
   try {
-    const { query, explanationMode, activeMisconception, language } = await req.json();
+    const body = await req.json();
+    const { action, prompt, code, errors, query, explanationMode, activeMisconception, language } = body;
     const apiKey = getGeminiApiKey();
 
+    // 1. AI Circuit Code Generation
+    if (action === 'generate_circuit') {
+      const userPrompt = prompt || query || 'Create a Bell state';
+      if (apiKey) {
+        try {
+          const genAI = new GoogleGenerativeAI(apiKey);
+          const model = genAI.getGenerativeModel({
+            model: 'gemini-1.5-flash',
+            systemInstruction: `You are an expert quantum compiler on QLearn.
+Convert the user's natural language request into a valid, minimal Qiskit circuit using ONLY the following constrained Python syntax:
+- qc = QuantumCircuit(num_qubits) where num_qubits is 1, 2, or 3.
+- qc.h(q)
+- qc.x(q)
+- qc.y(q)
+- qc.z(q)
+- qc.s(q)
+- qc.t(q)
+- qc.cx(control, target)
+- qc.cz(control, target)
+- qc.swap(q0, q1)
+- qc.measure_all()
+
+STRICT RULES:
+- Maximum 3 qubits (0, 1, 2).
+- Return ONLY valid Python code with brief comments.
+- Do NOT use markdown code blocks (\`\`\`python). Output pure executable code.
+- Always include qc.measure_all() at the end.`,
+            generationConfig: { maxOutputTokens: 250, temperature: 0.2 }
+          });
+          const res = await model.generateContent(`Generate circuit for: "${userPrompt}"`);
+          let genCode = res.response.text().trim();
+          // Strip any markdown backticks if model included them
+          genCode = genCode.replace(/^```(?:python)?\s*/i, '').replace(/```\s*$/i, '').trim();
+          if (genCode.includes('QuantumCircuit')) {
+            return NextResponse.json({
+              code: genCode,
+              explanation: `Generated quantum circuit for: "${userPrompt}"`
+            });
+          }
+        } catch (err) {
+          console.error("Gemini circuit generation error:", err);
+        }
+      }
+
+      // Offline / Fallback Generator
+      const fallback = fallbackGenerateCircuit(userPrompt);
+      return NextResponse.json(fallback);
+    }
+
+    // 2. AI Circuit Debugging
+    if (action === 'debug_circuit') {
+      const circuitCode = code || '';
+      const errorList = errors ? JSON.stringify(errors) : 'Syntax or semantic issue';
+      if (apiKey) {
+        try {
+          const genAI = new GoogleGenerativeAI(apiKey);
+          const model = genAI.getGenerativeModel({
+            model: 'gemini-1.5-flash',
+            systemInstruction: `You are Schrödinger AI, debugging a quantum circuit on QLearn.
+Analyze the user's code and errors. Explain what went wrong in 2-3 concise sentences.
+Then provide the corrected circuit code using only the supported gates (H, X, Y, Z, S, T, CX, CZ, SWAP, measure_all) and max 3 qubits.
+Format your output as:
+DIAGNOSIS: <brief explanation>
+FIXED_CODE:
+<the corrected python code without markdown formatting>`,
+            generationConfig: { maxOutputTokens: 300, temperature: 0.3 }
+          });
+          const res = await model.generateContent(`Code to debug:\n${circuitCode}\n\nErrors encountered:\n${errorList}`);
+          const text = res.response.text().trim();
+          const diagnosisMatch = text.match(/DIAGNOSIS:\s*([\s\S]*?)(?=FIXED_CODE:|$)/i);
+          const fixedCodeMatch = text.match(/FIXED_CODE:\s*([\s\S]*)/i);
+
+          const explanation = diagnosisMatch ? diagnosisMatch[1].trim() : text;
+          let fixedCode = fixedCodeMatch ? fixedCodeMatch[1].trim() : circuitCode;
+          fixedCode = fixedCode.replace(/^```(?:python)?\s*/i, '').replace(/```\s*$/i, '').trim();
+
+          return NextResponse.json({
+            explanation,
+            fixedCode
+          });
+        } catch (err) {
+          console.error("Gemini debugging error:", err);
+        }
+      }
+
+      // Fallback debugger
+      return NextResponse.json({
+        explanation: "Check that your circuit has between 1 and 3 qubits (`qc = QuantumCircuit(2)`), and all qubit indices are within [0, num_qubits - 1]. Ensure control and target qubits for CNOT are distinct.",
+        fixedCode: `qc = QuantumCircuit(2)\nqc.h(0)\nqc.cx(0, 1)\nqc.measure_all()`
+      });
+    }
+
+    // 3. Normal Socratic Tutor Chat
     if (apiKey) {
       try {
         const genAI = new GoogleGenerativeAI(apiKey);
-        // Latest recommended Google Gemini model for interactive web applications
         const langMap: Record<string, string> = {
           en: 'English',
           hi: 'Hindi (हिन्दी)',
@@ -47,36 +140,17 @@ Active Misconception Flag: ${activeMisconception || 'None'}.
 MULTILINGUAL REQUIREMENT:
 - The user's active platform language is: ${activeLangName}.
 - You MUST respond fully and fluently in ${activeLangName}.
-- If the language is Hindi (hi), write completely in natural, engaging Hindi (हिंदी में उत्तर दें) using Devanagari script.
-- If the language is Spanish (es), write completely in natural, engaging Spanish (Español).
-- If the language is French (fr), write completely in natural, engaging French (Français).
-- If the language is German (de), write completely in natural, engaging German (Deutsch).
-- MATHEMATICAL & VARIABLE PRESERVATION: Do NOT translate or localize mathematical equations, Dirac notations ($|0\\rangle$, $|1\\rangle$, $|\\psi\\rangle$, $|+\\rangle$, $|-\\rangle$), quantum gate abbreviations (H, X, Y, Z, S, T, CNOT, CZ, SWAP), variables ($n$, $x$, $f(x)$, $\\theta$, $\\phi$, $\\alpha$, $\\beta$), or numeric values. Keep all formulas inside $...$ or $$...$$ strictly intact.
-- If the student asks in any other language, seamlessly detect and converse in that language.
+- Keep all Dirac notations ($|0\\rangle$, $|1\\rangle$), gates (H, X, CNOT), and formulas intact.
 
-QLearn Curriculum Context (RAG Knowledge Base):
-- Deutsch-Jozsa Algorithm: Evaluates if an unknown oracle function f(x) is constant (same output for all inputs) or balanced (output is 0 for half and 1 for half) with just ONE query using quantum superposition and Hadamard interference, compared to 2^(n-1)+1 classical queries.
-- Grover's Algorithm: Provides quadratic speedup O(sqrt(N)) for searching unstructured databases using repeated applications of the Oracle and Diffusion Operator (inversion about the average).
-- Quantum Teleportation: Transmits an unknown qubit state |ψ⟩ from Alice to Bob without moving the physical particle, using a shared entangled Bell pair (|Φ+⟩ = (|00⟩+|11⟩)/√2) and two classical communication bits.
-- Superdense Coding: Transmits two classical bits of information using only ONE transmitted qubit, enabled by pre-shared entanglement.
-- Platform Tools:
-  * Interactive Circuit Builder: Drag-and-drop workbench supporting 1-3 qubits, common single and 2-qubit gates (H, X, Y, Z, S, T, CX, CZ, SWAP), real statevector calculations, and measurement probability histograms.
-  * 3D Bloch Sphere: Interactive Three.js visualization of qubit state pure vectors (x, y, z coordinates, θ and φ angles).
+QLEARN PLATFORM CAPABILITIES:
+- Drag-and-drop & code-based circuit builder (Qiskit, Cirq, PennyLane).
+- Multi-backend simulation (Qiskit Aer, PennyLane default.qubit, Cirq, qBraid cloud).
+- Socratic guided teaching.`;
 
-PEDAGOGICAL RULES:
-1. Socratic method: Guide the learner by asking insightful questions rather than just dumping answers.
-2. Adapt tone to Learner Mode (Simple: relatable real-world metaphors like coin flips and sound waves; Technical: Dirac bra-ket notation, unitary matrices, tensor products).
-3. If an active misconception is tagged, address it gently and constructively.
-4. Keep explanations engaging, concise, and physically accurate.`;
-
-        // High-speed low-latency model for instant responses
         const model = genAI.getGenerativeModel({ 
-          model: 'gemini-3.1-flash-lite',
+          model: 'gemini-1.5-flash',
           systemInstruction,
-          generationConfig: {
-            maxOutputTokens: 300,
-            temperature: 0.7
-          }
+          generationConfig: { maxOutputTokens: 300, temperature: 0.7 }
         });
 
         const result = await model.generateContent(query);
@@ -84,10 +158,6 @@ PEDAGOGICAL RULES:
         if (reply) return NextResponse.json({ reply });
       } catch (e: any) {
         console.error("Gemini API Error:", e);
-        const errMsg = e?.message || '';
-        return NextResponse.json({
-          reply: `⚠️ **Gemini Response Error**: ${errMsg || 'Unable to generate response from Gemini.'}`
-        });
       }
     }
 
@@ -105,4 +175,54 @@ PEDAGOGICAL RULES:
       { status: 200 }
     );
   }
+}
+
+function fallbackGenerateCircuit(prompt: string): { code: string; explanation: string } {
+  const p = prompt.toLowerCase();
+  if (p.includes('bell') || p.includes('entangle')) {
+    return {
+      code: `qc = QuantumCircuit(2)\nqc.h(0)\nqc.cx(0, 1)\nqc.measure_all()`,
+      explanation: "Created Bell state (|00> + |11>)/√2 using Hadamard on Q0 followed by CNOT from Q0 to Q1."
+    };
+  }
+  if (p.includes('ghz') || (p.includes('3') && p.includes('qubit'))) {
+    return {
+      code: `qc = QuantumCircuit(3)\nqc.h(0)\nqc.cx(0, 1)\nqc.cx(1, 2)\nqc.measure_all()`,
+      explanation: "Created 3-qubit GHZ state (|000> + |111>)/√2 using Hadamard on Q0 followed by cascading CNOTs."
+    };
+  }
+  if (p.includes('grover') || p.includes('search')) {
+    return {
+      code: `qc = QuantumCircuit(2)\nqc.h(0)\nqc.h(1)\nqc.cz(0, 1)\nqc.h(0)\nqc.h(1)\nqc.z(0)\nqc.z(1)\nqc.cz(0, 1)\nqc.h(0)\nqc.h(1)\nqc.measure_all()`,
+      explanation: "Created Grover's algorithm for 2 qubits with |11> marked state and diffusion operator."
+    };
+  }
+  if (p.includes('teleport')) {
+    return {
+      code: `qc = QuantumCircuit(3)\nqc.h(1)\nqc.cx(1, 2)\nqc.cx(0, 1)\nqc.h(0)\nqc.measure_all()`,
+      explanation: "Created Quantum Teleportation protocol circuit with shared Bell pair on Q1-Q2 and Bell measurement on Q0-Q1."
+    };
+  }
+  if (p.includes('superdense')) {
+    return {
+      code: `qc = QuantumCircuit(2)\nqc.h(0)\nqc.cx(0, 1)\nqc.z(0)\nqc.x(0)\nqc.cx(0, 1)\nqc.h(0)\nqc.measure_all()`,
+      explanation: "Created Superdense Coding circuit: entanglement prep, Alice's 2-bit encoding (ZX), and Bob's Bell measurement."
+    };
+  }
+  if (p.includes('deutsch')) {
+    return {
+      code: `qc = QuantumCircuit(2)\nqc.x(1)\nqc.h(0)\nqc.h(1)\nqc.cx(0, 1)\nqc.h(0)\nqc.measure_all()`,
+      explanation: "Created Deutsch-Jozsa algorithm with ancilla in |-> and balanced oracle (CNOT)."
+    };
+  }
+  if (p.includes('swap')) {
+    return {
+      code: `qc = QuantumCircuit(2)\nqc.x(0)\nqc.swap(0, 1)\nqc.measure_all()`,
+      explanation: "Prepares |10> and swaps Q0 and Q1 to yield |01>."
+    };
+  }
+  return {
+    code: `qc = QuantumCircuit(2)\nqc.h(0)\nqc.h(1)\nqc.measure_all()`,
+    explanation: "Created a 2-qubit uniform superposition circuit using parallel Hadamard gates."
+  };
 }

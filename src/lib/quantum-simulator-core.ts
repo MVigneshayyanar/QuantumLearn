@@ -402,3 +402,28 @@ export function generateQasm(numQubits: number, gates: PlacedGate[]): string {
 
   return lines.join('\n');
 }
+
+/**
+ * Calculates quantum statevector fidelity: |<target|actual>|^2
+ * Invariant under global phase differences (0.0 to 1.0).
+ */
+export function calculateStatevectorFidelity(
+  svA: { re: number; im: number }[],
+  svB: { re: number; im: number }[]
+): number {
+  if (!svA || !svB || svA.length !== svB.length || svA.length === 0) return 0;
+
+  let innerReal = 0;
+  let innerImag = 0;
+
+  for (let k = 0; k < svA.length; k++) {
+    const a = svA[k];
+    const b = svB[k];
+    // a* * b = (a.re*b.re + a.im*b.im) + i*(a.re*b.im - a.im*b.re)
+    innerReal += a.re * b.re + a.im * b.im;
+    innerImag += a.re * b.im - a.im * b.re;
+  }
+
+  const fidelity = innerReal * innerReal + innerImag * innerImag;
+  return Math.min(1.0, Math.max(0.0, fidelity));
+}

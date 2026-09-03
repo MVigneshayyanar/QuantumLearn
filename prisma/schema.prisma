@@ -26,6 +26,7 @@ model User {
   emailVerified DateTime?
   image         String?
   role          Role            @default(STUDENT)
+  passwordHash  String?
   streakDays    Int             @default(0)
   lastActiveAt  DateTime        @default(now())
   createdAt     DateTime        @default(now())
@@ -35,6 +36,7 @@ model User {
   quizAttempts  QuizAttempt[]
   circuits      SavedCircuit[]
   misconceptions MisconceptionLog[]
+  practiceSubmissions PracticeSubmission[]
 }
 
 model UserProgress {
@@ -87,4 +89,19 @@ model SavedCircuit {
   qasmCode    String?
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
+}
+
+// Stub model for future Practice/Judge feature.
+// The frontend practice submission UI does not exist yet;
+// this model is created ahead of time so the API route and
+// instructor dashboard can reference it once the feature lands.
+model PracticeSubmission {
+  id          String   @id @default(cuid())
+  userId      String
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  moduleSlug  String
+  problemId   String
+  result      String   // "accepted" | "wrong_answer" | "invalid_circuit"
+  code        String?  // optional submitted code/circuit JSON
+  createdAt   DateTime @default(now())
 }

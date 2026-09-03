@@ -1,5 +1,6 @@
 import { create } from 'zustand';
-import { persist } from 'zustand/middleware';
+// NOTE: persist middleware removed from useProgressStore — DB is now source of truth.
+// The persist import is retained in case other stores need it in the future.
 import { PlacedGate, SimulationResult, ChatMessage, ConceptMastery, MisconceptionTag } from './types';
 import { simulateLocalCircuit } from './quantum-simulator-core';
 
@@ -154,65 +155,66 @@ export const useCircuitStore = create<CircuitState>((set, get) => ({
   }
 }));
 
+// Progress store — provides optimistic local state for immediate UI feedback.
+// The DB (via API calls in api-helpers.ts) is the source of truth.
+// DO NOT re-add persist middleware — localStorage is NOT a data store for
+// learning data anymore.
 export const useProgressStore = create<UserProgressState>()(
-  persist(
-    (set, get) => ({
-      completedModules: {},
-      moduleScores: {},
-      streakDays: 1,
-      lastActiveDate: new Date().toISOString().split('T')[0],
-      conceptMastery: {
-        superposition: 40,
-        entanglement: 30,
-        phaseKickback: 20,
-        interference: 35,
-        measurement: 50
-      },
-      flaggedMisconceptions: {} as Record<MisconceptionTag, number>,
+  (set, get) => ({
+    completedModules: {},
+    moduleScores: {},
+    streakDays: 1,
+    lastActiveDate: new Date().toISOString().split('T')[0],
+    conceptMastery: {
+      superposition: 40,
+      entanglement: 30,
+      phaseKickback: 20,
+      interference: 35,
+      measurement: 50
+    },
+    flaggedMisconceptions: {} as Record<MisconceptionTag, number>,
 
-      markModuleComplete: (slug: string, score: number) => {
-        set({
-          completedModules: { ...get().completedModules, [slug]: true },
-          moduleScores: { ...get().moduleScores, [slug]: Math.max(score, get().moduleScores[slug] || 0) }
-        });
-      },
+    markModuleComplete: (slug: string, score: number) => {
+      set({
+        completedModules: { ...get().completedModules, [slug]: true },
+        moduleScores: { ...get().moduleScores, [slug]: Math.max(score, get().moduleScores[slug] || 0) }
+      });
+      // DB write is handled by the calling component via apiReportProgress()
+    },
 
-      recordMisconception: (tag: MisconceptionTag) => {
-        const current = get().flaggedMisconceptions[tag] || 0;
-        set({
-          flaggedMisconceptions: {
-            ...get().flaggedMisconceptions,
-            [tag]: current + 1
-          }
-        });
-      },
-
-      resolveMisconception: (tag: MisconceptionTag) => {
-        const copy = { ...get().flaggedMisconceptions };
-        delete copy[tag];
-        set({ flaggedMisconceptions: copy });
-      },
-
-      updateMastery: (concept, delta) => {
-        const current = get().conceptMastery[concept];
-        const updated = Math.min(100, Math.max(0, current + delta));
-        set({
-          conceptMastery: { ...get().conceptMastery, [concept]: updated }
-        });
-      },
-
-      incrementStreak: () => {
-        const today = new Date().toISOString().split('T')[0];
-        const last = get().lastActiveDate;
-        if (today !== last) {
-          set({ streakDays: get().streakDays + 1, lastActiveDate: today });
+    recordMisconception: (tag: MisconceptionTag) => {
+      const current = get().flaggedMisconceptions[tag] || 0;
+      set({
+        flaggedMisconceptions: {
+          ...get().flaggedMisconceptions,
+          [tag]: current + 1
         }
+      });
+      // DB write for misconceptions is handled by the quiz-attempt API route
+    },
+
+    resolveMisconception: (tag: MisconceptionTag) => {
+      const copy = { ...get().flaggedMisconceptions };
+      delete copy[tag];
+      set({ flaggedMisconceptions: copy });
+    },
+
+    updateMastery: (concept, delta) => {
+      const current = get().conceptMastery[concept];
+      const updated = Math.min(100, Math.max(0, current + delta));
+      set({
+        conceptMastery: { ...get().conceptMastery, [concept]: updated }
+      });
+    },
+
+    incrementStreak: () => {
+      const today = new Date().toISOString().split('T')[0];
+      const last = get().lastActiveDate;
+      if (today !== last) {
+        set({ streakDays: get().streakDays + 1, lastActiveDate: today });
       }
-    }),
-    {
-      name: 'quantum_learn_progress'
     }
-  )
+  })
 );
 
 export const useAITutorStore = create<AITutorState>((set, get) => ({

@@ -1,7 +1,8 @@
 'use client';
 
-import React, { useState } from 'react';
-import { useProgressStore, useAITutorStore } from '@/lib/state-store';
+import React, { useState, useEffect } from 'react';
+import { useStudentContext } from '@/lib/student-context';
+import { useAITutorStore } from '@/lib/state-store';
 import { useAccessibility } from '@/lib/accessibility-context';
 import { translations } from '@/lib/i18n';
 import Link from 'next/link';
@@ -17,24 +18,85 @@ import {
   ArrowRight,
   BarChart3,
   Users,
-  UserCheck
+  UserCheck,
+  Loader2
 } from 'lucide-react';
 import { ResponsiveContainer, PolarGrid, PolarAngleAxis, PolarRadiusAxis, Radar, RadarChart } from 'recharts';
 
-export function ProgressDashboard() {
-  const {
-    completedModules,
-    moduleScores,
-    streakDays,
-    conceptMastery,
-    flaggedMisconceptions
-  } = useProgressStore();
+// Shape returned by GET /api/students/[id]/summary
+interface StudentSummary {
+  student: { id: string; name: string; email: string; streakDays: number; lastActiveAt: string };
+  completedModules: Record<string, boolean>;
+  moduleScores: Record<string, number>;
+  conceptMastery: {
+    superposition: number;
+    entanglement: number;
+    phaseKickback: number;
+    interference: number;
+    measurement: number;
+  };
+  quizStats: { total: number; correct: number; accuracy: number };
+  misconceptions: Array<{ tag: string; count: number; isResolved: boolean }>;
+  recentQuizAttempts: Array<{
+    moduleSlug: string;
+    questionId: string;
+    isCorrect: boolean;
+    misconceptionTag: string | null;
+    createdAt: string;
+  }>;
+}
 
+export function ProgressDashboard() {
+  const { userId, studentName, isIdentified } = useStudentContext();
   const { setIsOpen: setAITutorOpen, addMessage, setActiveMisconception } = useAITutorStore();
   const { language } = useAccessibility();
   const t = translations[language];
 
+  const [summary, setSummary] = useState<StudentSummary | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const [roleView, setRoleView] = useState<'student' | 'educator'>('student');
+
+  // Fetch from DB on mount
+  useEffect(() => {
+    if (!userId) {
+      setIsLoading(false);
+      return;
+    }
+
+    const fetchSummary = async () => {
+      setIsLoading(true);
+      setError(null);
+      try {
+        const res = await fetch(`/api/students/${userId}/summary`);
+        if (!res.ok) {
+          throw new Error(`Failed to load progress (HTTP ${res.status})`);
+        }
+        const data: StudentSummary = await res.json();
+        setSummary(data);
+      } catch (err: any) {
+        console.warn('[ProgressDashboard] Failed to fetch summary:', err);
+        setError(err?.message || 'Failed to load your progress data.');
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchSummary();
+  }, [userId]);
+
+  // Derived data from summary
+  const completedModules = summary?.completedModules || {};
+  const moduleScores = summary?.moduleScores || {};
+  const streakDays = summary?.student?.streakDays || 1;
+  const conceptMastery = summary?.conceptMastery || {
+    superposition: 0,
+    entanglement: 0,
+    phaseKickback: 0,
+    interference: 0,
+    measurement: 0,
+  };
+  const flaggedMisconceptions = summary?.misconceptions?.filter(m => !m.isResolved) || [];
 
   const radarData = [
     { subject: 'Superposition', value: conceptMastery.superposition, fullMark: 100 },
@@ -72,7 +134,42 @@ export function ProgressDashboard() {
   ];
 
   const completedCount = Object.values(completedModules).filter(Boolean).length;
-  const flaggedList = Object.entries(flaggedMisconceptions);
+
+  // Loading state
+  if (isLoading) {
+    return (
+      <div className="max-w-6xl mx-auto px-4 sm:px-6 py-8 flex flex-col items-center justify-center min-h-[400px] gap-4">
+        <Loader2 className="w-8 h-8 text-primary-600 animate-spin" />
+        <p className="text-sm text-dark-500 font-medium">Loading your progress...</p>
+      </div>
+    );
+  }
+
+  // Not identified
+  if (!isIdentified) {
+    return (
+      <div className="max-w-6xl mx-auto px-4 sm:px-6 py-8 flex flex-col items-center justify-center min-h-[400px] gap-4">
+        <AlertTriangle className="w-8 h-8 text-amber-500" />
+        <p className="text-sm text-dark-600 font-medium">Please identify yourself to view your progress dashboard.</p>
+      </div>
+    );
+  }
+
+  // Error state
+  if (error) {
+    return (
+      <div className="max-w-6xl mx-auto px-4 sm:px-6 py-8 flex flex-col items-center justify-center min-h-[400px] gap-4">
+        <AlertTriangle className="w-8 h-8 text-red-500" />
+        <p className="text-sm text-red-600 font-medium">{error}</p>
+        <button
+          onClick={() => window.location.reload()}
+          className="px-4 py-2 rounded-lg bg-primary-600 text-white text-xs font-semibold hover:bg-primary-700 transition-colors"
+        >
+          Retry
+        </button>
+      </div>
+    );
+  }
 
   return (
     <div className="max-w-6xl mx-auto px-4 sm:px-6 py-8 space-y-8 animate-fadeIn">
@@ -83,7 +180,7 @@ export function ProgressDashboard() {
             Learner Profile
           </span>
           <h1 className="text-2xl sm:text-3xl font-bold text-dark-900 mt-2">
-            Quantum Mastery & Analytics
+            {studentName ? `${studentName}'s Quantum Journey` : 'Quantum Mastery & Analytics'}
           </h1>
           <p className="text-sm text-dark-600 mt-1">
             Track your understanding across quantum fundamentals, algorithms, and AI diagnostics.
@@ -104,18 +201,13 @@ export function ProgressDashboard() {
             <UserCheck className="w-3.5 h-3.5 text-primary-600" />
             <span>Student View</span>
           </button>
-          <button
-            onClick={() => setRoleView('educator')}
-            aria-pressed={roleView === 'educator'}
-            className={`flex items-center gap-2 px-3 py-1.5 rounded-lg text-xs font-semibold transition-colors ${
-              roleView === 'educator'
-                ? 'bg-white text-dark-900 shadow-xs'
-                : 'text-dark-600 hover:text-dark-900'
-            }`}
+          <Link
+            href="/instructor"
+            className={`flex items-center gap-2 px-3 py-1.5 rounded-lg text-xs font-semibold transition-colors text-dark-600 hover:text-dark-900`}
           >
             <Users className="w-3.5 h-3.5 text-primary-600" />
             <span>Educator / Class View</span>
-          </button>
+          </Link>
         </div>
       </div>
 
@@ -146,11 +238,9 @@ export function ProgressDashboard() {
             <Trophy className="w-6 h-6" />
           </div>
           <div>
-            <span className="text-xs text-dark-500 font-medium">Average Mastery</span>
+            <span className="text-xs text-dark-500 font-medium">Quiz Accuracy</span>
             <p className="text-2xl font-bold text-dark-900">
-              {Math.round(
-                Object.values(conceptMastery).reduce((a, b) => a + b, 0) / 5
-              )}%
+              {summary?.quizStats?.accuracy || 0}%
             </p>
           </div>
         </div>
@@ -187,10 +277,10 @@ export function ProgressDashboard() {
               <AlertTriangle className="w-4 h-4 text-amber-500" />
               <h3 className="font-bold text-base text-dark-900">AI Diagnostic Misconceptions</h3>
             </div>
-            <span className="text-xs text-dark-500 font-medium">{flaggedList.length} Active</span>
+            <span className="text-xs text-dark-500 font-medium">{flaggedMisconceptions.length} Active</span>
           </div>
 
-          {flaggedList.length === 0 ? (
+          {flaggedMisconceptions.length === 0 ? (
             <div className="p-8 text-center bg-emerald-50/50 rounded-2xl border border-emerald-100 space-y-2">
               <CheckCircle2 className="w-8 h-8 text-emerald-600 mx-auto" />
               <h4 className="font-bold text-sm text-emerald-950">No Conceptual Gaps Flagged!</h4>
@@ -200,22 +290,22 @@ export function ProgressDashboard() {
             </div>
           ) : (
             <div className="space-y-3">
-              {flaggedList.map(([tag, count]) => (
+              {flaggedMisconceptions.map((item) => (
                 <div
-                  key={tag}
+                  key={item.tag}
                   className="p-3.5 rounded-2xl bg-amber-50/60 border border-amber-200 flex items-center justify-between gap-3 text-xs"
                 >
                   <div className="space-y-0.5">
-                    <span className="font-mono font-bold text-amber-950 block">{tag}</span>
-                    <span className="text-amber-800 text-[11px]">Flagged {count} time(s) during quizzes</span>
+                    <span className="font-mono font-bold text-amber-950 block">{item.tag}</span>
+                    <span className="text-amber-800 text-[11px]">Flagged {item.count} time(s) during quizzes</span>
                   </div>
 
                   <button
                     onClick={() => {
-                      setActiveMisconception(tag);
+                      setActiveMisconception(item.tag);
                       addMessage({
                         role: 'user',
-                        content: `I'd like to work through my flagged misconception on "${tag}". Could you help guide my thinking?`
+                        content: `I'd like to work through my flagged misconception on "${item.tag}". Could you help guide my thinking?`
                       });
                       setAITutorOpen(true);
                     }}
@@ -251,7 +341,7 @@ export function ProgressDashboard() {
                     {isDone ? (
                       <span className="inline-flex items-center gap-1 text-xs font-semibold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-full">
                         <CheckCircle2 className="w-3.5 h-3.5" />
-                        Completed ({score}%)
+                        Completed ({Math.round(score)}%)
                       </span>
                     ) : (
                       <span className="text-xs text-dark-500 font-medium">In Progress</span>

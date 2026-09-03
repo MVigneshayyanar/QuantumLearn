@@ -26,25 +26,61 @@ Bob then performs a complete Bell-basis measurement to decode both classical bit
       stepName: "Shared Entanglement Preparation",
       equation: "|\\Phi^+\\rangle = (H_0 \\otimes I_1)\\, \\text{CNOT}_{0,1}\\, |00\\rangle = \\frac{1}{\\sqrt{2}} (|00\\rangle + |11\\rangle)",
       descriptionSimple: "Alice and Bob share an entangled Bell pair.",
-      descriptionTechnical: "Maximally entangled bipartite state with maximal entanglement entropy $S(\\rho_A) = 1$ bit."
+      descriptionTechnical: "Maximally entangled bipartite state with maximal entanglement entropy $S(\\rho_A) = 1$ bit.",
+      gateRationale: "Apply H on Q0 followed by CNOT from Q0 to Q1 to prepare the canonical Bell pair |Φ+⟩. Alice holds Q0, Bob holds Q1.",
+      stepGates: [
+        { type: 'h', qubits: [0], step: 0 },
+        { type: 'cx', qubits: [0, 1], step: 1 }
+      ],
+      commonMistakes: "Applying gates to Bob's qubit Q1 during preparation after the pair is distributed — Alice only touches Q0."
     },
     {
       stepName: "Alice's 2-Bit Local Encoding",
       equation: "(\\sigma_A \\otimes I_B)|\\Phi^+\\rangle \\in \\Big\\{ |\\Phi^+\\rangle\\ (00),\\  |\\Psi^+\\rangle\\ (01),\\  |\\Phi^-\\rangle\\ (10),\\  |\\Psi^-\\rangle\\ (11) \\Big\\}",
-      descriptionSimple: "Alice applies $I$, $X$, $Z$, or $ZX$ to encode 00, 01, 10, or 11.",
-      descriptionTechnical: "Local unitary operations on subsystem $A$ map the Bell state bijectively across the 4 orthogonal basis states in $\\mathcal{H}_A \\otimes \\mathcal{H}_B$."
+      descriptionSimple: "Alice applies I, X, Z, or ZX to encode 00, 01, 10, or 11.",
+      descriptionTechnical: "Local unitary operations on subsystem $A$ map the Bell state bijectively across the 4 orthogonal basis states in $\\mathcal{H}_A \\otimes \\mathcal{H}_B$.",
+      gateRationale: "To encode 00: do nothing (I). To encode 01: apply X(0). To encode 10: apply Z(0). To encode 11: apply Z(0) then X(0). Alice then sends Q0 to Bob.",
+      stepGates: [
+        { type: 'h', qubits: [0], step: 0 },
+        { type: 'cx', qubits: [0, 1], step: 1 },
+        { type: 'z', qubits: [0], step: 2 },
+        { type: 'x', qubits: [0], step: 3 }
+      ],
+      commonMistakes: "Using 2 qubits for transmission — the entire premise of Superdense Coding is transmitting only ONE physical qubit to deliver two classical bits!"
     },
     {
       stepName: "Bob's Bell Basis Decoding",
       equation: "(H_0 \\otimes I_1)\\, \\text{CNOT}_{0,1}\\, |\\text{Bell}\\rangle = |b_1 b_0\\rangle",
       descriptionSimple: "Bob receives Alice's qubit, applies CNOT and Hadamard to convert the state into definite classical bits.",
-      descriptionTechnical: "Inverse Bell transform maps the 4 Bell states back to computational basis states $\\{|00\\rangle, |01\\rangle, |10\\rangle, |11\\rangle\\}$."
+      descriptionTechnical: "Inverse Bell transform maps the 4 Bell states back to computational basis states $\\{|00\\rangle, |01\\rangle, |10\\rangle, |11\\rangle\\}$.",
+      gateRationale: "Bob applies the exact inverse of the Bell preparation circuit: CNOT(0, 1) followed by H(0).",
+      stepGates: [
+        { type: 'h', qubits: [0], step: 0 },
+        { type: 'cx', qubits: [0, 1], step: 1 },
+        { type: 'z', qubits: [0], step: 2 },
+        { type: 'x', qubits: [0], step: 3 },
+        { type: 'cx', qubits: [0, 1], step: 4 },
+        { type: 'h', qubits: [0], step: 5 }
+      ],
+      commonMistakes: "Applying Hadamard before CNOT in the decoder — quantum operations must be undone in reverse order (LIFO: Last In, First Out)."
     },
     {
       stepName: "Measurement",
       equation: "P(b_1 b_0 = \\text{message}) = 1.0",
       descriptionSimple: "Measuring both qubits yields Alice's original 2-bit message with 100% certainty!",
-      descriptionTechnical: "Exact deterministic projection onto computational basis — $1\\ \\text{qubit transmitted} \\Rightarrow 2\\ \\text{classical bits decoded}$."
+      descriptionTechnical: "Exact deterministic projection onto computational basis — $1\\ \\text{qubit transmitted} \\Rightarrow 2\\ \\text{classical bits decoded}$.",
+      gateRationale: "Measurement in computational basis |0⟩/|1⟩ recovers the two classical bits with 100% accuracy.",
+      stepGates: [
+        { type: 'h', qubits: [0], step: 0 },
+        { type: 'cx', qubits: [0, 1], step: 1 },
+        { type: 'z', qubits: [0], step: 2 },
+        { type: 'x', qubits: [0], step: 3 },
+        { type: 'cx', qubits: [0, 1], step: 4 },
+        { type: 'h', qubits: [0], step: 5 },
+        { type: 'measure', qubits: [0], step: 6 },
+        { type: 'measure', qubits: [1], step: 6 }
+      ],
+      commonMistakes: "Measuring only one qubit — Bob must measure both Q0 and Q1 to read the full 2-bit message."
     }
   ];
 

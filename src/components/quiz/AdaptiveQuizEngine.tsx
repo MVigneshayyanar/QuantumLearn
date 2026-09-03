@@ -4,6 +4,8 @@ import React, { useState, useEffect } from 'react';
 import { QuizQuestion, QuizOption, MisconceptionTag } from '@/lib/types';
 import { ALGORITHM_QUIZZES } from '@/lib/quiz-data';
 import { useProgressStore, useAITutorStore } from '@/lib/state-store';
+import { useStudentContext } from '@/lib/student-context';
+import { apiLogQuizAttempt, apiReportProgress } from '@/lib/api-helpers';
 import { useAccessibility } from '@/lib/accessibility-context';
 import { translations } from '@/lib/i18n';
 import {
@@ -28,6 +30,7 @@ export function AdaptiveQuizEngine({ moduleSlug, onComplete }: AdaptiveQuizEngin
   const { language, explanationMode, announce } = useAccessibility();
   const { recordMisconception, markModuleComplete, updateMastery } = useProgressStore();
   const { setIsOpen: setAITutorOpen, addMessage, setActiveMisconception } = useAITutorStore();
+  const { userId } = useStudentContext();
 
   const questions: QuizQuestion[] = ALGORITHM_QUIZZES[moduleSlug] || [];
   const [currentIdx, setCurrentIdx] = useState(0);
@@ -80,6 +83,20 @@ export function AdaptiveQuizEngine({ moduleSlug, onComplete }: AdaptiveQuizEngin
         announce(`Misconception detected: ${selectedOption.misconception_tag}`);
       }
     }
+
+    // Write quiz attempt to DB (fire-and-forget)
+    if (userId) {
+      apiLogQuizAttempt({
+        userId,
+        moduleSlug,
+        questionId: currentQ.id,
+        selectedAnswer: selectedOptionId,
+        isCorrect,
+        timeTakenMs: timeTaken,
+        difficulty: currentQ.difficulty,
+        misconceptionTag: selectedOption?.misconception_tag,
+      });
+    }
   };
 
   const handleNext = () => {
@@ -87,6 +104,12 @@ export function AdaptiveQuizEngine({ moduleSlug, onComplete }: AdaptiveQuizEngin
       setIsFinished(true);
       const finalScore = Math.round(((score + (isCurrentCorrect ? 1 : 0)) / questions.length) * 100);
       markModuleComplete(moduleSlug, finalScore);
+
+      // Write module completion to DB (fire-and-forget)
+      if (userId) {
+        apiReportProgress(userId, moduleSlug, 'completed', { score: finalScore });
+      }
+
       if (finalScore >= 60) {
         try {
           confetti({ particleCount: 80, spread: 70, origin: { y: 0.6 } });

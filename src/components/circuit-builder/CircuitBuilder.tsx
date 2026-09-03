@@ -19,8 +19,11 @@ import {
   Sparkles,
   Info,
   ChevronRight,
-  ChevronLeft
+  ChevronLeft,
+  Columns,
+  Server
 } from 'lucide-react';
+import { QuantumCodeEditor } from './QuantumCodeEditor';
 import { ResponsiveContainer, BarChart, Bar, XAxis, YAxis, Tooltip, Cell } from 'recharts';
 
 const MAX_STEPS = 8;
@@ -70,6 +73,8 @@ export function CircuitBuilder() {
   const [stepScrubber, setStepScrubber] = useState<number>(0);
   const [dragOverSlot, setDragOverSlot] = useState<{ qubit: number; step: number } | null>(null);
   const [isDraggingActive, setIsDraggingActive] = useState<boolean>(false);
+  const [viewMode, setViewMode] = useState<'visual' | 'split' | 'code'>('split');
+  const [activeBackend, setActiveBackend] = useState<'qiskit' | 'cirq' | 'pennylane' | 'qbraid'>('qiskit');
   const gridContainerRef = useRef<HTMLDivElement>(null);
 
   // Initialize simulation on mount
@@ -269,121 +274,8 @@ export function CircuitBuilder() {
     return lines.join('\n');
   };
 
-  return (
-    <div
-      className="space-y-8"
-      onKeyDown={handleKeyDown}
-      tabIndex={0}
-      aria-label="Quantum Circuit Editor. Use Arrow keys to navigate, Hotkeys H, X, Z, C to place gates."
-    >
-      {/* Top Controls Toolbar */}
-      <div className="bg-white rounded-2xl border border-dark-200 p-5 shadow-xs flex flex-wrap items-center justify-between gap-4">
-        {/* Qubit count & Presets */}
-        <div className="flex items-center flex-wrap gap-3">
-          <div className="flex items-center gap-2">
-            <span className="text-xs font-bold text-dark-700 uppercase tracking-wide">Qubits:</span>
-            <div className="inline-flex rounded-lg border border-dark-200 p-0.5 bg-dark-50">
-              {[1, 2, 3].map((n) => (
-                <button
-                  key={n}
-                  onClick={() => setNumQubits(n)}
-                  aria-pressed={numQubits === n}
-                  className={`px-3 py-1 text-xs font-semibold rounded-md transition-colors ${
-                    numQubits === n
-                      ? 'bg-primary-600 text-white shadow-xs'
-                      : 'text-dark-700 hover:text-dark-900 hover:bg-dark-100'
-                  }`}
-                >
-                  {n} {n === 1 ? 'Qubit' : 'Qubits'}
-                </button>
-              ))}
-            </div>
-          </div>
-
-          {/* Quick Presets */}
-          <div className="flex items-center gap-1.5 pl-3 border-l border-dark-200">
-            <span className="text-xs font-bold text-dark-700 uppercase tracking-wide">Presets:</span>
-            <button
-              onClick={() =>
-                loadPreset(2, [
-                  { id: 'b1', type: 'h', qubits: [0], step: 0 },
-                  { id: 'b2', type: 'cx', qubits: [0, 1], step: 1 }
-                ])
-              }
-              className="px-2.5 py-1 text-xs font-medium rounded bg-dark-100 hover:bg-dark-200 text-dark-800 transition-colors"
-            >
-              Bell State (|Φ+⟩)
-            </button>
-            <button
-              onClick={() =>
-                loadPreset(3, [
-                  { id: 'g1', type: 'h', qubits: [0], step: 0 },
-                  { id: 'g2', type: 'cx', qubits: [0, 1], step: 1 },
-                  { id: 'g3', type: 'cx', qubits: [1, 2], step: 2 }
-                ])
-              }
-              className="px-2.5 py-1 text-xs font-medium rounded bg-dark-100 hover:bg-dark-200 text-dark-800 transition-colors"
-            >
-              GHZ State (3Q)
-            </button>
-            <button
-              onClick={() =>
-                loadPreset(2, [
-                  { id: 's1', type: 'h', qubits: [0], step: 0 },
-                  { id: 's2', type: 'h', qubits: [1], step: 0 }
-                ])
-              }
-              className="px-2.5 py-1 text-xs font-medium rounded bg-dark-100 hover:bg-dark-200 text-dark-800 transition-colors"
-            >
-              Superposition
-            </button>
-          </div>
-        </div>
-
-        {/* Action Buttons: Run, Clear, Export */}
-        <div className="flex items-center gap-2">
-          <div className="flex items-center gap-1 bg-dark-50 border border-dark-200 rounded-lg px-2 py-1 text-xs">
-            <span className="text-dark-500 font-medium">Shots:</span>
-            <select
-              value={shots}
-              onChange={(e) => setShots(Number(e.target.value))}
-              aria-label="Measurement Shots Count"
-              className="bg-white border border-dark-200 rounded px-1.5 py-0.5 font-mono text-xs font-medium"
-            >
-              <option value="512">512</option>
-              <option value="1024">1024</option>
-              <option value="4096">4096</option>
-            </select>
-          </div>
-
-          <button
-            onClick={() => runSimulation()}
-            disabled={isLoading}
-            className="flex items-center gap-1.5 px-4 py-2 rounded-lg bg-primary-600 hover:bg-primary-700 disabled:opacity-50 text-white font-semibold text-xs shadow-xs transition-colors"
-          >
-            <Play className={`w-3.5 h-3.5 ${isLoading ? 'animate-spin' : ''}`} />
-            <span>{t.simulator.runSimulation}</span>
-          </button>
-
-          <button
-            onClick={() => clearCircuit()}
-            className="flex items-center gap-1 px-3 py-2 rounded-lg border border-dark-200 hover:bg-dark-50 text-dark-700 font-medium text-xs transition-colors"
-            title="Clear all gates from circuit"
-          >
-            <RotateCcw className="w-3.5 h-3.5" />
-            <span>Clear</span>
-          </button>
-
-          <button
-            onClick={() => setExportModalOpen(true)}
-            className="flex items-center gap-1 px-3 py-2 rounded-lg border border-dark-200 hover:bg-dark-50 text-dark-700 font-medium text-xs transition-colors"
-          >
-            <Code className="w-3.5 h-3.5 text-primary-600" />
-            <span>Export Code</span>
-          </button>
-        </div>
-      </div>
-
+  const renderVisualWorkspace = () => (
+    <>
       {/* Gate Toolbox */}
       <div className="bg-white rounded-2xl border border-dark-200 p-5 shadow-xs">
         <div className="flex items-center justify-between mb-3">
@@ -585,6 +477,215 @@ export function CircuitBuilder() {
           <span>Execution backend: <strong className="text-dark-800">Qiskit Aer Simulator (Local)</strong></span>
         </div>
       </div>
+    </>
+  );
+
+  return (
+    <div
+      className="space-y-8"
+      onKeyDown={handleKeyDown}
+      tabIndex={0}
+      aria-label="Quantum Circuit Editor. Use Arrow keys to navigate, Hotkeys H, X, Z, C to place gates."
+    >
+      {/* Top Controls Toolbar */}
+      <div className="bg-white rounded-2xl border border-dark-200 p-5 shadow-xs flex flex-wrap items-center justify-between gap-4">
+        {/* Qubit count & Presets */}
+        <div className="flex items-center flex-wrap gap-3">
+          <div className="flex items-center gap-2">
+            <span className="text-xs font-bold text-dark-700 uppercase tracking-wide">Qubits:</span>
+            <div className="inline-flex rounded-lg border border-dark-200 p-0.5 bg-dark-50">
+              {[1, 2, 3].map((n) => (
+                <button
+                  key={n}
+                  onClick={() => setNumQubits(n)}
+                  aria-pressed={numQubits === n}
+                  className={`px-3 py-1 text-xs font-semibold rounded-md transition-colors ${
+                    numQubits === n
+                      ? 'bg-primary-600 text-white shadow-xs'
+                      : 'text-dark-700 hover:text-dark-900 hover:bg-dark-100'
+                  }`}
+                >
+                  {n} {n === 1 ? 'Qubit' : 'Qubits'}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          {/* Quick Presets */}
+          <div className="flex items-center gap-1.5 pl-3 border-l border-dark-200">
+            <span className="text-xs font-bold text-dark-700 uppercase tracking-wide">Presets:</span>
+            <button
+              onClick={() =>
+                loadPreset(2, [
+                  { id: 'b1', type: 'h', qubits: [0], step: 0 },
+                  { id: 'b2', type: 'cx', qubits: [0, 1], step: 1 }
+                ])
+              }
+              className="px-2.5 py-1 text-xs font-medium rounded bg-dark-100 hover:bg-dark-200 text-dark-800 transition-colors"
+            >
+              Bell State (|Φ+⟩)
+            </button>
+            <button
+              onClick={() =>
+                loadPreset(3, [
+                  { id: 'g1', type: 'h', qubits: [0], step: 0 },
+                  { id: 'g2', type: 'cx', qubits: [0, 1], step: 1 },
+                  { id: 'g3', type: 'cx', qubits: [1, 2], step: 2 }
+                ])
+              }
+              className="px-2.5 py-1 text-xs font-medium rounded bg-dark-100 hover:bg-dark-200 text-dark-800 transition-colors"
+            >
+              GHZ State (3Q)
+            </button>
+            <button
+              onClick={() =>
+                loadPreset(2, [
+                  { id: 's1', type: 'h', qubits: [0], step: 0 },
+                  { id: 's2', type: 'h', qubits: [1], step: 0 }
+                ])
+              }
+              className="px-2.5 py-1 text-xs font-medium rounded bg-dark-100 hover:bg-dark-200 text-dark-800 transition-colors"
+            >
+              Superposition
+            </button>
+          </div>
+        </div>
+
+        {/* Multi-Backend Simulator Selector & Mode Toggles */}
+        <div className="flex items-center flex-wrap gap-3">
+          {/* Multi-Backend Selector */}
+          <div className="flex items-center gap-1.5 bg-dark-50 border border-dark-200 rounded-xl px-2.5 py-1 text-xs">
+            <Server className="w-3.5 h-3.5 text-primary-600 shrink-0" />
+            <span className="text-dark-500 font-bold uppercase text-[10px]">Backend:</span>
+            <select
+              value={activeBackend}
+              onChange={(e) => setActiveBackend(e.target.value as any)}
+              className="bg-white border border-dark-200 rounded-lg px-2 py-0.5 font-medium text-xs text-dark-900 focus:outline-none focus:ring-1 focus:ring-primary-500"
+              aria-label="Simulation Execution Backend"
+            >
+              <option value="qiskit">Qiskit Aer (Local Statevector)</option>
+              <option value="cirq">Cirq Simulator (Matrix Engine)</option>
+              <option value="pennylane">PennyLane default.qubit</option>
+              <option value="qbraid">qBraid Cloud SDK (API Key / Coming Soon)</option>
+            </select>
+            {activeBackend === 'qbraid' && (
+              <span className="px-1.5 py-0.5 rounded bg-amber-100 text-amber-800 text-[10px] font-bold">
+                Cloud Key Req.
+              </span>
+            )}
+          </div>
+
+          {/* View Mode Toggle: Visual | Split | Code */}
+          <div className="inline-flex rounded-xl border border-dark-200 p-0.5 bg-dark-100">
+            <button
+              onClick={() => setViewMode('visual')}
+              className={`flex items-center gap-1 px-2.5 py-1 rounded-lg text-xs font-semibold transition-all ${
+                viewMode === 'visual'
+                  ? 'bg-white text-dark-900 shadow-xs'
+                  : 'text-dark-600 hover:text-dark-900'
+              }`}
+            >
+              <Sliders className="w-3.5 h-3.5 text-primary-600" />
+              <span>Visual</span>
+            </button>
+            <button
+              onClick={() => setViewMode('split')}
+              className={`flex items-center gap-1 px-2.5 py-1 rounded-lg text-xs font-semibold transition-all ${
+                viewMode === 'split'
+                  ? 'bg-white text-dark-900 shadow-xs'
+                  : 'text-dark-600 hover:text-dark-900'
+              }`}
+            >
+              <Columns className="w-3.5 h-3.5 text-indigo-600" />
+              <span>Split</span>
+            </button>
+            <button
+              onClick={() => setViewMode('code')}
+              className={`flex items-center gap-1 px-2.5 py-1 rounded-lg text-xs font-semibold transition-all ${
+                viewMode === 'code'
+                  ? 'bg-white text-dark-900 shadow-xs'
+                  : 'text-dark-600 hover:text-dark-900'
+              }`}
+            >
+              <Code className="w-3.5 h-3.5 text-emerald-600" />
+              <span>Code</span>
+            </button>
+          </div>
+
+          {/* Action Buttons: Run, Clear, Export */}
+          <div className="flex items-center gap-2">
+            <div className="flex items-center gap-1 bg-dark-50 border border-dark-200 rounded-lg px-2 py-1 text-xs">
+              <span className="text-dark-500 font-medium">Shots:</span>
+              <select
+                value={shots}
+                onChange={(e) => setShots(Number(e.target.value))}
+                aria-label="Measurement Shots Count"
+                className="bg-white border border-dark-200 rounded px-1.5 py-0.5 font-mono text-xs font-medium"
+              >
+                <option value="512">512</option>
+                <option value="1024">1024</option>
+                <option value="4096">4096</option>
+              </select>
+            </div>
+
+            <button
+              onClick={() => runSimulation()}
+              disabled={isLoading}
+              className="flex items-center gap-1.5 px-4 py-2 rounded-lg bg-primary-600 hover:bg-primary-700 disabled:opacity-50 text-white font-semibold text-xs shadow-xs transition-colors"
+            >
+              <Play className={`w-3.5 h-3.5 ${isLoading ? 'animate-spin' : ''}`} />
+              <span>{t.simulator.runSimulation}</span>
+            </button>
+
+            <button
+              onClick={() => clearCircuit()}
+              className="flex items-center gap-1 px-3 py-2 rounded-lg border border-dark-200 hover:bg-dark-50 text-dark-700 font-medium text-xs transition-colors"
+              title="Clear all gates from circuit"
+            >
+              <RotateCcw className="w-3.5 h-3.5" />
+              <span>Clear</span>
+            </button>
+
+            <button
+              onClick={() => setExportModalOpen(true)}
+              className="flex items-center gap-1 px-3 py-2 rounded-lg border border-dark-200 hover:bg-dark-50 text-dark-700 font-medium text-xs transition-colors"
+            >
+              <Code className="w-3.5 h-3.5 text-primary-600" />
+              <span>Export</span>
+            </button>
+          </div>
+        </div>
+      </div>
+
+      {/* Workspace: Visual Canvas, Monaco Code Editor, or Live Split View */}
+      {viewMode === 'code' && (
+        <QuantumCodeEditor
+          numQubits={numQubits}
+          gates={gates}
+          onCircuitParsed={(newNum, newGates) => loadPreset(newNum, newGates)}
+          onRunSimulation={() => runSimulation()}
+          isLoading={isLoading}
+        />
+      )}
+
+      {viewMode === 'visual' && renderVisualWorkspace()}
+
+      {viewMode === 'split' && (
+        <div className="grid grid-cols-1 xl:grid-cols-12 gap-6 items-start">
+          <div className="xl:col-span-7">
+            {renderVisualWorkspace()}
+          </div>
+          <div className="xl:col-span-5 sticky top-6">
+            <QuantumCodeEditor
+              numQubits={numQubits}
+              gates={gates}
+              onCircuitParsed={(newNum, newGates) => loadPreset(newNum, newGates)}
+              onRunSimulation={() => runSimulation()}
+              isLoading={isLoading}
+            />
+          </div>
+        </div>
+      )}
 
       {/* Step Scrubber & Playback */}
       {simResult?.step_by_step && simResult.step_by_step.length > 1 && (
@@ -742,7 +843,7 @@ export function CircuitBuilder() {
         <div
           role="dialog"
           aria-modal="true"
-          className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-dark-900/60 backdrop-blur-xs"
+          className="fixed inset-0 z-[9999] flex items-center justify-center p-4 bg-dark-900/60 backdrop-blur-xs"
         >
           <div className="bg-white rounded-2xl max-w-2xl w-full max-h-[85vh] overflow-y-auto shadow-2xl border border-dark-200 p-6 space-y-6">
             <div className="flex items-center justify-between border-b border-dark-200 pb-4">

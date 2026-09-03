@@ -20,26 +20,54 @@ While any classical deterministic algorithm requires $\\Omega(2^{n-1} + 1)$ quer
     {
       stepName: "State Initialization",
       equation: "|\\psi_0\\rangle = |0\\rangle_{\\text{input}} \\otimes |0\\rangle_{\\text{ancilla}}",
-      descriptionSimple: "Both qubits start in the ground state $|0\\rangle$.",
-      descriptionTechnical: "Register in Hilbert space $\\mathcal{H}^{\\otimes 2}$, initialized to $|00\\rangle$."
+      descriptionSimple: "Both qubits start in the ground state |0⟩.",
+      descriptionTechnical: "Register in Hilbert space $\\mathcal{H}^{\\otimes 2}$, initialized to $|00\\rangle$.",
+      gateRationale: "No gates applied yet. Natural computational ground state |0⟩ of standard superconducting transmon qubits.",
+      stepGates: [],
+      commonMistakes: "Assuming qubits start in superposition automatically — in real hardware, all qubits reset to |0⟩."
     },
     {
       stepName: "Ancilla Inversion & Hadamard Layer",
       equation: "|\\psi_1\\rangle = (H \\otimes H)(I \\otimes X)|00\\rangle = |+\\rangle \\otimes |-\\rangle = \\frac{1}{2}(|0\\rangle + |1\\rangle)(|0\\rangle - |1\\rangle)",
-      descriptionSimple: "Flip the helper qubit with $X$, then apply Hadamard to put both in superposition.",
-      descriptionTechnical: "Prepares the target qubit in the $|-\\rangle$ eigenstate of the Pauli-$X$ operator to trigger phase kickback."
+      descriptionSimple: "Flip the helper qubit with X, then apply Hadamard to put both in superposition.",
+      descriptionTechnical: "Prepares the target qubit in the $|-\\rangle$ eigenstate of the Pauli-$X$ operator to trigger phase kickback.",
+      gateRationale: "Pauli-X flips Q1 to |1⟩. Then parallel Hadamard gates (H on Q0, H on Q1) map |0⟩ → |+⟩ and |1⟩ → |-⟩, establishing the required interference framework.",
+      stepGates: [
+        { type: 'x', qubits: [1], step: 0 },
+        { type: 'h', qubits: [0], step: 1 },
+        { type: 'h', qubits: [1], step: 1 }
+      ],
+      commonMistakes: "Applying H to the ancilla BEFORE flipping it with X. This creates |+⟩ instead of |-⟩, completely disabling the phase kickback mechanism!"
     },
     {
       stepName: "Oracle Evaluation (Phase Kickback)",
       equation: "U_f |x\\rangle|-\\rangle = (-1)^{f(x)} |x\\rangle|-\\rangle",
       descriptionSimple: "The function calculates its value and 'kicks' the negative sign back into the input qubit!",
-      descriptionTechnical: "Unitary $U_f |x\\rangle|y\\rangle = |x\\rangle|y \\oplus f(x)\\rangle$ transforms input basis state $|x\\rangle$ with global phase $(-1)^{f(x)}$."
+      descriptionTechnical: "Unitary $U_f |x\\rangle|y\\rangle = |x\\rangle|y \\oplus f(x)\\rangle$ transforms input basis state $|x\\rangle$ with global phase $(-1)^{f(x)}$.",
+      gateRationale: "For a balanced oracle f(x)=x, a CNOT gate with control Q0 and target Q1 kicks the negative eigenvalue of |-⟩ into the phase of Q0.",
+      stepGates: [
+        { type: 'x', qubits: [1], step: 0 },
+        { type: 'h', qubits: [0], step: 1 },
+        { type: 'h', qubits: [1], step: 1 },
+        { type: 'cx', qubits: [0, 1], step: 2 }
+      ],
+      commonMistakes: "Reversing CNOT control and target (using Q1 as control). This corrupts the ancilla rather than imprinting the phase on the input register."
     },
     {
       stepName: "Interference & Measurement",
       equation: "H|\\psi_{\\text{input}}\\rangle = \\frac{1}{2}\\Big[((-1)^{f(0)} + (-1)^{f(1)})|0\\rangle + ((-1)^{f(0)} - (-1)^{f(1)})|1\\rangle\\Big]",
-      descriptionSimple: "If $f(0)=f(1)$ (Constant), the amplitudes add up at $|0\\rangle$ (100%). If $f(0)\\neq f(1)$ (Balanced), they cancel out and measure $|1\\rangle$ (100%)!",
-      descriptionTechnical: "Constructive interference yields amplitude $\\pm 1$ at $|0\\rangle$ for constant $f$, and destructive interference yields 0 amplitude at $|0\\rangle$ (yielding $|1\\rangle$ with probability 1) for balanced $f$."
+      descriptionSimple: "If f is Constant, constructive interference yields |0⟩ (100%). If Balanced, destructive interference yields |1⟩ (100%)!",
+      descriptionTechnical: "Constructive interference yields amplitude $\\pm 1$ at $|0\\rangle$ for constant $f$, and destructive interference yields 0 amplitude at $|0\\rangle$ (yielding $|1\\rangle$ with probability 1) for balanced $f$.",
+      gateRationale: "A final Hadamard gate on Q0 transforms the relative phase information back into the computational basis |0⟩ vs |1⟩ so a standard Z-basis measurement reads the answer.",
+      stepGates: [
+        { type: 'x', qubits: [1], step: 0 },
+        { type: 'h', qubits: [0], step: 1 },
+        { type: 'h', qubits: [1], step: 1 },
+        { type: 'cx', qubits: [0, 1], step: 2 },
+        { type: 'h', qubits: [0], step: 3 },
+        { type: 'measure', qubits: [0], step: 4 }
+      ],
+      commonMistakes: "Measuring in the X-basis without the final Hadamard gate, or measuring the ancilla qubit Q1 instead of input qubit Q0."
     }
   ];
 

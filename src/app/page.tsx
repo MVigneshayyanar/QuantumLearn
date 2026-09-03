@@ -126,8 +126,8 @@ export default function HomePage() {
             {/* Quick stats pills */}
             <div className="grid grid-cols-3 gap-4 pt-6 border-t border-dark-200 max-w-lg text-xs">
               <div>
-                <span className="font-bold text-dark-900 text-sm block">Qiskit 2.5</span>
-                <span className="text-dark-500">{t.hero.statsCircuits}</span>
+                <span className="font-bold text-dark-900 text-sm block">Multi-Simulator</span>
+                <span className="text-dark-500">Qiskit · Cirq · PennyLane</span>
               </div>
               <div>
                 <span className="font-bold text-dark-900 text-sm block">Three.js 3D</span>

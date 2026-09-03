@@ -22,7 +22,7 @@ const rawTranslations = {
       keyboardHelp: "Keyboard Controls: Use Arrow keys to navigate wire grid. Press H, X, Y, Z, S, T, C (CNOT), W (SWAP) to place gates. Press Delete to remove.",
     },
     hero: {
-      badge: "Real Qiskit 2.5 Simulation Backend",
+      badge: "Multi-Backend Simulation (Qiskit · Cirq · PennyLane)",
       title: "Master Quantum Algorithms Hands-On",
       subtitle: "Experience quantum physics directly. Build real circuits, rotate 3D Bloch spheres, and learn with Schrödinger AI, an adaptive quantum tutor designed for beginners through researchers.",
       startLearning: "Start Learning Algorithms",
@@ -113,7 +113,7 @@ const rawTranslations = {
       keyboardHelp: "कीबोर्ड नियंत्रण: ग्रिड पर जाने के लिए तीर कुंजियों का उपयोग करें। गेट्स लगाने के लिए H, X, Y, Z, S, T, C, W दबाएं।",
     },
     hero: {
-      badge: "सटीक Qiskit 2.5 सिमुलेशन इंजन",
+      badge: "मल्टी-बैकएंड सिमुलेशन (Qiskit · Cirq · PennyLane)",
       title: "क्वांटम एल्गोरिदम सीखें — इंटरैक्टिव और आसान",
       subtitle: "वास्तविक क्वांटम सर्किट बनाएं, 3D ब्लॉच स्फीयर देखें, और हमारे अनुकूली श्रोडिंगर एआई (Schrödinger AI) के साथ सीखें।",
       startLearning: "एल्गोरिदम सीखना शुरू करें",
@@ -204,7 +204,7 @@ const rawTranslations = {
       keyboardHelp: "Controles de teclado: Use las teclas de flecha para navegar. Presione H, X, Y, Z, S, T, C, W para colocar compuertas.",
     },
     hero: {
-      badge: "Motor de Simulación Qiskit 2.5",
+      badge: "Simulación Multi-Backend (Qiskit · Cirq · PennyLane)",
       title: "Domine los Algoritmos Cuánticos en la Práctica",
       subtitle: "Experimente la física cuántica directamente. Construya circuitos reales, rote esferas 3D de Bloch y aprenda con Schrödinger AI, un tutor adaptativo diseñado para todos los niveles.",
       startLearning: "Comenzar Algoritmos",
@@ -295,7 +295,7 @@ const rawTranslations = {
       keyboardHelp: "Commandes clavier : Utilisez les flèches pour naviguer. Appuyez sur H, X, Y, Z, S, T, C, W pour placer des portes.",
     },
     hero: {
-      badge: "Moteur de Simulation Qiskit 2.5",
+      badge: "Simulation Multi-Backend (Qiskit · Cirq · PennyLane)",
       title: "Maîtrisez les Algorithmes Quantiques en Pratique",
       subtitle: "Découvrez directement la physique quantique. Construisez de vrais circuits, faites tourner des sphères de Bloch en 3D et apprenez avec Schrödinger AI.",
       startLearning: "Commencer les Algorithmes",
@@ -386,7 +386,7 @@ const rawTranslations = {
       keyboardHelp: "Tastatursteuerung: Verwenden Sie Pfeiltasten zur Navigation. Drücken Sie H, X, Y, Z, S, T, C, W, um Gatter zu platzieren.",
     },
     hero: {
-      badge: "Echte Qiskit 2.5 Simulations-Engine",
+      badge: "Multi-Backend Simulation (Qiskit · Cirq · PennyLane)",
       title: "Quantenalgorithmen Praktisch Meistern",
       subtitle: "Erleben Sie Quantenphysik direkt. Bauen Sie echte Schaltungen, drehen Sie 3D-Bloch-Kugeln und lernen Sie mit Schrödinger AI.",
       startLearning: "Algorithmen Starten",

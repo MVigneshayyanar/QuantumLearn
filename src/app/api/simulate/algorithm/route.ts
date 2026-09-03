@@ -77,7 +77,7 @@ export async function POST(req: NextRequest) {
     }
 
     const localResult = simulateLocalCircuit(numQubits, gates, body.shots || 1024);
-    return NextResponse.json(localResult);
+    return NextResponse.json({ ...localResult, gates });
   } catch (err: any) {
     return NextResponse.json({ error: err.message }, { status: 500 });
   }

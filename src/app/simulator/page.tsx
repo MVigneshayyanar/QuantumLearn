@@ -20,7 +20,7 @@ export default function SimulatorPage() {
             Simulator Workbench
           </span>
           <span className="px-2.5 py-0.5 rounded-full text-xs font-mono bg-dark-100 text-dark-700">
-            Qiskit 2.5
+            Multi-Backend (Qiskit · Cirq · PennyLane)
           </span>
         </div>
         <h1 className="text-2xl sm:text-3xl font-bold text-dark-900 tracking-tight">
