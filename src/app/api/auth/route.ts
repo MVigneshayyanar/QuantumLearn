@@ -78,13 +78,26 @@ export async function POST(req: NextRequest) {
         });
       }
 
-      return NextResponse.json({
+      const res = NextResponse.json({
         userId: user.id,
         name: user.name,
         email: user.email,
         role: user.role,
         isInstructor: user.role === 'EDUCATOR'
       });
+
+      res.cookies.set('ql_user_id', user.id, {
+        path: '/',
+        sameSite: 'lax',
+        maxAge: 60 * 60 * 24 * 7 // 7 days
+      });
+      res.cookies.set('ql_user_role', user.role, {
+        path: '/',
+        sameSite: 'lax',
+        maxAge: 60 * 60 * 24 * 7
+      });
+
+      return res;
     }
 
     if (action === 'signin' || action === 'login') {
@@ -144,13 +157,26 @@ export async function POST(req: NextRequest) {
       }
 
       const finalUser = user!;
-      return NextResponse.json({
+      const res = NextResponse.json({
         userId: finalUser.id,
         name: finalUser.name,
         email: finalUser.email,
         role: finalUser.role,
         isInstructor: finalUser.role === 'EDUCATOR'
       });
+
+      res.cookies.set('ql_user_id', finalUser.id, {
+        path: '/',
+        sameSite: 'lax',
+        maxAge: 60 * 60 * 24 * 7
+      });
+      res.cookies.set('ql_user_role', finalUser.role, {
+        path: '/',
+        sameSite: 'lax',
+        maxAge: 60 * 60 * 24 * 7
+      });
+
+      return res;
     }
 
     return NextResponse.json({ error: 'Invalid action.' }, { status: 400 });

@@ -8,13 +8,18 @@
  * - Total quiz attempts
  */
 
-import { NextResponse } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
+import { verifyInstructorAccess } from '@/lib/auth-server';
 
 export const dynamic = 'force-dynamic';
 
-export async function GET() {
+export async function GET(req: NextRequest) {
   try {
+    const auth = await verifyInstructorAccess(req);
+    if (!auth.authorized) {
+      return NextResponse.json({ error: auth.error || 'Unauthorized: Instructor access required.' }, { status: 403 });
+    }
     const [
       totalStudents,
       progressRecords,

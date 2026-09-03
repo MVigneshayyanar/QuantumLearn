@@ -104,6 +104,10 @@ export function StudentProvider({ children }: { children: React.ReactNode }) {
         setStudentName(storedName || (storedEmail ? storedEmail.split('@')[0] : 'Student'));
         setStudentEmail(storedEmail || '');
         setRole(storedRole);
+        if (typeof document !== 'undefined') {
+          document.cookie = `ql_user_id=${storedId}; path=/; max-age=604800; SameSite=Lax`;
+          document.cookie = `ql_user_role=${storedRole}; path=/; max-age=604800; SameSite=Lax`;
+        }
         syncUserProgressToStore(storedId);
       }
     } catch {
@@ -172,6 +176,11 @@ export function StudentProvider({ children }: { children: React.ReactNode }) {
     setRole(returnedRole || 'STUDENT');
     setShowIdentityModal(false);
 
+    if (typeof document !== 'undefined') {
+      document.cookie = `ql_user_id=${returnedId}; path=/; max-age=604800; SameSite=Lax`;
+      document.cookie = `ql_user_role=${returnedRole || 'STUDENT'}; path=/; max-age=604800; SameSite=Lax`;
+    }
+
     syncUserProgressToStore(returnedId);
     executePendingAction(returnedId);
     return { isInstructor: Boolean(isInstructor), userId: returnedId };
@@ -203,6 +212,11 @@ export function StudentProvider({ children }: { children: React.ReactNode }) {
     setRole(returnedRole || 'STUDENT');
     setShowIdentityModal(false);
 
+    if (typeof document !== 'undefined') {
+      document.cookie = `ql_user_id=${returnedId}; path=/; max-age=604800; SameSite=Lax`;
+      document.cookie = `ql_user_role=${returnedRole || 'STUDENT'}; path=/; max-age=604800; SameSite=Lax`;
+    }
+
     syncUserProgressToStore(returnedId);
     executePendingAction(returnedId);
     return { userId: returnedId };
@@ -216,6 +230,12 @@ export function StudentProvider({ children }: { children: React.ReactNode }) {
     localStorage.removeItem(LS_STUDENT_NAME);
     localStorage.removeItem(LS_STUDENT_EMAIL);
     localStorage.removeItem(LS_STUDENT_ROLE);
+
+    // Clear cookies
+    if (typeof document !== 'undefined') {
+      document.cookie = 'ql_user_id=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT;';
+      document.cookie = 'ql_user_role=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT;';
+    }
 
     // 2. Clear practice problem progress & history caches
     localStorage.removeItem('ql_practice_solved');

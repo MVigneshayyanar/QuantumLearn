@@ -14,8 +14,10 @@ import {
   TrendingUp,
   Flame,
   GraduationCap,
-  Sparkles
+  Sparkles,
+  ShieldAlert
 } from 'lucide-react';
+import { useStudentContext } from '@/lib/student-context';
 import { ResponsiveContainer, BarChart, Bar, XAxis, YAxis, Tooltip, Cell } from 'recharts';
 
 // Types for API responses
@@ -70,6 +72,7 @@ const MODULE_LABELS: Record<string, string> = {
 };
 
 export default function InstructorDashboard() {
+  const { isInstructor, openLoginModal, isLoading: isAuthLoading } = useStudentContext();
   const [overview, setOverview] = useState<OverviewData | null>(null);
   const [misconceptions, setMisconceptions] = useState<MisconceptionData | null>(null);
   const [students, setStudents] = useState<StudentRow[]>([]);
@@ -89,6 +92,9 @@ export default function InstructorDashboard() {
       ]);
 
       if (!overviewRes.ok || !miscRes.ok || !studentsRes.ok) {
+        if (overviewRes.status === 403 || miscRes.status === 403 || studentsRes.status === 403) {
+          throw new Error('Instructor access authorization failed. Please sign in as an instructor.');
+        }
         throw new Error('Failed to load instructor data.');
       }
 
@@ -109,8 +115,13 @@ export default function InstructorDashboard() {
   };
 
   useEffect(() => {
-    fetchAll();
-  }, []);
+    if (isAuthLoading) return;
+    if (isInstructor) {
+      fetchAll();
+    } else {
+      setIsLoading(false);
+    }
+  }, [isInstructor, isAuthLoading]);
 
   const handleSeedCohort = async () => {
     setIsSeeding(true);
@@ -126,11 +137,42 @@ export default function InstructorDashboard() {
     }
   };
 
-  if (isLoading) {
+  if (isAuthLoading || (isLoading && isInstructor)) {
     return (
       <div className="max-w-6xl mx-auto px-4 sm:px-6 py-8 flex flex-col items-center justify-center min-h-[400px] gap-4">
         <Loader2 className="w-8 h-8 text-primary-600 animate-spin" />
         <p className="text-sm text-dark-500 font-medium">Loading instructor dashboard...</p>
+      </div>
+    );
+  }
+
+  // Explicit Access Denied Screen (deliberate security boundary)
+  if (!isInstructor) {
+    return (
+      <div className="max-w-xl mx-auto px-4 py-20 text-center space-y-6">
+        <div className="w-16 h-16 mx-auto bg-amber-50 rounded-2xl flex items-center justify-center border border-amber-200 shadow-xs">
+          <ShieldAlert className="w-8 h-8 text-amber-600" />
+        </div>
+        <div className="space-y-2">
+          <h1 className="text-2xl font-bold text-dark-900">Instructor Access Required</h1>
+          <p className="text-sm text-dark-600 max-w-md mx-auto">
+            This dashboard is restricted to verified instructors and teaching assistants. Please sign in with an instructor-authorized account to view class analytics and student diagnostics.
+          </p>
+        </div>
+        <div className="flex items-center justify-center gap-3 pt-2">
+          <button
+            onClick={() => openLoginModal()}
+            className="px-5 py-2.5 rounded-xl bg-primary-600 hover:bg-primary-700 text-white font-semibold text-sm transition-colors shadow-xs"
+          >
+            Sign In as Instructor
+          </button>
+          <Link
+            href="/"
+            className="px-5 py-2.5 rounded-xl border border-dark-200 hover:bg-dark-50 text-dark-700 font-semibold text-sm transition-colors"
+          >
+            Return to Home
+          </Link>
+        </div>
       </div>
     );
   }
