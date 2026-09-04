@@ -128,7 +128,7 @@ export default function InstructorDashboard() {
 
   if (isLoading) {
     return (
-      <div className="max-w-6xl mx-auto px-4 sm:px-6 py-8 flex flex-col items-center justify-center min-h-[400px] gap-4">
+      <div className="w-full mx-auto px-8 py-8 flex flex-col items-center justify-center min-h-[400px] gap-4">
         <Loader2 className="w-8 h-8 text-primary-600 animate-spin" />
         <p className="text-sm text-dark-500 font-medium">Loading instructor dashboard...</p>
       </div>
@@ -137,7 +137,7 @@ export default function InstructorDashboard() {
 
   if (error) {
     return (
-      <div className="max-w-6xl mx-auto px-4 sm:px-6 py-8 flex flex-col items-center justify-center min-h-[400px] gap-4">
+      <div className="w-full mx-auto px-8 py-8 flex flex-col items-center justify-center min-h-[400px] gap-4">
         <AlertTriangle className="w-8 h-8 text-red-500" />
         <p className="text-sm text-red-600 font-medium">{error}</p>
       </div>
@@ -159,12 +159,12 @@ export default function InstructorDashboard() {
   })) || [];
 
   return (
-    <div className="max-w-6xl mx-auto px-4 sm:px-6 py-8 space-y-8 animate-fadeIn">
+    <div className="w-full mx-auto px-8 py-3 space-y-3.5 animate-fadeIn">
       {/* Header */}
-      <div className="bg-white rounded-3xl border border-dark-200 p-8 shadow-xs">
+      <div className="bg-white rounded-2xl border border-dark-200 p-5 sm:p-6 shadow-xs">
         <div className="flex flex-wrap items-center justify-between gap-4">
           <div>
-            <div className="flex items-center gap-2 mb-2">
+            <div className="flex items-center gap-2 mb-1.5">
               <Link
                 href="/dashboard"
                 className="flex items-center gap-1 text-xs text-dark-500 hover:text-dark-700 font-medium transition-colors"
@@ -173,10 +173,10 @@ export default function InstructorDashboard() {
                 Back to Student View
               </Link>
             </div>
-            <span className="text-xs font-semibold px-3 py-1 rounded-full bg-primary-50 text-primary-700 border border-primary-100">
+            <span className="text-xs font-semibold px-2.5 py-0.5 rounded-full bg-primary-50 text-primary-700 border border-primary-100">
               Educator Dashboard
             </span>
-            <h1 className="text-2xl sm:text-3xl font-bold text-dark-900 mt-2">
+            <h1 className="text-xl sm:text-2xl font-bold text-dark-900 mt-1.5">
               Class Analytics & Insights
             </h1>
             <p className="text-sm text-dark-600 mt-1">

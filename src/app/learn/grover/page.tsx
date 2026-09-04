@@ -87,10 +87,10 @@ The Grover iteration $G = U_s U_w = (2|s\\rangle\\langle s| - I)(I - 2|w\\rangle
   ];
 
   const paramControls = (
-    <div className="flex flex-wrap items-center justify-between gap-4 text-xs">
-      <div className="flex items-center gap-2">
-        <span className="font-bold text-dark-800">Target Marked State:</span>
-        <div className="inline-flex rounded-lg border border-dark-200 p-0.5 bg-dark-50">
+    <div className="flex flex-wrap items-center justify-between gap-2.5 text-xs">
+      <div className="flex items-center gap-2 flex-wrap">
+        <span className="font-bold text-dark-800 text-[11px]">Marked State:</span>
+        <div className="inline-flex rounded-lg border border-dark-200 p-0.5 bg-dark-50 gap-0.5">
           {['00', '01', '10', '11'].map((state) => (
             <button
               key={state}
@@ -98,17 +98,18 @@ The Grover iteration $G = U_s U_w = (2|s\\rangle\\langle s| - I)(I - 2|w\\rangle
                 setNumQubits(2);
                 setMarkedState(state);
               }}
-              className={`px-3 py-1.5 rounded-md font-mono font-medium transition-colors ${markedState === state && numQubits === 2
+              className={`px-2.5 py-1 rounded-md font-mono text-[11px] font-semibold transition-colors ${
+                markedState === state && numQubits === 2
                   ? 'bg-primary-600 text-white shadow-xs'
-                  : 'text-dark-700 hover:text-dark-900'
-                }`}
+                  : 'text-dark-700 hover:text-dark-900 hover:bg-white'
+              }`}
             >
               |{state}⟩
             </button>
           ))}
         </div>
       </div>
-      <span className="text-dark-500 font-mono">Search Space N = {2 ** numQubits} items (1 Grover Iteration)</span>
+      <span className="text-dark-500 font-mono text-[11px]">Search Space N = {2 ** numQubits} items (1 Iteration)</span>
     </div>
   );
 

@@ -31,9 +31,9 @@ export function Navbar() {
   const t = translations[language];
 
   const navLinks = [
-    { href: '/', label: 'Home', icon: Atom },
+    { href: '/', label: t.nav.home, icon: Atom },
     { href: '/simulator', label: t.nav.simulator, icon: Cpu },
-    { href: '/practice', label: 'Practice', icon: Terminal },
+    { href: '/practice', label: t.nav.practice, icon: Terminal },
     { href: '/bloch-sphere', label: t.nav.blochSphere, icon: Globe },
   ];
 
@@ -44,10 +44,15 @@ export function Navbar() {
     { href: '/learn/superdense-coding', label: 'Superdense', icon: Layers },
   ];
 
+  // Hide Navbar on full-screen practice solve workbench
+  if (pathname.startsWith('/practice/') && pathname !== '/practice') {
+    return null;
+  }
+
   return (
     <>
     <header className="bg-white border-b border-dark-200 sticky top-0 z-30 shadow-subtle">
-      <div className="max-w-[1440px] mx-auto px-3 sm:px-6 lg:px-8">
+      <div className="w-full mx-auto px-8">
         <div className="flex items-center justify-between h-16">
           {/* Brand Logo */}
           <Link href="/" className="flex items-center gap-2.5 group shrink-0">
@@ -96,7 +101,7 @@ export function Navbar() {
                 }`}
               >
                 <BookOpen className={`w-4 h-4 shrink-0 ${pathname.startsWith('/learn') ? 'text-primary-600' : 'text-dark-500'}`} />
-                <span>Algorithms</span>
+                <span>{t.nav.algorithms}</span>
                 <ChevronDown className="w-3.5 h-3.5 text-dark-500 opacity-70 group-hover:rotate-180 transition-transform duration-200" />
               </button>
               
@@ -152,12 +157,12 @@ export function Navbar() {
                 href="/instructor"
                 className={`h-10 px-3 rounded-xl border text-xs font-bold whitespace-nowrap flex items-center gap-1.5 transition-colors shadow-2xs shrink-0 ${
                   pathname.startsWith('/instructor')
-                    ? 'bg-purple-600 text-white border-purple-600 ring-2 ring-purple-500/20'
-                    : 'bg-purple-50 hover:bg-purple-100 text-purple-800 border-purple-200'
+                    ? 'bg-primary-600 text-white border-primary-600 ring-2 ring-primary-500/20'
+                    : 'bg-primary-50 hover:bg-primary-100 text-primary-800 border-primary-200'
                 }`}
                 title="Instructor Portal & Student Analytics"
               >
-                <GraduationCap className="w-4 h-4 text-purple-600 shrink-0" />
+                <GraduationCap className="w-4 h-4 text-primary-600 shrink-0" />
                 <span className="hidden xl:inline">Instructor Portal</span>
                 <span className="xl:hidden">Instructor</span>
               </Link>

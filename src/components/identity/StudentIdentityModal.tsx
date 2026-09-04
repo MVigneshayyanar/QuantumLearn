@@ -4,7 +4,7 @@ import React, { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useStudentContext } from '@/lib/student-context';
 import {
-  Sparkles,
+  Atom,
   ArrowRight,
   Loader2,
   X,
@@ -79,12 +79,12 @@ export function StudentIdentityModal() {
 
         {/* Modal Header */}
         <div className="text-center space-y-2">
-          <div className="w-12 h-12 rounded-2xl bg-purple-50 border border-purple-200 text-purple-600 flex items-center justify-center mx-auto shadow-xs">
-            <Sparkles className="w-6 h-6" />
+          <div className="w-12 h-12 rounded-2xl bg-primary-600 text-white flex items-center justify-center mx-auto shadow-md shadow-primary-500/20">
+            <Atom className="w-6 h-6 animate-pulse" />
           </div>
           <div>
             <h2 className="text-xl font-bold text-dark-900">
-              {mode === 'signin' ? 'Sign In to QLearn' : 'Create Student Account'}
+              {mode === 'signin' ? 'Sign In to QuantumLearn' : 'Create Student Account'}
             </h2>
             <p className="text-xs text-dark-500 mt-0.5">
               Sign in to submit your quantum circuits to the judge and track progress.
@@ -144,7 +144,7 @@ export function StudentIdentityModal() {
                   onChange={(e) => setName(e.target.value)}
                   placeholder="e.g. Marie Curie"
                   disabled={isSubmitting}
-                  className="w-full pl-10 pr-4 py-2.5 rounded-xl border border-dark-200 bg-white text-xs text-dark-900 placeholder:text-dark-400 focus:outline-none focus:ring-2 focus:ring-purple-500/20 focus:border-purple-500 transition-all"
+                  className="w-full pl-10 pr-4 py-2.5 rounded-xl border border-dark-200 bg-white text-xs text-dark-900 placeholder:text-dark-400 focus:outline-none focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500 transition-all"
                 />
               </div>
             </div>
@@ -160,7 +160,7 @@ export function StudentIdentityModal() {
                 onChange={(e) => setEmail(e.target.value)}
                 placeholder="name@university.edu"
                 disabled={isSubmitting}
-                className="w-full pl-10 pr-4 py-2.5 rounded-xl border border-dark-200 bg-white text-xs text-dark-900 placeholder:text-dark-400 focus:outline-none focus:ring-2 focus:ring-purple-500/20 focus:border-purple-500 transition-all"
+                className="w-full pl-10 pr-4 py-2.5 rounded-xl border border-dark-200 bg-white text-xs text-dark-900 placeholder:text-dark-400 focus:outline-none focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500 transition-all"
               />
             </div>
           </div>
@@ -175,7 +175,7 @@ export function StudentIdentityModal() {
                 onChange={(e) => setPassword(e.target.value)}
                 placeholder="••••••••"
                 disabled={isSubmitting}
-                className="w-full pl-10 pr-4 py-2.5 rounded-xl border border-dark-200 bg-white text-xs text-dark-900 placeholder:text-dark-400 focus:outline-none focus:ring-2 focus:ring-purple-500/20 focus:border-purple-500 transition-all"
+                className="w-full pl-10 pr-4 py-2.5 rounded-xl border border-dark-200 bg-white text-xs text-dark-900 placeholder:text-dark-400 focus:outline-none focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500 transition-all"
               />
             </div>
           </div>
@@ -183,7 +183,7 @@ export function StudentIdentityModal() {
           <button
             type="submit"
             disabled={isSubmitting}
-            className="w-full mt-2 flex items-center justify-center gap-2 py-3 px-4 rounded-xl bg-purple-600 hover:bg-purple-700 active:bg-purple-800 disabled:opacity-50 text-white font-bold text-xs shadow-xs transition-all hover:shadow-card"
+            className="w-full mt-2 flex items-center justify-center gap-2 py-3 px-4 rounded-xl bg-primary-600 hover:bg-primary-700 active:bg-primary-800 disabled:opacity-50 text-white font-bold text-xs shadow-xs transition-all hover:shadow-card"
           >
             {isSubmitting ? (
               <>

@@ -47,7 +47,7 @@ export default function PracticeListPage() {
     }
   }, [userId]);
 
-  const categories = ['All', 'Quantum Parallelism', 'Single-Qubit Operations', 'Quantum Entanglement', 'Amplitude Amplification', 'Circuit Identities', 'Quantum Communication'];
+  const categories = ['All', ...Array.from(new Set(PRACTICE_PROBLEMS.map((p) => p.category)))];
 
   const filteredProblems = PRACTICE_PROBLEMS.filter((p) => {
     const matchesSearch =
@@ -71,36 +71,36 @@ export default function PracticeListPage() {
   const totalCount = PRACTICE_PROBLEMS.length;
 
   return (
-    <div className="max-w-6xl mx-auto px-4 sm:px-6 py-8 space-y-8 animate-fadeIn">
+    <div className="w-full mx-auto px-8 py-3 space-y-3.5 animate-fadeIn">
       {/* Hero Header */}
-      <div className="bg-white rounded-3xl border border-dark-200 p-8 shadow-xs relative overflow-hidden">
-        <div className="flex flex-wrap items-center justify-between gap-6">
-          <div className="space-y-2 max-w-2xl">
+      <div className="bg-white rounded-2xl border border-dark-200 p-5 sm:p-6 shadow-xs relative overflow-hidden">
+        <div className="flex flex-wrap items-center justify-between gap-4">
+          <div className="space-y-1.5 max-w-2xl">
             <div className="flex items-center gap-2">
-              <span className="px-3 py-1 rounded-full text-xs font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200 flex items-center gap-1.5">
+              <span className="px-2.5 py-0.5 rounded-full text-xs font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200 flex items-center gap-1.5">
                 <ShieldCheck className="w-3.5 h-3.5 text-emerald-600" />
                 Strict Judge Arena — Zero AI Hints
               </span>
-              <span className="px-2.5 py-0.5 rounded-full text-xs font-mono bg-dark-100 text-dark-700">
+              <span className="px-2 py-0.5 rounded-full text-[11px] font-mono bg-dark-100 text-dark-700">
                 LeetCode Style
               </span>
             </div>
-            <h1 className="text-2xl sm:text-3xl font-bold text-dark-900 tracking-tight">
+            <h1 className="text-xl sm:text-2xl font-bold text-dark-900 tracking-tight">
               Quantum Circuit Practice Problems
             </h1>
-            <p className="text-sm text-dark-600 leading-relaxed">
+            <p className="text-xs sm:text-sm text-dark-600 leading-normal">
               Solve circuit construction challenges under strict automated verification. Your circuits are graded directly against statevector fidelity and measurement probability thresholds.
             </p>
           </div>
 
           {/* Quick Stats Card */}
-          <div className="bg-dark-900 text-white rounded-2xl p-5 min-w-[200px] border border-dark-800 shadow-sm space-y-2">
+          <div className="bg-dark-900 text-white rounded-xl p-4 min-w-[180px] border border-dark-800 shadow-sm space-y-1.5">
             <div className="flex items-center justify-between text-xs text-dark-400">
               <span>Solved Progress</span>
               <Trophy className="w-4 h-4 text-amber-400" />
             </div>
-            <div className="text-2xl font-bold text-white">
-              {solvedCount} <span className="text-sm font-normal text-dark-400">/ {totalCount}</span>
+            <div className="text-xl font-bold text-white">
+              {solvedCount} <span className="text-xs font-normal text-dark-400">/ {totalCount}</span>
             </div>
             <div className="w-full bg-dark-800 rounded-full h-1.5 overflow-hidden">
               <div

@@ -85,24 +85,24 @@ Bob then performs a complete Bell-basis measurement to decode both classical bit
   ];
 
   const paramControls = (
-    <div className="flex flex-wrap items-center justify-between gap-4 text-xs">
-      <div className="flex items-center gap-2">
-        <span className="font-bold text-dark-800">2 Classical Bits to Transmit:</span>
-        <div className="inline-flex rounded-lg border border-dark-200 p-0.5 bg-dark-50">
+    <div className="flex flex-wrap items-center justify-between gap-2.5 text-xs">
+      <div className="flex items-center gap-2 flex-wrap">
+        <span className="font-bold text-dark-800 text-[11px]">2 Classical Bits:</span>
+        <div className="inline-flex rounded-lg border border-dark-200 p-0.5 bg-dark-50 gap-0.5">
           {(['00', '01', '10', '11'] as const).map((bits) => (
             <button
               key={bits}
               onClick={() => setMessageBits(bits)}
-              className={`px-3 py-1.5 rounded-md font-mono font-medium transition-colors ${
-                messageBits === bits ? 'bg-primary-600 text-white shadow-xs' : 'text-dark-700 hover:text-dark-900'
+              className={`px-2.5 py-1 rounded-md font-mono text-[11px] font-semibold transition-colors ${
+                messageBits === bits ? 'bg-primary-600 text-white shadow-xs' : 'text-dark-700 hover:text-dark-900 hover:bg-white'
               }`}
             >
-              &quot;{bits}&quot; {bits === '00' ? '(I)' : bits === '01' ? '(X)' : bits === '10' ? '(Z)' : '(Z·X)'}
+              &quot;{bits}&quot; {bits === '00' ? '(I)' : bits === '01' ? '(X)' : bits === '10' ? '(Z)' : '(ZX)'}
             </button>
           ))}
         </div>
       </div>
-      <span className="text-dark-500 font-mono">1 Transmitted Qubit = 2 Classical Bits</span>
+      <span className="text-dark-500 font-mono text-[11px]">1 Sent Qubit = 2 Bits</span>
     </div>
   );
 

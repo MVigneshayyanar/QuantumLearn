@@ -73,7 +73,7 @@ export function CircuitBuilder() {
   const [stepScrubber, setStepScrubber] = useState<number>(0);
   const [dragOverSlot, setDragOverSlot] = useState<{ qubit: number; step: number } | null>(null);
   const [isDraggingActive, setIsDraggingActive] = useState<boolean>(false);
-  const [viewMode, setViewMode] = useState<'visual' | 'split' | 'code'>('split');
+  const [viewMode, setViewMode] = useState<'visual' | 'split' | 'code'>('visual');
   const [activeBackend, setActiveBackend] = useState<'qiskit' | 'cirq' | 'pennylane' | 'qbraid'>('qiskit');
   const gridContainerRef = useRef<HTMLDivElement>(null);
 
@@ -360,121 +360,156 @@ export function CircuitBuilder() {
         )}
       </div>
 
-      {/* Main Interactive Circuit Wire Grid */}
-      <div className="bg-white rounded-2xl border border-dark-200 p-6 shadow-xs overflow-x-auto">
-        <div className="min-w-[650px] space-y-6">
-          {Array.from({ length: numQubits }, (_, qIdx) => (
-            <div key={qIdx} className="flex items-center gap-4">
-              {/* Qubit Label */}
-              <div className="w-20 shrink-0 flex items-center gap-2 notranslate" translate="no">
-                <span className="font-mono font-bold text-sm text-dark-800">q[{qIdx}]</span>
-                <span className="px-2 py-0.5 rounded bg-dark-100 font-mono text-xs text-dark-600">|0⟩</span>
-              </div>
+      {/* Unified Side-by-Side Stage: Interactive Circuit Wire Grid + Live 3D Bloch Spheres */}
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 items-start">
+        {/* Main Interactive Circuit Wire Grid */}
+        <div className="lg:col-span-6 bg-white rounded-2xl border border-dark-200 p-5 shadow-xs space-y-4">
+          <div className="flex items-center justify-between">
+            <h3 className="font-bold text-sm text-dark-900">Quantum Circuit Board</h3>
+            <span className="text-xs text-dark-500 font-mono">
+              {numQubits} Qubit{numQubits > 1 ? 's' : ''} · {MAX_STEPS} Steps
+            </span>
+          </div>
 
-              {/* Wire slots */}
-              <div className="flex-1 flex items-center gap-2 circuit-wire">
-                {Array.from({ length: MAX_STEPS }, (_, sIdx) => {
-                  const placed = gates.find((g) => g.step === sIdx && g.qubits.includes(qIdx));
-                  const isSelected = selectedSlot?.qubit === qIdx && selectedSlot?.step === sIdx;
-                  const isDragOver = dragOverSlot?.qubit === qIdx && dragOverSlot?.step === sIdx;
-                  const isControl = placed && placed.type === 'cx' && placed.qubits[0] === qIdx;
-                  const isTarget = placed && placed.type === 'cx' && placed.qubits[1] === qIdx;
+          <div className="overflow-x-auto pb-1">
+            <div className="min-w-[420px] space-y-4">
+              {Array.from({ length: numQubits }, (_, qIdx) => (
+                <div key={qIdx} className="flex items-center gap-3">
+                  {/* Qubit Label */}
+                  <div className="w-16 shrink-0 flex items-center gap-1.5 notranslate" translate="no">
+                    <span className="font-mono font-bold text-xs text-dark-800">q[{qIdx}]</span>
+                    <span className="px-1.5 py-0.5 rounded bg-dark-100 font-mono text-[10px] text-dark-600">|0⟩</span>
+                  </div>
 
-                  return (
-                    <div
-                      key={sIdx}
-                      onDragOver={(e) => {
-                        e.preventDefault();
-                        e.dataTransfer.dropEffect = 'copy';
-                      }}
-                      onDragEnter={(e) => {
-                        e.preventDefault();
-                        setDragOverSlot({ qubit: qIdx, step: sIdx });
-                      }}
-                      onDragLeave={(e) => {
-                        e.preventDefault();
-                        if (dragOverSlot?.qubit === qIdx && dragOverSlot?.step === sIdx) {
-                          setDragOverSlot(null);
-                        }
-                      }}
-                      onDrop={(e) => handleSlotDrop(e, qIdx, sIdx)}
-                      onClick={() => {
-                        setSelectedSlot({ qubit: qIdx, step: sIdx });
-                        placeSelectedGateOnSlot(qIdx, sIdx);
-                      }}
-                      onContextMenu={(e) => {
-                        e.preventDefault();
-                        removeGateAt(qIdx, sIdx);
-                      }}
-                      className={`relative z-10 w-12 h-12 rounded-xl flex items-center justify-center cursor-pointer transition-all border ${
-                        isDragOver
-                          ? 'ring-4 ring-primary-500 ring-offset-2 border-primary-600 bg-primary-100 scale-105 shadow-md'
-                          : isSelected
-                          ? 'ring-2 ring-primary-600 ring-offset-2 border-primary-600 bg-primary-50/80 shadow-xs'
-                          : placed
-                          ? 'border-dark-300 bg-white shadow-xs'
-                          : isDraggingActive
-                          ? 'border-dashed border-primary-400 bg-primary-50/30 animate-pulse'
-                          : 'border-dashed border-dark-200 hover:border-primary-400 bg-white/90 hover:bg-primary-50/30'
-                      }`}
-                      title={
-                        placed
-                          ? `Step ${sIdx}: ${placed.type.toUpperCase()} on Q${placed.qubits.join(', Q')}. Drag to move, or right-click to remove.`
-                          : `Step ${sIdx} (Empty). Drag a gate here or click to place ${selectedGateType.toUpperCase()}`
-                      }
-                    >
-                      {placed ? (
+                  {/* Wire slots */}
+                  <div className="flex-1 flex items-center gap-2 circuit-wire pr-2">
+                    {Array.from({ length: MAX_STEPS }, (_, sIdx) => {
+                      const placed = gates.find((g) => g.step === sIdx && g.qubits.includes(qIdx));
+                      const isSelected = selectedSlot?.qubit === qIdx && selectedSlot?.step === sIdx;
+                      const isDragOver = dragOverSlot?.qubit === qIdx && dragOverSlot?.step === sIdx;
+                      const isControl = placed && placed.type === 'cx' && placed.qubits[0] === qIdx;
+                      const isTarget = placed && placed.type === 'cx' && placed.qubits[1] === qIdx;
+
+                      return (
                         <div
-                          draggable={true}
-                          onDragStart={(e) => {
-                            e.stopPropagation();
-                            e.dataTransfer.setData('text/plain', placed.type);
-                            e.dataTransfer.setData('application/quantum-gate', placed.type);
-                            e.dataTransfer.setData(
-                              'application/quantum-move',
-                              JSON.stringify({ qubit: qIdx, step: sIdx, gateId: placed.id, type: placed.type })
-                            );
-                            e.dataTransfer.effectAllowed = 'move';
-                            setIsDraggingActive(true);
+                          key={sIdx}
+                          onDragOver={(e) => {
+                            e.preventDefault();
+                            e.dataTransfer.dropEffect = 'copy';
                           }}
-                          onDragEnd={() => {
-                            setIsDraggingActive(false);
-                            setDragOverSlot(null);
+                          onDragEnter={(e) => {
+                            e.preventDefault();
+                            setDragOverSlot({ qubit: qIdx, step: sIdx });
                           }}
-                          className="w-full h-full flex items-center justify-center cursor-grab active:cursor-grabbing select-none"
+                          onDragLeave={(e) => {
+                            e.preventDefault();
+                            if (dragOverSlot?.qubit === qIdx && dragOverSlot?.step === sIdx) {
+                              setDragOverSlot(null);
+                            }
+                          }}
+                          onDrop={(e) => handleSlotDrop(e, qIdx, sIdx)}
+                          onClick={() => {
+                            setSelectedSlot({ qubit: qIdx, step: sIdx });
+                            placeSelectedGateOnSlot(qIdx, sIdx);
+                          }}
+                          onContextMenu={(e) => {
+                            e.preventDefault();
+                            removeGateAt(qIdx, sIdx);
+                          }}
+                          className={`relative z-10 w-9 h-9 sm:w-10 sm:h-10 rounded-lg flex items-center justify-center cursor-pointer transition-all border ${
+                            isDragOver
+                              ? 'ring-3 ring-primary-500 ring-offset-1 border-primary-600 bg-primary-100 scale-105 shadow-md'
+                              : isSelected
+                              ? 'ring-2 ring-primary-600 ring-offset-1 border-primary-600 bg-primary-50/80 shadow-xs'
+                              : placed
+                              ? 'border-dark-300 bg-white shadow-2xs'
+                              : isDraggingActive
+                              ? 'border-dashed border-primary-400 bg-primary-50/30 animate-pulse'
+                              : 'border-dashed border-dark-200 hover:border-primary-400 bg-white/90 hover:bg-primary-50/30'
+                          }`}
+                          title={
+                            placed
+                              ? `Step ${sIdx}: ${placed.type.toUpperCase()} on Q${placed.qubits.join(', Q')}. Drag to move, or right-click to remove.`
+                              : `Step ${sIdx} (Empty). Drag a gate here or click to place ${selectedGateType.toUpperCase()}`
+                          }
                         >
-                          {isControl ? (
-                            <div className="w-3.5 h-3.5 rounded-full bg-primary-600 ring-2 ring-white" />
-                          ) : isTarget ? (
-                            <div className="w-6 h-6 rounded-full border-2 border-primary-600 flex items-center justify-center font-bold text-primary-700 text-xs bg-white">
-                              +
-                            </div>
-                          ) : (
-                            <span
-                              className={`w-9 h-9 rounded-lg flex items-center justify-center font-mono font-bold text-xs shadow-xs ${
-                                AVAILABLE_GATES.find((g) => g.type === placed.type)?.color || 'bg-primary-600 text-white'
-                              }`}
+                          {placed ? (
+                            <div
+                              draggable={true}
+                              onDragStart={(e) => {
+                                e.stopPropagation();
+                                e.dataTransfer.setData('text/plain', placed.type);
+                                e.dataTransfer.setData('application/quantum-gate', placed.type);
+                                e.dataTransfer.setData(
+                                  'application/quantum-move',
+                                  JSON.stringify({ qubit: qIdx, step: sIdx, gateId: placed.id, type: placed.type })
+                                );
+                                e.dataTransfer.effectAllowed = 'move';
+                                setIsDraggingActive(true);
+                              }}
+                              onDragEnd={() => {
+                                setIsDraggingActive(false);
+                                setDragOverSlot(null);
+                              }}
+                              className="w-full h-full flex items-center justify-center cursor-grab active:cursor-grabbing select-none"
                             >
-                              {placed.type.toUpperCase()}
-                            </span>
+                              {isControl ? (
+                                <div className="w-3 h-3 rounded-full bg-primary-600 ring-2 ring-white" />
+                              ) : isTarget ? (
+                                <div className="w-5 h-5 rounded-full border-2 border-primary-600 flex items-center justify-center font-bold text-primary-700 text-[11px] bg-white">
+                                  +
+                                </div>
+                              ) : (
+                                <span
+                                  className={`w-7 h-7 sm:w-8 sm:h-8 rounded-md flex items-center justify-center font-mono font-bold text-[11px] shadow-xs ${
+                                    AVAILABLE_GATES.find((g) => g.type === placed.type)?.color || 'bg-primary-600 text-white'
+                                  }`}
+                                >
+                                  {placed.type.toUpperCase()}
+                                </span>
+                              )}
+                            </div>
+                          ) : isDragOver ? (
+                            <span className="text-[9px] font-mono font-bold text-primary-700">DROP</span>
+                          ) : (
+                            <span className="text-[9px] font-mono text-dark-400 opacity-60">S{sIdx}</span>
                           )}
                         </div>
-                      ) : isDragOver ? (
-                        <span className="text-[10px] font-mono font-bold text-primary-700">DROP</span>
-                      ) : (
-                        <span className="text-[10px] font-mono text-dark-400 opacity-60">S{sIdx}</span>
-                      )}
-                    </div>
-                  );
-                })}
-              </div>
+                      );
+                    })}
+                  </div>
+                </div>
+              ))}
             </div>
-          ))}
+          </div>
+
+          <div className="pt-2 border-t border-dark-100 flex items-center justify-between text-[11px] text-dark-500">
+            <span>💡 Click to place gate · Right-click/Del to remove</span>
+            <span>Backend: <strong className="text-dark-800">Qiskit Aer (Local)</strong></span>
+          </div>
         </div>
 
-        <div className="mt-4 pt-3 border-t border-dark-100 flex items-center justify-between text-xs text-dark-500">
-          <span>💡 Tip: Click any slot to place the selected gate. Right-click or press Delete to remove.</span>
-          <span>Execution backend: <strong className="text-dark-800">Qiskit Aer Simulator (Local)</strong></span>
+        {/* Live 3D Bloch Spheres */}
+        <div className="lg:col-span-6 bg-white rounded-2xl border border-dark-200 p-4 sm:p-5 shadow-xs space-y-3">
+          <div className="flex items-center justify-between px-1">
+            <h3 className="font-bold text-xs sm:text-sm text-dark-900">Live 3D Bloch Spheres</h3>
+            <span className="text-[10px] font-mono text-dark-500">
+              {numQubits} Qubit Vector{numQubits > 1 ? 's' : ''}
+            </span>
+          </div>
+
+          <div className={`grid grid-cols-1 ${numQubits === 1 ? 'grid-cols-1' : numQubits === 2 ? 'sm:grid-cols-2' : 'sm:grid-cols-2 xl:grid-cols-3'} gap-2.5`}>
+            {Array.from({ length: numQubits }, (_, qIdx) => (
+              <div key={qIdx} className="w-full">
+                <BlochSphere3D
+                  qubitIndex={qIdx}
+                  bloch={currentBlochVectors[qIdx] || null}
+                  warning={simResult?.warnings?.find((w) => w.includes(`qubit ${qIdx}`))}
+                  size={numQubits > 2 ? 150 : 180}
+                />
+              </div>
+            ))}
+          </div>
         </div>
       </div>
     </>
@@ -482,15 +517,16 @@ export function CircuitBuilder() {
 
   return (
     <div
-      className="space-y-8"
-      onKeyDown={handleKeyDown}
+      className="space-y-6"
       tabIndex={0}
-      aria-label="Quantum Circuit Editor. Use Arrow keys to navigate, Hotkeys H, X, Z, C to place gates."
+      onKeyDown={handleKeyDown}
+      role="region"
+      aria-label="Quantum Circuit Simulator Workbench"
     >
-      {/* Top Controls Toolbar */}
-      <div className="bg-white rounded-2xl border border-dark-200 p-5 shadow-xs flex flex-wrap items-center justify-between gap-4">
-        {/* Qubit count & Presets */}
-        <div className="flex items-center flex-wrap gap-3">
+      {/* Top Interactive Controls Toolbar */}
+      <div className="bg-white rounded-2xl border border-dark-200 p-4 shadow-xs flex flex-wrap items-center justify-between gap-4">
+        {/* Qubit Selector & Presets */}
+        <div className="flex items-center flex-wrap gap-4">
           <div className="flex items-center gap-2">
             <span className="text-xs font-bold text-dark-700 uppercase tracking-wide">Qubits:</span>
             <div className="inline-flex rounded-lg border border-dark-200 p-0.5 bg-dark-50">
@@ -744,29 +780,6 @@ export function CircuitBuilder() {
           )}
         </div>
       )}
-
-      {/* 3D Bloch Spheres for all active qubits */}
-      <div className="space-y-4">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <Sparkles className="w-4 h-4 text-primary-600" />
-            <h3 className="font-bold text-base text-dark-900">3D Bloch Spheres (Per-Qubit State)</h3>
-          </div>
-          <span className="text-xs text-dark-500">Drag any sphere to rotate 3D view</span>
-        </div>
-
-        <div className={`grid grid-cols-1 ${numQubits === 1 ? 'md:grid-cols-1 max-w-sm mx-auto' : numQubits === 2 ? 'md:grid-cols-2' : 'md:grid-cols-3'} gap-6`}>
-          {Array.from({ length: numQubits }, (_, qIdx) => (
-            <BlochSphere3D
-              key={qIdx}
-              qubitIndex={qIdx}
-              bloch={currentBlochVectors[qIdx] || null}
-              warning={simResult?.warnings?.find((w) => w.includes(`qubit ${qIdx}`))}
-              size={280}
-            />
-          ))}
-        </div>
-      </div>
 
       {/* State Vector Amplitudes & Measurement Histogram */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">

@@ -88,7 +88,7 @@ export default function HomePage() {
   return (
     <div className="space-y-24 py-8">
       {/* Hero Section */}
-      <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-6">
+      <section className="w-full mx-auto px-8 pt-6">
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 items-center">
           {/* Hero Left Content */}
           <div className="lg:col-span-7 space-y-6">
@@ -205,7 +205,7 @@ export default function HomePage() {
       </section>
 
       {/* 4 Core Algorithm Modules Grid */}
-      <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <section className="w-full mx-auto px-8">
         <div className="flex flex-col sm:flex-row sm:items-end justify-between mb-8 gap-4">
           <div>
             <span className="text-xs font-semibold px-3 py-1 rounded-full bg-primary-50 text-primary-700 border border-primary-100">
@@ -259,7 +259,7 @@ export default function HomePage() {
 
       {/* Accessibility & Inclusive Education Feature Section */}
       <section className="bg-white border-y border-dark-200 py-16">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="w-full mx-auto px-8">
           <div className="text-center max-w-2xl mx-auto mb-12 space-y-3">
             <span className="text-xs font-semibold px-3 py-1 rounded-full bg-primary-50 text-primary-700">
               Universal Design (WCAG 2.1 AA)
