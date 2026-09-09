@@ -2,17 +2,24 @@
 
 import React from 'react';
 import Link from 'next/link';
+import { usePathname } from 'next/navigation';
 import { useAccessibility } from '@/lib/accessibility-context';
 import { translations } from '@/lib/i18n';
 import { Atom, ShieldCheck, Heart } from 'lucide-react';
 
 export function Footer() {
+  const pathname = usePathname();
   const { language } = useAccessibility();
   const t = translations[language];
 
+  // Hide footer on practice arena & coding workbench
+  if (pathname.startsWith('/practice')) {
+    return null;
+  }
+
   return (
     <footer className="bg-white border-t border-dark-200 mt-20 text-xs text-dark-600">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
+      <div className="w-full mx-auto px-8 py-10">
         <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
           <div className="space-y-3">
             <div className="flex items-center gap-2">

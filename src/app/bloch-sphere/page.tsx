@@ -48,25 +48,26 @@ export default function BlochSpherePage() {
   ];
 
   return (
-    <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8 animate-fadeIn">
+    <div className="w-full mx-auto px-8 py-2.5 space-y-3 animate-fadeIn">
       {/* Header */}
-      <div className="bg-white rounded-3xl border border-dark-200 p-8 shadow-xs">
-        <div className="flex items-center gap-2 mb-2">
-          <span className="px-3 py-1 rounded-full text-xs font-semibold bg-primary-50 text-primary-700 border border-primary-100 flex items-center gap-1.5">
-            <Globe className="w-3.5 h-3.5 text-primary-600" />
-            3D Quantum Visualizer
-          </span>
+      <div className="bg-white rounded-xl border border-dark-200 py-3 px-5 sm:px-6 shadow-xs flex flex-col md:flex-row md:items-center justify-between gap-3">
+        <div>
+          <div className="flex items-center gap-2 mb-1">
+            <span className="px-2.5 py-0.5 rounded-full text-[11px] font-semibold bg-primary-50 text-primary-700 border border-primary-100 flex items-center gap-1.5">
+              <Globe className="w-3 h-3 text-primary-600" />
+              3D Quantum Visualizer
+            </span>
+          </div>
+          <h1 className="text-lg sm:text-xl font-bold text-dark-900 tracking-tight">
+            Interactive 3D Bloch Sphere Explorer
+          </h1>
+          <p className="text-xs text-dark-600 mt-0.5 max-w-3xl leading-normal">
+            The Bloch Sphere is the geometrical representation of pure 2-level quantum state space (qubit). Drag with your mouse or touch to rotate the 3D camera, adjust angles θ and φ, or inspect entangled mixed states.
+          </p>
         </div>
-        <h1 className="text-2xl sm:text-3xl font-bold text-dark-900 tracking-tight">
-          Interactive 3D Bloch Sphere Explorer
-        </h1>
-        <p className="text-sm text-dark-600 mt-1 max-w-3xl leading-relaxed">
-          The Bloch Sphere is the geometrical representation of pure 2-level quantum state space (qubit).
-          Drag with your mouse or touch to rotate the 3D camera, adjust angles θ and φ, or inspect entangled mixed states.
-        </p>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-3.5 items-start">
         {/* Left: 3D Canvas */}
         <div className="lg:col-span-6 flex justify-center">
           <div className="w-full max-w-md">
@@ -80,10 +81,10 @@ export default function BlochSpherePage() {
         </div>
 
         {/* Right: Angle Controls & Standard Basis Presets */}
-        <div className="lg:col-span-6 space-y-6">
+        <div className="lg:col-span-6 space-y-3.5">
           {/* Preset Basis States */}
-          <div className="bg-white rounded-2xl border border-dark-200 p-6 shadow-xs space-y-3">
-            <h3 className="font-bold text-sm text-dark-900">Standard Basis Presets</h3>
+          <div className="bg-white rounded-2xl border border-dark-200 p-4 sm:p-5 shadow-xs space-y-2.5">
+            <h3 className="font-bold text-xs sm:text-sm text-dark-900">Standard Basis Presets</h3>
             <div className="grid grid-cols-2 gap-2">
               {standardStates.map((s, idx) => (
                 <button
@@ -118,9 +119,9 @@ export default function BlochSpherePage() {
 
           {/* Continuous Angle Sliders */}
           {!isEntangledDemo && (
-            <div className="bg-white rounded-2xl border border-dark-200 p-6 shadow-xs space-y-4">
+            <div className="bg-white rounded-2xl border border-dark-200 p-4 sm:p-5 shadow-xs space-y-3">
               <div className="flex items-center justify-between">
-                <h3 className="font-bold text-sm text-dark-900">State Parameters (θ, φ)</h3>
+                <h3 className="font-bold text-xs sm:text-sm text-dark-900">State Parameters (θ, φ)</h3>
                 <button
                   onClick={() => {
                     setTheta(0);
@@ -134,7 +135,7 @@ export default function BlochSpherePage() {
               </div>
 
               {/* Polar Angle Theta */}
-              <div className="space-y-1.5">
+              <div className="space-y-1">
                 <div className="flex justify-between text-xs">
                   <span className="font-medium text-dark-700">θ (Polar Angle from +Z):</span>
                   <span className="font-mono font-bold text-primary-700">
@@ -153,7 +154,7 @@ export default function BlochSpherePage() {
               </div>
 
               {/* Azimuthal Angle Phi */}
-              <div className="space-y-1.5">
+              <div className="space-y-1">
                 <div className="flex justify-between text-xs">
                   <span className="font-medium text-dark-700">φ (Azimuthal Angle in XY plane):</span>
                   <span className="font-mono font-bold text-primary-700">
@@ -172,14 +173,14 @@ export default function BlochSpherePage() {
               </div>
 
               {/* Probability Readout */}
-              <div className="pt-3 border-t border-dark-100 grid grid-cols-2 gap-3 text-center">
-                <div className="p-3 bg-dark-50 rounded-xl border border-dark-200">
+              <div className="pt-2 border-t border-dark-100 grid grid-cols-2 gap-2.5 text-center">
+                <div className="p-2.5 bg-dark-50 rounded-xl border border-dark-200">
                   <span className="text-[11px] text-dark-500 block font-medium">P(|0⟩) = cos²(θ/2)</span>
                   <span className="font-mono font-bold text-sm text-primary-700">
                     {(prob0 * 100).toFixed(1)}%
                   </span>
                 </div>
-                <div className="p-3 bg-dark-50 rounded-xl border border-dark-200">
+                <div className="p-2.5 bg-dark-50 rounded-xl border border-dark-200">
                   <span className="text-[11px] text-dark-500 block font-medium">P(|1⟩) = sin²(θ/2)</span>
                   <span className="font-mono font-bold text-sky-700">
                     {(prob1 * 100).toFixed(1)}%
@@ -190,9 +191,9 @@ export default function BlochSpherePage() {
           )}
 
           {/* Mathematical Parameterization */}
-          <div className="p-5 rounded-2xl bg-dark-50/60 border border-dark-200 text-xs space-y-2 text-dark-700 leading-relaxed">
+          <div className="p-4 rounded-2xl bg-dark-50/60 border border-dark-200 text-xs space-y-1.5 text-dark-700 leading-relaxed">
             <h4 className="font-bold text-dark-900">Bloch Sphere Formulation:</h4>
-            <p className="font-mono text-[11px] text-primary-900 bg-white p-2 rounded border border-dark-200">
+            <p className="font-mono text-[11px] text-primary-900 bg-white p-1.5 rounded border border-dark-200">
               |ψ⟩ = cos(θ/2)|0⟩ + e^(iφ) sin(θ/2)|1⟩
             </p>
             <p>

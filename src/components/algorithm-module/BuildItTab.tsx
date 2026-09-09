@@ -183,8 +183,8 @@ export function BuildItTab({ moduleSlug, onProceedToQuiz }: BuildItTabProps) {
       <div className="bg-white rounded-3xl border border-dark-200 p-6 sm:p-8 shadow-xs space-y-4">
         <div className="flex flex-wrap items-center justify-between gap-3">
           <div className="flex items-center gap-2">
-            <span className="px-3 py-1 rounded-full text-xs font-semibold bg-purple-50 text-purple-700 border border-purple-200 flex items-center gap-1.5">
-              <Sparkles className="w-3.5 h-3.5 text-purple-600" />
+            <span className="px-3 py-1 rounded-full text-xs font-semibold bg-primary-50 text-primary-700 border border-primary-200 flex items-center gap-1.5">
+              <Sparkles className="w-3.5 h-3.5 text-primary-600" />
               Guided Build It — AI Coaching ON
             </span>
             <span className="px-2.5 py-0.5 rounded-full text-xs font-mono bg-dark-100 text-dark-700">
@@ -218,7 +218,7 @@ export function BuildItTab({ moduleSlug, onProceedToQuiz }: BuildItTabProps) {
       <div className="bg-white rounded-2xl border border-dark-200 p-5 shadow-xs">
         <div className="flex items-center justify-between mb-3">
           <div className="flex items-center gap-2">
-            <Wand2 className="w-4 h-4 text-purple-600" />
+            <Wand2 className="w-4 h-4 text-primary-600" />
             <h3 className="font-bold text-sm text-dark-900">Select Gate to Place</h3>
             <span className="text-xs text-dark-500">(Click a gate, then click wire slot to insert)</span>
           </div>
@@ -233,7 +233,7 @@ export function BuildItTab({ moduleSlug, onProceedToQuiz }: BuildItTabProps) {
                 onClick={() => setSelectedGateType(gate.type)}
                 className={`flex items-center gap-2 px-3 py-2 rounded-xl border text-xs font-semibold transition-all select-none hover:scale-105 active:scale-95 ${
                   isSelected
-                    ? 'border-purple-600 ring-2 ring-purple-500/20 bg-purple-50 text-purple-900 shadow-xs'
+                    ? 'border-primary-600 ring-2 ring-primary-500/20 bg-primary-50 text-primary-900 shadow-xs'
                     : 'border-dark-200 hover:border-dark-300 bg-white text-dark-800 hover:bg-dark-50'
                 }`}
               >
@@ -307,10 +307,10 @@ export function BuildItTab({ moduleSlug, onProceedToQuiz }: BuildItTabProps) {
                       }}
                       className={`relative z-10 w-12 h-12 rounded-xl flex items-center justify-center cursor-pointer transition-all border ${
                         isSelected
-                          ? 'ring-2 ring-purple-600 ring-offset-2 border-purple-600 bg-purple-50'
+                          ? 'ring-2 ring-primary-600 ring-offset-2 border-primary-600 bg-primary-50'
                           : placed
                           ? 'border-dark-300 bg-white shadow-xs'
-                          : 'border-dashed border-dark-200 hover:border-purple-400 bg-white/90 hover:bg-purple-50/30'
+                          : 'border-dashed border-dark-200 hover:border-primary-400 bg-white/90 hover:bg-primary-50/30'
                       }`}
                       title={placed ? `Right-click to remove ${placed.type.toUpperCase()}` : `Click to place ${selectedGateType.toUpperCase()}`}
                     >
@@ -345,7 +345,7 @@ export function BuildItTab({ moduleSlug, onProceedToQuiz }: BuildItTabProps) {
           onClick={() => setShowHints(!showHints)}
           className="flex items-center gap-1.5 px-4 py-2 rounded-xl border border-dark-200 hover:bg-dark-50 text-dark-700 font-semibold text-xs transition-colors"
         >
-          <HelpCircle className="w-4 h-4 text-purple-600" />
+          <HelpCircle className="w-4 h-4 text-primary-600" />
           <span>{showHints ? 'Hide Socratic Hints' : 'Need a Socratic Hint?'}</span>
           <ChevronDown className={`w-3.5 h-3.5 transition-transform ${showHints ? 'rotate-180' : ''}`} />
         </button>
@@ -353,7 +353,7 @@ export function BuildItTab({ moduleSlug, onProceedToQuiz }: BuildItTabProps) {
         <button
           onClick={() => handleSubmitCircuit()}
           disabled={isSubmitting || gates.length === 0}
-          className="flex items-center gap-2 px-6 py-3 rounded-xl bg-purple-600 hover:bg-purple-700 disabled:opacity-50 text-white font-bold text-sm shadow-xs transition-all hover:shadow-card"
+          className="flex items-center gap-2 px-6 py-3 rounded-xl bg-primary-600 hover:bg-primary-700 disabled:opacity-50 text-white font-bold text-sm shadow-xs transition-all hover:shadow-card"
         >
           {isSubmitting ? (
             <>
@@ -371,16 +371,16 @@ export function BuildItTab({ moduleSlug, onProceedToQuiz }: BuildItTabProps) {
 
       {/* Hints Card */}
       {showHints && (
-        <div className="p-5 rounded-2xl bg-purple-50/70 border border-purple-200 space-y-3 text-xs animate-fadeIn">
+        <div className="p-5 rounded-2xl bg-primary-50/70 border border-primary-200 space-y-3 text-xs animate-fadeIn">
           <div className="flex items-center justify-between">
-            <span className="font-bold text-purple-900">Socratic Coaching Clues ({challenge.hints.length}):</span>
+            <span className="font-bold text-primary-900">Socratic Coaching Clues ({challenge.hints.length}):</span>
             <div className="flex items-center gap-1">
               {challenge.hints.map((_, i) => (
                 <button
                   key={i}
                   onClick={() => setActiveHintIdx(i)}
                   className={`w-6 h-6 rounded-md font-bold text-[11px] ${
-                    activeHintIdx === i ? 'bg-purple-600 text-white' : 'bg-purple-100 text-purple-800'
+                    activeHintIdx === i ? 'bg-primary-600 text-white' : 'bg-primary-100 text-primary-800'
                   }`}
                 >
                   {i + 1}
@@ -388,7 +388,7 @@ export function BuildItTab({ moduleSlug, onProceedToQuiz }: BuildItTabProps) {
               ))}
             </div>
           </div>
-          <div className="text-purple-800 leading-relaxed">
+          <div className="text-primary-800 leading-relaxed">
             <MathRenderer text={challenge.hints[activeHintIdx]} />
           </div>
         </div>

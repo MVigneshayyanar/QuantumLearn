@@ -1,11 +1,13 @@
 'use client';
 
 import React from 'react';
+import { usePathname } from 'next/navigation';
 import { useAccessibility, FontSizeOption, ExplanationMode, Language } from '@/lib/accessibility-context';
 import { translations } from '@/lib/i18n';
 import { Type, Sparkles, BookOpen, Activity, Globe, HelpCircle } from 'lucide-react';
 
 export function AccessibilityBar() {
+  const pathname = usePathname();
   const {
     fontSize,
     setFontSize,
@@ -20,13 +22,18 @@ export function AccessibilityBar() {
 
   const t = translations[language];
 
+  // Hide top bar on full-screen practice workbench
+  if (pathname.startsWith('/practice/') && pathname !== '/practice') {
+    return null;
+  }
+
   return (
     <div
       role="region"
       aria-label="Accessibility and Learning Preferences"
-      className="bg-dark-50 border-b border-dark-200 text-xs text-dark-700 py-1.5 px-4 relative z-40"
+      className="bg-dark-50 border-b border-dark-200 text-xs text-dark-700 py-1.5 relative z-40"
     >
-      <div className="max-w-7xl mx-auto flex flex-wrap items-center justify-between gap-3">
+      <div className="w-full mx-auto px-8 flex flex-wrap items-center justify-between gap-3">
         {/* Left: Explanation Mode Toggle (Core to school vs researcher) */}
         <div className="flex items-center space-x-2">
           <span className="font-semibold text-dark-900 flex items-center gap-1">

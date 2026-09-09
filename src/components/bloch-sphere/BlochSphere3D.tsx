@@ -279,9 +279,9 @@ export function BlochSphere3D({
   const isEntangled = !bloch || !bloch.is_pure;
 
   return (
-    <div className="flex flex-col items-center bg-white rounded-2xl border border-dark-200 p-4 shadow-xs relative">
+    <div className="flex flex-col items-center bg-white rounded-xl border border-dark-200 p-2 sm:p-2.5 shadow-2xs relative w-full">
       {/* Header Info */}
-      <div className="w-full flex items-center justify-between mb-2">
+      <div className="w-full flex items-center justify-between mb-1">
         <div className="flex items-center gap-2">
           <span className="font-bold text-sm text-dark-900">
             Qubit {qubitIndex} Bloch Sphere

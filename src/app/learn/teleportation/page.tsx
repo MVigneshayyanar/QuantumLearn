@@ -84,37 +84,37 @@ The protocol obeys the No-Cloning Theorem because Alice's joint Bell-basis proje
   ];
 
   const paramControls = (
-    <div className="flex flex-wrap items-center justify-between gap-4 text-xs">
-      <div className="flex items-center gap-2">
-        <span className="font-bold text-dark-800">Mystery State Prepared by Alice:</span>
-        <div className="inline-flex rounded-lg border border-dark-200 p-0.5 bg-dark-50">
+    <div className="flex flex-wrap items-center justify-between gap-2.5 text-xs">
+      <div className="flex items-center gap-2 flex-wrap">
+        <span className="font-bold text-dark-800 text-[11px]">Alice&apos;s Prepared State:</span>
+        <div className="inline-flex rounded-lg border border-dark-200 p-0.5 bg-dark-50 gap-0.5">
           <button
             onClick={() => setStatePrep('plus')}
-            className={`px-3 py-1.5 rounded-md font-medium transition-colors ${
-              statePrep === 'plus' ? 'bg-primary-600 text-white shadow-xs' : 'text-dark-700 hover:text-dark-900'
+            className={`px-2.5 py-1 rounded-md text-[11px] font-semibold transition-colors ${
+              statePrep === 'plus' ? 'bg-primary-600 text-white shadow-xs' : 'text-dark-700 hover:text-dark-900 hover:bg-white'
             }`}
           >
-            |+⟩ Superposition (H)
+            |+⟩ (H)
           </button>
           <button
             onClick={() => setStatePrep('one')}
-            className={`px-3 py-1.5 rounded-md font-medium transition-colors ${
-              statePrep === 'one' ? 'bg-primary-600 text-white shadow-xs' : 'text-dark-700 hover:text-dark-900'
+            className={`px-2.5 py-1 rounded-md text-[11px] font-semibold transition-colors ${
+              statePrep === 'one' ? 'bg-primary-600 text-white shadow-xs' : 'text-dark-700 hover:text-dark-900 hover:bg-white'
             }`}
           >
-            |1⟩ State (X)
+            |1⟩ (X)
           </button>
           <button
             onClick={() => setStatePrep('t_state')}
-            className={`px-3 py-1.5 rounded-md font-medium transition-colors ${
-              statePrep === 't_state' ? 'bg-primary-600 text-white shadow-xs' : 'text-dark-700 hover:text-dark-900'
+            className={`px-2.5 py-1 rounded-md text-[11px] font-semibold transition-colors ${
+              statePrep === 't_state' ? 'bg-primary-600 text-white shadow-xs' : 'text-dark-700 hover:text-dark-900 hover:bg-white'
             }`}
           >
-            T-State (H + T)
+            T-State (H+T)
           </button>
         </div>
       </div>
-      <span className="text-dark-500 font-mono">Q0: Alice Message | Q1: Alice Entangled | Q2: Bob Target</span>
+      <span className="text-dark-500 font-mono text-[11px]">Q0: Msg | Q1: Alice Bell | Q2: Bob Target</span>
     </div>
   );
 

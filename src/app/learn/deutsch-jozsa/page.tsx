@@ -72,45 +72,45 @@ While any classical deterministic algorithm requires $\\Omega(2^{n-1} + 1)$ quer
   ];
 
   const paramControls = (
-    <div className="flex flex-wrap items-center justify-between gap-4 text-xs">
-      <div className="flex items-center gap-2">
-        <span className="font-bold text-dark-800">Select Oracle Function:</span>
-        <div className="inline-flex rounded-lg border border-dark-200 p-0.5 bg-dark-50">
+    <div className="flex flex-wrap items-center justify-between gap-2.5 text-xs">
+      <div className="flex items-center gap-2 flex-wrap">
+        <span className="font-bold text-dark-800 text-[11px]">Oracle Function:</span>
+        <div className="inline-flex rounded-lg border border-dark-200 p-0.5 bg-dark-50 gap-0.5">
           <button
             onClick={() => setOracleType('balanced_id')}
-            className={`px-3 py-1.5 rounded-md font-medium transition-colors ${
-              oracleType === 'balanced_id' ? 'bg-primary-600 text-white shadow-xs' : 'text-dark-700 hover:text-dark-900'
+            className={`px-2.5 py-1 rounded-md text-[11px] font-semibold transition-colors ${
+              oracleType === 'balanced_id' ? 'bg-primary-600 text-white shadow-xs' : 'text-dark-700 hover:text-dark-900 hover:bg-white'
             }`}
           >
-            Balanced: f(x) = x
+            Balanced: f(x)=x
           </button>
           <button
             onClick={() => setOracleType('balanced_not')}
-            className={`px-3 py-1.5 rounded-md font-medium transition-colors ${
-              oracleType === 'balanced_not' ? 'bg-primary-600 text-white shadow-xs' : 'text-dark-700 hover:text-dark-900'
+            className={`px-2.5 py-1 rounded-md text-[11px] font-semibold transition-colors ${
+              oracleType === 'balanced_not' ? 'bg-primary-600 text-white shadow-xs' : 'text-dark-700 hover:text-dark-900 hover:bg-white'
             }`}
           >
-            Balanced: f(x) = ¬x
+            Balanced: f(x)=¬x
           </button>
           <button
             onClick={() => setOracleType('constant_0')}
-            className={`px-3 py-1.5 rounded-md font-medium transition-colors ${
-              oracleType === 'constant_0' ? 'bg-primary-600 text-white shadow-xs' : 'text-dark-700 hover:text-dark-900'
+            className={`px-2.5 py-1 rounded-md text-[11px] font-semibold transition-colors ${
+              oracleType === 'constant_0' ? 'bg-primary-600 text-white shadow-xs' : 'text-dark-700 hover:text-dark-900 hover:bg-white'
             }`}
           >
-            Constant: f(x) = 0
+            Constant: f(x)=0
           </button>
           <button
             onClick={() => setOracleType('constant_1')}
-            className={`px-3 py-1.5 rounded-md font-medium transition-colors ${
-              oracleType === 'constant_1' ? 'bg-primary-600 text-white shadow-xs' : 'text-dark-700 hover:text-dark-900'
+            className={`px-2.5 py-1 rounded-md text-[11px] font-semibold transition-colors ${
+              oracleType === 'constant_1' ? 'bg-primary-600 text-white shadow-xs' : 'text-dark-700 hover:text-dark-900 hover:bg-white'
             }`}
           >
-            Constant: f(x) = 1
+            Constant: f(x)=1
           </button>
         </div>
       </div>
-      <span className="text-dark-500 font-mono">Input Qubit: Q0 | Ancilla: Q1</span>
+      <span className="text-dark-500 font-mono text-[11px]">Input: Q0 | Ancilla: Q1</span>
     </div>
   );
 

@@ -448,22 +448,27 @@ export function QuantumCodeEditor({
 
       {/* AI Code Generation Modal with Portal (escapes all parent stacking contexts) */}
       {showAIPrompt && isMounted && createPortal(
-        <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/75 backdrop-blur-sm animate-fadeIn p-4">
-          <div className="bg-dark-900 border border-dark-700 rounded-2xl w-full max-w-lg p-6 space-y-4 shadow-2xl relative z-[10000]">
-            <div className="flex items-center justify-between">
+        <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/40 backdrop-blur-xs animate-fadeIn p-4">
+          <div className="bg-white border border-dark-200 rounded-2xl w-full max-w-lg p-6 space-y-4 shadow-2xl relative z-[10000] text-dark-900">
+            <div className="flex items-center justify-between border-b border-dark-100 pb-3">
               <div className="flex items-center gap-2">
-                <Wand2 className="w-5 h-5 text-purple-400" />
-                <h3 className="font-bold text-white text-sm">Generate Quantum Circuit with AI</h3>
+                <div className="w-8 h-8 rounded-xl bg-primary-50 text-primary-600 flex items-center justify-center border border-primary-100">
+                  <Wand2 className="w-4 h-4" />
+                </div>
+                <div>
+                  <h3 className="font-bold text-dark-900 text-sm">Generate Quantum Circuit with AI</h3>
+                  <p className="text-[11px] text-dark-500">Schrödinger AI code synthesizer</p>
+                </div>
               </div>
               <button
                 onClick={() => setShowAIPrompt(false)}
-                className="text-dark-400 hover:text-white text-sm"
+                className="text-dark-400 hover:text-dark-700 hover:bg-dark-100 p-1 rounded-lg transition-colors"
               >
                 ✕
               </button>
             </div>
 
-            <p className="text-xs text-dark-300">
+            <p className="text-xs text-dark-600">
               Describe the quantum circuit you want to build in plain English or Hindi. Schrödinger AI will generate valid code for your selected simulator (Qiskit, Cirq, or PennyLane).
             </p>
 
@@ -472,12 +477,12 @@ export function QuantumCodeEditor({
               value={aiPromptInput}
               onChange={(e) => setAiPromptInput(e.target.value)}
               placeholder="e.g. Create a 2-qubit Bell state, or a 3-qubit GHZ state, or apply Hadamard on all qubits..."
-              className="w-full rounded-xl bg-dark-950 border border-dark-700 p-3 text-xs text-white placeholder:text-dark-500 focus:outline-none focus:border-purple-500 font-mono"
+              className="w-full rounded-xl bg-dark-50 border border-dark-200 p-3 text-xs text-dark-900 placeholder:text-dark-400 focus:outline-none focus:border-primary-500 focus:bg-white font-mono transition-colors"
             />
 
             {/* Quick Prompt Chips */}
             <div className="flex flex-wrap gap-1.5 text-[11px]">
-              <span className="text-dark-400">Suggestions:</span>
+              <span className="text-dark-500 self-center">Suggestions:</span>
               {[
                 'Bell State (Entanglement)',
                 '3-Qubit GHZ State',
@@ -488,24 +493,24 @@ export function QuantumCodeEditor({
                 <button
                   key={s}
                   onClick={() => setAiPromptInput(s)}
-                  className="px-2 py-0.5 rounded bg-dark-800 hover:bg-dark-700 text-purple-300 border border-dark-700"
+                  className="px-2.5 py-1 rounded-lg bg-dark-50 hover:bg-primary-50 hover:text-primary-700 hover:border-primary-200 text-dark-700 border border-dark-200 transition-colors text-[11px] font-medium"
                 >
                   {s}
                 </button>
               ))}
             </div>
 
-            <div className="flex justify-end gap-2 pt-2 border-t border-dark-800">
+            <div className="flex justify-end gap-2 pt-3 border-t border-dark-100">
               <button
                 onClick={() => setShowAIPrompt(false)}
-                className="px-4 py-2 rounded-lg border border-dark-700 text-dark-300 hover:bg-dark-800 text-xs font-semibold"
+                className="px-4 py-2 rounded-xl border border-dark-200 text-dark-600 hover:bg-dark-50 text-xs font-semibold transition-colors"
               >
                 Cancel
               </button>
               <button
                 onClick={handleGenerateCircuitAI}
                 disabled={isGeneratingAI || !aiPromptInput.trim()}
-                className="flex items-center gap-1.5 px-5 py-2 rounded-lg bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 disabled:opacity-40 text-white font-bold text-xs transition-all shadow-xs"
+                className="flex items-center gap-1.5 px-5 py-2 rounded-xl bg-primary-600 hover:bg-primary-700 disabled:opacity-40 text-white font-bold text-xs transition-all shadow-xs"
               >
                 {isGeneratingAI ? (
                   <>
