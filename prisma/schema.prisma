@@ -37,6 +37,9 @@ model User {
   circuits      SavedCircuit[]
   misconceptions MisconceptionLog[]
   practiceSubmissions PracticeSubmission[]
+  instructorMappings  InstructorStudent[]  @relation("InstructorRelation")
+  studentMappings     InstructorStudent[]  @relation("StudentRelation")
+  aiInteractions      AIInteraction[]
 }
 
 model UserProgress {
@@ -61,6 +64,7 @@ model QuizAttempt {
   questionId      String
   selectedAnswer  String
   isCorrect       Boolean
+  isAIAssisted    Boolean         @default(false)
   timeTakenMs     Int
   difficulty      DifficultyLevel
   misconceptionTag String?
@@ -91,10 +95,6 @@ model SavedCircuit {
   updatedAt   DateTime @updatedAt
 }
 
-// Stub model for future Practice/Judge feature.
-// The frontend practice submission UI does not exist yet;
-// this model is created ahead of time so the API route and
-// instructor dashboard can reference it once the feature lands.
 model PracticeSubmission {
   id          String   @id @default(cuid())
   userId      String
@@ -102,6 +102,28 @@ model PracticeSubmission {
   moduleSlug  String
   problemId   String
   result      String   // "accepted" | "wrong_answer" | "invalid_circuit"
+  isAIAssisted Boolean @default(false)
   code        String?  // optional submitted code/circuit JSON
   createdAt   DateTime @default(now())
+}
+
+model InstructorStudent {
+  id           String   @id @default(cuid())
+  instructorId String
+  studentId    String
+  instructor   User     @relation("InstructorRelation", fields: [instructorId], references: [id], onDelete: Cascade)
+  student      User     @relation("StudentRelation", fields: [studentId], references: [id], onDelete: Cascade)
+  createdAt    DateTime @default(now())
+
+  @@unique([instructorId, studentId])
+}
+
+model AIInteraction {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  action    String   // "chat" | "generate_circuit" | "debug_circuit" | "diagnose_build_it"
+  context   String?  // moduleSlug or problemId
+  query     String?  // snippet of question/prompt
+  createdAt DateTime @default(now())
 }

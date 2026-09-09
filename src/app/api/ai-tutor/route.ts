@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { generateSocraticResponse, generateSocraticCircuitFeedback } from '@/lib/ai-engine';
 import { GoogleGenerativeAI } from '@google/generative-ai';
+import { prisma } from '@/lib/prisma';
 
 import fs from 'fs';
 import path from 'path';
@@ -68,6 +69,21 @@ export async function POST(req: NextRequest) {
     const body = await req.json();
     const { action, prompt, code, errors, query, explanationMode, activeMisconception, language } = body;
     const apiKey = getGeminiApiKey();
+
+    // Log AI Interaction if user is identified
+    const activeUserId = body.userId || req.cookies.get('ql_user_id')?.value;
+    if (activeUserId) {
+      prisma.aIInteraction
+        .create({
+          data: {
+            userId: activeUserId,
+            action: action || 'chat',
+            context: body.moduleSlug || body.problemId || null,
+            query: (prompt || query || code || '').slice(0, 250),
+          },
+        })
+        .catch((e) => console.warn('[AIInteractionLog] failed:', e.message));
+    }
 
     // 1. AI Circuit Code Generation
     if (action === 'generate_circuit') {

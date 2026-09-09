@@ -4,6 +4,17 @@ import type { NextRequest } from 'next/server';
 export function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
+  // Enforce server-side access control on the /admin route
+  if (pathname.startsWith('/admin')) {
+    const role = request.cookies.get('ql_user_role')?.value;
+    if (role !== 'ADMIN') {
+      const redirectUrl = request.nextUrl.clone();
+      redirectUrl.pathname = '/';
+      redirectUrl.searchParams.set('auth_error', 'admin_required');
+      return NextResponse.redirect(redirectUrl);
+    }
+  }
+
   // Enforce server-side access control on the /instructor route
   if (pathname.startsWith('/instructor')) {
     const role = request.cookies.get('ql_user_role')?.value;
@@ -24,5 +35,5 @@ export function middleware(request: NextRequest) {
 }
 
 export const config = {
-  matcher: ['/instructor/:path*'],
+  matcher: ['/instructor/:path*', '/admin/:path*'],
 };

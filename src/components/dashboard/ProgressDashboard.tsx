@@ -47,7 +47,7 @@ interface StudentSummary {
 }
 
 export function ProgressDashboard() {
-  const { userId, studentName, isIdentified } = useStudentContext();
+  const { userId, studentName, isIdentified, isInstructor, isAdmin } = useStudentContext();
   const { setIsOpen: setAITutorOpen, addMessage, setActiveMisconception } = useAITutorStore();
   const { language } = useAccessibility();
   const t = translations[language];
@@ -188,28 +188,30 @@ export function ProgressDashboard() {
           </p>
         </div>
 
-        {/* Role switcher (Student vs Educator) */}
-        <div className="inline-flex rounded-xl border border-dark-200 p-1 bg-dark-50">
-          <button
-            onClick={() => setRoleView('student')}
-            aria-pressed={roleView === 'student'}
-            className={`flex items-center gap-2 px-3 py-1.5 rounded-lg text-xs font-semibold transition-colors ${
-              roleView === 'student'
-                ? 'bg-white text-dark-900 shadow-xs'
-                : 'text-dark-600 hover:text-dark-900'
-            }`}
-          >
-            <UserCheck className="w-3.5 h-3.5 text-primary-600" />
-            <span>Student View</span>
-          </button>
-          <Link
-            href="/instructor"
-            className={`flex items-center gap-2 px-3 py-1.5 rounded-lg text-xs font-semibold transition-colors text-dark-600 hover:text-dark-900`}
-          >
-            <Users className="w-3.5 h-3.5 text-primary-600" />
-            <span>Educator / Class View</span>
-          </Link>
-        </div>
+        {/* Role switcher (Only visible to Instructor or Admin) */}
+        {(isInstructor || isAdmin) && (
+          <div className="inline-flex rounded-xl border border-dark-200 p-1 bg-dark-50">
+            <button
+              onClick={() => setRoleView('student')}
+              aria-pressed={roleView === 'student'}
+              className={`flex items-center gap-2 px-3 py-1.5 rounded-lg text-xs font-semibold transition-colors ${
+                roleView === 'student'
+                  ? 'bg-white text-dark-900 shadow-xs'
+                  : 'text-dark-600 hover:text-dark-900'
+              }`}
+            >
+              <UserCheck className="w-3.5 h-3.5 text-primary-600" />
+              <span>Student View</span>
+            </button>
+            <Link
+              href="/instructor"
+              className={`flex items-center gap-2 px-3 py-1.5 rounded-lg text-xs font-semibold transition-colors text-dark-600 hover:text-dark-900`}
+            >
+              <Users className="w-3.5 h-3.5 text-primary-600" />
+              <span>Educator / Class View</span>
+            </Link>
+          </div>
+        )}
       </div>
 
       {/* Quick Stats Grid */}

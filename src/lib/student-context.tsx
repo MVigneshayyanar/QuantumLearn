@@ -20,12 +20,13 @@ interface StudentContextValue {
   studentEmail: string | null;
   role: UserRole | null;
   isIdentified: boolean;
+  isAdmin: boolean;
   isInstructor: boolean;
   isLoading: boolean;
   showIdentityModal: boolean;
   openLoginModal: (callback?: (id?: string) => void) => void;
   closeLoginModal: () => void;
-  login: (email: string, password: string) => Promise<{ isInstructor: boolean; userId: string }>;
+  login: (email: string, password: string) => Promise<{ isInstructor: boolean; isAdmin: boolean; userId: string }>;
   register: (name: string, email: string, password: string) => Promise<{ userId: string }>;
   logout: () => void;
 }
@@ -36,12 +37,13 @@ const StudentContext = createContext<StudentContextValue>({
   studentEmail: null,
   role: null,
   isIdentified: false,
+  isAdmin: false,
   isInstructor: false,
   isLoading: true,
   showIdentityModal: false,
   openLoginModal: () => {},
   closeLoginModal: () => {},
-  login: async () => ({ isInstructor: false, userId: '' }),
+  login: async () => ({ isInstructor: false, isAdmin: false, userId: '' }),
   register: async () => ({ userId: '' }),
   logout: () => {},
 });
@@ -183,7 +185,9 @@ export function StudentProvider({ children }: { children: React.ReactNode }) {
 
     syncUserProgressToStore(returnedId);
     executePendingAction(returnedId);
-    return { isInstructor: Boolean(isInstructor), userId: returnedId };
+    const isInst = returnedRole === 'EDUCATOR' || returnedRole === 'ADMIN' || Boolean(isInstructor);
+    const isAdm = returnedRole === 'ADMIN';
+    return { isInstructor: isInst, isAdmin: isAdm, userId: returnedId };
   }, []);
 
   const register = useCallback(async (name: string, email: string, password: string) => {
@@ -202,12 +206,12 @@ export function StudentProvider({ children }: { children: React.ReactNode }) {
 
     userIdRef.current = returnedId;
     localStorage.setItem(LS_STUDENT_ID, returnedId);
-    localStorage.setItem(LS_STUDENT_NAME, returnedName);
+    localStorage.setItem(LS_STUDENT_NAME, returnedName || returnedEmail);
     localStorage.setItem(LS_STUDENT_EMAIL, returnedEmail);
     localStorage.setItem(LS_STUDENT_ROLE, returnedRole || 'STUDENT');
 
     setUserId(returnedId);
-    setStudentName(returnedName);
+    setStudentName(returnedName || returnedEmail.split('@')[0]);
     setStudentEmail(returnedEmail);
     setRole(returnedRole || 'STUDENT');
     setShowIdentityModal(false);
@@ -223,9 +227,7 @@ export function StudentProvider({ children }: { children: React.ReactNode }) {
   }, []);
 
   const logout = useCallback(() => {
-    userIdRef.current = null;
-
-    // 1. Clear all authentication credentials from localStorage
+    // 1. Clear credentials
     localStorage.removeItem(LS_STUDENT_ID);
     localStorage.removeItem(LS_STUDENT_NAME);
     localStorage.removeItem(LS_STUDENT_EMAIL);
@@ -240,23 +242,23 @@ export function StudentProvider({ children }: { children: React.ReactNode }) {
     // 2. Clear practice problem progress & history caches
     localStorage.removeItem('ql_practice_solved');
     localStorage.removeItem('ql_practice_attempted');
-
     try {
-      for (let i = localStorage.length - 1; i >= 0; i--) {
+      const keysToRemove: string[] = [];
+      for (let i = 0; i < localStorage.length; i++) {
         const key = localStorage.key(i);
         if (
           key &&
           (key.startsWith('ql_practice_history_') ||
-            key.startsWith('ql_temp_') ||
-            key.startsWith('ql_sim_'))
+            key.startsWith('ql_code_') ||
+            key.startsWith('ql_quiz_result_'))
         ) {
-          localStorage.removeItem(key);
+          keysToRemove.push(key);
         }
       }
+      keysToRemove.forEach((k) => localStorage.removeItem(k));
     } catch {}
 
-    // 3. Reset in-memory state stores to clean initial state
-    useProgressStore.getState().resetProgress();
+    // 3. Clear Zustand stores
     useAITutorStore.getState().resetChat();
     useCircuitStore.getState().clearCircuit();
 
@@ -269,11 +271,18 @@ export function StudentProvider({ children }: { children: React.ReactNode }) {
     // 5. If on protected route, redirect to home
     if (typeof window !== 'undefined') {
       const currentPath = window.location.pathname;
-      if (currentPath.startsWith('/dashboard') || currentPath.startsWith('/instructor')) {
+      if (
+        currentPath.startsWith('/dashboard') ||
+        currentPath.startsWith('/instructor') ||
+        currentPath.startsWith('/admin')
+      ) {
         window.location.href = '/';
       }
     }
   }, []);
+
+  const isInstructor = role === 'EDUCATOR' || role === 'ADMIN' || (role as string) === 'INSTRUCTOR';
+  const isAdmin = role === 'ADMIN';
 
   return (
     <StudentContext.Provider
@@ -283,7 +292,8 @@ export function StudentProvider({ children }: { children: React.ReactNode }) {
         studentEmail,
         role,
         isIdentified: !!userId,
-        isInstructor: role === 'EDUCATOR',
+        isAdmin,
+        isInstructor,
         isLoading,
         showIdentityModal,
         openLoginModal,

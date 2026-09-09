@@ -28,11 +28,17 @@ export async function POST(req: NextRequest) {
     const passwordHash = hashPassword(trimmedPassword);
 
     // ==========================================
-    // INSTRUCTOR SPECIAL LOGIN CHECK
-    // Email: instructor@qlearn.com | Pass: qlearn123
+    // SPECIAL CREDENTIALS CHECK
+    // Admin: admin@qlearn.com | Pass: admin123
+    // Instructor: instructor@qlearn.com | Pass: qlearn123
+    // Student Demo: student@qlearn.com | Pass: student123
     // ==========================================
+    const isAdminCredentials =
+      normalizedEmail === 'admin@qlearn.com' && trimmedPassword === 'admin123';
     const isInstructorCredentials =
       normalizedEmail === 'instructor@qlearn.com' && trimmedPassword === 'qlearn123';
+    const isStudentCredentials =
+      normalizedEmail === 'student@qlearn.com' && trimmedPassword === 'student123';
 
     if (action === 'signup') {
       if (!trimmedName || trimmedName.length < 2) {
@@ -51,7 +57,7 @@ export async function POST(req: NextRequest) {
         );
       }
 
-      const role = isInstructorCredentials ? 'EDUCATOR' : 'STUDENT';
+      const role = isAdminCredentials ? 'ADMIN' : isInstructorCredentials ? 'EDUCATOR' : 'STUDENT';
 
       let user;
       if (existingUser) {
@@ -83,7 +89,8 @@ export async function POST(req: NextRequest) {
         name: user.name,
         email: user.email,
         role: user.role,
-        isInstructor: user.role === 'EDUCATOR'
+        isAdmin: user.role === 'ADMIN',
+        isInstructor: user.role === 'EDUCATOR' || user.role === 'ADMIN'
       });
 
       res.cookies.set('ql_user_id', user.id, {
@@ -106,6 +113,19 @@ export async function POST(req: NextRequest) {
         where: { email: normalizedEmail }
       });
 
+      // If admin credentials used for the first time, auto-provision
+      if (!user && isAdminCredentials) {
+        user = await (prisma.user as any).create({
+          data: {
+            name: 'System Administrator',
+            email: 'admin@qlearn.com',
+            passwordHash,
+            role: 'ADMIN',
+            lastActiveAt: new Date()
+          }
+        });
+      }
+
       // If instructor credentials used for the first time, auto-provision
       if (!user && isInstructorCredentials) {
         user = await (prisma.user as any).create({
@@ -114,6 +134,19 @@ export async function POST(req: NextRequest) {
             email: 'instructor@qlearn.com',
             passwordHash,
             role: 'EDUCATOR',
+            lastActiveAt: new Date()
+          }
+        });
+      }
+
+      // If student demo credentials used for the first time, auto-provision
+      if (!user && isStudentCredentials) {
+        user = await (prisma.user as any).create({
+          data: {
+            name: 'Alex Mercer (Student)',
+            email: 'student@qlearn.com',
+            passwordHash,
+            role: 'STUDENT',
             lastActiveAt: new Date()
           }
         });
@@ -129,13 +162,26 @@ export async function POST(req: NextRequest) {
       // Check password
       const storedHash = (user as any).passwordHash;
 
-      // Verify either matching hash or instructor override
-      if (isInstructorCredentials) {
-        // ensure instructor role is active
-        if (user.role !== 'EDUCATOR') {
+      // Verify either matching hash or admin/instructor/student override
+      if (isAdminCredentials) {
+        if (user.role !== 'ADMIN') {
+          user = await prisma.user.update({
+            where: { id: user.id },
+            data: { role: 'ADMIN', passwordHash }
+          });
+        }
+      } else if (isInstructorCredentials) {
+        if (user.role !== 'EDUCATOR' && user.role !== 'ADMIN') {
           user = await prisma.user.update({
             where: { id: user.id },
             data: { role: 'EDUCATOR', passwordHash }
+          });
+        }
+      } else if (isStudentCredentials) {
+        if (user.role !== 'STUDENT') {
+          user = await prisma.user.update({
+            where: { id: user.id },
+            data: { role: 'STUDENT', passwordHash }
           });
         }
       } else if (storedHash && storedHash !== passwordHash) {
@@ -162,7 +208,8 @@ export async function POST(req: NextRequest) {
         name: finalUser.name,
         email: finalUser.email,
         role: finalUser.role,
-        isInstructor: finalUser.role === 'EDUCATOR'
+        isAdmin: finalUser.role === 'ADMIN',
+        isInstructor: finalUser.role === 'EDUCATOR' || finalUser.role === 'ADMIN'
       });
 
       res.cookies.set('ql_user_id', finalUser.id, {

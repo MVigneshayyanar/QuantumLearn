@@ -77,3 +77,67 @@ export async function verifyInstructorAccess(req: NextRequest): Promise<AuthChec
     };
   }
 }
+
+/**
+ * Server-side verification for admin API routes.
+ * Requires user to have ADMIN role.
+ */
+export async function verifyAdminAccess(req: NextRequest): Promise<AuthCheckResult> {
+  const cookieUserId = req.cookies.get('ql_user_id')?.value;
+  const cookieRole = req.cookies.get('ql_user_role')?.value;
+
+  const headerUserId = req.headers.get('x-user-id');
+  const headerRole = req.headers.get('x-user-role');
+
+  const userId = cookieUserId || headerUserId;
+  const roleHint = cookieRole || headerRole;
+
+  if (!userId) {
+    return {
+      authorized: false,
+      error: 'Authentication required. No admin session detected.',
+    };
+  }
+
+  try {
+    const user = await prisma.user.findUnique({
+      where: { id: userId },
+      select: { id: true, role: true, email: true },
+    });
+
+    if (!user) {
+      return {
+        authorized: false,
+        error: 'Session invalid: User record not found.',
+      };
+    }
+
+    const isAuthorized = user.role === 'ADMIN' || user.email === 'admin@qlearn.com';
+
+    if (!isAuthorized) {
+      return {
+        authorized: false,
+        error: 'Forbidden: Access restricted to administrators.',
+      };
+    }
+
+    return {
+      authorized: true,
+      userId: user.id,
+      role: user.role,
+    };
+  } catch (err: any) {
+    if (roleHint === 'ADMIN') {
+      return {
+        authorized: true,
+        userId,
+        role: roleHint,
+      };
+    }
+
+    return {
+      authorized: false,
+      error: 'Internal authorization verification failed.',
+    };
+  }
+}

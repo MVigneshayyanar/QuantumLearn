@@ -54,7 +54,9 @@ export function StudentIdentityModal() {
         await register(trimmedName, trimmedEmail, trimmedPassword);
       } else {
         const res = await login(trimmedEmail, trimmedPassword);
-        if (res.isInstructor) {
+        if (res.isAdmin) {
+          router.push('/admin');
+        } else if (res.isInstructor) {
           router.push('/instructor');
         }
       }
@@ -198,6 +200,47 @@ export function StudentIdentityModal() {
             )}
           </button>
         </form>
+
+        {/* Quick Demo Credentials */}
+        {mode === 'signin' && (
+          <div className="pt-2 border-t border-dark-100 space-y-2">
+            <span className="text-[11px] font-semibold text-dark-500 block text-center">
+              Quick Sign-In Accounts:
+            </span>
+            <div className="grid grid-cols-3 gap-1.5">
+              <button
+                type="button"
+                onClick={() => {
+                  setEmail('admin@qlearn.com');
+                  setPassword('admin123');
+                }}
+                className="py-1.5 px-2 rounded-xl bg-purple-50 hover:bg-purple-100 text-purple-700 font-semibold text-[11px] border border-purple-200 transition-colors text-center"
+              >
+                Admin Demo
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  setEmail('instructor@qlearn.com');
+                  setPassword('qlearn123');
+                }}
+                className="py-1.5 px-2 rounded-xl bg-indigo-50 hover:bg-indigo-100 text-indigo-700 font-semibold text-[11px] border border-indigo-200 transition-colors text-center"
+              >
+                Instructor Demo
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  setEmail('student@qlearn.com');
+                  setPassword('student123');
+                }}
+                className="py-1.5 px-2 rounded-xl bg-primary-50 hover:bg-primary-100 text-primary-700 font-semibold text-[11px] border border-primary-200 transition-colors text-center"
+              >
+                Student Demo
+              </button>
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );

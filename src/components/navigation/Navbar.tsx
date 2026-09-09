@@ -1,6 +1,6 @@
 'use client';
 
-import React from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useAccessibility } from '@/lib/accessibility-context';
@@ -20,15 +20,36 @@ import {
   Terminal,
   LogOut,
   GraduationCap,
-  User
+  User,
+  ShieldCheck,
+  UserCheck
 } from 'lucide-react';
 
 export function Navbar() {
   const pathname = usePathname();
   const { language } = useAccessibility();
   const { isOpen, setIsOpen } = useAITutorStore();
-  const { userId, studentName, isInstructor, logout, openLoginModal } = useStudentContext();
+  const { userId, studentName, studentEmail, role, isAdmin, isInstructor, logout, openLoginModal } = useStudentContext();
   const t = translations[language];
+
+  const [profileDropdownOpen, setProfileDropdownOpen] = useState(false);
+  const profileDropdownRef = useRef<HTMLDivElement>(null);
+
+  // Close dropdown on click outside
+  useEffect(() => {
+    function handleClickOutside(event: MouseEvent) {
+      if (profileDropdownRef.current && !profileDropdownRef.current.contains(event.target as Node)) {
+        setProfileDropdownOpen(false);
+      }
+    }
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
+
+  // Close dropdown on route change
+  useEffect(() => {
+    setProfileDropdownOpen(false);
+  }, [pathname]);
 
   const navLinks = [
     { href: '/', label: t.nav.home, icon: Atom },
@@ -151,23 +172,7 @@ export function Navbar() {
           </nav>
 
           {/* AI Tutor Drawer Button & Auth Controls */}
-          <div className="flex items-center gap-1.5 lg:gap-2 shrink-0">
-            {isInstructor && (
-              <Link
-                href="/instructor"
-                className={`h-10 px-3 rounded-xl border text-xs font-bold whitespace-nowrap flex items-center gap-1.5 transition-colors shadow-2xs shrink-0 ${
-                  pathname.startsWith('/instructor')
-                    ? 'bg-primary-600 text-white border-primary-600 ring-2 ring-primary-500/20'
-                    : 'bg-primary-50 hover:bg-primary-100 text-primary-800 border-primary-200'
-                }`}
-                title="Instructor Portal & Student Analytics"
-              >
-                <GraduationCap className="w-4 h-4 text-primary-600 shrink-0" />
-                <span className="hidden xl:inline">Instructor Portal</span>
-                <span className="xl:hidden">Instructor</span>
-              </Link>
-            )}
-
+          <div className="flex items-center gap-2 shrink-0">
             <button
               type="button"
               onClick={() => setIsOpen(!isOpen)}
@@ -180,35 +185,184 @@ export function Navbar() {
             </button>
 
             {userId ? (
-              <div className="flex items-center gap-1.5 pl-1.5 border-l border-dark-200 shrink-0">
-                <Link
-                  href="/dashboard"
-                  className={`h-10 px-2.5 lg:px-3 rounded-xl border flex items-center gap-2 transition-all whitespace-nowrap shrink-0 ${
-                    pathname === '/dashboard'
-                      ? 'bg-primary-50 border-primary-300 text-primary-900 ring-2 ring-primary-500/20 shadow-xs'
-                      : 'border-dark-200 hover:border-dark-300 hover:bg-dark-50 text-dark-800'
-                  }`}
-                  title="Open Student Dashboard & Progress"
-                >
-                  <div className="w-6 h-6 rounded-lg bg-primary-600 text-white font-bold flex items-center justify-center text-xs shadow-2xs shrink-0">
-                    {(studentName || 'S').charAt(0).toUpperCase()}
-                  </div>
-                  <span className="font-semibold text-xs text-dark-900 max-w-[70px] xl:max-w-[105px] truncate">
-                    {studentName}
-                  </span>
-                  <span className="text-[10px] font-bold text-primary-700 bg-primary-100/70 border border-primary-200 px-1.5 py-0.5 rounded-md flex items-center gap-1 shrink-0">
-                    <LayoutDashboard className="w-3 h-3 text-primary-600 shrink-0" />
-                    <span className="hidden sm:inline">Dashboard</span>
-                  </span>
-                </Link>
-
+              /* Profile Dropdown Container */
+              <div className="relative pl-1.5 border-l border-dark-200 shrink-0" ref={profileDropdownRef}>
                 <button
-                  onClick={logout}
-                  title="Sign Out"
-                  className="h-10 w-10 rounded-xl border border-dark-200 hover:border-red-200 hover:bg-red-50 text-dark-400 hover:text-red-600 flex items-center justify-center transition-colors shrink-0"
+                  type="button"
+                  onClick={() => setProfileDropdownOpen((prev) => !prev)}
+                  aria-expanded={profileDropdownOpen}
+                  aria-haspopup="true"
+                  className={`h-10 px-2.5 rounded-xl border flex items-center gap-2 transition-all select-none cursor-pointer ${
+                    profileDropdownOpen
+                      ? 'bg-dark-100 border-dark-300 shadow-xs ring-2 ring-primary-500/20'
+                      : 'border-dark-200 hover:border-dark-300 hover:bg-dark-50 bg-white'
+                  }`}
+                  title="Open user profile menu"
                 >
-                  <LogOut className="w-4 h-4" />
+                  <div
+                    className={`w-7 h-7 rounded-lg text-white font-bold flex items-center justify-center text-xs shadow-2xs shrink-0 ${
+                      isAdmin
+                        ? 'bg-purple-600'
+                        : isInstructor
+                        ? 'bg-indigo-600'
+                        : 'bg-primary-600'
+                    }`}
+                  >
+                    {(studentName || 'U').charAt(0).toUpperCase()}
+                  </div>
+
+                  <div className="flex flex-col items-start text-left leading-tight hidden sm:flex">
+                    <span className="font-bold text-xs text-dark-900 max-w-[90px] xl:max-w-[120px] truncate">
+                      {studentName}
+                    </span>
+                    <span
+                      className={`text-[9px] font-bold uppercase tracking-wider ${
+                        isAdmin
+                          ? 'text-purple-700'
+                          : isInstructor
+                          ? 'text-indigo-700'
+                          : 'text-primary-700'
+                      }`}
+                    >
+                      {isAdmin ? 'Admin' : isInstructor ? 'Instructor' : 'Student'}
+                    </span>
+                  </div>
+
+                  <ChevronDown
+                    className={`w-3.5 h-3.5 text-dark-400 transition-transform duration-200 ${
+                      profileDropdownOpen ? 'rotate-180 text-dark-800' : ''
+                    }`}
+                  />
                 </button>
+
+                {/* Dropdown Floating Menu */}
+                {profileDropdownOpen && (
+                  <div className="absolute right-0 top-full mt-2 w-64 bg-white border border-dark-200 rounded-2xl shadow-xl z-50 p-2 animate-fadeIn text-xs">
+                    {/* User Header Info */}
+                    <div className="p-2.5 rounded-xl bg-dark-50/80 mb-1 border border-dark-100">
+                      <div className="flex items-center gap-2.5">
+                        <div
+                          className={`w-9 h-9 rounded-xl text-white font-bold flex items-center justify-center text-sm shadow-xs shrink-0 ${
+                            isAdmin
+                              ? 'bg-purple-600'
+                              : isInstructor
+                              ? 'bg-indigo-600'
+                              : 'bg-primary-600'
+                          }`}
+                        >
+                          {(studentName || 'U').charAt(0).toUpperCase()}
+                        </div>
+                        <div className="overflow-hidden leading-tight">
+                          <p className="font-bold text-xs text-dark-900 truncate">{studentName}</p>
+                          <p className="text-[11px] text-dark-500 font-mono truncate">{studentEmail}</p>
+                        </div>
+                      </div>
+
+                      <div className="mt-2 pt-1.5 border-t border-dark-200/60 flex items-center justify-between">
+                        <span className="text-[10px] text-dark-500 font-medium">Role:</span>
+                        <span
+                          className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${
+                            isAdmin
+                              ? 'bg-purple-100 text-purple-800'
+                              : isInstructor
+                              ? 'bg-indigo-100 text-indigo-800'
+                              : 'bg-primary-100 text-primary-800'
+                          }`}
+                        >
+                          {isAdmin ? 'System Administrator' : isInstructor ? 'Verified Instructor' : 'Student Learner'}
+                        </span>
+                      </div>
+                    </div>
+
+                    {/* Role-Specific Navigation Menu Items */}
+                    <div className="py-1 space-y-0.5">
+                      {/* ADMIN ROLE */}
+                      {isAdmin ? (
+                        <Link
+                          href="/admin"
+                          onClick={() => setProfileDropdownOpen(false)}
+                          className={`flex items-center gap-2.5 px-3 py-2 rounded-xl transition-colors ${
+                            pathname.startsWith('/admin')
+                              ? 'bg-purple-50 text-purple-900 font-bold border border-purple-200/60'
+                              : 'text-dark-700 hover:bg-dark-100 hover:text-dark-900'
+                          }`}
+                        >
+                          <ShieldCheck className="w-4 h-4 text-purple-600 shrink-0" />
+                          <div className="flex flex-col">
+                            <span className="font-semibold text-xs text-dark-900">Admin Dashboard</span>
+                            <span className="text-[10px] text-dark-500">User & cohort management</span>
+                          </div>
+                        </Link>
+                      ) : isInstructor ? (
+                        /* INSTRUCTOR ROLE */
+                        <>
+                          <Link
+                            href="/dashboard"
+                            onClick={() => setProfileDropdownOpen(false)}
+                            className={`flex items-center gap-2.5 px-3 py-2 rounded-xl transition-colors ${
+                              pathname === '/dashboard'
+                                ? 'bg-primary-50 text-primary-900 font-bold border border-primary-200/60'
+                                : 'text-dark-700 hover:bg-dark-100 hover:text-dark-900'
+                            }`}
+                          >
+                            <LayoutDashboard className="w-4 h-4 text-primary-600 shrink-0" />
+                            <div className="flex flex-col">
+                              <span className="font-semibold text-xs text-dark-900">Personal Record</span>
+                              <span className="text-[10px] text-dark-500">Your personal learning journey</span>
+                            </div>
+                          </Link>
+
+                          <Link
+                            href="/instructor"
+                            onClick={() => setProfileDropdownOpen(false)}
+                            className={`flex items-center gap-2.5 px-3 py-2 rounded-xl transition-colors ${
+                              pathname.startsWith('/instructor')
+                                ? 'bg-indigo-50 text-indigo-900 font-bold border border-indigo-200/60'
+                                : 'text-dark-700 hover:bg-dark-100 hover:text-dark-900'
+                            }`}
+                          >
+                            <GraduationCap className="w-4 h-4 text-indigo-600 shrink-0" />
+                            <div className="flex flex-col">
+                              <span className="font-semibold text-xs text-dark-900">Student Record</span>
+                              <span className="text-[10px] text-dark-500">Class roster & AI analytics</span>
+                            </div>
+                          </Link>
+                        </>
+                      ) : (
+                        /* NORMAL USER / STUDENT ROLE */
+                        <Link
+                          href="/dashboard"
+                          onClick={() => setProfileDropdownOpen(false)}
+                          className={`flex items-center gap-2.5 px-3 py-2 rounded-xl transition-colors ${
+                            pathname === '/dashboard'
+                              ? 'bg-primary-50 text-primary-900 font-bold border border-primary-200/60'
+                              : 'text-dark-700 hover:bg-dark-100 hover:text-dark-900'
+                          }`}
+                        >
+                          <LayoutDashboard className="w-4 h-4 text-primary-600 shrink-0" />
+                          <div className="flex flex-col">
+                            <span className="font-semibold text-xs text-dark-900">Dashboard</span>
+                            <span className="text-[10px] text-dark-500">Your learning & progress</span>
+                          </div>
+                        </Link>
+                      )}
+                    </div>
+
+                    {/* Sign Out Action */}
+                    <div className="pt-1 mt-1 border-t border-dark-100">
+                      <button
+                        onClick={() => {
+                          setProfileDropdownOpen(false);
+                          logout();
+                        }}
+                        className="w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-dark-600 hover:text-red-600 hover:bg-red-50 transition-colors font-semibold text-xs"
+                      >
+                        <LogOut className="w-4 h-4 text-dark-400 group-hover:text-red-600" />
+                        <span>Sign Out</span>
+                      </button>
+                    </div>
+                  </div>
+                )}
               </div>
             ) : (
               <div className="flex items-center gap-2 pl-2 border-l border-dark-200 shrink-0">
@@ -272,15 +426,23 @@ export function Navbar() {
       {/* Profile & Dashboard combined */}
       {userId ? (
         <Link
-          href="/dashboard"
+          href={isAdmin ? '/admin' : isInstructor ? '/instructor' : '/dashboard'}
           className={`flex flex-col items-center justify-center w-full h-full gap-1 transition-colors ${
-            pathname === '/dashboard' ? 'text-primary-600' : 'text-dark-500 hover:text-dark-700'
+            pathname === '/dashboard' || pathname.startsWith('/admin') || pathname.startsWith('/instructor')
+              ? 'text-primary-600'
+              : 'text-dark-500 hover:text-dark-700'
           }`}
         >
-          <div className="w-5 h-5 rounded-full bg-primary-600 text-white flex items-center justify-center text-[10px] font-bold">
-            {(studentName || 'S').charAt(0).toUpperCase()}
+          <div
+            className={`w-5 h-5 rounded-full text-white flex items-center justify-center text-[10px] font-bold ${
+              isAdmin ? 'bg-purple-600' : isInstructor ? 'bg-indigo-600' : 'bg-primary-600'
+            }`}
+          >
+            {(studentName || 'U').charAt(0).toUpperCase()}
           </div>
-          <span className="text-[10px] font-medium">Dashboard</span>
+          <span className="text-[10px] font-medium">
+            {isAdmin ? 'Admin' : isInstructor ? 'Class' : 'Dashboard'}
+          </span>
         </Link>
       ) : (
         <button
