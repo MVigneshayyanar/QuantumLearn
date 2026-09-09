@@ -2,15 +2,13 @@
 
 import React from 'react';
 import { usePathname } from 'next/navigation';
-import { useAccessibility, FontSizeOption, ExplanationMode, Language } from '@/lib/accessibility-context';
+import { useAccessibility, ExplanationMode, Language } from '@/lib/accessibility-context';
 import { translations } from '@/lib/i18n';
-import { Type, Sparkles, BookOpen, Activity, Globe, HelpCircle } from 'lucide-react';
+import { Sparkles, BookOpen, Activity, Globe, HelpCircle } from 'lucide-react';
 
 export function AccessibilityBar() {
   const pathname = usePathname();
   const {
-    fontSize,
-    setFontSize,
     explanationMode,
     setExplanationMode,
     reducedMotion,
@@ -68,32 +66,8 @@ export function AccessibilityBar() {
           </div>
         </div>
 
-        {/* Right: Font size, Reduced motion, Language, Qubit Primer */}
+        {/* Right: Reduced motion, Language, Qubit Primer */}
         <div className="flex items-center flex-wrap gap-4">
-          {/* Font Size Scaling */}
-          <div className="flex items-center space-x-1">
-            <Type className="w-3.5 h-3.5 text-dark-500" aria-hidden="true" />
-            <span className="sr-only">{t.a11y.fontSize}</span>
-            <div className="flex items-center space-x-0.5 bg-white border border-dark-200 rounded p-0.5">
-              {(['sm', 'md', 'lg', 'xl'] as FontSizeOption[]).map((size) => (
-                <button
-                  key={size}
-                  type="button"
-                  onClick={() => setFontSize(size)}
-                  aria-pressed={fontSize === size}
-                  className={`w-6 h-5 flex items-center justify-center rounded text-[11px] font-medium uppercase ${
-                    fontSize === size
-                      ? 'bg-dark-900 text-white'
-                      : 'text-dark-600 hover:bg-dark-100'
-                  }`}
-                  title={`Set text size: ${size}`}
-                >
-                  {size}
-                </button>
-              ))}
-            </div>
-          </div>
-
           {/* Reduced Motion Toggle */}
           <button
             type="button"

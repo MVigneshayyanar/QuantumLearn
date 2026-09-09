@@ -32,9 +32,9 @@ export function Navbar() {
 
   const navLinks = [
     { href: '/', label: t.nav.home, icon: Atom },
-    { href: '/simulator', label: t.nav.simulator, icon: Cpu },
-    { href: '/practice', label: t.nav.practice, icon: Terminal },
     { href: '/bloch-sphere', label: t.nav.blochSphere, icon: Globe },
+    { href: '/practice', label: t.nav.practice, icon: Terminal },
+    { href: '/simulator', label: t.nav.simulator, icon: Cpu },
   ];
 
   const algoLinks = [
@@ -240,13 +240,13 @@ export function Navbar() {
       </Link>
 
       <Link
-        href="/simulator"
+        href="/bloch-sphere"
         className={`flex flex-col items-center justify-center w-full h-full gap-1 transition-colors ${
-          pathname === '/simulator' ? 'text-primary-600' : 'text-dark-500 hover:text-dark-700'
+          pathname === '/bloch-sphere' ? 'text-primary-600' : 'text-dark-500 hover:text-dark-700'
         }`}
       >
-        <Cpu className="w-5 h-5" />
-        <span className="text-[10px] font-medium">Simulator</span>
+        <Globe className="w-5 h-5" />
+        <span className="text-[10px] font-medium">Bloch Sphere</span>
       </Link>
 
       <Link
