@@ -104,82 +104,70 @@ export function BlochSphere3D({
     containerRef.current.innerHTML = '';
     containerRef.current.appendChild(renderer.domElement);
 
-    // Lighting
-    const ambientLight = new THREE.AmbientLight(0xffffff, 0.9);
+    // Lighting (ambient 1.3, directional 2.0 at [3, 4, 5])
+    const ambientLight = new THREE.AmbientLight(0xffffff, 1.3);
     scene.add(ambientLight);
-    const dirLight = new THREE.DirectionalLight(0xffffff, 0.7);
-    dirLight.position.set(5, 10, 7);
+    const dirLight = new THREE.DirectionalLight(0xffffff, 2.0);
+    dirLight.position.set(3, 4, 5);
     scene.add(dirLight);
 
     // Main Sphere Wireframe & Translucent Surface
     const sphereRadius = 1.0;
     const isEntangled = !bloch || !bloch.is_pure;
 
-    // Outer translucent shell
-    const sphereGeo = new THREE.SphereGeometry(sphereRadius, 36, 36);
-    const sphereMat = new THREE.MeshPhongMaterial({
+    // 1. Transparent sphere shell
+    const sphereGeo = new THREE.SphereGeometry(sphereRadius, 48, 32);
+    const sphereMat = new THREE.MeshStandardMaterial({
       color: isEntangled ? 0x94a3b8 : 0x818cf8,
       transparent: true,
       opacity: isEntangled ? 0.08 : 0.16,
       depthWrite: false,
-      shininess: 35
+      side: THREE.DoubleSide,
+      roughness: 0.4
     });
     const sphereMesh = new THREE.Mesh(sphereGeo, sphereMat);
     scene.add(sphereMesh);
 
-    // Equator ring (XZ plane in Three.js = XY plane in physics)
+    // 2. Latitude and longitude grid (wireframe)
+    const gridGeo = new THREE.SphereGeometry(sphereRadius, 20, 12);
+    const gridMat = new THREE.MeshBasicMaterial({
+      color: isEntangled ? 0x94a3b8 : 0x818cf8,
+      wireframe: true,
+      transparent: true,
+      opacity: isEntangled ? 0.12 : 0.22
+    });
+    const gridMesh = new THREE.Mesh(gridGeo, gridMat);
+    scene.add(gridMesh);
+
+    // 3. Equator (smooth circle of 97 points)
     const equatorGeo = new THREE.BufferGeometry();
     const equatorPoints: THREE.Vector3[] = [];
-    for (let i = 0; i <= 64; i++) {
-      const angle = (i / 64) * Math.PI * 2;
+    const eqSteps = 96;
+    for (let i = 0; i <= eqSteps; i++) {
+      const angle = (i / eqSteps) * Math.PI * 2;
       equatorPoints.push(new THREE.Vector3(Math.cos(angle) * sphereRadius, 0, Math.sin(angle) * sphereRadius));
     }
     equatorGeo.setFromPoints(equatorPoints);
-    const ringMat = new THREE.LineBasicMaterial({ color: 0xa5b4fc, transparent: true, opacity: 0.5 });
+    const ringMat = new THREE.LineBasicMaterial({ color: 0xa5b4fc, linewidth: 1.3, transparent: true, opacity: 0.6 });
     const equatorLine = new THREE.Line(equatorGeo, ringMat);
     scene.add(equatorLine);
 
-    // Meridian ring (XY plane in Three.js = XZ plane in physics)
-    const meridianGeo = new THREE.BufferGeometry();
-    const meridianPoints: THREE.Vector3[] = [];
-    for (let i = 0; i <= 64; i++) {
-      const angle = (i / 64) * Math.PI * 2;
-      meridianPoints.push(new THREE.Vector3(Math.cos(angle) * sphereRadius, Math.sin(angle) * sphereRadius, 0));
-    }
-    meridianGeo.setFromPoints(meridianPoints);
-    const meridianLine = new THREE.Line(meridianGeo, ringMat);
-    scene.add(meridianLine);
-
-    // Complete 6 Axes: ±Z (Vertical), ±X (Horizontal), ±Y (Depth)
+    // 4. Coordinate axes (slender lines through origin)
     const axisGroup = new THREE.Group();
-    const axisMat = new THREE.LineBasicMaterial({ color: 0x64748b, transparent: true, opacity: 0.75 });
-    const axisArrowMat = new THREE.MeshBasicMaterial({ color: 0x475569 });
+    const axisMat = new THREE.LineBasicMaterial({ color: 0x64748b, linewidth: 1, transparent: true, opacity: 0.75 });
+    const axisLimit = 1.25;
 
-    const axisLimit = 1.35;
-    const coneGeo = new THREE.ConeGeometry(0.04, 0.1, 16);
-
-    // Helper to create an axis with arrow head
-    const addAxis = (from: THREE.Vector3, to: THREE.Vector3, conePos: THREE.Vector3, coneRot: THREE.Euler) => {
+    const addAxisLine = (from: THREE.Vector3, to: THREE.Vector3) => {
       const lineGeo = new THREE.BufferGeometry().setFromPoints([from, to]);
       axisGroup.add(new THREE.Line(lineGeo, axisMat));
-
-      const cone = new THREE.Mesh(coneGeo, axisArrowMat);
-      cone.position.copy(conePos);
-      cone.rotation.copy(coneRot);
-      axisGroup.add(cone);
     };
 
-    // +Z & -Z Axis (Vertical in Three.js)
-    addAxis(new THREE.Vector3(0, 0, 0), new THREE.Vector3(0, axisLimit, 0), new THREE.Vector3(0, axisLimit, 0), new THREE.Euler(0, 0, 0));
-    addAxis(new THREE.Vector3(0, 0, 0), new THREE.Vector3(0, -axisLimit, 0), new THREE.Vector3(0, -axisLimit, 0), new THREE.Euler(Math.PI, 0, 0));
-
-    // +X & -X Axis (Horizontal in Three.js)
-    addAxis(new THREE.Vector3(0, 0, 0), new THREE.Vector3(axisLimit, 0, 0), new THREE.Vector3(axisLimit, 0, 0), new THREE.Euler(0, 0, -Math.PI / 2));
-    addAxis(new THREE.Vector3(0, 0, 0), new THREE.Vector3(-axisLimit, 0, 0), new THREE.Vector3(-axisLimit, 0, 0), new THREE.Euler(0, 0, Math.PI / 2));
-
-    // +Y & -Y Axis (Depth in Three.js)
-    addAxis(new THREE.Vector3(0, 0, 0), new THREE.Vector3(0, 0, axisLimit), new THREE.Vector3(0, 0, axisLimit), new THREE.Euler(Math.PI / 2, 0, 0));
-    addAxis(new THREE.Vector3(0, 0, 0), new THREE.Vector3(0, 0, -axisLimit), new THREE.Vector3(0, 0, -axisLimit), new THREE.Euler(-Math.PI / 2, 0, 0));
+    // Z Axis (vertical in Three.js)
+    addAxisLine(new THREE.Vector3(0, -axisLimit, 0), new THREE.Vector3(0, axisLimit, 0));
+    // X Axis (horizontal in Three.js)
+    addAxisLine(new THREE.Vector3(-axisLimit, 0, 0), new THREE.Vector3(axisLimit, 0, 0));
+    // Y Axis (depth in Three.js)
+    addAxisLine(new THREE.Vector3(0, 0, -axisLimit), new THREE.Vector3(0, 0, axisLimit));
 
     scene.add(axisGroup);
 
@@ -195,19 +183,41 @@ export function BlochSphere3D({
       const tx = bloch.x * sphereRadius;
       const ty = bloch.z * sphereRadius; // Physics Z is vertical in Three.js
       const tz = bloch.y * sphereRadius; // Physics Y is depth in Three.js
+      const endpoint = new THREE.Vector3(tx, ty, tz);
+      const length = endpoint.length();
 
-      // Needle shaft
-      const needlePoints = [new THREE.Vector3(0, 0, 0), new THREE.Vector3(tx, ty, tz)];
+      // Needle shaft line
+      const needlePoints = [new THREE.Vector3(0, 0, 0), endpoint];
       const needleGeo = new THREE.BufferGeometry().setFromPoints(needlePoints);
       const needleMat = new THREE.LineBasicMaterial({ color: 0x4f46e5, linewidth: 3 });
       const needleLine = new THREE.Line(needleGeo, needleMat);
       needleGroup.add(needleLine);
 
-      // Needle tip sphere / arrow head
-      const tipGeo = new THREE.SphereGeometry(0.065, 16, 16);
-      const tipMat = new THREE.MeshStandardMaterial({ color: 0x4f46e5, roughness: 0.2 });
+      // State-vector arrow cone
+      if (length > 0.00001) {
+        const direction = endpoint.clone().normalize();
+        const arrowHeight = Math.min(0.16, length * 0.35);
+        const arrowRadius = Math.min(0.055, length * 0.15);
+        const arrowPosition = endpoint.clone().addScaledVector(direction, -arrowHeight / 2);
+        const rotation = new THREE.Quaternion().setFromUnitVectors(new THREE.Vector3(0, 1, 0), direction);
+
+        const coneGeo = new THREE.ConeGeometry(arrowRadius, arrowHeight, 24);
+        const coneMat = new THREE.MeshStandardMaterial({ color: 0x4f46e5, roughness: 0.3 });
+        const coneMesh = new THREE.Mesh(coneGeo, coneMat);
+        coneMesh.position.copy(arrowPosition);
+        coneMesh.quaternion.copy(rotation);
+        needleGroup.add(coneMesh);
+      }
+
+      // State-vector endpoint sphere
+      const tipGeo = new THREE.SphereGeometry(0.04, 20, 20);
+      const tipMat = new THREE.MeshStandardMaterial({
+        color: 0x4f46e5,
+        emissive: 0x4f46e5,
+        emissiveIntensity: 0.2
+      });
       const tipMesh = new THREE.Mesh(tipGeo, tipMat);
-      tipMesh.position.set(tx, ty, tz);
+      tipMesh.position.copy(endpoint);
       needleGroup.add(tipMesh);
 
       // Trajectory projection point on equator plane
