@@ -91,18 +91,18 @@ export default function HomePage() {
   ];
 
   return (
-    <div className="space-y-16 py-6">
+    <div className="space-y-12 sm:space-y-16 py-4 sm:py-6 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
       {/* Hero Section */}
-      <section className="w-full mx-auto px-8 pt-2">
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 items-center">
+      <section className="w-full pt-2">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-10 xl:gap-12 items-center">
           {/* Hero Left Content */}
-          <div className="lg:col-span-7 space-y-6">
+          <div className="lg:col-span-7 space-y-5 sm:space-y-6">
             <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-primary-50 border border-primary-200 text-xs font-semibold text-primary-800">
               <Sparkles className="w-3.5 h-3.5 text-primary-600" />
               <span>{t.hero.badge}</span>
             </div>
 
-            <h1 className="text-4xl sm:text-5xl lg:text-6xl font-extrabold text-dark-900 tracking-tight leading-[1.1]">
+            <h1 className="text-3xl sm:text-4xl lg:text-[42px] xl:text-5xl font-extrabold text-dark-900 tracking-tight leading-[1.15]">
               {t.hero.title}
             </h1>
 
@@ -218,8 +218,8 @@ export default function HomePage() {
       </section>
 
       {/* What is Quantum? Focused Educational Section */}
-      <section id="what-is-quantum" className="w-full mx-auto px-8 scroll-mt-6">
-        <div className="bg-white rounded-3xl border border-dark-200 p-6 sm:p-10 shadow-card space-y-6">
+      <section id="what-is-quantum" className="w-full scroll-mt-6">
+        <div className="bg-white rounded-3xl border border-dark-200 p-5 sm:p-8 lg:p-10 shadow-card space-y-6">
           {/* Header with Explanation Mode Switcher */}
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-dark-100 pb-5">
             <div className="space-y-1.5">
@@ -356,7 +356,7 @@ export default function HomePage() {
       </section>
 
       {/* 4 Core Algorithm Modules Grid */}
-      <section className="w-full mx-auto px-8">
+      <section className="w-full">
         <div className="flex flex-col sm:flex-row sm:items-end justify-between mb-8 gap-4">
           <div>
             <span className="text-xs font-semibold px-3 py-1 rounded-full bg-primary-50 text-primary-700 border border-primary-100">
@@ -443,8 +443,8 @@ export default function HomePage() {
       </section>
 
       {/* Accessibility & Inclusive Education Feature Section */}
-      <section className="bg-white border-y border-dark-200 py-16">
-        <div className="w-full mx-auto px-8">
+      <section className="bg-white border-y border-dark-200 py-12 sm:py-16 -mx-4 sm:-mx-6 lg:-mx-8 px-4 sm:px-6 lg:px-8">
+        <div className="w-full max-w-7xl mx-auto">
           <div className="text-center max-w-2xl mx-auto mb-12 space-y-3">
             <span className="text-xs font-semibold px-3 py-1 rounded-full bg-primary-50 text-primary-700">
               Adaptive Quantum Education
