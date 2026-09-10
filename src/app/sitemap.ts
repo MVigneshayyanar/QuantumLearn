@@ -1,11 +1,12 @@
 import { MetadataRoute } from 'next';
+import { PRACTICE_PROBLEMS } from '@/lib/practice-problems';
 
-const BASE_URL = process.env.NEXT_PUBLIC_SITE_URL || 'https://qlearn.tech';
+const BASE_URL = process.env.NEXT_PUBLIC_SITE_URL || 'https://www.qlearn.tech';
 
 export default function sitemap(): MetadataRoute.Sitemap {
   const currentDate = new Date().toISOString();
 
-  return [
+  const coreRoutes: MetadataRoute.Sitemap = [
     {
       url: `${BASE_URL}`,
       lastModified: currentDate,
@@ -61,4 +62,13 @@ export default function sitemap(): MetadataRoute.Sitemap {
       priority: 0.8,
     },
   ];
+
+  const practiceProblemRoutes: MetadataRoute.Sitemap = PRACTICE_PROBLEMS.map((problem) => ({
+    url: `${BASE_URL}/practice/${problem.id}`,
+    lastModified: currentDate,
+    changeFrequency: 'weekly',
+    priority: 0.75,
+  }));
+
+  return [...coreRoutes, ...practiceProblemRoutes];
 }

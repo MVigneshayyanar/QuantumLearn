@@ -16,6 +16,8 @@ import {
   softwareApplicationSchema,
   courseSchemaList,
   faqSchema,
+  algorithmListSchema,
+  howToSchema,
   siteUrl,
 } from '@/lib/seo-schema';
 
@@ -139,7 +141,13 @@ export default function RootLayout({
   return (
     <html lang="en" data-font-size="md">
       <head>
-        {/* Structured Data: Schema.org WebSite */}
+        {/* Performance: DNS prefetch & preconnect for faster LCP (Core Web Vitals = ranking signal) */}
+        <link rel="dns-prefetch" href="//fonts.googleapis.com" />
+        <link rel="dns-prefetch" href="//fonts.gstatic.com" />
+        <link rel="preconnect" href="https://fonts.googleapis.com" />
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
+
+        {/* Structured Data: Schema.org WebSite (Sitelinks SearchBox) */}
         <script
           type="application/ld+json"
           dangerouslySetInnerHTML={{ __html: JSON.stringify(websiteSchema) }}
@@ -149,17 +157,27 @@ export default function RootLayout({
           type="application/ld+json"
           dangerouslySetInnerHTML={{ __html: JSON.stringify(organizationSchema) }}
         />
-        {/* Structured Data: SoftwareApplication */}
+        {/* Structured Data: SoftwareApplication (EducationalApplication) */}
         <script
           type="application/ld+json"
           dangerouslySetInnerHTML={{ __html: JSON.stringify(softwareApplicationSchema) }}
         />
-        {/* Structured Data: Course Catalog */}
+        {/* Structured Data: Course Catalog × 5 */}
         <script
           type="application/ld+json"
           dangerouslySetInnerHTML={{ __html: JSON.stringify(courseSchemaList) }}
         />
-        {/* Structured Data: Quantum FAQ Rich Snippets */}
+        {/* Structured Data: Algorithm ItemList (carousel rich snippets) */}
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(algorithmListSchema) }}
+        />
+        {/* Structured Data: HowTo — How to use the quantum circuit simulator */}
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(howToSchema) }}
+        />
+        {/* Structured Data: Expanded FAQ Rich Snippets (10 Q&As) */}
         <script
           type="application/ld+json"
           dangerouslySetInnerHTML={{ __html: JSON.stringify(faqSchema) }}
