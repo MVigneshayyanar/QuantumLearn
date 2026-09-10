@@ -28,6 +28,8 @@ import {
 } from 'lucide-react';
 import { useStudentContext } from '@/lib/student-context';
 import { ResponsiveContainer, BarChart, Bar, XAxis, YAxis, Tooltip, Cell } from 'recharts';
+import { MISCONCEPTION_GUIDES } from '@/lib/ai-engine';
+import { MisconceptionTag } from '@/lib/types';
 
 interface ModuleStat {
   moduleSlug: string;
@@ -317,12 +319,16 @@ export default function InstructorDashboard() {
     students: m.totalStudents,
   })) || [];
 
-  const misconceptionChartData = misconceptions?.aggregatedByTag?.slice(0, 8).map((m) => ({
-    name: m.tag.replace(/_/g, ' ').substring(0, 20),
-    fullName: m.tag,
-    count: m.totalCount,
-    students: m.studentCount,
-  })) || [];
+  const misconceptionChartData = misconceptions?.aggregatedByTag?.slice(0, 8).map((m) => {
+    const guideName = MISCONCEPTION_GUIDES[m.tag as MisconceptionTag]?.name;
+    const cleanName = guideName || m.tag.split('_').map((w) => w.charAt(0).toUpperCase() + w.slice(1).toLowerCase()).join(' ');
+    return {
+      name: cleanName.substring(0, 22),
+      fullName: cleanName,
+      count: m.totalCount,
+      students: m.studentCount,
+    };
+  }) || [];
 
   return (
     <div className="w-full mx-auto px-6 sm:px-8 py-4 space-y-4 animate-fadeIn">
@@ -528,8 +534,9 @@ export default function InstructorDashboard() {
                     </td>
                     <td className="py-2.5 pr-4 font-mono text-dark-600">{q.questionId}</td>
                     <td className="py-2.5 pr-4">
-                      <span className="px-2 py-0.5 rounded-full bg-amber-50 text-amber-800 font-mono text-[11px] border border-amber-200">
-                        {q.misconceptionTag}
+                      <span className="px-2.5 py-1 rounded-lg bg-amber-50 text-amber-900 font-medium text-xs border border-amber-200">
+                        {MISCONCEPTION_GUIDES[q.misconceptionTag as MisconceptionTag]?.name ||
+                          q.misconceptionTag.split('_').map((w) => w.charAt(0).toUpperCase() + w.slice(1).toLowerCase()).join(' ')}
                       </span>
                     </td>
                     <td className="py-2.5 text-right font-bold text-dark-900">{q.count}</td>

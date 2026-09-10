@@ -3829,3 +3829,163 @@ export function evaluatePracticeSubmission(
     executionTimeMs: execTime
   };
 }
+
+/**
+ * getSkillBaseProblems
+ * ─────────────────────────────────────────────────────────────────────────────
+ * Returns a curated list of 10 practice problems for Stage 6 (Skill Base) of
+ * a given algorithm module:  4 Easy + 4 Medium + 2 Hard.
+ *
+ * Selection strategy:
+ *  1. Filter PRACTICE_PROBLEMS where algorithms array includes moduleSlug.
+ *  2. If a difficulty tier has fewer problems than needed, supplement with
+ *     Foundation-tagged problems from the same difficulty.
+ *  3. Hard-code well-known curations per algorithm for guaranteed quality.
+ */
+export function getSkillBaseProblems(
+  moduleSlug: string,
+  counts: { easy: number; medium: number; hard: number } = { easy: 4, medium: 4, hard: 2 }
+): PracticeProblem[] {
+  // Predefined curations per algorithm for best quality
+  const CURATION: Record<string, { easy: string[]; medium: string[]; hard: string[] }> = {
+    'deutsch-jozsa': {
+      easy: [
+        'prob-superposition',
+        'prob-minus-state',
+        'prob-pauli-y-flip',
+        'prob-hadamard-reversibility'
+      ],
+      medium: [
+        'prob-clifford-h-s-h',
+        'prob-deutsch-jozsa-constant',
+        'prob-deutsch-jozsa-balanced',
+        'prob-phase-kickback-demo'
+      ],
+      hard: [
+        'prob-deutsch-jozsa-n-bit',
+        'prob-oracle-synthesis'
+      ]
+    },
+    'grover': {
+      easy: [
+        'prob-superposition',
+        'prob-minus-state',
+        'prob-2qubit-uniform',
+        'prob-pauli-y-flip'
+      ],
+      medium: [
+        'prob-grover-oracle-11',
+        'prob-grover-oracle-00',
+        'prob-grover-diffusion',
+        'prob-phase-inversion-cz'
+      ],
+      hard: [
+        'prob-grover-full-search',
+        'prob-grover-multi-target'
+      ]
+    },
+    'teleportation': {
+      easy: [
+        'prob-bell-state',
+        'prob-bell-phi-minus',
+        'prob-superposition',
+        'prob-pauli-y-flip'
+      ],
+      medium: [
+        'prob-bell-psi-plus',
+        'prob-bell-psi-minus',
+        'prob-teleportation-resource',
+        'prob-alice-bell-coupling'
+      ],
+      hard: [
+        'prob-teleportation-full',
+        'prob-ghz-state'
+      ]
+    },
+    'superdense-coding': {
+      easy: [
+        'prob-bell-state',
+        'prob-bell-phi-minus',
+        'prob-superposition',
+        'prob-minus-state'
+      ],
+      medium: [
+        'prob-bell-psi-plus',
+        'prob-bell-psi-minus',
+        'prob-superdense-encode-10',
+        'prob-superdense-encode-01'
+      ],
+      hard: [
+        'prob-superdense-full-decode',
+        'prob-superdense-encode-11'
+      ]
+    }
+  };
+
+  const curation = CURATION[moduleSlug];
+  if (!curation) {
+    // Fallback: pick first 10 from all problems
+    const all = PRACTICE_PROBLEMS.filter(p =>
+      p.algorithms?.includes(moduleSlug as AlgorithmSlug)
+    );
+    return all.slice(0, 10);
+  }
+
+  const findById = (id: string) => PRACTICE_PROBLEMS.find(p => p.id === id);
+  const findByDiff = (diff: ProblemDifficulty, exclude: Set<string>) =>
+    PRACTICE_PROBLEMS.filter(p =>
+      p.difficulty === diff &&
+      p.algorithms?.some(a => a === moduleSlug || a === 'foundations') &&
+      !exclude.has(p.id)
+    );
+
+  const result: PracticeProblem[] = [];
+  const usedIds = new Set<string>();
+
+  const addFromList = (ids: string[], needed: number) => {
+    for (const id of ids) {
+      if (result.length >= needed) break;
+      const p = findById(id);
+      if (p && !usedIds.has(id)) {
+        result.push(p);
+        usedIds.add(id);
+      }
+    }
+  };
+
+  const easyTarget = result.length + counts.easy;
+  addFromList(curation.easy, easyTarget);
+  // Supplement Easy if needed
+  if (result.length < easyTarget) {
+    const extras = findByDiff('Easy', usedIds);
+    for (const p of extras) {
+      if (result.length >= easyTarget) break;
+      result.push(p);
+      usedIds.add(p.id);
+    }
+  }
+
+  const mediumTarget = result.length + counts.medium;
+  addFromList(curation.medium, mediumTarget);
+  if (result.length < mediumTarget) {
+    const extras = findByDiff('Medium', usedIds);
+    for (const p of extras) {
+      if (result.length >= mediumTarget) break;
+      result.push(p);
+      usedIds.add(p.id);
+    }
+  }
+
+  const hardTarget = result.length + counts.hard;
+  addFromList(curation.hard, hardTarget);
+  if (result.length < hardTarget) {
+    const extras = findByDiff('Hard', usedIds);
+    for (const p of extras) {
+      if (result.length >= hardTarget) break;
+      result.push(p);
+      usedIds.add(p.id);
+    }
+  }
+
+  return result;
+}

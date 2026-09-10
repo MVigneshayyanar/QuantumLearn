@@ -22,10 +22,16 @@ interface StudentContextValue {
   isIdentified: boolean;
   isAdmin: boolean;
   isInstructor: boolean;
+  isPremium: boolean;
   isLoading: boolean;
   showIdentityModal: boolean;
+  showSubscriptionModal: boolean;
   openLoginModal: (callback?: (id?: string) => void) => void;
   closeLoginModal: () => void;
+  openSubscriptionModal: () => void;
+  closeSubscriptionModal: () => void;
+  upgradeToPremium: () => void;
+  downgradeToFree: () => void;
   login: (email: string, password: string) => Promise<{ isInstructor: boolean; isAdmin: boolean; userId: string }>;
   register: (name: string, email: string, password: string) => Promise<{ userId: string }>;
   logout: () => void;
@@ -39,10 +45,16 @@ const StudentContext = createContext<StudentContextValue>({
   isIdentified: false,
   isAdmin: false,
   isInstructor: false,
+  isPremium: false,
   isLoading: true,
   showIdentityModal: false,
+  showSubscriptionModal: false,
   openLoginModal: () => {},
   closeLoginModal: () => {},
+  openSubscriptionModal: () => {},
+  closeSubscriptionModal: () => {},
+  upgradeToPremium: () => {},
+  downgradeToFree: () => {},
   login: async () => ({ isInstructor: false, isAdmin: false, userId: '' }),
   register: async () => ({ userId: '' }),
   logout: () => {},
@@ -56,6 +68,7 @@ const LS_STUDENT_ID = 'ql_student_id';
 const LS_STUDENT_NAME = 'ql_student_name';
 const LS_STUDENT_EMAIL = 'ql_student_email';
 const LS_STUDENT_ROLE = 'ql_student_role';
+const LS_STUDENT_PREMIUM = 'ql_is_premium';
 
 async function syncUserProgressToStore(uid: string) {
   try {
@@ -83,8 +96,10 @@ export function StudentProvider({ children }: { children: React.ReactNode }) {
   const [studentName, setStudentName] = useState<string | null>(null);
   const [studentEmail, setStudentEmail] = useState<string | null>(null);
   const [role, setRole] = useState<UserRole | null>(null);
+  const [isPremium, setIsPremium] = useState<boolean>(false);
   const [isLoading, setIsLoading] = useState(true);
   const [showIdentityModal, setShowIdentityModal] = useState(false);
+  const [showSubscriptionModal, setShowSubscriptionModal] = useState(false);
 
   // Synchronous ref to prevent stale closures from checking outdated null state
   const userIdRef = useRef<string | null>(null);
@@ -99,6 +114,12 @@ export function StudentProvider({ children }: { children: React.ReactNode }) {
       const storedName = localStorage.getItem(LS_STUDENT_NAME);
       const storedEmail = localStorage.getItem(LS_STUDENT_EMAIL);
       const storedRole = (localStorage.getItem(LS_STUDENT_ROLE) as UserRole) || 'STUDENT';
+      const storedPremium =
+        localStorage.getItem(LS_STUDENT_PREMIUM) === 'true' ||
+        storedRole === 'ADMIN' ||
+        storedRole === 'EDUCATOR';
+
+      setIsPremium(storedPremium);
 
       if (storedId) {
         userIdRef.current = storedId;
@@ -141,6 +162,25 @@ export function StudentProvider({ children }: { children: React.ReactNode }) {
   const closeLoginModal = useCallback(() => {
     setShowIdentityModal(false);
     pendingActionRef.current = null;
+  }, []);
+
+  const openSubscriptionModal = useCallback(() => {
+    setShowSubscriptionModal(true);
+  }, []);
+
+  const closeSubscriptionModal = useCallback(() => {
+    setShowSubscriptionModal(false);
+  }, []);
+
+  const upgradeToPremium = useCallback(() => {
+    setIsPremium(true);
+    localStorage.setItem(LS_STUDENT_PREMIUM, 'true');
+    setShowSubscriptionModal(false);
+  }, []);
+
+  const downgradeToFree = useCallback(() => {
+    setIsPremium(false);
+    localStorage.removeItem(LS_STUDENT_PREMIUM);
   }, []);
 
   const executePendingAction = (newUserId?: string) => {
@@ -232,6 +272,8 @@ export function StudentProvider({ children }: { children: React.ReactNode }) {
     localStorage.removeItem(LS_STUDENT_NAME);
     localStorage.removeItem(LS_STUDENT_EMAIL);
     localStorage.removeItem(LS_STUDENT_ROLE);
+    localStorage.removeItem(LS_STUDENT_PREMIUM);
+    setIsPremium(false);
 
     // Clear cookies
     if (typeof document !== 'undefined') {
@@ -283,6 +325,7 @@ export function StudentProvider({ children }: { children: React.ReactNode }) {
 
   const isInstructor = role === 'EDUCATOR' || role === 'ADMIN' || (role as string) === 'INSTRUCTOR';
   const isAdmin = role === 'ADMIN';
+  const effectiveIsPremium = isPremium || isAdmin || isInstructor;
 
   return (
     <StudentContext.Provider
@@ -294,10 +337,16 @@ export function StudentProvider({ children }: { children: React.ReactNode }) {
         isIdentified: !!userId,
         isAdmin,
         isInstructor,
+        isPremium: effectiveIsPremium,
         isLoading,
         showIdentityModal,
+        showSubscriptionModal,
         openLoginModal,
         closeLoginModal,
+        openSubscriptionModal,
+        closeSubscriptionModal,
+        upgradeToPremium,
+        downgradeToFree,
         login,
         register,
         logout,

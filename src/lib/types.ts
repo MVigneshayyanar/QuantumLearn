@@ -73,6 +73,15 @@ export interface QuizOption {
   misconception_tag?: MisconceptionTag;
 }
 
+export interface SkillSection {
+  id: string;
+  title: string;
+  description: string;
+  weightPercent: number; // e.g. 25 for 25%
+  isPremium?: boolean;
+  questionIds: string[];
+}
+
 export interface QuizQuestion {
   id: string;
   module_slug: string;
@@ -83,6 +92,8 @@ export interface QuizQuestion {
   concept_tag: string;
   hint: string;
   hint_hi?: string;
+  isPremium?: boolean;
+  skillSectionId?: string;
 }
 
 export interface ChatMessage {

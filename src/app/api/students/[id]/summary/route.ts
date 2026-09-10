@@ -56,10 +56,13 @@ export async function GET(
     // Build completedModules and moduleScores maps
     const completedModules: Record<string, boolean> = {};
     const moduleScores: Record<string, number> = {};
+    // moduleStages: stageReached (1–6) per module → for dashboard progress bars
+    const moduleStages: Record<string, number> = {};
 
     for (const p of (progressRecords as any[])) {
       completedModules[p.moduleSlug] = p.isCompleted;
       moduleScores[p.moduleSlug] = p.masteryScore;
+      moduleStages[p.moduleSlug] = p.stageReached ?? 1;
     }
 
     // Quiz stats
@@ -109,6 +112,7 @@ export async function GET(
       student: user,
       completedModules,
       moduleScores,
+      moduleStages,  // stageReached (1–6) per module
       conceptMastery,
       quizStats: {
         total: totalAttempts,

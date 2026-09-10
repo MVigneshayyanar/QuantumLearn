@@ -22,14 +22,26 @@ import {
   GraduationCap,
   User,
   ShieldCheck,
-  UserCheck
+  UserCheck,
+  Crown
 } from 'lucide-react';
 
 export function Navbar() {
   const pathname = usePathname();
   const { language } = useAccessibility();
   const { isOpen, setIsOpen } = useAITutorStore();
-  const { userId, studentName, studentEmail, role, isAdmin, isInstructor, logout, openLoginModal } = useStudentContext();
+  const {
+    userId,
+    studentName,
+    studentEmail,
+    role,
+    isAdmin,
+    isInstructor,
+    isPremium,
+    openSubscriptionModal,
+    logout,
+    openLoginModal
+  } = useStudentContext();
   const t = translations[language];
 
   const [profileDropdownOpen, setProfileDropdownOpen] = useState(false);
@@ -212,19 +224,26 @@ export function Navbar() {
                   </div>
 
                   <div className="flex flex-col items-start text-left leading-tight hidden sm:flex">
-                    <span className="font-bold text-xs text-dark-900 max-w-[90px] xl:max-w-[120px] truncate">
-                      {studentName}
-                    </span>
+                    <div className="flex items-center gap-1">
+                      <span className="font-bold text-xs text-dark-900 max-w-[90px] xl:max-w-[120px] truncate">
+                        {studentName}
+                      </span>
+                      {isPremium && !isAdmin && !isInstructor && (
+                        <Crown className="w-3 h-3 text-amber-500 fill-amber-400 shrink-0" />
+                      )}
+                    </div>
                     <span
                       className={`text-[9px] font-bold uppercase tracking-wider ${
                         isAdmin
                           ? 'text-purple-700'
                           : isInstructor
                           ? 'text-indigo-700'
+                          : isPremium
+                          ? 'text-amber-700 font-black'
                           : 'text-primary-700'
                       }`}
                     >
-                      {isAdmin ? 'Admin' : isInstructor ? 'Instructor' : 'Student'}
+                      {isAdmin ? 'Admin' : isInstructor ? 'Instructor' : isPremium ? 'Pro Student' : 'Student'}
                     </span>
                   </div>
 
@@ -266,10 +285,18 @@ export function Navbar() {
                               ? 'bg-purple-100 text-purple-800'
                               : isInstructor
                               ? 'bg-indigo-100 text-indigo-800'
+                              : isPremium
+                              ? 'bg-amber-100 text-amber-900 border border-amber-300'
                               : 'bg-primary-100 text-primary-800'
                           }`}
                         >
-                          {isAdmin ? 'System Administrator' : isInstructor ? 'Verified Instructor' : 'Student Learner'}
+                          {isAdmin
+                            ? 'System Administrator'
+                            : isInstructor
+                            ? 'Verified Instructor'
+                            : isPremium
+                            ? '👑 Pro Student Learner'
+                            : 'Student Learner'}
                         </span>
                       </div>
                     </div>
@@ -345,6 +372,46 @@ export function Navbar() {
                             <span className="text-[10px] text-dark-500">Your learning & progress</span>
                           </div>
                         </Link>
+                      )}
+                    </div>
+
+                    {/* Pro Subscription Status / Upgrade Card */}
+                    <div className="pt-1 mt-1 border-t border-dark-100">
+                      {!isPremium ? (
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setProfileDropdownOpen(false);
+                            openSubscriptionModal();
+                          }}
+                          className="w-full flex items-center justify-between px-3 py-2 rounded-xl text-amber-900 bg-gradient-to-r from-amber-50 to-orange-50 border border-amber-200/80 hover:bg-amber-100/70 transition-colors font-semibold text-xs cursor-pointer"
+                        >
+                          <div className="flex items-center gap-2">
+                            <Crown className="w-3.5 h-3.5 text-amber-600 fill-amber-400 shrink-0" />
+                            <div className="flex flex-col text-left">
+                              <span className="font-bold text-[11px] text-amber-950">Upgrade to Pro</span>
+                              <span className="text-[9px] text-amber-700">Unlock all questions & AI</span>
+                            </div>
+                          </div>
+                          <span className="text-[10px] bg-amber-500 text-white font-bold px-1.5 py-0.5 rounded shadow-2xs">
+                            PRO
+                          </span>
+                        </button>
+                      ) : (
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setProfileDropdownOpen(false);
+                            openSubscriptionModal();
+                          }}
+                          className="w-full flex items-center justify-between px-2.5 py-1.5 rounded-xl bg-amber-50/80 border border-amber-200 hover:bg-amber-100/60 text-amber-900 transition-colors text-[11px] font-bold cursor-pointer"
+                        >
+                          <div className="flex items-center gap-1.5">
+                            <Crown className="w-3.5 h-3.5 text-amber-600 fill-amber-400" />
+                            <span>QLearn Pro Member</span>
+                          </div>
+                          <span className="text-[10px] text-amber-700 underline font-medium">Manage</span>
+                        </button>
                       )}
                     </div>
 

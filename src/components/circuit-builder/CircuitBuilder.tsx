@@ -25,21 +25,16 @@ import {
 } from 'lucide-react';
 import { QuantumCodeEditor } from './QuantumCodeEditor';
 import { ResponsiveContainer, BarChart, Bar, XAxis, YAxis, Tooltip, Cell } from 'recharts';
+import {
+  AVAILABLE_GATE_LIST,
+  QuantumGateSymbol,
+  ControlDotIcon,
+  TargetPlusIcon,
+  SwapXIcon
+} from '@/components/circuit/QuantumGateSymbol';
 
 const MAX_STEPS = 8;
-
-const AVAILABLE_GATES: { type: GateType; name: string; desc: string; multi?: boolean; color: string }[] = [
-  { type: 'h', name: 'H', desc: 'Hadamard: Creates equal superposition (|0> -> |+>)', color: 'bg-indigo-600 text-white' },
-  { type: 'x', name: 'X', desc: 'Pauli-X: Bit flip / Quantum NOT (|0> <-> |1>)', color: 'bg-emerald-600 text-white' },
-  { type: 'y', name: 'Y', desc: 'Pauli-Y: Bit and phase flip', color: 'bg-teal-600 text-white' },
-  { type: 'z', name: 'Z', desc: 'Pauli-Z: Phase flip (|1> -> -|1>)', color: 'bg-violet-600 text-white' },
-  { type: 's', name: 'S', desc: 'Phase Gate: +90° phase shift', color: 'bg-purple-600 text-white' },
-  { type: 't', name: 'T', desc: 'T Gate: +45° phase shift (π/8 gate)', color: 'bg-pink-600 text-white' },
-  { type: 'cx', name: 'CX', desc: 'CNOT: Controlled NOT (Entanglement)', multi: true, color: 'bg-indigo-700 text-white' },
-  { type: 'cz', name: 'CZ', desc: 'Controlled-Z: Inverts phase of |11>', multi: true, color: 'bg-blue-700 text-white' },
-  { type: 'swap', name: 'SWAP', desc: 'SWAP: Exchanges state of 2 qubits', multi: true, color: 'bg-cyan-700 text-white' },
-  { type: 'measure', name: 'M', desc: 'Measurement in Z computational basis', color: 'bg-dark-800 text-white' },
-];
+const AVAILABLE_GATES = AVAILABLE_GATE_LIST;
 
 export function CircuitBuilder() {
   const {
@@ -290,7 +285,7 @@ export function CircuitBuilder() {
         </div>
 
         <div className="flex flex-wrap items-center gap-2">
-          {AVAILABLE_GATES.map((gate) => {
+          {AVAILABLE_GATE_LIST.map((gate) => {
             const isSelected = selectedGateType === gate.type;
             return (
               <button
@@ -308,20 +303,15 @@ export function CircuitBuilder() {
                   setDragOverSlot(null);
                 }}
                 onClick={() => setSelectedGateType(gate.type)}
-                className={`flex items-center gap-2 px-3 py-2 rounded-xl border text-xs font-semibold cursor-grab active:cursor-grabbing transition-all select-none hover:scale-105 active:scale-95 ${
+                className={`flex items-center gap-2 px-2.5 py-1.5 rounded-xl border text-xs font-semibold cursor-grab active:cursor-grabbing transition-all select-none hover:scale-105 active:scale-95 ${
                   isSelected
-                    ? 'border-primary-600 ring-2 ring-primary-500/20 bg-primary-50/60 text-primary-900 shadow-xs'
+                    ? 'border-blue-600 ring-2 ring-blue-500/20 bg-blue-50/70 text-blue-900 shadow-xs'
                     : 'border-dark-200 hover:border-dark-300 bg-white text-dark-800 hover:bg-dark-50'
                 }`}
                 title={`${gate.desc} — Drag & drop onto wire or click to select`}
               >
-                <span
-                  className={`w-6 h-6 rounded-md flex items-center justify-center font-mono text-xs font-bold notranslate ${gate.color}`}
-                  translate="no"
-                >
-                  {gate.name}
-                </span>
-                <span className="notranslate" translate="no">{gate.type.toUpperCase()}</span>
+                <QuantumGateSymbol type={gate.type} size="sm" />
+                <span className="notranslate font-semibold" translate="no">{gate.name}</span>
                 {gate.multi && <span className="text-[10px] text-dark-400 uppercase font-mono notranslate" translate="no">2Q</span>}
               </button>
             );
@@ -387,8 +377,8 @@ export function CircuitBuilder() {
                       const placed = gates.find((g) => g.step === sIdx && g.qubits.includes(qIdx));
                       const isSelected = selectedSlot?.qubit === qIdx && selectedSlot?.step === sIdx;
                       const isDragOver = dragOverSlot?.qubit === qIdx && dragOverSlot?.step === sIdx;
-                      const isControl = placed && placed.type === 'cx' && placed.qubits[0] === qIdx;
-                      const isTarget = placed && placed.type === 'cx' && placed.qubits[1] === qIdx;
+                      const isControl = placed && (placed.type === 'cx' || placed.type === 'cz') && placed.qubits[0] === qIdx;
+                      const isTarget = placed && (placed.type === 'cx' || placed.type === 'cz') && placed.qubits[1] === qIdx;
 
                       return (
                         <div
@@ -418,14 +408,14 @@ export function CircuitBuilder() {
                           }}
                           className={`relative z-10 w-9 h-9 sm:w-10 sm:h-10 rounded-lg flex items-center justify-center cursor-pointer transition-all border ${
                             isDragOver
-                              ? 'ring-3 ring-primary-500 ring-offset-1 border-primary-600 bg-primary-100 scale-105 shadow-md'
+                              ? 'ring-3 ring-blue-500 ring-offset-1 border-blue-600 bg-blue-100 scale-105 shadow-md'
                               : isSelected
-                              ? 'ring-2 ring-primary-600 ring-offset-1 border-primary-600 bg-primary-50/80 shadow-xs'
+                              ? 'ring-2 ring-blue-600 ring-offset-1 border-blue-600 bg-blue-50/80 shadow-xs'
                               : placed
                               ? 'border-dark-300 bg-white shadow-2xs'
                               : isDraggingActive
-                              ? 'border-dashed border-primary-400 bg-primary-50/30 animate-pulse'
-                              : 'border-dashed border-dark-200 hover:border-primary-400 bg-white/90 hover:bg-primary-50/30'
+                              ? 'border-dashed border-blue-400 bg-blue-50/30 animate-pulse'
+                              : 'border-dashed border-dark-200 hover:border-blue-400 bg-white/90 hover:bg-blue-50/30'
                           }`}
                           title={
                             placed
@@ -433,6 +423,17 @@ export function CircuitBuilder() {
                               : `Step ${sIdx} (Empty). Drag a gate here or click to place ${selectedGateType.toUpperCase()}`
                           }
                         >
+                          {/* Vertical connector line for multi-qubit gates (CX, CZ, SWAP) */}
+                          {placed && placed.qubits.length > 1 && Math.min(...placed.qubits) === qIdx && (
+                            <div
+                              className="absolute left-1/2 -translate-x-1/2 w-0.5 bg-blue-600 pointer-events-none z-0"
+                              style={{
+                                top: '50%',
+                                height: `${(Math.max(...placed.qubits) - Math.min(...placed.qubits)) * 56}px`
+                              }}
+                            />
+                          )}
+
                           {placed ? (
                             <div
                               draggable={true}
@@ -453,20 +454,26 @@ export function CircuitBuilder() {
                               }}
                               className="w-full h-full flex items-center justify-center cursor-grab active:cursor-grabbing select-none"
                             >
-                              {isControl ? (
-                                <div className="w-3 h-3 rounded-full bg-primary-600 ring-2 ring-white" />
-                              ) : isTarget ? (
-                                <div className="w-5 h-5 rounded-full border-2 border-primary-600 flex items-center justify-center font-bold text-primary-700 text-[11px] bg-white">
-                                  +
-                                </div>
+                              {placed.type === 'cx' ? (
+                                isControl ? (
+                                  <ControlDotIcon size={14} />
+                                ) : isTarget ? (
+                                  <TargetPlusIcon size={26} />
+                                ) : (
+                                  <QuantumGateSymbol type={placed.type} size="sm" />
+                                )
+                              ) : placed.type === 'cz' ? (
+                                isControl ? (
+                                  <ControlDotIcon size={14} />
+                                ) : isTarget ? (
+                                  <QuantumGateSymbol type="z" size="sm" />
+                                ) : (
+                                  <QuantumGateSymbol type={placed.type} size="sm" />
+                                )
+                              ) : placed.type === 'swap' ? (
+                                <SwapXIcon size={24} />
                               ) : (
-                                <span
-                                  className={`w-7 h-7 sm:w-8 sm:h-8 rounded-md flex items-center justify-center font-mono font-bold text-[11px] shadow-xs ${
-                                    AVAILABLE_GATES.find((g) => g.type === placed.type)?.color || 'bg-primary-600 text-white'
-                                  }`}
-                                >
-                                  {placed.type.toUpperCase()}
-                                </span>
+                                <QuantumGateSymbol type={placed.type} size="sm" />
                               )}
                             </div>
                           ) : isDragOver ? (

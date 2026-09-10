@@ -202,12 +202,13 @@ FIXED_CODE:
 
         const socraticSystemInstruction = isCircuitDiagnosis
           ? `You are Schrödinger AI, an expert quantum physics coach on QLearn.
-The student submitted a circuit for a guided algorithm construction challenge that did not match the expected state.
-Your task:
-1. Specifically point out which qubit or gate placement in their circuit is diverging (e.g. they placed H on Q0, but X on Q1).
-2. Explain the physical effect of the gate they placed versus what state the algorithm actually needs at this stage.
-3. Ask an encouraging guiding question to help them fix it themselves.
-STRICT PEDAGOGICAL RULE: DO NOT give them the direct full answer or gate sequence. Guide them Socratically so they learn!`
+STRICT USER REQUIREMENT: The user needs SHORT AND SIMPLE feedback (maximum 3 concise bullet points, under 60 words total).
+Do NOT write introductions, greetings, essays, or long paragraphs!
+
+Output format ONLY:
+• Step Done: <1 short sentence on what is correct so far>
+• Next Step: <1 short sentence on the specific gate to place next>
+• Quick Clue: <1 brief conceptual hint or question>`
           : `You are Schrödinger AI, an expert Quantum Computing AI Tutor on the QLearn platform.
 Learner Mode: ${explanationMode === 'simple' ? 'Simple / School Student (intuitive analogies, clear metaphors)' : 'Technical / Researcher (Dirac notation, unitary matrices, state vectors)'}.
 Active Misconception Flag: ${activeMisconception || 'None'}.
@@ -224,8 +225,8 @@ QLEARN PLATFORM CAPABILITIES:
 
         const reply = await callGeminiCascade(genAI, query, {
           systemInstruction: socraticSystemInstruction,
-          maxOutputTokens: 1000,
-          temperature: isCircuitDiagnosis ? 0.4 : 0.7,
+          maxOutputTokens: isCircuitDiagnosis ? 160 : 1000,
+          temperature: isCircuitDiagnosis ? 0.3 : 0.7,
         });
 
         if (reply) {

@@ -4,6 +4,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { useAccessibility } from '@/lib/accessibility-context';
 import { translations } from '@/lib/i18n';
 import { useStudentContext } from '@/lib/student-context';
+import { useProgressStore } from '@/lib/state-store';
 import { apiReportProgress } from '@/lib/api-helpers';
 import { BlochSphere3D } from '@/components/bloch-sphere/BlochSphere3D';
 import { AdaptiveQuizEngine } from '@/components/quiz/AdaptiveQuizEngine';
@@ -24,10 +25,18 @@ import {
   Wand2,
   Hammer,
   AlertTriangle,
-  Check
+  Check,
+  Target
 } from 'lucide-react';
 import { ResponsiveContainer, BarChart, Bar, XAxis, YAxis, Tooltip, Cell } from 'recharts';
 import { BuildItTab } from './BuildItTab';
+import { SkillBaseStage } from './SkillBaseStage';
+import {
+  QuantumGateSymbol,
+  ControlDotIcon,
+  TargetPlusIcon,
+  SwapXIcon
+} from '@/components/circuit/QuantumGateSymbol';
 
 const GATE_COLORS: Record<string, string> = {
   h: 'bg-indigo-600 text-white',
@@ -142,8 +151,22 @@ export function AlgorithmModuleView({
   const { explanationMode, language, announce } = useAccessibility();
   const t = translations[language];
 
-  const [activeTab, setActiveTab] = useState<'intuition' | 'math' | 'circuit' | 'build_it' | 'quiz'>('intuition');
+  const [activeTab, setActiveTab] = useState<'intuition' | 'math' | 'circuit' | 'build_it' | 'quiz' | 'skill_base'>('intuition');
   const [simResult, setSimResult] = useState<SimulationResult | null>(null);
+
+  // Sync tab with URL search params (?stage=skill_base or ?tab=skill_base)
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const sp = new URLSearchParams(window.location.search);
+      const stageParam = sp.get('stage') || sp.get('tab');
+      if (
+        stageParam &&
+        ['intuition', 'math', 'circuit', 'build_it', 'quiz', 'skill_base'].includes(stageParam)
+      ) {
+        setActiveTab(stageParam as any);
+      }
+    }
+  }, []);
   const [circuitGates, setCircuitGates] = useState<PlacedGate[]>(() => getDefaultGatesForAlgorithm(algorithmBackendId));
   const [currentStepIdx, setCurrentStepIdx] = useState<number>(0);
   const [isLoading, setIsLoading] = useState<boolean>(false);
@@ -196,13 +219,9 @@ export function AlgorithmModuleView({
     }
   }, [userId, moduleSlug]);
 
-  // Report stage progression when navigating tabs
-  const STAGE_MAP: Record<string, number> = { intuition: 1, math: 2, circuit: 3, build_it: 4, quiz: 5 };
-  useEffect(() => {
-    if (userId && STAGE_MAP[activeTab]) {
-      apiReportProgress(userId, moduleSlug, 'in_progress', { stageReached: STAGE_MAP[activeTab] });
-    }
-  }, [activeTab, userId, moduleSlug]);
+
+  const { completedModules } = useProgressStore();
+  const isModuleFullyComplete = Boolean(completedModules[moduleSlug]);
 
   const snapshots: StepSnapshot[] = simResult?.step_by_step || [];
   const currentSnapshot = snapshots[currentStepIdx] || null;
@@ -224,20 +243,21 @@ export function AlgorithmModuleView({
   );
 
   const tabs = [
-    { id: 'intuition', label: '1. Intuition & Concepts', icon: Lightbulb },
-    { id: 'math', label: '2. Math & Construction', icon: FileCode },
-    { id: 'circuit', label: '3. Interactive Circuit', icon: Cpu },
-    { id: 'build_it', label: '4. Build It (Guided AI)', icon: Wand2 },
-    { id: 'quiz', label: '5. Knowledge Check', icon: GraduationCap }
+    { id: 'intuition', label: '1. Intuition', icon: Lightbulb },
+    { id: 'math', label: '2. Math', icon: FileCode },
+    { id: 'circuit', label: '3. Circuit', icon: Cpu },
+    { id: 'build_it', label: '4. Build It', icon: Wand2 },
+    { id: 'quiz', label: '5. Knowledge Check', icon: GraduationCap },
+    { id: 'skill_base', label: '6. Skill Base & Practice', icon: Target }
   ];
 
   return (
     <div className="w-full mx-auto px-8 py-3 space-y-3.5">
       {/* Module Header */}
-      <div className="bg-white rounded-2xl border border-dark-200 p-5 sm:p-6 shadow-xs relative overflow-hidden">
+      <div className="bg-white rounded-2xl border border-dark-200 p-5 sm:p-6 shadow-xs relative overflow-hidden space-y-4">
         <div className="flex flex-wrap items-center justify-between gap-4">
           <div className="space-y-1.5 max-w-3xl">
-            <div className="flex items-center gap-2">
+            <div className="flex flex-wrap items-center gap-2">
               <span className="px-2.5 py-0.5 rounded-full text-xs font-semibold bg-primary-50 text-primary-700 border border-primary-100">
                 {category}
               </span>
@@ -247,14 +267,36 @@ export function AlgorithmModuleView({
               <span className="px-2.5 py-0.5 rounded-full text-xs font-semibold bg-emerald-50 text-emerald-700 border border-emerald-100">
                 {speedup}
               </span>
+              <span className="px-2.5 py-0.5 rounded-full text-xs font-semibold bg-indigo-50 text-indigo-700 border border-indigo-100">
+                6 Learning Stages
+              </span>
             </div>
             <h1 className="text-xl sm:text-2xl font-bold text-dark-900 tracking-tight">{title}</h1>
             <p className="text-xs sm:text-sm text-dark-600 leading-normal">{subtitle}</p>
           </div>
+
+          {/* Module Completion Status Badge */}
+          <div className="flex items-center gap-3">
+            <div className="text-right">
+              <span className="text-[11px] text-dark-500 font-medium block">Module Status:</span>
+              <span className="text-sm font-bold text-dark-900 font-mono">
+                {isModuleFullyComplete ? '100% Mastered (6/6 Stages)' : 'In Progress (Stage 6 Required for 100%)'}
+              </span>
+            </div>
+            <div
+              className={`px-3.5 py-2 rounded-xl border text-xs font-bold shadow-2xs ${
+                isModuleFullyComplete
+                  ? 'bg-emerald-500 text-white border-emerald-600'
+                  : 'bg-amber-50 text-amber-800 border-amber-200'
+              }`}
+            >
+              {isModuleFullyComplete ? '✓ 100% Certified' : 'Stage 6 Required for 100%'}
+            </div>
+          </div>
         </div>
 
         {/* Tab Navigation */}
-        <div className="mt-4 flex flex-wrap gap-1.5 border-t border-dark-100 pt-3" role="tablist">
+        <div className="flex flex-wrap gap-1.5 border-t border-dark-100 pt-3" role="tablist">
           {tabs.map((tab) => {
             const Icon = tab.icon;
             const isActive = activeTab === tab.id;
@@ -300,8 +342,13 @@ export function AlgorithmModuleView({
 
           <div className="flex justify-end">
             <button
-              onClick={() => setActiveTab('math')}
-              className="flex items-center gap-2 px-6 py-3 rounded-xl bg-primary-600 hover:bg-primary-700 text-white font-semibold text-xs shadow-xs transition-colors"
+              onClick={() => {
+                if (userId) {
+                  apiReportProgress(userId, moduleSlug, 'in_progress', { stageReached: 2 });
+                }
+                setActiveTab('math');
+              }}
+              className="flex items-center gap-2 px-6 py-3 rounded-xl bg-primary-600 hover:bg-primary-700 text-white font-semibold text-xs shadow-xs transition-colors cursor-pointer"
             >
               <span>Next: Mathematical Walkthrough</span>
               <ChevronRight className="w-4 h-4" />
@@ -356,10 +403,10 @@ export function AlgorithmModuleView({
                       {step.stepGates.map((g, gIdx) => (
                         <div
                           key={gIdx}
-                          className="px-2.5 py-1 rounded bg-dark-800 border border-dark-700 text-primary-300 flex items-center gap-1.5 shrink-0"
+                          className="px-2.5 py-1 rounded-lg bg-dark-800 border border-dark-700 text-primary-300 flex items-center gap-2 shrink-0"
                         >
-                          <span className="font-bold text-white uppercase">{g.type}</span>
-                          <span className="text-dark-400 text-[10px]">Q{g.qubits.join(', Q')}</span>
+                          <QuantumGateSymbol type={(g.type.toLowerCase() as any)} size="sm" />
+                          <span className="text-dark-300 text-xs font-mono">Q{g.qubits.join(', Q')}</span>
                         </div>
                       ))}
                     </div>
@@ -389,8 +436,13 @@ export function AlgorithmModuleView({
               <span>Back: Intuition</span>
             </button>
             <button
-              onClick={() => setActiveTab('circuit')}
-              className="flex items-center gap-2 px-5 py-2 rounded-xl bg-primary-600 hover:bg-primary-700 text-white font-semibold text-xs shadow-xs transition-colors"
+              onClick={() => {
+                if (userId) {
+                  apiReportProgress(userId, moduleSlug, 'in_progress', { stageReached: 3 });
+                }
+                setActiveTab('circuit');
+              }}
+              className="flex items-center gap-2 px-5 py-2 rounded-xl bg-primary-600 hover:bg-primary-700 text-white font-semibold text-xs shadow-xs transition-colors cursor-pointer"
             >
               <span>Next: Interactive Circuit & Simulation</span>
               <ChevronRight className="w-4 h-4" />
@@ -541,6 +593,8 @@ export function AlgorithmModuleView({
                           const placed = circuitGates.find((g) => g.step === sIdx && g.qubits.includes(qIdx));
                           const isExecuted = sIdx < currentStepIdx;
                           const isCurrent = sIdx === currentStepIdx - 1;
+                          const isControl = placed && (placed.type === 'cx' || placed.type === 'cz') && placed.qubits[0] === qIdx;
+                          const isTarget = placed && (placed.type === 'cx' || placed.type === 'cz') && placed.qubits[1] === qIdx;
 
                           return (
                             <div
@@ -548,7 +602,7 @@ export function AlgorithmModuleView({
                               onClick={() => setCurrentStepIdx(sIdx + 1)}
                               className={`relative z-10 w-9 h-9 rounded-lg flex items-center justify-center cursor-pointer transition-all border ${
                                 isCurrent
-                                  ? 'ring-3 ring-primary-500/40 ring-offset-1 border-primary-600 scale-105 shadow-sm bg-white'
+                                  ? 'ring-3 ring-blue-500/40 ring-offset-1 border-blue-600 scale-105 shadow-sm bg-white'
                                   : isExecuted
                                   ? 'border-emerald-300 bg-white shadow-2xs'
                                   : 'border-dashed border-dark-200 bg-white/70 opacity-35 grayscale-[50%]'
@@ -561,15 +615,42 @@ export function AlgorithmModuleView({
                                   : `Step ${sIdx + 1}`
                               }
                             >
-                              {placed ? (
+                              {/* Vertical connector line for multi-qubit gates (CX, CZ, SWAP) */}
+                              {placed && placed.qubits.length > 1 && Math.min(...placed.qubits) === qIdx && (
                                 <div
-                                  className={`w-7 h-7 rounded-md flex items-center justify-center font-mono font-bold text-[11px] relative ${
-                                    GATE_COLORS[placed.type.toLowerCase()] || 'bg-primary-600 text-white'
-                                  }`}
-                                >
-                                  {placed.type.toUpperCase()}
+                                  className="absolute left-1/2 -translate-x-1/2 w-0.5 bg-blue-600 pointer-events-none z-0"
+                                  style={{
+                                    top: '50%',
+                                    height: `${(Math.max(...placed.qubits) - Math.min(...placed.qubits)) * 48}px`
+                                  }}
+                                />
+                              )}
+
+                              {placed ? (
+                                <div className="relative w-full h-full flex items-center justify-center select-none">
+                                  {placed.type === 'cx' ? (
+                                    isControl ? (
+                                      <ControlDotIcon size={12} />
+                                    ) : isTarget ? (
+                                      <TargetPlusIcon size={24} />
+                                    ) : (
+                                      <QuantumGateSymbol type={placed.type} size="sm" />
+                                    )
+                                  ) : placed.type === 'cz' ? (
+                                    isControl ? (
+                                      <ControlDotIcon size={12} />
+                                    ) : isTarget ? (
+                                      <QuantumGateSymbol type="z" size="sm" />
+                                    ) : (
+                                      <QuantumGateSymbol type={placed.type} size="sm" />
+                                    )
+                                  ) : placed.type === 'swap' ? (
+                                    <SwapXIcon size={22} />
+                                  ) : (
+                                    <QuantumGateSymbol type={placed.type} size="sm" />
+                                  )}
                                   {isExecuted && !isCurrent && (
-                                    <span className="absolute -top-1 -right-1 w-3 h-3 bg-emerald-500 text-white rounded-full flex items-center justify-center text-[7px] font-bold">
+                                    <span className="absolute -top-1 -right-1 w-3.5 h-3.5 bg-emerald-500 text-white rounded-full flex items-center justify-center text-[8px] font-bold shadow-xs z-20">
                                       ✓
                                     </span>
                                   )}
@@ -674,8 +755,13 @@ export function AlgorithmModuleView({
               <span>Back: Math</span>
             </button>
             <button
-              onClick={() => setActiveTab('build_it')}
-              className="flex items-center gap-2 px-5 py-2 rounded-xl bg-primary-600 hover:bg-primary-700 text-white font-semibold text-xs shadow-xs transition-colors"
+              onClick={() => {
+                if (userId) {
+                  apiReportProgress(userId, moduleSlug, 'in_progress', { stageReached: 4 });
+                }
+                setActiveTab('build_it');
+              }}
+              className="flex items-center gap-2 px-5 py-2 rounded-xl bg-primary-600 hover:bg-primary-700 text-white font-semibold text-xs shadow-xs transition-colors cursor-pointer"
             >
               <span>Next: Build It Hands-on</span>
               <ChevronRight className="w-4 h-4" />
@@ -689,6 +775,9 @@ export function AlgorithmModuleView({
         <BuildItTab
           moduleSlug={moduleSlug}
           onProceedToQuiz={() => {
+            if (userId) {
+              apiReportProgress(userId, moduleSlug, 'in_progress', { stageReached: 5 });
+            }
             setActiveTab('quiz');
           }}
         />
@@ -699,11 +788,19 @@ export function AlgorithmModuleView({
         <div className="space-y-4 animate-fadeIn">
           <AdaptiveQuizEngine
             moduleSlug={moduleSlug}
-            onComplete={(score) => {
-              // optional callback
+            onProceedToSkillBase={() => {
+              setActiveTab('skill_base');
             }}
           />
         </div>
+      )}
+
+      {/* Stage 6: Skill Base & Practice */}
+      {activeTab === 'skill_base' && (
+        <SkillBaseStage
+          moduleSlug={moduleSlug}
+          moduleTitle={title}
+        />
       )}
     </div>
   );

@@ -22,12 +22,15 @@ import {
   Loader2
 } from 'lucide-react';
 import { ResponsiveContainer, PolarGrid, PolarAngleAxis, PolarRadiusAxis, Radar, RadarChart } from 'recharts';
+import { MISCONCEPTION_GUIDES } from '@/lib/ai-engine';
+import { MisconceptionTag } from '@/lib/types';
 
 // Shape returned by GET /api/students/[id]/summary
 interface StudentSummary {
   student: { id: string; name: string; email: string; streakDays: number; lastActiveAt: string };
   completedModules: Record<string, boolean>;
   moduleScores: Record<string, number>;
+  moduleStages: Record<string, number>; // stageReached (1–6) per module
   conceptMastery: {
     superposition: number;
     entanglement: number;
@@ -48,8 +51,8 @@ interface StudentSummary {
 
 export function ProgressDashboard() {
   const { userId, studentName, isIdentified, isInstructor, isAdmin } = useStudentContext();
-  const { setIsOpen: setAITutorOpen, addMessage, setActiveMisconception } = useAITutorStore();
-  const { language } = useAccessibility();
+  const { askTutor } = useAITutorStore();
+  const { language, explanationMode } = useAccessibility();
   const t = translations[language];
 
   const [summary, setSummary] = useState<StudentSummary | null>(null);
@@ -89,6 +92,7 @@ export function ProgressDashboard() {
   // Derived data from summary
   const completedModules = summary?.completedModules || {};
   const moduleScores = summary?.moduleScores || {};
+  const moduleStages = summary?.moduleStages || {}; // stageReached per module
   const streakDays = summary?.student?.streakDays || 1;
   const conceptMastery = summary?.conceptMastery || {
     superposition: 0,
@@ -98,6 +102,9 @@ export function ProgressDashboard() {
     measurement: 0,
   };
   const flaggedMisconceptions = summary?.misconceptions?.filter(m => !m.isResolved) || [];
+
+  // Stage labels for the 6-stage model
+  const STAGE_LABELS = ['Intuition', 'Math', 'Circuit', 'Build It', 'Quiz', 'Skill Base'];
 
   const radarData = [
     { subject: 'Superposition', value: conceptMastery.superposition, fullMark: 100 },
@@ -293,32 +300,41 @@ export function ProgressDashboard() {
             </div>
           ) : (
             <div className="space-y-3">
-              {flaggedMisconceptions.map((item) => (
-                <div
-                  key={item.tag}
-                  className="p-3.5 rounded-2xl bg-amber-50/60 border border-amber-200 flex items-center justify-between gap-3 text-xs"
-                >
-                  <div className="space-y-0.5">
-                    <span className="font-mono font-bold text-amber-950 block">{item.tag}</span>
-                    <span className="text-amber-800 text-[11px]">Flagged {item.count} time(s) during quizzes</span>
-                  </div>
-
-                  <button
-                    onClick={() => {
-                      setActiveMisconception(item.tag);
-                      addMessage({
-                        role: 'user',
-                        content: `I'd like to work through my flagged misconception on "${item.tag}". Could you help guide my thinking?`
-                      });
-                      setAITutorOpen(true);
-                    }}
-                    className="flex items-center gap-1 px-3 py-1.5 rounded-lg bg-amber-600 hover:bg-amber-700 text-white font-semibold text-xs shadow-2xs transition-colors shrink-0"
+              {flaggedMisconceptions.map((item) => {
+                const guide = MISCONCEPTION_GUIDES[item.tag as MisconceptionTag];
+                const humanTitle =
+                  guide?.name ||
+                  item.tag
+                    .split('_')
+                    .map((w) => w.charAt(0).toUpperCase() + w.slice(1).toLowerCase())
+                    .join(' ');
+                return (
+                  <div
+                    key={item.tag}
+                    className="p-3.5 rounded-2xl bg-amber-50/60 border border-amber-200 flex items-center justify-between gap-3 text-xs"
                   >
-                    <Bot className="w-3.5 h-3.5" />
-                    <span>Review with AI</span>
-                  </button>
-                </div>
-              ))}
+                    <div className="space-y-1">
+                      <span className="font-bold text-amber-950 block text-sm">{humanTitle}</span>
+                      <span className="text-amber-800 text-[11px] block">
+                        Flagged {item.count} time(s) during quizzes
+                      </span>
+                    </div>
+
+                    <button
+                      onClick={() => {
+                        askTutor(
+                          `I'd like to work through my flagged misconception on "${humanTitle}". Could you help guide my thinking?`,
+                          { explanationMode, activeMisconception: item.tag, language }
+                        );
+                      }}
+                      className="flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-amber-600 hover:bg-amber-700 text-white font-semibold text-xs shadow-2xs transition-colors shrink-0 cursor-pointer"
+                    >
+                      <Bot className="w-3.5 h-3.5" />
+                      <span>Review with AI</span>
+                    </button>
+                  </div>
+                );
+              })}
             </div>
           )}
         </div>
@@ -329,12 +345,25 @@ export function ProgressDashboard() {
         <h3 className="font-bold text-lg text-dark-900">Algorithm Curricula Progress</h3>
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
           {algorithmModules.map((mod) => {
-            const isDone = completedModules[mod.slug];
-            const score = moduleScores[mod.slug] || 0;
+            const isDone = Boolean(completedModules[mod.slug]);
+            const stageReached = moduleStages[mod.slug] || 0;
+            // Each stage represents 16.67% of the curriculum (100% / 6 stages).
+            // A stage is only completed when the student finishes it.
+            // When a student is ON Stage 6, they have completed stages 1–5 (83.3%).
+            // Stage 6 is the final practice stage and is ONLY marked complete (100%) when all practice problems are solved (isDone is true).
+            const completedStagesCount = isDone
+              ? 6
+              : Math.min(5, Math.max(0, stageReached - 1));
+            const stagePct = isDone ? 100 : Math.round((completedStagesCount / 6) * 100);
+            const currentStageName = isDone
+              ? 'Completed'
+              : stageReached > 0
+              ? STAGE_LABELS[stageReached - 1]
+              : 'Not started';
             return (
               <div
                 key={mod.slug}
-                className="bg-white rounded-2xl border border-dark-200 p-6 shadow-xs flex flex-col justify-between space-y-4 hover:border-primary-300 transition-colors"
+                className="bg-white rounded-2xl border border-dark-200 p-5 shadow-xs flex flex-col justify-between space-y-4 hover:border-primary-300 transition-colors"
               >
                 <div className="space-y-2">
                   <div className="flex items-center justify-between">
@@ -342,24 +371,81 @@ export function ProgressDashboard() {
                       {mod.category}
                     </span>
                     {isDone ? (
-                      <span className="inline-flex items-center gap-1 text-xs font-semibold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-full">
+                      <span className="inline-flex items-center gap-1 text-xs font-semibold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-full border border-emerald-200">
                         <CheckCircle2 className="w-3.5 h-3.5" />
-                        Completed ({Math.round(score)}%)
+                        100% Mastered
+                      </span>
+                    ) : stageReached > 0 ? (
+                      <span className="text-[11px] font-semibold text-primary-700 bg-primary-50 border border-primary-200 px-2 py-0.5 rounded-full">
+                        Stage {stageReached}/6 In Progress · {stagePct}%
                       </span>
                     ) : (
-                      <span className="text-xs text-dark-500 font-medium">In Progress</span>
+                      <span className="text-xs text-dark-400 font-medium">Not started</span>
                     )}
                   </div>
                   <h4 className="font-bold text-base text-dark-900">{mod.title}</h4>
                 </div>
 
+                {/* 6-Stage Progress Bar */}
+                <div className="space-y-1.5">
+                  <div className="flex items-center justify-between text-[10px] font-semibold text-dark-500">
+                    <span>
+                      {isDone
+                        ? 'All 6 Stages Completed'
+                        : stageReached > 0
+                        ? `Current: Stage ${stageReached} (${currentStageName})`
+                        : 'Begin Stage 1'}
+                    </span>
+                    <span className="font-mono">{stagePct}% complete</span>
+                  </div>
+                  {/* Segmented 6-stage track */}
+                  <div className="grid grid-cols-6 gap-0.5">
+                    {STAGE_LABELS.map((label, idx) => {
+                      const stageNum = idx + 1;
+                      const isCompleted = isDone || stageNum <= completedStagesCount;
+                      const isCurrent = !isDone && stageNum === stageReached;
+                      return (
+                        <div
+                          key={label}
+                          title={`Stage ${stageNum}: ${label} ${isCompleted ? '(Completed)' : isCurrent ? '(In Progress)' : ''}`}
+                          className={`h-2 rounded-full transition-all duration-500 ${
+                            isCompleted
+                              ? isDone
+                                ? 'bg-emerald-500'
+                                : 'bg-primary-500'
+                              : isCurrent
+                              ? 'bg-primary-200 border-2 border-primary-500'
+                              : 'bg-dark-150 border border-dark-200'
+                          }`}
+                        />
+                      );
+                    })}
+                  </div>
+                  <div className="flex justify-between text-[9px] text-dark-400 font-medium">
+                    {STAGE_LABELS.map((l, idx) => (
+                      <span
+                        key={l}
+                        className={
+                          isDone || idx < completedStagesCount
+                            ? 'text-primary-600 font-bold'
+                            : idx === stageReached - 1
+                            ? 'text-primary-500 font-bold underline'
+                            : ''
+                        }
+                      >
+                        {idx + 1}
+                      </span>
+                    ))}
+                  </div>
+                </div>
+
                 <div className="flex items-center justify-between pt-2 border-t border-dark-100">
-                  <span className="text-xs text-dark-500">4 Stages: Intuition, Math, Circuit, Quiz</span>
+                  <span className="text-[10px] text-dark-400">6 stages · 16.7% each · Stage 6 = certificate</span>
                   <Link
                     href={mod.href}
-                    className="flex items-center gap-1 text-xs font-bold text-primary-600 hover:text-primary-700"
+                    className="flex items-center gap-1 text-xs font-bold text-primary-600 hover:text-primary-700 transition-colors"
                   >
-                    <span>{isDone ? 'Review Module' : 'Continue Module'}</span>
+                    <span>{isDone ? 'Review' : stageReached > 0 ? 'Continue' : 'Start'}</span>
                     <ArrowRight className="w-3.5 h-3.5" />
                   </Link>
                 </div>

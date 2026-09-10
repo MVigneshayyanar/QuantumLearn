@@ -1,6 +1,19 @@
 import { GateType, PlacedGate } from './types';
 import { simulateLocalCircuit, calculateStatevectorFidelity } from './quantum-simulator-core';
 
+export interface BuildItMilestone {
+  id: string;
+  label: string;
+  shortAction: string;
+  simpleClue: string;
+  requiredGateSignatures: string[];
+  minStep?: number;
+}
+
+export interface EvaluatedMilestone extends BuildItMilestone {
+  completed: boolean;
+}
+
 export interface BuildItChallenge {
   moduleSlug: string;
   title: string;
@@ -12,6 +25,23 @@ export interface BuildItChallenge {
   checkerType: 'fidelity' | 'measurement';
   targetOutcome?: string;
   hints: string[];
+  milestones?: BuildItMilestone[];
+}
+
+export interface BuildItEvaluation {
+  isCorrect: boolean;
+  fidelity: number;
+  completionPercentage: number;
+  completedMilestonesCount: number;
+  totalMilestones: number;
+  milestones: EvaluatedMilestone[];
+  matchedGates: string[];
+  missingGates: string[];
+  unexpectedGates: string[];
+  structuralDiff: string[];
+  diagnosisPrompt: string;
+  nextActionSuggestion: string;
+  currentClue: string;
 }
 
 export const BUILD_IT_CHALLENGES: Record<string, BuildItChallenge> = {
@@ -34,9 +64,43 @@ export const BUILD_IT_CHALLENGES: Record<string, BuildItChallenge> = {
     checkerType: 'measurement',
     targetOutcome: '11',
     hints: [
-      'Remember that phase kickback requires the ancilla qubit (Q1) to be in the |-> eigenstate, which is created by X followed by H.',
-      'The balanced oracle f(x)=x is implemented via CNOT with input Q0 as control and ancilla Q1 as target.',
-      'Don’t forget the final Hadamard on Q0 to convert the kickback phase into computational basis measurement.'
+      'Ancilla Q1 must be in |-> to kick back a -1 phase.',
+      'The balanced oracle f(x)=x is a CNOT with control Q0 and target Q1.',
+      'A final Hadamard on Q0 converts the phase kickback into measurable |1>.'
+    ],
+    milestones: [
+      {
+        id: 'ancilla-init',
+        label: 'Ancilla Setup',
+        shortAction: 'Place X gate on Q1',
+        simpleClue: 'Prepares Q1 so Hadamard turns it into |−⟩.',
+        requiredGateSignatures: ['X(Q1)'],
+        minStep: 0
+      },
+      {
+        id: 'superposition',
+        label: 'Superposition',
+        shortAction: 'Place H on Q0 and Q1',
+        simpleClue: 'Puts both qubits into equal superposition.',
+        requiredGateSignatures: ['H(Q0)', 'H(Q1)'],
+        minStep: 1
+      },
+      {
+        id: 'balanced-oracle',
+        label: 'CNOT Oracle',
+        shortAction: 'Place CNOT from Q0 to Q1',
+        simpleClue: 'Evaluates f(x) and kicks back a -1 phase to Q0.',
+        requiredGateSignatures: ['CX(Q0,1)'],
+        minStep: 2
+      },
+      {
+        id: 'interference',
+        label: 'Interference',
+        shortAction: 'Place final H on Q0',
+        simpleClue: 'Converts kickback phase into measurable state |1⟩.',
+        requiredGateSignatures: ['H(Q0)'],
+        minStep: 3
+      }
     ]
   },
   'grover': {
@@ -62,9 +126,43 @@ export const BUILD_IT_CHALLENGES: Record<string, BuildItChallenge> = {
     checkerType: 'measurement',
     targetOutcome: '11',
     hints: [
-      'Grover search requires two core components: an Oracle that inverts the phase of |11>, and a Diffusion operator that inverts amplitudes about the mean.',
-      'A CZ gate acts directly as a phase oracle for |11> because it negates amplitude only when both qubits are 1.',
-      'The diffusion operator can be written as H-layer, followed by reflection about |00>.'
+      'Grover requires an Oracle (to mark |11>) and a Diffusion operator (to amplify it).',
+      'CZ acts directly as the phase oracle for |11>.',
+      'Diffusion inverts amplitudes about the mean.'
+    ],
+    milestones: [
+      {
+        id: 'uniform-superposition',
+        label: 'Superposition',
+        shortAction: 'Place H on Q0 and Q1',
+        simpleClue: 'Creates equal superposition across all 4 states.',
+        requiredGateSignatures: ['H(Q0)', 'H(Q1)'],
+        minStep: 0
+      },
+      {
+        id: 'phase-oracle',
+        label: 'Phase Oracle',
+        shortAction: 'Place CZ gate between Q0 and Q1',
+        simpleClue: 'CZ flips the phase of target |11⟩.',
+        requiredGateSignatures: ['CZ(Q0,1)'],
+        minStep: 1
+      },
+      {
+        id: 'diffusion-basis',
+        label: 'Diffusion H-Layer',
+        shortAction: 'Place H on Q0 and Q1',
+        simpleClue: 'Rotates states into the diffusion basis.',
+        requiredGateSignatures: ['H(Q0)', 'H(Q1)'],
+        minStep: 2
+      },
+      {
+        id: 'diffusion-reflection',
+        label: 'Diffusion Inversion',
+        shortAction: 'Place Z on Q0 & Q1, then CZ between them',
+        simpleClue: 'Reflects amplitudes about the mean to amplify |11⟩.',
+        requiredGateSignatures: ['Z(Q0)', 'Z(Q1)', 'CZ(Q0,1)'],
+        minStep: 3
+      }
     ]
   },
   'teleportation': {
@@ -85,9 +183,35 @@ export const BUILD_IT_CHALLENGES: Record<string, BuildItChallenge> = {
     ],
     checkerType: 'fidelity',
     hints: [
-      'First establish the quantum communication channel: entangle Alice (Q1) and Bob (Q2) into a Bell pair.',
-      'Alice then couples the message qubit (Q0) to her half of the Bell pair (Q1) with a CNOT, then rotates with Hadamard.',
-      'Notice that physical particles do not travel — only quantum information is transferred via entanglement and classical correlations.'
+      'Teleportation requires shared entanglement between Alice (Q1) and Bob (Q2).',
+      'Alice performs Bell measurement by coupling Q0 to Q1 with CNOT, then H on Q0.',
+      'Only quantum information travels — no physical particle is transferred.'
+    ],
+    milestones: [
+      {
+        id: 'message-prep',
+        label: 'Message Prep',
+        shortAction: 'Place H on Q0',
+        simpleClue: 'Prepares the quantum test state to teleport.',
+        requiredGateSignatures: ['H(Q0)'],
+        minStep: 0
+      },
+      {
+        id: 'bell-entanglement',
+        label: 'Bell Entanglement',
+        shortAction: 'Place H on Q1 and CNOT (Q1 -> Q2)',
+        simpleClue: 'Creates shared entanglement between Alice & Bob.',
+        requiredGateSignatures: ['H(Q1)', 'CX(Q1,2)'],
+        minStep: 1
+      },
+      {
+        id: 'bell-measurement',
+        label: 'Bell Measurement',
+        shortAction: 'Place CNOT (Q0 -> Q1) and H on Q0',
+        simpleClue: 'Projects Alice’s qubits into the Bell basis.',
+        requiredGateSignatures: ['CX(Q0,1)', 'H(Q0)'],
+        minStep: 3
+      }
     ]
   },
   'superdense-coding': {
@@ -111,48 +235,73 @@ export const BUILD_IT_CHALLENGES: Record<string, BuildItChallenge> = {
     checkerType: 'measurement',
     targetOutcome: '11',
     hints: [
-      'To transmit "11", Alice must apply both the Z gate (flips phase) and X gate (flips bit) onto her qubit Q0.',
-      'Bob decodes Alice’s transmission by running the inverse Bell circuit: CNOT followed by Hadamard on Q0.',
-      'Both bits are recovered deterministically from a single qubit transfer!'
+      'To transmit "11", apply both Z (flips phase) and X (flips bit) to Q0.',
+      'Bob decodes with inverse Bell: CNOT followed by Hadamard on Q0.',
+      'Two classical bits are recovered from a single transferred qubit.'
+    ],
+    milestones: [
+      {
+        id: 'bell-pair-prep',
+        label: 'Bell Pair',
+        shortAction: 'Place H on Q0 and CNOT (Q0 -> Q1)',
+        simpleClue: 'Prepares shared Bell state between Alice & Bob.',
+        requiredGateSignatures: ['H(Q0)', 'CX(Q0,1)'],
+        minStep: 0
+      },
+      {
+        id: 'alice-encoding',
+        label: '2-Bit Encoding',
+        shortAction: 'Place Z then X on Q0',
+        simpleClue: 'Encodes 2 classical bits ("11") into 1 qubit.',
+        requiredGateSignatures: ['Z(Q0)', 'X(Q0)'],
+        minStep: 2
+      },
+      {
+        id: 'bob-decoding',
+        label: 'Bell Decoding',
+        shortAction: 'Place CNOT (Q0 -> Q1) and H on Q0',
+        simpleClue: 'Decodes both transmitted bits deterministically.',
+        requiredGateSignatures: ['CX(Q0,1)', 'H(Q0)'],
+        minStep: 4
+      }
     ]
   }
 };
 
 /**
+ * Normalizes gate signature string for robust comparisons (e.g. CX(Q0,1) vs CX(0,1))
+ */
+function normalizeSig(s: string): string {
+  return s.replace(/Q/g, '').replace(/\s+/g, '').toUpperCase();
+}
+
+/**
  * Evaluates the user's Build It circuit.
- * Returns { isCorrect, fidelity, diagnosisPrompt }
+ * Returns { isCorrect, fidelity, completionPercentage, milestones, diagnosisPrompt, nextActionSuggestion, currentClue }
  */
 export function evaluateBuildItCircuit(
   challenge: BuildItChallenge,
   userGates: PlacedGate[]
-): {
-  isCorrect: boolean;
-  fidelity: number;
-  structuralDiff: string[];
-  diagnosisPrompt: string;
-} {
+): BuildItEvaluation {
   const targetSim = simulateLocalCircuit(challenge.numQubits, challenge.solutionGates, 1024);
   const userSim = simulateLocalCircuit(challenge.numQubits, userGates, 1024);
 
   const fidelity = calculateStatevectorFidelity(targetSim.statevector, userSim.statevector);
 
-  // Check structural differences for Socratic feedback
-  const diffs: string[] = [];
   const targetGateTypes = challenge.solutionGates.map(g => `${g.type.toUpperCase()}(Q${g.qubits.join(',')})`);
   const userGateTypes = userGates.map(g => `${g.type.toUpperCase()}(Q${g.qubits.join(',')})`);
 
-  // Detect missing gates
-  for (const tg of targetGateTypes) {
-    if (!userGateTypes.includes(tg)) {
-      diffs.push(`Missing expected operation ${tg}`);
-    }
-  }
+  // Detect matched, missing, and unexpected gates
+  const matchedGates = targetGateTypes.filter(tg => userGateTypes.some(ug => normalizeSig(ug) === normalizeSig(tg)));
+  const missingGates = targetGateTypes.filter(tg => !userGateTypes.some(ug => normalizeSig(ug) === normalizeSig(tg)));
+  const unexpectedGates = userGateTypes.filter(ug => !targetGateTypes.some(tg => normalizeSig(tg) === normalizeSig(ug)));
 
-  // Detect unexpected gates
-  for (const ug of userGateTypes) {
-    if (!targetGateTypes.includes(ug)) {
-      diffs.push(`Unexpected operation ${ug}`);
-    }
+  const diffs: string[] = [];
+  for (const mg of missingGates) {
+    diffs.push(`Missing ${mg}`);
+  }
+  for (const ug of unexpectedGates) {
+    diffs.push(`Unexpected ${ug}`);
   }
 
   const isCorrect = Boolean(
@@ -163,19 +312,105 @@ export function evaluateBuildItCircuit(
     )
   );
 
-  const diagnosisPrompt = `The student is working on the guided "Build It" challenge for "${challenge.title}".
-Goal: ${challenge.objective}
-Student's circuit gates: [${userGateTypes.join(', ') || 'empty'}]
-Expected circuit gates: [${targetGateTypes.join(', ')}]
-Observed Statevector Fidelity: ${(fidelity * 100).toFixed(1)}%
-Structural differences noted: ${diffs.join('; ') || 'Equivalent gate count but incorrect parameter or order'}
+  // Evaluate milestones sequentially
+  const defaultMilestones: BuildItMilestone[] = [
+    {
+      id: 'core-construction',
+      label: 'Circuit Assembly',
+      shortAction: 'Place the remaining required gates',
+      simpleClue: 'Follow the algorithm workflow step by step.',
+      requiredGateSignatures: targetGateTypes
+    }
+  ];
 
-Provide a Socratic, encouraging pedagogical hint to help the student understand what gate is misplaced or missing and why that physical operation is critical to the algorithm. DO NOT give them the direct full answer.`;
+  const challengeMilestones = (challenge.milestones && challenge.milestones.length > 0)
+    ? challenge.milestones
+    : defaultMilestones;
+
+  let priorMilestonesCompleted = true;
+  const evaluatedMilestones: EvaluatedMilestone[] = challengeMilestones.map((m, index) => {
+    // If prior stage is incomplete, later sequential stages cannot be marked complete
+    if (!priorMilestonesCompleted) {
+      return {
+        ...m,
+        completed: false
+      };
+    }
+
+    const minStep = m.minStep ?? index;
+    const isDone = m.requiredGateSignatures.every(req =>
+      userGates.some(ug => {
+        const sig = `${ug.type.toUpperCase()}(Q${ug.qubits.join(',')})`;
+        return normalizeSig(sig) === normalizeSig(req) && ug.step >= minStep;
+      })
+    );
+
+    if (!isDone) {
+      priorMilestonesCompleted = false;
+    }
+
+    return {
+      ...m,
+      completed: isDone
+    };
+  });
+
+  const completedMilestonesCount = evaluatedMilestones.filter(m => m.completed).length;
+  const totalMilestones = evaluatedMilestones.length;
+
+  // Calculate completion percentage
+  let completionPercentage: number;
+  if (isCorrect) {
+    completionPercentage = 100;
+  } else if (userGates.length === 0) {
+    completionPercentage = 0;
+  } else {
+    const milestoneRatio = totalMilestones > 0 ? (completedMilestonesCount / totalMilestones) : 0;
+    const gateRatio = targetGateTypes.length > 0 ? (matchedGates.length / targetGateTypes.length) : 0;
+    let rawPct = Math.round((milestoneRatio * 0.75 + gateRatio * 0.25) * 100);
+    if (rawPct < 15 && (matchedGates.length > 0 || completedMilestonesCount > 0)) {
+      rawPct = 25;
+    }
+    completionPercentage = Math.min(95, Math.max(5, rawPct));
+  }
+
+  // Determine next action suggestion & clue based on first incomplete milestone
+  const firstIncomplete = evaluatedMilestones.find(m => !m.completed);
+  let nextActionSuggestion = 'Place the next required quantum gate.';
+  let currentClue = challenge.hints[0] || 'Review the state transformation for the next step.';
+
+  if (firstIncomplete) {
+    nextActionSuggestion = firstIncomplete.shortAction || firstIncomplete.label;
+    currentClue = firstIncomplete.simpleClue || currentClue;
+  } else if (!isCorrect) {
+    nextActionSuggestion = 'All gates present! Verify their sequential step order on the wire timeline.';
+    currentClue = 'Double-check which column (step) each gate occupies.';
+  }
+
+  const diagnosisPrompt = `Challenge: "${challenge.title}"
+Progress: ${completionPercentage}% (${completedMilestonesCount}/${totalMilestones} steps)
+Placed: [${userGateTypes.join(', ') || 'empty'}]
+Expected: [${targetGateTypes.join(', ')}]
+Next Step: "${nextActionSuggestion}"
+
+REQUIREMENT: Return 3 SHORT lines (max 40 words total):
+• Step Done: <what is done>
+• Next Step: <next gate to place>
+• Quick Clue: <1 simple clue>`;
 
   return {
     isCorrect,
     fidelity,
+    completionPercentage,
+    completedMilestonesCount,
+    totalMilestones,
+    milestones: evaluatedMilestones,
+    matchedGates,
+    missingGates,
+    unexpectedGates,
     structuralDiff: diffs,
-    diagnosisPrompt
+    diagnosisPrompt,
+    nextActionSuggestion,
+    currentClue
   };
 }

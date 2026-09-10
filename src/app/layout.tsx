@@ -9,6 +9,7 @@ import { AITutorDrawer } from '@/components/ai-tutor/AITutorDrawer';
 import { GoogleTranslator } from '@/components/accessibility/GoogleTranslator';
 import { StudentProvider } from '@/lib/student-context';
 import { StudentIdentityModal } from '@/components/identity/StudentIdentityModal';
+import { SubscriptionModal } from '@/components/subscription/SubscriptionModal';
 
 export const metadata: Metadata = {
   title: 'QLearn | AI-Based Interactive Quantum Algorithm Learning Platform',
@@ -46,6 +47,9 @@ export default function RootLayout({
 
             {/* Student Identity Modal — shown on first visit */}
             <StudentIdentityModal />
+
+            {/* QLearn Pro Subscription Modal */}
+            <SubscriptionModal />
 
             {/* Onboarding Primer Modal */}
             <QubitPrimerModal />

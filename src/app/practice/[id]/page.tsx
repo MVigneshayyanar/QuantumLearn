@@ -38,21 +38,17 @@ import {
   Keyboard
 } from 'lucide-react';
 import { ResponsiveContainer, BarChart, Bar, XAxis, YAxis, Tooltip, Cell } from 'recharts';
-
-const AVAILABLE_GATES: { type: GateType; name: string; desc: string; multi?: boolean; color: string }[] = [
-  { type: 'h', name: 'H', desc: 'Hadamard: Creates equal superposition', color: 'bg-indigo-600 text-white' },
-  { type: 'x', name: 'X', desc: 'Pauli-X: Bit flip', color: 'bg-emerald-600 text-white' },
-  { type: 'y', name: 'Y', desc: 'Pauli-Y: Bit and phase flip', color: 'bg-teal-600 text-white' },
-  { type: 'z', name: 'Z', desc: 'Pauli-Z: Phase flip', color: 'bg-violet-600 text-white' },
-  { type: 's', name: 'S', desc: 'Phase Gate: +90° phase shift', color: 'bg-purple-600 text-white' },
-  { type: 't', name: 'T', desc: 'T Gate: +45° phase shift', color: 'bg-pink-600 text-white' },
-  { type: 'cx', name: 'CX', desc: 'CNOT: Controlled NOT (Entanglement)', multi: true, color: 'bg-indigo-700 text-white' },
-  { type: 'cz', name: 'CZ', desc: 'Controlled-Z: Inverts phase of |11>', multi: true, color: 'bg-blue-700 text-white' },
-  { type: 'swap', name: 'SWAP', desc: 'SWAP: Exchanges state of 2 qubits', multi: true, color: 'bg-cyan-700 text-white' },
-  { type: 'measure', name: 'M', desc: 'Measurement in computational basis', color: 'bg-dark-800 text-white' },
-];
+import {
+  QuantumGateSymbol,
+  GATE_CONFIGS,
+  AVAILABLE_GATE_LIST,
+  ControlDotIcon,
+  TargetPlusIcon,
+  SwapXIcon
+} from '@/components/circuit/QuantumGateSymbol';
 
 const MAX_STEPS = 8;
+const AVAILABLE_GATES = AVAILABLE_GATE_LIST;
 
 interface SubmissionRecord {
   timestamp: string;
@@ -70,11 +66,29 @@ export default function PracticeDetailPage() {
   const problemId = params?.id as string;
   const problem = PRACTICE_PROBLEMS.find((p) => p.id === problemId);
 
+  const [returnTo, setReturnTo] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const sp = new URLSearchParams(window.location.search);
+      const ret = sp.get('returnTo');
+      if (ret) setReturnTo(ret);
+    }
+  }, []);
+
+  const currentProblemIdx = PRACTICE_PROBLEMS.findIndex((p) => p.id === problem?.id);
+  const nextProblem =
+    currentProblemIdx >= 0 && currentProblemIdx < PRACTICE_PROBLEMS.length - 1
+      ? PRACTICE_PROBLEMS[currentProblemIdx + 1]
+      : null;
+
   const [gates, setGates] = useState<PlacedGate[]>([]);
   const [selectedGateType, setSelectedGateType] = useState<GateType>('h');
   const [controlQubit, setControlQubit] = useState<number>(0);
   const [targetQubit, setTargetQubit] = useState<number>(1);
   const [selectedSlot, setSelectedSlot] = useState<{ qubit: number; step: number } | null>(null);
+  const [dragOverSlot, setDragOverSlot] = useState<{ qubit: number; step: number } | null>(null);
+  const [isDraggingActive, setIsDraggingActive] = useState(false);
 
   const [verdict, setVerdict] = useState<SubmissionVerdict | null>(null);
   const [isEvaluating, setIsEvaluating] = useState(false);
@@ -109,22 +123,23 @@ export default function PracticeDetailPage() {
   const numQubits = problem.numQubits;
 
   // Gate manipulation
-  const placeGateOnSlot = (qubit: number, step: number) => {
-    const isMulti = ['cx', 'cz', 'swap'].includes(selectedGateType);
+  const placeGateOnSlot = (qubit: number, step: number, gateTypeOverride?: GateType) => {
+    const typeToPlace = gateTypeOverride || selectedGateType;
+    const isMulti = ['cx', 'cz', 'swap'].includes(typeToPlace);
     const newGates = gates.filter((g) => !(g.step === step && g.qubits.includes(qubit)));
 
     if (isMulti) {
       const tgt = qubit === controlQubit ? (qubit + 1) % numQubits : qubit;
       newGates.push({
         id: `p-gate-${Date.now()}-${step}`,
-        type: selectedGateType,
+        type: typeToPlace,
         qubits: [controlQubit, tgt],
         step
       });
     } else {
       newGates.push({
         id: `p-gate-${Date.now()}-${step}`,
-        type: selectedGateType,
+        type: typeToPlace,
         qubits: [qubit],
         step
       });
@@ -366,11 +381,11 @@ export default function PracticeDetailPage() {
       <div className="h-12 bg-white border-b border-dark-200 px-4 flex items-center justify-between shrink-0 shadow-2xs">
         <div className="flex items-center gap-3">
           <Link
-            href="/practice"
+            href={returnTo || '/practice'}
             className="flex items-center gap-1.5 text-xs font-semibold text-dark-700 hover:text-dark-900 transition-colors bg-dark-50 hover:bg-dark-100 px-2.5 py-1.5 rounded-lg border border-dark-200"
           >
             <ArrowLeft className="w-3.5 h-3.5" />
-            <span>Problem List</span>
+            <span>{returnTo ? 'Back to Stage 6' : 'Problem List'}</span>
           </Link>
           <div className="h-4 w-px bg-dark-200" />
           <span className="text-xs font-bold text-dark-900 truncate max-w-[200px] sm:max-w-xs">
@@ -1067,23 +1082,34 @@ export default function PracticeDetailPage() {
                 >
                   Gates:
                 </span>
-                {AVAILABLE_GATES.filter((g) => problem.allowedGates.includes(g.type)).map((gate) => {
+                {AVAILABLE_GATE_LIST.filter((g) => problem.allowedGates.includes(g.type)).map((gate) => {
                   const isSelected = selectedGateType === gate.type;
                   return (
                     <button
                       key={gate.type}
+                      draggable={true}
+                      onDragStart={(e) => {
+                        e.dataTransfer.setData('text/plain', gate.type);
+                        e.dataTransfer.setData('application/quantum-gate', gate.type);
+                        e.dataTransfer.effectAllowed = 'copy';
+                        setSelectedGateType(gate.type);
+                        setIsDraggingActive(true);
+                      }}
+                      onDragEnd={() => {
+                        setIsDraggingActive(false);
+                        setDragOverSlot(null);
+                      }}
                       onClick={() => setSelectedGateType(gate.type)}
                       style={{ fontSize: `calc(${fontSizeSetting} * 0.92)` }}
-                      className={`flex items-center gap-1.5 px-2.5 py-1 rounded-lg border font-semibold transition-all select-none shrink-0 ${
+                      className={`flex items-center gap-1.5 px-2.5 py-1 rounded-lg border font-semibold cursor-grab active:cursor-grabbing transition-all select-none shrink-0 ${
                         isSelected
                           ? 'border-primary-600 bg-primary-50 text-primary-900 ring-2 ring-primary-500/20 shadow-xs'
                           : 'border-dark-200 bg-white text-dark-700 hover:bg-dark-100 hover:text-dark-900'
                       }`}
+                      title={`${gate.desc} — Drag onto wire or click to place`}
                     >
-                      <span className={`w-4 h-4 rounded flex items-center justify-center font-mono text-[10px] font-bold ${gate.color}`}>
-                        {gate.name}
-                      </span>
-                      <span>{gate.type.toUpperCase()}</span>
+                      <QuantumGateSymbol type={gate.type} size="sm" />
+                      <span className="font-bold font-sans">{gate.name}</span>
                     </button>
                   );
                 })}
@@ -1163,10 +1189,69 @@ export default function PracticeDetailPage() {
                       {Array.from({ length: MAX_STEPS }, (_, sIdx) => {
                         const placed = gates.find((g) => g.step === sIdx && g.qubits.includes(qIdx));
                         const isSelected = selectedSlot?.qubit === qIdx && selectedSlot?.step === sIdx;
+                        const isDragOver = dragOverSlot?.qubit === qIdx && dragOverSlot?.step === sIdx;
+                        const isControl = placed && placed.qubits.length > 1 && placed.qubits[0] === qIdx;
+                        const isTarget = placed && placed.qubits.length > 1 && placed.qubits[1] === qIdx;
 
                         return (
                           <div
                             key={sIdx}
+                            onDragOver={(e) => {
+                              e.preventDefault();
+                              e.dataTransfer.dropEffect = 'copy';
+                            }}
+                            onDragEnter={(e) => {
+                              e.preventDefault();
+                              setDragOverSlot({ qubit: qIdx, step: sIdx });
+                            }}
+                            onDragLeave={(e) => {
+                              e.preventDefault();
+                              if (dragOverSlot?.qubit === qIdx && dragOverSlot?.step === sIdx) {
+                                setDragOverSlot(null);
+                              }
+                            }}
+                            onDrop={(e) => {
+                              e.preventDefault();
+                              setDragOverSlot(null);
+                              setIsDraggingActive(false);
+
+                              const moveData = e.dataTransfer.getData('application/quantum-move');
+                              if (moveData) {
+                                try {
+                                  const parsed = JSON.parse(moveData);
+                                  const filtered = gates.filter(
+                                    (g) => g.id !== parsed.gateId && !(g.step === sIdx && g.qubits.includes(qIdx))
+                                  );
+                                  if (['cx', 'cz', 'swap'].includes(parsed.type)) {
+                                    const tgt = qIdx === 0 ? 1 : 0;
+                                    filtered.push({
+                                      id: `prac-gate-${Date.now()}-${sIdx}`,
+                                      type: parsed.type,
+                                      qubits: [qIdx, tgt],
+                                      step: sIdx
+                                    });
+                                  } else {
+                                    filtered.push({
+                                      id: `prac-gate-${Date.now()}-${sIdx}`,
+                                      type: parsed.type,
+                                      qubits: [qIdx],
+                                      step: sIdx
+                                    });
+                                  }
+                                  setGates(filtered);
+                                  return;
+                                } catch {}
+                              }
+
+                              const droppedType = (e.dataTransfer.getData('application/quantum-gate') ||
+                                e.dataTransfer.getData('text/plain') ||
+                                selectedGateType) as GateType;
+
+                              if (droppedType && problem.allowedGates.includes(droppedType)) {
+                                setSelectedGateType(droppedType);
+                                placeGateOnSlot(qIdx, sIdx, droppedType);
+                              }
+                            }}
                             onClick={() => {
                               setSelectedSlot({ qubit: qIdx, step: sIdx });
                               placeGateOnSlot(qIdx, sIdx);
@@ -1176,22 +1261,77 @@ export default function PracticeDetailPage() {
                               removeGateAt(qIdx, sIdx);
                             }}
                             className={`relative z-10 w-10 h-10 rounded-xl flex items-center justify-center cursor-pointer transition-all border ${
-                              isSelected
+                              isDragOver
+                                ? 'ring-3 ring-primary-500 ring-offset-1 border-primary-600 bg-primary-100 scale-105 shadow-md'
+                                : isSelected
                                 ? 'ring-2 ring-primary-600 border-primary-600 bg-primary-50'
                                 : placed
                                 ? 'border-dark-300 bg-white shadow-xs'
+                                : isDraggingActive
+                                ? 'border-dashed border-primary-400 bg-primary-50/40 animate-pulse'
                                 : 'border-dashed border-dark-200 hover:border-primary-400 bg-white/90 hover:bg-primary-50/30'
                             }`}
-                            title={placed ? `Right-click to remove ${placed.type.toUpperCase()}` : `Click to place ${selectedGateType.toUpperCase()}`}
+                            title={
+                              placed
+                                ? `Step ${sIdx}: ${placed.type.toUpperCase()} on Q${placed.qubits.join(', Q')}. Drag to move, or right-click to remove.`
+                                : `Click or drag to place ${selectedGateType.toUpperCase()}`
+                            }
                           >
+                            {/* Vertical connector line */}
+                            {isControl && placed && (
+                              <div
+                                className="absolute left-1/2 -translate-x-1/2 w-0.5 bg-blue-600 pointer-events-none z-0"
+                                style={{
+                                  top: '50%',
+                                  height: `${(placed.qubits[1] - placed.qubits[0]) * 58}px`
+                                }}
+                              />
+                            )}
+
                             {placed ? (
                               <div
-                                className={`w-8 h-8 rounded-lg flex items-center justify-center font-mono font-bold text-[11px] shadow-2xs ${
-                                  AVAILABLE_GATES.find((g) => g.type === placed.type)?.color || 'bg-primary-600 text-white'
-                                }`}
+                                draggable={true}
+                                onDragStart={(e) => {
+                                  e.stopPropagation();
+                                  e.dataTransfer.setData('text/plain', placed.type);
+                                  e.dataTransfer.setData('application/quantum-gate', placed.type);
+                                  e.dataTransfer.setData(
+                                    'application/quantum-move',
+                                    JSON.stringify({ qubit: qIdx, step: sIdx, gateId: placed.id, type: placed.type })
+                                  );
+                                  e.dataTransfer.effectAllowed = 'move';
+                                  setIsDraggingActive(true);
+                                }}
+                                onDragEnd={() => {
+                                  setIsDraggingActive(false);
+                                  setDragOverSlot(null);
+                                }}
+                                className="w-full h-full flex items-center justify-center cursor-grab active:cursor-grabbing select-none"
                               >
-                                {placed.type.toUpperCase()}
+                                {placed.type === 'cx' ? (
+                                  isControl ? (
+                                    <ControlDotIcon size={12} />
+                                  ) : isTarget ? (
+                                    <TargetPlusIcon size={24} />
+                                  ) : (
+                                    <QuantumGateSymbol type={placed.type} size="sm" />
+                                  )
+                                ) : placed.type === 'cz' ? (
+                                  isControl ? (
+                                    <ControlDotIcon size={12} />
+                                  ) : isTarget ? (
+                                    <QuantumGateSymbol type="z" size="sm" />
+                                  ) : (
+                                    <QuantumGateSymbol type={placed.type} size="sm" />
+                                  )
+                                ) : placed.type === 'swap' ? (
+                                  <SwapXIcon size={20} />
+                                ) : (
+                                  <QuantumGateSymbol type={placed.type} size="sm" />
+                                )}
                               </div>
+                            ) : isDragOver ? (
+                              <span className="text-[8px] font-mono font-bold text-primary-700">DROP</span>
                             ) : (
                               <span className="text-[9px] font-mono text-dark-400 opacity-60">
                                 {relativeLineNumbers ? `[${sIdx}]` : `S${sIdx}`}
@@ -1284,20 +1424,82 @@ export default function PracticeDetailPage() {
                         <span className="text-dark-500 text-[11px] font-sans">Runtime: <strong>{verdict.executionTimeMs} ms</strong></span>
                       </div>
 
-                      <div className="p-3.5 rounded-xl bg-dark-50 border border-dark-200 text-dark-800 space-y-1">
-                        <div className="text-dark-500 text-[11px] font-sans">Judge Output:</div>
+                      <div className="p-3.5 rounded-xl bg-dark-50 border border-dark-200 text-dark-800 space-y-2">
+                        <div className="flex items-center justify-between">
+                          <span className="text-dark-500 text-[11px] font-sans">Judge Output:</span>
+                          <span className="px-2 py-0.5 rounded-md text-[10px] font-mono font-bold bg-white border border-dark-200 text-dark-800">
+                            {verdict.status === 'ACCEPTED'
+                              ? '100% Complete'
+                              : verdict.fidelity !== undefined
+                              ? `${Math.round(verdict.fidelity * 100)}% Complete`
+                              : verdict.measuredProbability !== undefined
+                              ? `${Math.round(verdict.measuredProbability * 100)}% Match`
+                              : '0% Complete'}
+                          </span>
+                        </div>
                         <div className="text-dark-900 font-sans text-xs font-medium">{verdict.message}</div>
+
+                        {/* Completion Percentage Progress Bar */}
+                        <div className="space-y-1 pt-1">
+                          <div className="w-full h-2 bg-dark-200 rounded-full overflow-hidden">
+                            <div
+                              className={`h-full rounded-full transition-all duration-500 ${
+                                verdict.status === 'ACCEPTED'
+                                  ? 'bg-emerald-500'
+                                  : (verdict.fidelity || 0) > 0.5 || (verdict.measuredProbability || 0) > 0.5
+                                  ? 'bg-amber-500'
+                                  : 'bg-rose-500'
+                              }`}
+                              style={{
+                                width: `${
+                                  verdict.status === 'ACCEPTED'
+                                    ? 100
+                                    : Math.max(
+                                        5,
+                                        Math.round(
+                                          (verdict.fidelity ?? verdict.measuredProbability ?? 0) * 100
+                                        )
+                                      )
+                                }%`
+                              }}
+                            />
+                          </div>
+                        </div>
+
                         {verdict.fidelity !== undefined && (
-                          <div className="text-emerald-700 font-bold text-[11px] pt-1">
+                          <div className="text-emerald-700 font-bold text-[11px] pt-0.5">
                             Fidelity Score: {(verdict.fidelity * 100).toFixed(2)}%
                           </div>
                         )}
                         {verdict.measuredProbability !== undefined && (
-                          <div className="text-emerald-700 font-bold text-[11px] pt-1">
+                          <div className="text-emerald-700 font-bold text-[11px] pt-0.5">
                             Target State Probability: {(verdict.measuredProbability * 100).toFixed(2)}%
                           </div>
                         )}
                       </div>
+
+                      {verdict.status === 'ACCEPTED' && (
+                        <div className="pt-2 flex flex-wrap items-center gap-2">
+                          {returnTo && (
+                            <Link
+                              href={returnTo}
+                              className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-primary-600 hover:bg-primary-700 text-white text-xs font-bold shadow-xs transition-colors"
+                            >
+                              <ArrowLeft className="w-3.5 h-3.5" />
+                              <span>Back to Stage 6: Skill Base</span>
+                            </Link>
+                          )}
+                          {nextProblem && (
+                            <Link
+                              href={`/practice/${nextProblem.id}${returnTo ? `?returnTo=${encodeURIComponent(returnTo)}` : ''}`}
+                              className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold shadow-xs transition-colors"
+                            >
+                              <span>Next Question: {nextProblem.title}</span>
+                              <ChevronRight className="w-3.5 h-3.5" />
+                            </Link>
+                          )}
+                        </div>
+                      )}
                     </div>
                   ) : (
                     <div className="h-full flex flex-col items-center justify-center text-dark-400 py-6 gap-2">

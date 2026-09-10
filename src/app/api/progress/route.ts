@@ -55,7 +55,7 @@ export async function POST(req: NextRequest) {
           moduleSlug,
           isCompleted: true,
           masteryScore: typeof score === 'number' ? score : 0,
-          stageReached: 4, // quiz stage = final
+          stageReached: 6, // Stage 6 = Skill Base (final stage)
           lastVisitedAt: now,
         },
       });
@@ -63,12 +63,22 @@ export async function POST(req: NextRequest) {
     }
 
     // status === 'in_progress'
+    const existing = await prisma.userProgress.findUnique({
+      where: {
+        userId_moduleSlug: { userId, moduleSlug },
+      },
+    });
+
+    const newStage = typeof stageReached === 'number'
+      ? Math.max(existing?.stageReached ?? 1, stageReached)
+      : (existing?.stageReached ?? 1);
+
     const progress = await prisma.userProgress.upsert({
       where: {
         userId_moduleSlug: { userId, moduleSlug },
       },
       update: {
-        stageReached: typeof stageReached === 'number' ? stageReached : undefined,
+        stageReached: newStage,
         lastVisitedAt: now,
       },
       create: {

@@ -3,6 +3,7 @@ import { create } from 'zustand';
 // The persist import is retained in case other stores need it in the future.
 import { PlacedGate, SimulationResult, ChatMessage, ConceptMastery, MisconceptionTag } from './types';
 import { simulateLocalCircuit } from './quantum-simulator-core';
+import { generateSocraticResponse } from './ai-engine';
 
 interface CircuitState {
   numQubits: number;
@@ -56,6 +57,14 @@ interface AITutorState {
   setActiveMisconception: (tag: string | null) => void;
   clearChat: () => void;
   resetChat: () => void;
+  askTutor: (
+    prompt: string,
+    options?: {
+      explanationMode?: 'simple' | 'technical';
+      activeMisconception?: string | null;
+      language?: string;
+    }
+  ) => Promise<void>;
 }
 
 export const useCircuitStore = create<CircuitState>((set, get) => ({
@@ -273,5 +282,77 @@ export const useAITutorStore = create<AITutorState>((set, get) => ({
     ],
     isGenerating: false,
     activeMisconception: null
-  })
+  }),
+  askTutor: async (prompt, options) => {
+    const cleanPrompt = prompt.trim();
+    if (!cleanPrompt || get().isGenerating) return;
+
+    const targetMisconception =
+      options?.activeMisconception !== undefined
+        ? options.activeMisconception
+        : get().activeMisconception;
+
+    const userMsg: ChatMessage = {
+      id: `msg-${Date.now()}-${Math.random().toString(36).substring(2, 5)}`,
+      role: 'user',
+      content: cleanPrompt,
+      timestamp: Date.now()
+    };
+
+    set({
+      messages: [...get().messages, userMsg],
+      isOpen: true,
+      isGenerating: true,
+      activeMisconception: targetMisconception
+    });
+
+    try {
+      const res = await fetch('/api/ai-tutor', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          query: cleanPrompt,
+          explanationMode: options?.explanationMode || 'simple',
+          activeMisconception: targetMisconception,
+          language: options?.language || 'en'
+        })
+      });
+
+      if (res.ok) {
+        const data = await res.json();
+        if (data.reply) {
+          const assistantMsg: ChatMessage = {
+            id: `msg-${Date.now()}-${Math.random().toString(36).substring(2, 5)}`,
+            role: 'assistant',
+            content: data.reply,
+            timestamp: Date.now()
+          };
+          set({
+            messages: [...get().messages, assistantMsg],
+            isGenerating: false,
+            activeMisconception: null
+          });
+          return;
+        }
+      }
+      throw new Error('AI API route did not return reply');
+    } catch {
+      // Local fallback engine
+      const offlineReply = generateSocraticResponse(cleanPrompt, {
+        explanationMode: options?.explanationMode || 'simple',
+        activeMisconception: targetMisconception
+      });
+      const assistantMsg: ChatMessage = {
+        id: `msg-${Date.now()}-${Math.random().toString(36).substring(2, 5)}`,
+        role: 'assistant',
+        content: offlineReply,
+        timestamp: Date.now()
+      };
+      set({
+        messages: [...get().messages, assistantMsg],
+        isGenerating: false,
+        activeMisconception: null
+      });
+    }
+  }
 }));

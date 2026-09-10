@@ -177,71 +177,34 @@ export function generateSocraticCircuitFeedback(params: {
     const hasCX = gateStrUpper.includes('CX');
     const hasCZ = gateStrUpper.includes('CZ');
 
-    // Case 1: Student placed X on Q1 instead of H (The exact situation shown by the user)
     if (hasHOnQ0 && hasXOnQ1 && !hasHOnQ1) {
-      return `### 💡 Schrödinger AI Socratic Guidance
-
-**Let's analyze your circuit initialization:**
-You started off well by placing a **Hadamard (H) gate** on Qubit 0, which creates the superposition state $|+\\rangle = \\frac{|0\\rangle + |1\\rangle}{\\sqrt{2}}$.
-
-However, take a close look at **Qubit 1**: you placed an **X gate**.
-- Remember that an $X$ gate performs a deterministic bit-flip ($|0\\rangle \\to |1\\rangle$). It does *not* create an equal superposition of possibilities.
-- Grover's search must start by putting **all qubits** into an equal superposition so the algorithm can search through $|00\\rangle, |01\\rangle, |10\\rangle, |11\\rangle$ simultaneously.
-
-**Guiding Question:**
-*What single-qubit gate can you replace the X gate with on Qubit 1 so that both qubits begin in an equal superposition of $|0\\rangle$ and $|1\\rangle$?*`;
+      return `• **Step Done:** Hadamard (H) gate placed on Qubit 0.
+• **Next Step:** Replace the X gate on Qubit 1 with a **Hadamard (H) gate**.
+• **Quick Clue:** Grover requires both qubits to start in an equal superposition $|+\\rangle$, whereas X creates a deterministic $|1\\rangle$.`;
     }
 
-    // Case 2: Missing initialization superposition altogether
     if (!hasHOnQ0 || !hasHOnQ1) {
-      return `### 💡 Schrödinger AI Socratic Guidance
-
-**Step 1 — Creating the Search Space:**
-Before we can search for a target item, the quantum register must hold an equal superposition across all 4 computational basis states.
-
-**Guiding Question:**
-*Which fundamental gate transforms a qubit starting from $|0\\rangle$ into an equal blend of $|0\\rangle$ and $|1\\rangle$? What happens when you apply this gate to both Q0 and Q1 at step 0?*`;
+      return `• **Step Done:** Circuit started.
+• **Next Step:** Place **Hadamard (H) gates** on both Q0 and Q1 to create uniform 4-state superposition.
+• **Quick Clue:** What single-qubit gate transforms $|0\\rangle$ into an equal blend of $|0\\rangle$ and $|1\\rangle$?`;
     }
 
-    // Case 3: Superposition exists, but using CNOT instead of CZ for oracle
     if (hasHOnQ0 && hasHOnQ1 && hasCX && !hasCZ) {
-      return `### 💡 Schrödinger AI Socratic Guidance
-
-**Look closely at your Oracle implementation:**
-Notice that you placed a **CNOT (CX)** gate.
-- A CNOT flips the target qubit's bit ($|0\\rangle \\leftrightarrow |1\\rangle$). This alters the computational states themselves rather than marking the target state.
-- In Grover's search, the Phase Oracle must perform a **phase inversion** (multiplying the amplitude of the target state $|11\\rangle$ by $-1$), without altering the underlying bit pattern!
-
-**Guiding Question:**
-*Which controlled 2-qubit phase gate acts symmetrically to negate the amplitude only when both qubits are $|1\\rangle$?*`;
+      return `• **Step Done:** Uniform superposition established.
+• **Next Step:** Replace CNOT with a **Controlled-Z (CZ)** gate on Q0 and Q1 for the phase oracle.
+• **Quick Clue:** The Phase Oracle must negate the amplitude of target state $|11\\rangle$ without flipping bit values.`;
     }
 
-    // Case 4: Superposition exists, but oracle is missing
     if (hasHOnQ0 && hasHOnQ1 && !hasCZ && !hasCX) {
-      return `### 💡 Schrödinger AI Socratic Guidance
-
-**Great job! Uniform superposition is established:**
-Both qubits are now in equal superposition: $\\frac{1}{2}(|00\\rangle + |01\\rangle + |10\\rangle + |11\\rangle)$.
-
-**Next Step — The Phase Oracle:**
-Now the algorithm must "tag" or "mark" the target state $|11\\rangle$ with a negative sign ($-1$ relative phase), while leaving $|00\\rangle, |01\\rangle, |10\\rangle$ untouched.
-
-**Guiding Question:**
-*Which 2-qubit controlled gate flips the sign of $|11\\rangle$ without changing any of the other three basis states?*`;
+      return `• **Step Done:** Uniform 4-state superposition established on Q0 and Q1.
+• **Next Step:** Place a **Controlled-Z (CZ)** gate between Q0 and Q1 to mark target $|11\\rangle$.
+• **Quick Clue:** Which controlled gate flips the sign of $|11\\rangle$ while leaving other states untouched?`;
     }
 
-    // Case 5: Oracle is in place, but diffusion operator is missing or incomplete
     if (hasCZ) {
-      return `### 💡 Schrödinger AI Socratic Guidance
-
-**The Phase Oracle is working! Now for Amplitude Amplification:**
-Your oracle has successfully negated the phase of $|11\\rangle$: $\\frac{1}{2}(|00\\rangle + |01\\rangle + |10\\rangle - |11\\rangle)$.
-
-However, if you measure now, notice that $|-0.5|^2 = 25\\%$. Every state still has the exact same measurement probability!
-- We need the **Grover Diffusion Operator (Inversion about the Mean)** to reflect all amplitudes about their average, turning that negative phase into a peak probability near 100%.
-
-**Guiding Question:**
-*To reflect about the uniform state $|s\\rangle$, we first rotate back from the superposition basis using Hadamard gates. What sequence of gates inverts about $|00\\rangle$ before rotating back?*`;
+      return `• **Step Done:** Phase oracle marked $|11\\rangle$ with negative phase.
+• **Next Step:** Assemble the **Diffusion Operator** (H on Q0 & Q1, reflection, and final H).
+• **Quick Clue:** Diffusion inverts amplitudes about the mean, amplifying $|11\\rangle$ toward 100% probability.`;
     }
   }
 
@@ -252,41 +215,28 @@ However, if you measure now, notice that $|-0.5|^2 = 25\\%$. Every state still h
     const hasHOnQ1 = gateStrUpper.includes('H(Q1)');
     const hasCX = gateStrUpper.includes('CX');
 
-    // Case 1: Missing X on ancilla Q1
     if (!hasXOnQ1) {
-      return `### 💡 Schrödinger AI Socratic Guidance
-
-**Examine the Ancilla Qubit (Qubit 1):**
-The Deutsch-Jozsa algorithm depends entirely on **Phase Kickback**. Phase kickback only occurs when the target ancilla qubit is in the negative superposition eigenstate $|-\\rangle = \\frac{|0\\rangle - |1\\rangle}{\\sqrt{2}}$.
-
-If you only apply a Hadamard gate to $|0\\rangle$, it produces $|+\\rangle$, which has an eigenvalue of $+1$ (no phase kickback will occur!).
-
-**Guiding Question:**
-*What gate must you apply to Qubit 1 at step 0 (before the Hadamard gate) so that $H$ transforms it into $|-\\rangle$?*`;
+      return `• **Step Done:** Circuit started.
+• **Next Step:** Apply an **X gate** to Ancilla Qubit 1 to initialize it to $|1\\rangle$.
+• **Quick Clue:** Phase kickback requires ancilla Q1 to start in $|1\\rangle$ so that the subsequent Hadamard puts it in $|-\\rangle$.`;
     }
 
-    // Case 2: Missing balanced oracle
+    if (hasXOnQ1 && (!hasHOnQ0 || !hasHOnQ1)) {
+      return `• **Step Done:** Ancilla Q1 initialized with **X gate** ($|1\\rangle$). Excellent first step!
+• **Next Step:** Place **Hadamard (H) gates** on both Q0 and Q1 to create superposition.
+• **Quick Clue:** Both input Q0 and ancilla Q1 must enter the oracle in superposition ($|+, -\\rangle$) for phase kickback.`;
+    }
+
     if (hasXOnQ1 && hasHOnQ0 && hasHOnQ1 && !hasCX) {
-      return `### 💡 Schrödinger AI Socratic Guidance
-
-**Superposition and Ancilla are ready!**
-Both qubits are in superposition, with Qubit 1 in the $|-\\rangle$ state ready for kickback. Now you need to query the balanced function $f(x) = x$.
-- A quantum function oracle computes $|x, y\\rangle \\to |x, y \\oplus f(x)\\rangle$.
-
-**Guiding Question:**
-*Which 2-qubit gate adds the value of input Qubit 0 into ancilla Qubit 1 modulo 2 ($y \\oplus x$)?*`;
+      return `• **Step Done:** Ancilla initialized and superposition established on both qubits.
+• **Next Step:** Place a **CNOT gate** (Control: Q0, Target: Q1) to evaluate the balanced oracle $f(x) = x$.
+• **Quick Clue:** Which 2-qubit gate adds input Q0 into ancilla Q1 modulo 2 ($y \\oplus x$)?`;
     }
 
-    // Case 3: Missing final Hadamard
     if (hasCX) {
-      return `### 💡 Schrödinger AI Socratic Guidance
-
-**Phase Kickback has occurred!**
-The oracle has successfully transferred the global function property into the phase of Qubit 0.
-However, detectors in a quantum computer only measure in the computational Z basis ($|0\\rangle$ or $|1\\rangle$), not the phase basis ($|+\\rangle$ or $|-\\rangle$).
-
-**Guiding Question:**
-*What gate converts phase interference on Qubit 0 back into a deterministic computational measurement of $|1\\rangle$?*`;
+      return `• **Step Done:** Phase kickback completed across the oracle.
+• **Next Step:** Place a final **Hadamard (H) gate** on Qubit 0.
+• **Quick Clue:** Detectors measure in the Z basis; the final H converts kickback phase interference into a deterministic $|1\\rangle$ bit.`;
     }
   }
 
@@ -296,23 +246,15 @@ However, detectors in a quantum computer only measure in the computational Z bas
     const hasCX01 = gateStrUpper.includes('CX(Q0,1)') || gateStrUpper.includes('CX(0,1)');
 
     if (!hasCX12) {
-      return `### 💡 Schrödinger AI Socratic Guidance
-
-**Step 1 — Establishing the Quantum Channel:**
-Before Alice can teleport her quantum state on Qubit 0, Alice (Q1) and Bob (Q2) must share an entangled resource.
-
-**Guiding Question:**
-*What two gates create the maximally entangled Bell state $|\\Phi^+\\rangle = \\frac{|00\\rangle + |11\\rangle}{\\sqrt{2}}$ between Alice's Qubit 1 and Bob's Qubit 2?*`;
+      return `• **Step Done:** Message state prepared.
+• **Next Step:** Create an entangled Bell pair between Alice (Q1) and Bob (Q2) using **H(Q1)** and **CX(Q1, Q2)**.
+• **Quick Clue:** Teleportation requires shared entanglement before Alice can measure and transmit.`;
     }
 
     if (hasCX12 && !hasCX01) {
-      return `### 💡 Schrödinger AI Socratic Guidance
-
-**Bell pair is established! Now for Bell Measurement:**
-Alice holds the unknown message state on Qubit 0 and her half of the Bell pair on Qubit 1. To teleport the information, Alice must perform a joint Bell-basis measurement.
-
-**Guiding Question:**
-*To measure in the Bell basis using standard computational detectors, Alice must reverse the Bell state circuit. Which entangling gate couples message Q0 to entangled Q1?*`;
+      return `• **Step Done:** Entangled Bell pair established between Alice and Bob.
+• **Next Step:** Perform Bell measurement: apply **CNOT (Control: Q0, Target: Q1)** followed by **H(Q0)**.
+• **Quick Clue:** Coupling message Q0 to entangled Q1 enables joint Bell-basis projection.`;
     }
   }
 
@@ -323,15 +265,9 @@ Alice holds the unknown message state on Qubit 0 and her half of the Bell pair o
     const hasCX = gateStrUpper.includes('CX');
 
     if (!hasZ || !hasX) {
-      return `### 💡 Schrödinger AI Socratic Guidance
-
-**Encoding the Message "11":**
-Alice wants to transmit two classical bits: $b_1 b_2 = 11$.
-- Applying a $Z$ gate alters the relative phase ($|\\Phi^+\\rangle \\to |\\Phi^-\\rangle$).
-- Applying an $X$ gate alters the bit parity ($|\\Phi^+\\rangle \\to |\\Psi^+\\rangle$).
-
-**Guiding Question:**
-*What combination of single-qubit gates must Alice apply to Qubit 0 to encode both a bit flip and a phase flip for the message "11"?*`;
+      return `• **Step Done:** Shared Bell pair prepared.
+• **Next Step:** Apply **Z** and **X gates** on Alice's Qubit 0 to encode the two classical bits '11'.
+• **Quick Clue:** Z flips phase ($|\\Phi^+\\rangle \\to |\\Phi^-\\rangle$) and X flips bit ($|\\Phi^-\\rangle \\to |\\Psi^-\\rangle$).`;
     }
 
     if (hasZ && hasX && !hasCX) {

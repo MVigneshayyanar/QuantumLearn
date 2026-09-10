@@ -86,7 +86,7 @@ export function StudentIdentityModal() {
           </div>
           <div>
             <h2 className="text-xl font-bold text-dark-900">
-              {mode === 'signin' ? 'Sign In to QuantumLearn' : 'Create Student Account'}
+              {mode === 'signin' ? 'Sign In to QLearn' : 'Create Student Account'}
             </h2>
             <p className="text-xs text-dark-500 mt-0.5">
               Sign in to submit your quantum circuits to the judge and track progress.

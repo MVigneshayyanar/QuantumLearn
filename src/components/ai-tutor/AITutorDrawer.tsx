@@ -27,7 +27,8 @@ export function AITutorDrawer() {
     setIsGenerating,
     activeMisconception,
     setActiveMisconception,
-    clearChat
+    clearChat,
+    askTutor
   } = useAITutorStore();
 
   const { explanationMode, language } = useAccessibility();
@@ -40,56 +41,65 @@ export function AITutorDrawer() {
     }
   }, [messages, isOpen]);
 
+  // Auto-respond if the last message in the chat is an unreplied user message
+  useEffect(() => {
+    if (!isOpen || isGenerating || messages.length === 0) return;
+    const lastMsg = messages[messages.length - 1];
+    if (lastMsg && lastMsg.role === 'user') {
+      const runPendingReply = async () => {
+        setIsGenerating(true);
+        try {
+          const response = await fetch('/api/ai-tutor', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              query: lastMsg.content,
+              explanationMode,
+              activeMisconception,
+              language
+            })
+          });
+
+          if (response.ok) {
+            const data = await response.json();
+            if (data.reply) {
+              addMessage({
+                role: 'assistant',
+                content: data.reply
+              });
+              return;
+            }
+          }
+          throw new Error('API route failed');
+        } catch {
+          const offlineReply = generateSocraticResponse(lastMsg.content, {
+            explanationMode,
+            activeMisconception
+          });
+          addMessage({
+            role: 'assistant',
+            content: offlineReply
+          });
+        } finally {
+          setIsGenerating(false);
+          setActiveMisconception(null);
+        }
+      };
+      runPendingReply();
+    }
+  }, [isOpen, messages, isGenerating, explanationMode, activeMisconception, language, addMessage, setIsGenerating, setActiveMisconception]);
+
   if (!isOpen) return null;
 
   const handleSend = async (customPrompt?: string) => {
     const textToSend = customPrompt || inputVal.trim();
     if (!textToSend || isGenerating) return;
-
-    // Add user message
-    addMessage({
-      role: 'user',
-      content: textToSend
-    });
     setInputVal('');
-    setIsGenerating(true);
-
-    try {
-      // Call Next.js API route /api/ai-tutor
-      const response = await fetch('/api/ai-tutor', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          query: textToSend,
-          explanationMode,
-          activeMisconception,
-          language
-        })
-      });
-
-      if (response.ok) {
-        const data = await response.json();
-        addMessage({
-          role: 'assistant',
-          content: data.reply
-        });
-      } else {
-        throw new Error('API route failed');
-      }
-    } catch {
-      // Offline / Local Socratic Engine fallback
-      const offlineReply = generateSocraticResponse(textToSend, {
-        explanationMode,
-        activeMisconception
-      });
-      addMessage({
-        role: 'assistant',
-        content: offlineReply
-      });
-    } finally {
-      setIsGenerating(false);
-      setActiveMisconception(null);
-    }
+    await askTutor(textToSend, {
+      explanationMode,
+      activeMisconception,
+      language
+    });
   };
 
   const localizedPrompts: Record<string, { label: string; prompt: string }[]> = {
