@@ -611,7 +611,7 @@ export function BlochSphere3D({
       {bloch && bloch.is_pure && (
         <div className="w-full mt-3 grid grid-cols-3 gap-2 text-center text-xs notranslate" translate="no">
           <div className="p-2 bg-dark-50 rounded-lg border border-dark-100">
-            <span className="text-dark-500 block text-[10px] uppercase font-mono">X / Y / Z</span>
+            <span className="text-dark-500 block text-[10px] uppercase font-mono">X, Y, Z</span>
             <span className="font-mono font-bold text-dark-800 text-[11px]">
               ({bloch.x}, {bloch.y}, {bloch.z})
             </span>
