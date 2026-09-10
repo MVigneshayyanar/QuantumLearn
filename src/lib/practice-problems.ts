@@ -43,6 +43,7 @@ export interface PracticeProblem {
   targetOutcome?: { basis: string; minProbability: number };
   sampleSolutionGates: PlacedGate[];
   hintsDisabled: true; // Explicit confirmation that hints/AI are strictly disabled
+  isPremium?: boolean;
 }
 
 export interface SubmissionVerdict {

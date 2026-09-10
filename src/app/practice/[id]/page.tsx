@@ -35,7 +35,8 @@ import {
   X,
   Layout,
   Code2,
-  Keyboard
+  Keyboard,
+  Crown
 } from 'lucide-react';
 import { ResponsiveContainer, BarChart, Bar, XAxis, YAxis, Tooltip, Cell } from 'recharts';
 import {
@@ -121,6 +122,9 @@ export default function PracticeDetailPage() {
   }
 
   const numQubits = problem.numQubits;
+  const problemIndex = PRACTICE_PROBLEMS.findIndex((p) => p.id === problem.id);
+  const qNum = problemIndex !== -1 ? problemIndex + 1 : 1;
+  const isProblemPremium = problem.isPremium || problem.difficulty === 'Hard';
 
   // Gate manipulation
   const placeGateOnSlot = (qubit: number, step: number, gateTypeOverride?: GateType) => {
@@ -388,9 +392,16 @@ export default function PracticeDetailPage() {
             <span>{returnTo ? 'Back to Stage 6' : 'Problem List'}</span>
           </Link>
           <div className="h-4 w-px bg-dark-200" />
-          <span className="text-xs font-bold text-dark-900 truncate max-w-[200px] sm:max-w-xs">
-            {problem.id}. {problem.title}
+          <span className="text-xs font-bold text-dark-900 truncate max-w-[200px] sm:max-w-xs flex items-center gap-1.5">
+            <span className="text-primary-600 font-mono font-extrabold shrink-0">Q{qNum}.</span>
+            <span className="truncate">{problem.title}</span>
           </span>
+          {isProblemPremium && (
+            <span className="inline-flex items-center gap-0.5 text-[9px] font-extrabold text-amber-800 bg-amber-100 border border-amber-300 px-1.5 py-0.5 rounded shrink-0">
+              <Crown className="w-2.5 h-2.5 text-amber-600 fill-amber-500" />
+              Premium
+            </span>
+          )}
           <span
             className={`px-2 py-0.5 rounded text-[10px] font-bold ${
               problem.difficulty === 'Easy'
@@ -911,9 +922,16 @@ export default function PracticeDetailPage() {
                 <div>
                   <h1 
                     style={{ fontSize: `calc(${fontSizeSetting} * 1.35)` }}
-                    className="font-bold text-dark-900 flex items-center gap-2"
+                    className="font-bold text-dark-900 flex items-center gap-2 flex-wrap"
                   >
+                    <span className="text-primary-600 font-mono font-extrabold">Q{qNum}.</span>
                     <MathRenderer text={problem.title} />
+                    {isProblemPremium && (
+                      <span className="inline-flex items-center gap-1 text-[11px] font-extrabold text-amber-800 bg-amber-100 border border-amber-300 px-2 py-0.5 rounded-md shadow-2xs">
+                        <Crown className="w-3 h-3 text-amber-600 fill-amber-500" />
+                        Premium Question
+                      </span>
+                    )}
                   </h1>
                   <div className="flex items-center gap-2 mt-2">
                     <span 

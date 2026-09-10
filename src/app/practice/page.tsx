@@ -25,7 +25,8 @@ import {
   Sparkles,
   Zap,
   Atom,
-  RotateCcw
+  RotateCcw,
+  Crown,
 } from 'lucide-react';
 
 import { useStudentContext } from '@/lib/student-context';
@@ -88,7 +89,13 @@ export default function PracticeListPage() {
       p.description.toLowerCase().includes(q) ||
       (p.algorithms && p.algorithms.some((a) => a.toLowerCase().includes(q)));
 
-    const matchesDifficulty = selectedDifficulty === 'All' || p.difficulty === selectedDifficulty;
+    const isPremium = p.isPremium || p.difficulty === 'Hard';
+    const matchesDifficulty =
+      selectedDifficulty === 'All'
+        ? true
+        : selectedDifficulty === 'Premium'
+        ? isPremium
+        : p.difficulty === selectedDifficulty;
     const matchesCategory = selectedCategory === 'All' || p.category === selectedCategory;
     const matchesAlgorithm =
       selectedAlgorithm === 'all' || (p.algorithms && p.algorithms.includes(selectedAlgorithm));
@@ -215,19 +222,24 @@ export default function PracticeListPage() {
           />
         </div>
 
-        {/* Difficulty Filter */}
+        {/* Difficulty & Premium Filter */}
         <div className="flex items-center gap-1 bg-dark-100 p-1 rounded-xl border border-dark-200 text-xs">
-          {['All', 'Easy', 'Medium', 'Hard'].map((diff) => (
+          {['All', 'Easy', 'Medium', 'Hard', 'Premium'].map((diff) => (
             <button
               key={diff}
               onClick={() => setSelectedDifficulty(diff)}
-              className={`px-3 py-1 rounded-lg font-semibold transition-all ${
+              className={`px-3 py-1 rounded-lg font-semibold transition-all flex items-center gap-1 ${
                 selectedDifficulty === diff
-                  ? 'bg-white text-dark-900 shadow-xs'
+                  ? diff === 'Premium'
+                    ? 'bg-gradient-to-r from-amber-500 to-yellow-500 text-white shadow-xs'
+                    : 'bg-white text-dark-900 shadow-xs'
+                  : diff === 'Premium'
+                  ? 'text-amber-700 hover:text-amber-900 font-bold'
                   : 'text-dark-600 hover:text-dark-900'
               }`}
             >
-              {diff}
+              {diff === 'Premium' && <Crown className="w-3 h-3 text-amber-500 fill-amber-400" />}
+              <span>{diff}</span>
             </button>
           ))}
         </div>
@@ -267,7 +279,8 @@ export default function PracticeListPage() {
           <table className="w-full text-xs text-left">
             <thead>
               <tr className="border-b border-dark-200 bg-dark-50/50 text-dark-500 font-semibold uppercase tracking-wider text-[10px]">
-                <th className="py-3.5 px-5 w-12 text-center">Status</th>
+                <th className="py-3.5 px-3 w-10 text-center">Q#</th>
+                <th className="py-3.5 px-3 w-12 text-center">Status</th>
                 <th className="py-3.5 px-5">Problem</th>
                 <th className="py-3.5 px-4">Algorithm</th>
                 <th className="py-3.5 px-4">Category</th>
@@ -279,7 +292,7 @@ export default function PracticeListPage() {
             <tbody className="divide-y divide-dark-100">
               {filteredProblems.length === 0 ? (
                 <tr>
-                  <td colSpan={7} className="py-12 text-center">
+                  <td colSpan={8} className="py-12 text-center">
                     <div className="max-w-sm mx-auto space-y-3">
                       <div className="w-10 h-10 rounded-full bg-dark-100 text-dark-400 flex items-center justify-center mx-auto">
                         <Filter className="w-5 h-5" />
@@ -301,12 +314,26 @@ export default function PracticeListPage() {
                   </td>
                 </tr>
               ) : (
-                filteredProblems.map((prob) => {
+                filteredProblems.map((prob, probIdx) => {
                   const status = getStatus(prob.id);
+                  const isPremium = prob.isPremium || prob.difficulty === 'Hard';
+                  const globalIdx = PRACTICE_PROBLEMS.findIndex((p) => p.id === prob.id);
+                  const displayNum = globalIdx !== -1 ? globalIdx + 1 : probIdx + 1;
                   return (
-                    <tr key={prob.id} className="hover:bg-dark-50/60 transition-colors group">
+                    <tr key={prob.id} className={`hover:bg-dark-50/60 transition-colors group ${isPremium ? 'bg-amber-50/30' : ''}`}>
+                      {/* Question Number */}
+                      <td className="py-4 px-3 text-center">
+                        <div className={`w-7 h-7 rounded-lg flex items-center justify-center text-[11px] font-black mx-auto ${
+                          isPremium
+                            ? 'bg-gradient-to-tr from-amber-500 to-yellow-400 text-white shadow-xs shadow-amber-500/25'
+                            : 'bg-dark-100 text-dark-700'
+                        }`}>
+                          {displayNum}
+                        </div>
+                      </td>
+
                       {/* Status Icon */}
-                      <td className="py-4 px-5 text-center">
+                      <td className="py-4 px-3 text-center">
                         {status === 'SOLVED' ? (
                           <CheckCircle2 className="w-4 h-4 text-emerald-600 mx-auto" />
                         ) : status === 'ATTEMPTED' ? (
@@ -316,12 +343,20 @@ export default function PracticeListPage() {
                         )}
                       </td>
 
-                      {/* Title & Description */}
+                      {/* Title & Description + Premium Badge */}
                       <td className="py-4 px-5">
                         <Link href={`/practice/${prob.id}`} className="block group-hover:text-primary-600 transition-colors">
-                          <span className="font-bold text-sm text-dark-900 group-hover:text-primary-600 flex items-center gap-1.5">
-                            <MathRenderer text={prob.title} />
-                          </span>
+                          <div className="flex items-center gap-2">
+                            <span className="font-bold text-sm text-dark-900 group-hover:text-primary-600">
+                              <MathRenderer text={prob.title} />
+                            </span>
+                            {isPremium && (
+                              <span className="inline-flex items-center gap-0.5 text-[8px] font-extrabold text-amber-800 bg-amber-100 border border-amber-300 px-1.5 py-0.5 rounded shrink-0">
+                                <Crown className="w-2.5 h-2.5 text-amber-600 fill-amber-500" />
+                                Premium
+                              </span>
+                            )}
+                          </div>
                           <div className="text-xs text-dark-500 mt-0.5 line-clamp-1">
                             <MathRenderer text={prob.description} />
                           </div>

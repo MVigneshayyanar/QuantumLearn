@@ -26,11 +26,14 @@ import {
   Hammer,
   AlertTriangle,
   Check,
-  Target
+  Target,
+  Trophy,
+  Award
 } from 'lucide-react';
 import { ResponsiveContainer, BarChart, Bar, XAxis, YAxis, Tooltip, Cell } from 'recharts';
 import { BuildItTab } from './BuildItTab';
 import { SkillBaseStage } from './SkillBaseStage';
+import { QuantumCertificateModal } from '@/components/certificate/QuantumCertificateModal';
 import {
   QuantumGateSymbol,
   ControlDotIcon,
@@ -209,7 +212,8 @@ export function AlgorithmModuleView({
   }, [algorithmBackendId]);
 
   // Report module "in_progress" to DB on first access
-  const { userId } = useStudentContext();
+  const { userId, studentName } = useStudentContext();
+  const [showCertificate, setShowCertificate] = useState(false);
   const hasReportedRef = useRef(false);
 
   useEffect(() => {
@@ -275,22 +279,35 @@ export function AlgorithmModuleView({
             <p className="text-xs sm:text-sm text-dark-600 leading-normal">{subtitle}</p>
           </div>
 
-          {/* Module Completion Status Badge */}
-          <div className="flex items-center gap-3">
-            <div className="text-right">
+          {/* Module Completion Status Badge & Get Certification Button */}
+          <div className="flex flex-wrap items-center gap-3">
+            <button
+              onClick={() => setShowCertificate(true)}
+              className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-gradient-to-r from-amber-500 via-amber-600 to-amber-700 hover:brightness-110 text-white font-bold text-xs shadow-md shadow-amber-500/25 transition-all cursor-pointer ring-2 ring-amber-300/40"
+              title="Get or View Official Quantum Algorithm Certificate"
+            >
+              <Trophy className="w-4 h-4 text-amber-200" />
+              <span>
+                {isModuleFullyComplete
+                  ? '🏆 View Received Certificate'
+                  : `🏆 Get ${moduleSlug.includes('grover') ? 'Grover ' : ''}Certification`}
+              </span>
+            </button>
+
+            <div className="text-right hidden sm:block">
               <span className="text-[11px] text-dark-500 font-medium block">Module Status:</span>
-              <span className="text-sm font-bold text-dark-900 font-mono">
-                {isModuleFullyComplete ? '100% Mastered (6/6 Stages)' : 'In Progress (Stage 6 Required for 100%)'}
+              <span className="text-xs font-bold text-dark-900 font-mono">
+                {isModuleFullyComplete ? '100% Mastered (6/6 Stages)' : 'In Progress (Stage 6 Required)'}
               </span>
             </div>
             <div
-              className={`px-3.5 py-2 rounded-xl border text-xs font-bold shadow-2xs ${
+              className={`px-3 py-1.5 rounded-xl border text-xs font-bold shadow-2xs ${
                 isModuleFullyComplete
                   ? 'bg-emerald-500 text-white border-emerald-600'
                   : 'bg-amber-50 text-amber-800 border-amber-200'
               }`}
             >
-              {isModuleFullyComplete ? '✓ 100% Certified' : 'Stage 6 Required for 100%'}
+              {isModuleFullyComplete ? '✓ Certified' : 'Stage 6 Required'}
             </div>
           </div>
         </div>
@@ -788,6 +805,7 @@ export function AlgorithmModuleView({
         <div className="space-y-4 animate-fadeIn">
           <AdaptiveQuizEngine
             moduleSlug={moduleSlug}
+            moduleTitle={title}
             onProceedToSkillBase={() => {
               setActiveTab('skill_base');
             }}
@@ -802,6 +820,16 @@ export function AlgorithmModuleView({
           moduleTitle={title}
         />
       )}
+
+      {/* Quantum Algorithm Certificate Modal */}
+      <QuantumCertificateModal
+        isOpen={showCertificate}
+        onClose={() => setShowCertificate(false)}
+        moduleSlug={moduleSlug}
+        moduleTitle={title}
+        studentName={studentName || undefined}
+        isCompleted={isModuleFullyComplete}
+      />
     </div>
   );
 }

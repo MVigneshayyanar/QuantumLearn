@@ -17,13 +17,15 @@ import {
   Sparkles,
   Trophy,
   HelpCircle,
-  Brain,
-  Target,
+  X,
+  Award,
 } from 'lucide-react';
 import confetti from 'canvas-confetti';
+import { QuantumCertificateModal } from '@/components/certificate/QuantumCertificateModal';
 
 interface AdaptiveQuizEngineProps {
   moduleSlug: string;
+  moduleTitle?: string;
   onComplete?: (score: number) => void;
   onProceedToSkillBase?: () => void;
 }
@@ -42,26 +44,23 @@ function shuffleArray<T>(arr: T[], seed: number): T[] {
 
 export function AdaptiveQuizEngine({
   moduleSlug,
+  moduleTitle,
   onComplete,
   onProceedToSkillBase,
 }: AdaptiveQuizEngineProps) {
   const { language, explanationMode } = useAccessibility();
   const { recordMisconception, updateMastery } = useProgressStore();
   const { askTutor } = useAITutorStore();
-  const { userId } = useStudentContext();
+  const { userId, studentName } = useStudentContext();
 
   const allQuestions: QuizQuestion[] = ALGORITHM_QUIZZES[moduleSlug] || [];
 
-  // Pick 3 random questions, stable per session (seed from current minute)
-  const sessionSeed = useMemo(() => Math.floor(Date.now() / 60000), []);
+  // Pick 3 foundational (non-premium) questions for the Knowledge Check
   const selectedQuestions = useMemo<QuizQuestion[]>(() => {
     if (allQuestions.length === 0) return [];
-    // prefer non-premium first, then fill
     const free = allQuestions.filter((q) => !q.isPremium);
-    const premium = allQuestions.filter((q) => q.isPremium);
-    const pool = shuffleArray(free, sessionSeed).concat(shuffleArray(premium, sessionSeed + 1));
-    return pool.slice(0, 3);
-  }, [allQuestions, sessionSeed]);
+    return free.slice(0, 3);
+  }, [allQuestions]);
 
   const TOTAL_QUESTIONS = selectedQuestions.length;
 
@@ -70,10 +69,15 @@ export function AdaptiveQuizEngine({
   const [isSubmitted, setIsSubmitted] = useState(false);
   const [showHint, setShowHint] = useState(false);
   const [isFinished, setIsFinished] = useState(false);
+  const [isRetryingFromFinish, setIsRetryingFromFinish] = useState(false);
+  const [reviewingQuestion, setReviewingQuestion] = useState<QuizQuestion | null>(null);
+  const [showCertModal, setShowCertModal] = useState(false);
   const [startTime] = useState<number>(Date.now());
 
   // Track answers: { [qId]: isCorrect }
   const [answers, setAnswers] = useState<Record<string, boolean>>({});
+  // Track selected options: { [qId]: optionId }
+  const [selectedOptionIds, setSelectedOptionIds] = useState<Record<string, string>>({});
 
   if (TOTAL_QUESTIONS === 0) {
     return (
@@ -94,6 +98,66 @@ export function AdaptiveQuizEngine({
     setSelectedOptionId(optId);
   };
 
+  const askAIToExplainMistake = (q: QuizQuestion, chosenOptId?: string) => {
+    const optId = chosenOptId || selectedOptionIds[q.id];
+    const chosenOpt = q.options.find((o) => o.id === optId);
+    const qText = language === 'hi' && q.question_hi ? q.question_hi : q.question;
+    const chosenText = chosenOpt
+      ? language === 'hi' && chosenOpt.text_hi
+        ? chosenOpt.text_hi
+        : chosenOpt.text
+      : 'an incorrect answer';
+
+    const prompt = `I got this question wrong on the ${moduleSlug} Knowledge Check:
+Question: "${qText}"
+My Answer: "${chosenText}"
+
+Could you teach me why this is incorrect in simple, intuitive terms, and give me a helpful clue so I can answer it correctly when I retry?`;
+
+    askTutor(prompt, {
+      explanationMode,
+      language,
+      activeMisconception: chosenOpt?.misconception_tag || null,
+    });
+  };
+
+  const handleRetrySingleQuestion = (qId: string) => {
+    const targetIdx = selectedQuestions.findIndex((q) => q.id === qId);
+    if (targetIdx !== -1) {
+      setCurrentIdx(targetIdx);
+      setSelectedOptionId(null);
+      setIsSubmitted(false);
+      setShowHint(false);
+      setIsFinished(false);
+      setIsRetryingFromFinish(true);
+      setReviewingQuestion(null);
+    }
+  };
+
+  const askAIToCoachAllMistakes = () => {
+    const wrongQs = selectedQuestions.filter((q) => answers[q.id] === false);
+    if (wrongQs.length === 0) return;
+
+    const mistakesSummary = wrongQs
+      .map((q, idx) => {
+        const optId = selectedOptionIds[q.id];
+        const opt = q.options.find((o) => o.id === optId);
+        return `${idx + 1}. Question: "${q.question}"\n   My Answer: "${opt ? opt.text : 'Incorrect choice'}"`;
+      })
+      .join('\n\n');
+
+    const prompt = `I just finished the ${moduleSlug} Knowledge Check and missed ${wrongQs.length} question(s):
+
+${mistakesSummary}
+
+Could you teach me the core quantum principles behind these mistakes in simple terms, and give me clear guidance so I can retry and score 100%?`;
+
+    askTutor(prompt, {
+      explanationMode,
+      language,
+    });
+  };
+
   const handleSubmit = () => {
     if (!selectedOptionId || isSubmitted) return;
     setIsSubmitted(true);
@@ -102,10 +166,31 @@ export function AdaptiveQuizEngine({
     const isCorrect = selectedOption?.is_correct || false;
     const timeTaken = Date.now() - startTime;
 
-    setAnswers((prev) => ({ ...prev, [currentQ.id]: isCorrect }));
+    setSelectedOptionIds((prev) => ({ ...prev, [currentQ.id]: selectedOptionId }));
+    const newAnswers = { ...answers, [currentQ.id]: isCorrect };
+    setAnswers(newAnswers);
+
+    const newCorrectCount = Object.values(newAnswers).filter(Boolean).length;
+    const newScorePercent = Math.round((newCorrectCount / TOTAL_QUESTIONS) * 100);
 
     if (isCorrect) {
       updateMastery('superposition', 8);
+      if (newScorePercent >= 67) {
+        try {
+          confetti({
+            particleCount: 70,
+            spread: 70,
+            origin: { y: 0.6 },
+            colors: ['#10B981', '#6366F1', '#F59E0B'],
+          });
+        } catch {}
+      }
+      if (userId) {
+        apiReportProgress(userId, moduleSlug, 'in_progress', {
+          stageReached: 5,
+          score: newScorePercent,
+        });
+      }
     } else {
       if (selectedOption?.misconception_tag) {
         recordMisconception(selectedOption.misconception_tag);
@@ -127,6 +212,15 @@ export function AdaptiveQuizEngine({
   };
 
   const handleNext = () => {
+    if (isRetryingFromFinish) {
+      setIsFinished(true);
+      setIsRetryingFromFinish(false);
+      setSelectedOptionId(null);
+      setIsSubmitted(false);
+      setShowHint(false);
+      return;
+    }
+
     if (isLastQuestion) {
       setIsFinished(true);
       // Report Stage 5 complete (83.3% = 5/6 stages)
@@ -153,7 +247,10 @@ export function AdaptiveQuizEngine({
   const handleRestart = () => {
     setCurrentIdx(0);
     setAnswers({});
+    setSelectedOptionIds({});
     setIsFinished(false);
+    setIsRetryingFromFinish(false);
+    setReviewingQuestion(null);
     setIsSubmitted(false);
     setSelectedOptionId(null);
     setShowHint(false);
@@ -162,8 +259,10 @@ export function AdaptiveQuizEngine({
   // ── Finished screen ────────────────────────────────────────────────────────
   if (isFinished) {
     const passed = scorePercent >= 67; // ≥ 2/3 correct
+    const incorrectQuestions = selectedQuestions.filter((q) => answers[q.id] === false);
+
     return (
-      <div className="bg-white rounded-3xl border border-dark-200 p-6 sm:p-8 space-y-6 shadow-xs max-w-2xl mx-auto animate-fadeIn">
+      <div className="bg-white rounded-3xl border border-dark-200 p-6 sm:p-8 space-y-6 shadow-xs max-w-2xl mx-auto animate-fadeIn relative">
         {/* Trophy icon */}
         <div
           className={`w-16 h-16 rounded-3xl flex items-center justify-center mx-auto shadow-sm ${
@@ -183,53 +282,140 @@ export function AdaptiveQuizEngine({
           </h3>
           <p className="text-xs text-dark-600 max-w-md mx-auto leading-relaxed">
             You answered <strong>{correctCount} of {TOTAL_QUESTIONS}</strong> questions correctly.
-            To reach <strong>100% Algorithm Mastery</strong>, complete Stage 6: Skill Base &amp; Practice.
+            {scorePercent === 100
+              ? ' Outstanding! You achieved 100% Mastery on this algorithm!'
+              : ' Click any incorrect question below to have Schrödinger AI teach you the concept, then retry to reach 100%!'}
           </p>
         </div>
 
         {/* Per-question result summary */}
-        <div className="grid grid-cols-3 gap-3">
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
           {selectedQuestions.map((q, idx) => {
             const correct = answers[q.id];
             const qText = language === 'hi' && q.question_hi ? q.question_hi : q.question;
+            const chosenOptId = selectedOptionIds[q.id];
+            const chosenOpt = q.options.find((o) => o.id === chosenOptId);
+
             return (
               <div
                 key={q.id}
-                className={`p-3 rounded-2xl border text-center ${
+                onClick={() => {
+                  if (correct === false) {
+                    setReviewingQuestion(q);
+                  }
+                }}
+                className={`p-3.5 rounded-2xl border text-center transition-all ${
                   correct === undefined
                     ? 'border-dark-200 bg-dark-50'
                     : correct
-                    ? 'border-emerald-300 bg-emerald-50'
-                    : 'border-red-300 bg-red-50'
+                    ? 'border-emerald-300 bg-emerald-50/80 shadow-2xs'
+                    : 'border-red-300 bg-red-50/90 hover:border-red-400 hover:shadow-md cursor-pointer hover:scale-[1.01]'
                 }`}
               >
-                <div className="flex items-center justify-center mb-1.5">
+                <div className="flex items-center justify-between mb-1.5">
+                  <span className="text-[11px] font-mono font-bold text-dark-700">Question {idx + 1}</span>
                   {correct === undefined ? (
-                    <div className="w-6 h-6 rounded-full bg-dark-200 flex items-center justify-center text-[10px] font-bold text-dark-600">
-                      {idx + 1}
+                    <div className="w-5 h-5 rounded-full bg-dark-200 flex items-center justify-center text-[10px] font-bold text-dark-600">
+                      ?
                     </div>
                   ) : correct ? (
-                    <CheckCircle2 className="w-6 h-6 text-emerald-600" />
+                    <CheckCircle2 className="w-5 h-5 text-emerald-600" />
                   ) : (
-                    <XCircle className="w-6 h-6 text-red-500" />
+                    <XCircle className="w-5 h-5 text-red-500" />
                   )}
                 </div>
-                <p className="text-[10px] text-dark-700 leading-tight line-clamp-2">{qText}</p>
-                <span
-                  className={`mt-1 inline-block text-[9px] font-bold px-2 py-0.5 rounded-full ${
-                    correct === undefined
-                      ? 'bg-dark-100 text-dark-500'
-                      : correct
-                      ? 'bg-emerald-100 text-emerald-800'
-                      : 'bg-red-100 text-red-800'
-                  }`}
-                >
-                  {correct === undefined ? 'Skipped' : correct ? 'Correct' : 'Incorrect'}
-                </span>
+
+                <p className="text-[11px] font-medium text-dark-800 leading-snug line-clamp-2 min-h-[2.5rem]">
+                  {qText}
+                </p>
+
+                <div className="mt-2 flex items-center justify-center gap-1.5 flex-wrap">
+                  <span
+                    className={`text-[9px] font-bold px-2 py-0.5 rounded-full ${
+                      correct === undefined
+                        ? 'bg-dark-100 text-dark-500'
+                        : correct
+                        ? 'bg-emerald-100 text-emerald-800'
+                        : 'bg-red-100 text-red-800'
+                    }`}
+                  >
+                    {correct === undefined ? 'Skipped' : correct ? 'Correct ✓' : 'Incorrect ✗'}
+                  </span>
+                </div>
+
+                {correct === false && (
+                  <div className="mt-2.5 pt-2 border-t border-red-200/80 flex items-center justify-center gap-1.5">
+                    <button
+                      type="button"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        askAIToExplainMistake(q);
+                      }}
+                      className="flex items-center gap-1 px-2 py-1 rounded-lg bg-red-100 hover:bg-red-200 text-red-900 font-bold text-[10px] transition-colors cursor-pointer"
+                      title="Ask Schrödinger AI to teach this question"
+                    >
+                      <Bot className="w-3 h-3 text-red-700" />
+                      <span>Teach Me</span>
+                    </button>
+                    <button
+                      type="button"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleRetrySingleQuestion(q.id);
+                      }}
+                      className="flex items-center gap-1 px-2 py-1 rounded-lg bg-primary-600 hover:bg-primary-700 text-white font-bold text-[10px] transition-colors cursor-pointer shadow-2xs"
+                      title="Retry this question to get the answer right"
+                    >
+                      <RotateCcw className="w-3 h-3" />
+                      <span>Retry</span>
+                    </button>
+                  </div>
+                )}
               </div>
             );
           })}
         </div>
+
+        {/* Mistake Help Banner when there are wrong questions */}
+        {incorrectQuestions.length > 0 && (
+          <div className="p-3.5 rounded-2xl bg-amber-50 border border-amber-200 flex flex-wrap items-center justify-between gap-3 text-xs animate-fadeIn">
+            <div className="flex items-center gap-2.5">
+              <div className="w-7 h-7 rounded-xl bg-amber-500 text-white flex items-center justify-center shrink-0">
+                <Bot className="w-4 h-4" />
+              </div>
+              <div>
+                <h4 className="font-bold text-amber-950 text-xs">Reach 100% Algorithm Mastery</h4>
+                <p className="text-[11px] text-amber-800">
+                  Schrödinger AI can explain your {incorrectQuestions.length} missed question(s) so you can retry and achieve a perfect score!
+                </p>
+              </div>
+            </div>
+            <div className="flex items-center gap-2">
+              <button
+                onClick={askAIToCoachAllMistakes}
+                className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-amber-200/90 hover:bg-amber-300 text-amber-950 font-bold text-[11px] transition-colors cursor-pointer shadow-2xs"
+              >
+                <Bot className="w-3.5 h-3.5" />
+                <span>Coach Mistakes</span>
+              </button>
+              <button
+                onClick={() => handleRetrySingleQuestion(incorrectQuestions[0].id)}
+                className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-primary-600 hover:bg-primary-700 text-white font-bold text-[11px] transition-colors cursor-pointer shadow-2xs"
+              >
+                <RotateCcw className="w-3.5 h-3.5" />
+                <span>Retry Missed Question</span>
+              </button>
+            </div>
+          </div>
+        )}
+
+        {/* Perfect score banner */}
+        {scorePercent === 100 && (
+          <div className="p-3 rounded-2xl bg-emerald-50 border border-emerald-200 flex items-center justify-center gap-2 text-xs text-emerald-900 font-bold animate-fadeIn">
+            <Sparkles className="w-4 h-4 text-emerald-600" />
+            <span>🎉 Perfect 100% Score! You have fully mastered this stage!</span>
+          </div>
+        )}
 
         {/* Score bar */}
         <div className="space-y-1.5">
@@ -239,21 +425,54 @@ export function AdaptiveQuizEngine({
           </div>
           <div className="w-full h-3 bg-dark-100 rounded-full overflow-hidden">
             <div
-              className={`h-full rounded-full transition-all duration-700 ${passed ? 'bg-emerald-500' : 'bg-amber-500'}`}
+              className={`h-full rounded-full transition-all duration-700 ${scorePercent === 100 ? 'bg-emerald-500' : passed ? 'bg-emerald-500' : 'bg-amber-500'}`}
               style={{ width: `${scorePercent}%` }}
             />
           </div>
           <p className="text-[10px] text-dark-500 text-right">{scorePercent}% Score</p>
         </div>
 
+        {/* Quantum Certificate Callout Banner */}
+        <div className="p-4 sm:p-5 rounded-2xl bg-gradient-to-r from-amber-500/10 via-yellow-500/15 to-amber-500/15 border-2 border-amber-300 shadow-xs flex flex-col sm:flex-row items-center justify-between gap-4">
+          <div className="flex items-center gap-3.5">
+            <div className="w-12 h-12 rounded-2xl bg-gradient-to-tr from-amber-500 to-yellow-400 text-white flex items-center justify-center shadow-md shadow-amber-500/25 shrink-0">
+              <Award className="w-6 h-6 text-amber-950" />
+            </div>
+            <div>
+              <div className="flex items-center gap-2">
+                <span className="text-[10px] font-extrabold tracking-wider uppercase px-2 py-0.5 rounded-md bg-amber-200 text-amber-900 border border-amber-300">
+                  Official Quantum Credential
+                </span>
+                <span className="text-[11px] font-bold text-amber-800">QLearn Quantum Academy</span>
+              </div>
+              <h4 className="text-sm sm:text-base font-black text-dark-900 mt-0.5">
+                {moduleTitle || (moduleSlug.includes('grover') ? "Grover's Algorithm" : 'Quantum Algorithm')} Certification
+              </h4>
+              <p className="text-xs text-dark-600">
+                Verified certificate of completion signed by Dr. Erwin Schrödinger
+              </p>
+            </div>
+          </div>
+
+          <button
+            onClick={() => setShowCertModal(true)}
+            className="w-full sm:w-auto px-5 py-2.5 rounded-xl bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 text-white font-black text-xs shadow-md shadow-amber-500/25 flex items-center justify-center gap-2 transition-all cursor-pointer hover:scale-[1.02] shrink-0 ring-2 ring-amber-300/50"
+          >
+            <Trophy className="w-4 h-4 text-amber-200" />
+            <span>
+              🏆 Get {moduleSlug.includes('grover') ? 'Grover ' : ''}Certification
+            </span>
+          </button>
+        </div>
+
         {/* Actions */}
         <div className="flex flex-wrap items-center justify-center gap-3 pt-2 border-t border-dark-100">
           <button
             onClick={handleRestart}
-            className="flex items-center gap-2 px-4 py-2.5 rounded-xl border border-dark-200 hover:bg-dark-50 font-semibold text-xs text-dark-800 transition-colors"
+            className="flex items-center gap-2 px-4 py-2.5 rounded-xl border border-dark-200 hover:bg-dark-50 font-semibold text-xs text-dark-800 transition-colors cursor-pointer"
           >
             <RotateCcw className="w-4 h-4" />
-            <span>Retry Quiz</span>
+            <span>Retry Entire Quiz</span>
           </button>
 
           {onProceedToSkillBase && (
@@ -269,17 +488,118 @@ export function AdaptiveQuizEngine({
 
           <button
             onClick={() => {
-              askTutor(
-                `I just finished the Knowledge Check for the ${moduleSlug} algorithm. Can you give me a personalized challenge question to reinforce what I studied?`,
-                { explanationMode, language }
-              );
+              if (incorrectQuestions.length > 0) {
+                askAIToCoachAllMistakes();
+              } else {
+                askTutor(
+                  `I just completed the Knowledge Check for the ${moduleSlug} algorithm with 100%! Can you give me an advanced conceptual teaser or question to deepen my understanding?`,
+                  { explanationMode, language }
+                );
+              }
             }}
             className="flex items-center gap-2 px-4 py-2.5 rounded-xl border border-primary-200 hover:bg-primary-50 text-primary-700 font-semibold text-xs transition-colors cursor-pointer"
           >
             <Bot className="w-4 h-4" />
-            <span>Ask AI Tutor</span>
+            <span>{incorrectQuestions.length > 0 ? 'Ask AI About Mistakes' : 'Ask AI Tutor'}</span>
           </button>
         </div>
+
+        {/* Review & Retry Modal for clicked incorrect question */}
+        {reviewingQuestion && (
+          <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4 backdrop-blur-xs animate-fadeIn">
+            <div className="bg-white rounded-3xl border border-dark-200 p-6 max-w-lg w-full shadow-2xl space-y-4 animate-scaleUp">
+              <div className="flex items-center justify-between pb-3 border-b border-dark-100">
+                <div className="flex items-center gap-2">
+                  <div className="w-7 h-7 rounded-xl bg-red-100 text-red-600 flex items-center justify-center">
+                    <XCircle className="w-4 h-4" />
+                  </div>
+                  <div>
+                    <h4 className="font-black text-sm text-dark-900">Review Incorrect Question</h4>
+                    <span className="text-[10px] text-dark-500 font-medium">{reviewingQuestion.concept_tag}</span>
+                  </div>
+                </div>
+                <button
+                  onClick={() => setReviewingQuestion(null)}
+                  className="w-7 h-7 rounded-full bg-dark-100 hover:bg-dark-200 flex items-center justify-center text-dark-600 transition-colors cursor-pointer"
+                >
+                  <X className="w-4 h-4" />
+                </button>
+              </div>
+
+              <div className="space-y-3">
+                <p className="font-bold text-sm text-dark-900 leading-snug">
+                  {language === 'hi' && reviewingQuestion.question_hi
+                    ? reviewingQuestion.question_hi
+                    : reviewingQuestion.question}
+                </p>
+
+                {/* What user answered */}
+                {(() => {
+                  const optId = selectedOptionIds[reviewingQuestion.id];
+                  const opt = reviewingQuestion.options.find((o) => o.id === optId);
+                  if (!opt) return null;
+                  return (
+                    <div className="p-3 rounded-xl bg-red-50 border border-red-200 space-y-1 text-xs">
+                      <div className="flex items-center gap-1.5 font-bold text-red-900">
+                        <XCircle className="w-3.5 h-3.5 text-red-600 shrink-0" />
+                        <span>Your Answer: {opt.text}</span>
+                      </div>
+                      {opt.explanation && (
+                        <p className="text-[11px] text-red-800 leading-relaxed pl-5">
+                          {opt.explanation}
+                        </p>
+                      )}
+                    </div>
+                  );
+                })()}
+
+                {/* Socratic Hint */}
+                {reviewingQuestion.hint && (
+                  <div className="p-2.5 rounded-xl bg-amber-50 border border-amber-200 text-xs text-amber-900 flex items-start gap-2">
+                    <span className="font-bold">💡 Clue:</span>
+                    <span>{reviewingQuestion.hint}</span>
+                  </div>
+                )}
+              </div>
+
+              <div className="flex flex-wrap items-center justify-end gap-2 pt-3 border-t border-dark-100">
+                <button
+                  onClick={() => setReviewingQuestion(null)}
+                  className="px-3.5 py-2 rounded-xl border border-dark-200 hover:bg-dark-50 text-xs font-semibold text-dark-700 transition-colors cursor-pointer"
+                >
+                  Close
+                </button>
+                <button
+                  onClick={() => {
+                    askAIToExplainMistake(reviewingQuestion);
+                    setReviewingQuestion(null);
+                  }}
+                  className="flex items-center gap-1.5 px-4 py-2 rounded-xl bg-amber-100 hover:bg-amber-200 text-amber-950 font-bold text-xs transition-colors cursor-pointer"
+                >
+                  <Bot className="w-3.5 h-3.5 text-amber-800" />
+                  <span>Ask AI Tutor to Explain</span>
+                </button>
+                <button
+                  onClick={() => handleRetrySingleQuestion(reviewingQuestion.id)}
+                  className="flex items-center gap-1.5 px-4 py-2 rounded-xl bg-primary-600 hover:bg-primary-700 text-white font-bold text-xs transition-colors cursor-pointer shadow-xs"
+                >
+                  <RotateCcw className="w-3.5 h-3.5" />
+                  <span>Retry Question Now</span>
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Quantum Certificate Modal */}
+        <QuantumCertificateModal
+          isOpen={showCertModal}
+          onClose={() => setShowCertModal(false)}
+          moduleSlug={moduleSlug}
+          moduleTitle={moduleTitle || (moduleSlug.includes('grover') ? "Grover's Quantum Search" : moduleSlug)}
+          studentName={studentName || 'Alex Mercer'}
+          isCompleted={true}
+        />
       </div>
     );
   }
@@ -290,20 +610,46 @@ export function AdaptiveQuizEngine({
 
   return (
     <div className="bg-white rounded-3xl border border-dark-200 p-5 sm:p-7 shadow-xs space-y-5 max-w-3xl mx-auto">
+      {/* ── Retrying Banner ───────────────────────────────────────────────── */}
+      {isRetryingFromFinish && (
+        <div className="p-3 rounded-2xl bg-amber-50 border border-amber-200 flex flex-wrap items-center justify-between gap-2 text-xs text-amber-900 animate-fadeIn">
+          <div className="flex items-center gap-2 font-semibold">
+            <RotateCcw className="w-4 h-4 text-amber-600 shrink-0" />
+            <span>Retrying Mistake: Select the correct answer to raise your score to 100%!</span>
+          </div>
+          <button
+            onClick={() => {
+              setIsFinished(true);
+              setIsRetryingFromFinish(false);
+              setSelectedOptionId(null);
+              setIsSubmitted(false);
+            }}
+            className="text-[11px] font-bold text-amber-800 hover:text-amber-950 underline cursor-pointer"
+          >
+            Back to Results
+          </button>
+        </div>
+      )}
 
-      {/* ── Header: Quiz title & progress dots ─────────────────────────────── */}
+      {/* ── Header: Quiz title & progress dots with Question Numbers ─────────── */}
       <div className="flex items-center justify-between gap-3 pb-4 border-b border-dark-100">
         <div className="flex items-center gap-2.5">
-          <div className="w-8 h-8 rounded-xl bg-primary-600 text-white flex items-center justify-center shadow-xs">
-            <Brain className="w-4.5 h-4.5" />
+          <div className="w-9 h-9 rounded-xl bg-primary-600 text-white flex items-center justify-center font-black text-xs shadow-xs">
+            Q{currentIdx + 1}
           </div>
           <div>
-            <h3 className="text-sm font-black text-dark-900 leading-none">Knowledge Check</h3>
-            <p className="text-[10px] text-dark-500 mt-0.5">Stage 5 of 6</p>
+            <div className="flex items-center gap-2">
+              <h3 className="text-sm font-black text-dark-900 leading-none">
+                Question {currentIdx + 1} of {TOTAL_QUESTIONS}
+              </h3>
+            </div>
+            <p className="text-[10px] text-dark-500 mt-0.5">
+              Stage 5: Knowledge Check · {moduleTitle || 'Quantum Algorithm'}
+            </p>
           </div>
         </div>
 
-        {/* Question dots */}
+        {/* Question dots with Q1, Q2, Q3, Q4 */}
         <div className="flex items-center gap-1.5">
           {selectedQuestions.map((q, idx) => (
             <div
@@ -315,10 +661,11 @@ export function AdaptiveQuizEngine({
                     : 'bg-red-400 border-red-400 text-white'
                   : idx === currentIdx
                   ? 'bg-primary-600 border-primary-600 text-white ring-2 ring-primary-300/50'
-                  : 'bg-dark-50 border-dark-200 text-dark-400'
+                  : 'bg-dark-50 border-dark-200 text-dark-500 font-mono'
               }`}
+              title={`Question ${idx + 1}`}
             >
-              {idx < currentIdx ? (answers[q.id] ? '✓' : '✗') : idx + 1}
+              {idx < currentIdx ? (answers[q.id] ? '✓' : '✗') : `Q${idx + 1}`}
             </div>
           ))}
           <span className="ml-1 text-[11px] font-mono font-bold text-dark-600">
@@ -403,7 +750,7 @@ export function AdaptiveQuizEngine({
       {/* ── Explanation after submit ──────────────────────────────────────── */}
       {isSubmitted && (
         <div
-          className={`p-4 rounded-xl border text-xs leading-relaxed animate-fadeIn space-y-1.5 ${
+          className={`p-4 rounded-xl border text-xs leading-relaxed animate-fadeIn space-y-2.5 ${
             isCurrentCorrect
               ? 'bg-emerald-50 border-emerald-200 text-emerald-900'
               : 'bg-amber-50 border-amber-200 text-amber-900'
@@ -423,6 +770,31 @@ export function AdaptiveQuizEngine({
             )}
           </div>
           <p>{selectedOption?.explanation}</p>
+
+          {/* AI Teaching & Retry buttons when incorrect */}
+          {!isCurrentCorrect && (
+            <div className="flex flex-wrap items-center gap-2 pt-2 border-t border-amber-200/80 mt-2">
+              <button
+                type="button"
+                onClick={() => askAIToExplainMistake(currentQ, selectedOptionId || undefined)}
+                className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-amber-200/90 hover:bg-amber-300 text-amber-950 font-bold text-[11px] shadow-2xs transition-colors cursor-pointer"
+              >
+                <Bot className="w-3.5 h-3.5 text-amber-800" />
+                <span>Teach Me With AI Tutor</span>
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  setIsSubmitted(false);
+                  setSelectedOptionId(null);
+                }}
+                className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-amber-300 hover:bg-amber-100/80 text-amber-900 font-semibold text-[11px] transition-colors cursor-pointer"
+              >
+                <RotateCcw className="w-3.5 h-3.5 text-amber-700" />
+                <span>Try Again Now</span>
+              </button>
+            </div>
+          )}
         </div>
       )}
 
@@ -433,7 +805,7 @@ export function AdaptiveQuizEngine({
             <button
               type="button"
               onClick={() => setShowHint(!showHint)}
-              className="text-xs text-dark-500 hover:text-dark-800 flex items-center gap-1 font-medium transition-colors"
+              className="text-xs text-dark-500 hover:text-dark-800 flex items-center gap-1 font-medium transition-colors cursor-pointer"
             >
               <HelpCircle className="w-3.5 h-3.5 text-amber-500" />
               <span>{showHint ? 'Hide hint' : 'Need a hint?'}</span>
@@ -446,7 +818,7 @@ export function AdaptiveQuizEngine({
           )}
         </div>
 
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-2.5">
           {!isSubmitted ? (
             <button
               type="button"
@@ -457,14 +829,35 @@ export function AdaptiveQuizEngine({
               Check Answer
             </button>
           ) : (
-            <button
-              type="button"
-              onClick={handleNext}
-              className="flex items-center gap-1.5 px-5 py-2.5 rounded-xl bg-primary-600 hover:bg-primary-700 text-white font-bold text-xs shadow-xs transition-all cursor-pointer"
-            >
-              <span>{isLastQuestion ? 'View Results' : 'Next Question'}</span>
-              <ArrowRight className="w-4 h-4" />
-            </button>
+            <>
+              {!isCurrentCorrect && !isRetryingFromFinish && (
+                <button
+                  type="button"
+                  onClick={() => {
+                    setIsSubmitted(false);
+                    setSelectedOptionId(null);
+                  }}
+                  className="flex items-center gap-1.5 px-4 py-2.5 rounded-xl border border-dark-300 hover:bg-dark-50 text-dark-800 font-semibold text-xs transition-all cursor-pointer"
+                >
+                  <RotateCcw className="w-3.5 h-3.5" />
+                  <span>Retry Question</span>
+                </button>
+              )}
+              <button
+                type="button"
+                onClick={handleNext}
+                className="flex items-center gap-1.5 px-5 py-2.5 rounded-xl bg-primary-600 hover:bg-primary-700 text-white font-bold text-xs shadow-xs transition-all cursor-pointer"
+              >
+                <span>
+                  {isRetryingFromFinish
+                    ? `Back to Results (${scorePercent}%)`
+                    : isLastQuestion
+                    ? 'View Results'
+                    : 'Next Question'}
+                </span>
+                <ArrowRight className="w-4 h-4" />
+              </button>
+            </>
           )}
         </div>
       </div>

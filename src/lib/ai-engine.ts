@@ -77,6 +77,33 @@ export function generateSocraticResponse(
   const mode = context.explanationMode || 'simple';
   const query = userQuery.toLowerCase();
 
+  // Quiz Mistake & Review Coaching
+  if (
+    query.includes('got this question wrong') ||
+    query.includes('knowledge check') ||
+    query.includes('quiz') ||
+    query.includes('why this is incorrect') ||
+    query.includes('my answer:')
+  ) {
+    if (query.includes('evaluation') || query.includes('evaluations') || query.includes('how many')) {
+      return mode === 'simple'
+        ? `Let's clear this up! 💡\n\nIn classical computing, checking if a function is constant or balanced requires evaluating both $f(0)$ and $f(1)$ — that's **2 separate evaluations**.\n\nHowever, the **Deutsch-Jozsa algorithm** uses quantum superposition to evaluate all possible inputs simultaneously! Quantum interference then reveals whether the function is constant or balanced in **exactly 1 quantum evaluation**.\n\n🎯 *Try it again:* When you retry the question, remember this single-query speedup!`
+        : `### Quantum Query Complexity Analysis\n\nClassically, determining whether $f: \\{0,1\\} \\to \\{0,1\\}$ is constant or balanced requires evaluating $f(0)$ and $f(1)$, requiring $\\Omega(2)$ queries in the worst case.\n\nThe Deutsch-Jozsa algorithm exploits quantum parallelism: applying $H^{\\otimes n}$ creates a uniform superposition over all inputs, and the phase oracle embeds $f(x)$ into relative phases. A final Hadamard transform results in amplitude $\\frac{1}{2}\\sum_x (-1)^{f(x)}$, which evaluates the global property deterministically with **exactly 1 oracle query** ($O(1)$ query complexity).`;
+    }
+
+    if (query.includes('ancilla') || query.includes('helper') || query.includes('|-⟩') || query.includes('|->')) {
+      return mode === 'simple'
+        ? `Here's the secret to the helper qubit! 🔑\n\nWhen the ancilla is in the $|-\\rangle = (|0\\rangle - |1\\rangle)/\\sqrt{2}$ state, applying the CNOT gate doesn't just change the ancilla — it causes a **negative phase $(-1)^{f(x)}$ to kick back** into the input control qubit!\n\nWithout initializing the ancilla into $|-\\rangle$, phase kickback would not occur, and interference couldn't happen.\n\n🎯 *Retry Tip:* Look for the answer describing how the negative sign $(-1)$ is transferred or kicked back to the control qubit!`
+        : `### Phase Kickback Mechanics\n\nThe ancilla qubit is prepared in $|-\\rangle = H|1\\rangle = \\frac{1}{\\sqrt{2}}(|0\\rangle - |1\\rangle)$. Applying the oracle unitary $U_f|x\\rangle|y\\rangle = |x\\rangle|y \\oplus f(x)\\rangle$ yields:\n$$U_f|x\\rangle|-\\rangle = (-1)^{f(x)}|x\\rangle|-\\rangle$$\nBecause $|-\\rangle$ is an eigenstate of the Pauli $X$ gate with eigenvalue $-1$, the function evaluation $f(x)$ kicks back as a global/relative phase $(-1)^{f(x)}$ onto the control register $|x\\rangle$.`;
+    }
+
+    if (query.includes('interference') || query.includes('hadamard on input') || query.includes('yields |0>')) {
+      return mode === 'simple'
+        ? `Let's look at what the final Hadamard gate does! 🌈\n\nAfter phase kickback, the input qubit holds the phase information. The final Hadamard gate creates **quantum interference**:\n- If the function is **constant**, the amplitudes add up constructively at $|0\\rangle$ (100% chance).\n- If the function is **balanced**, the amplitudes cancel out at $|0\\rangle$ and constructively interfere at $|1\\rangle$ (100% chance).\n\n🎯 *Retry Tip:* If you measure $|0\\rangle$, the function is guaranteed to be **constant**; if $|1\\rangle$, it is **balanced**!`
+        : `### Constructive & Destructive Interference\n\nThe post-oracle state is $\\frac{1}{\\sqrt{2}}\\left[(-1)^{f(0)}|0\\rangle + (-1)^{f(1)}|1\\rangle\\right]$.\nApplying a final Hadamard yields:\n$$H \\left(\\frac{(-1)^{f(0)}|0\\rangle + (-1)^{f(1)}|1\\rangle}{\\sqrt{2}}\\right) = \\frac{(-1)^{f(0)}+(-1)^{f(1)}}{2}|0\\rangle + \\frac{(-1)^{f(0)}-(-1)^{f(1)}}{2}|1\\rangle$$\n- For constant functions ($f(0)=f(1)$), destructive interference zeroes out $|1\\rangle$, yielding $|0\\rangle$ with probability 1.\n- For balanced functions ($f(0) \\neq f(1)$), destructive interference zeroes out $|0\\rangle$, yielding $|1\\rangle$ with probability 1.`;
+    }
+  }
+
   // Check if query is about a misconception
   if (context.activeMisconception && MISCONCEPTION_GUIDES[context.activeMisconception as MisconceptionTag]) {
     const guide = MISCONCEPTION_GUIDES[context.activeMisconception as MisconceptionTag];

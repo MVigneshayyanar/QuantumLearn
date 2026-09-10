@@ -24,6 +24,7 @@ import {
   Download,
 } from 'lucide-react';
 import confetti from 'canvas-confetti';
+import { QuantumCertificateModal } from '@/components/certificate/QuantumCertificateModal';
 
 interface SkillBaseStageProps {
   moduleSlug: string;
@@ -42,7 +43,19 @@ const DIFF_ICONS = {
   Hard:   Flame,
 };
 
-function CertificateCard({ moduleTitle, isPremium, onUpgrade }: { moduleTitle: string; isPremium: boolean; onUpgrade: () => void }) {
+function CertificateCard({
+  moduleSlug,
+  moduleTitle,
+  isPremium,
+  onUpgrade,
+  onOpenCertificate,
+}: {
+  moduleSlug: string;
+  moduleTitle: string;
+  isPremium: boolean;
+  onUpgrade: () => void;
+  onOpenCertificate: () => void;
+}) {
   const date = new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
   if (!isPremium) {
     return (
@@ -62,13 +75,22 @@ function CertificateCard({ moduleTitle, isPremium, onUpgrade }: { moduleTitle: s
               <em>{moduleTitle}</em> Algorithm Certificate.
             </p>
           </div>
-          <button
-            onClick={onUpgrade}
-            className="inline-flex items-center gap-2 px-6 py-3 rounded-2xl bg-gradient-to-r from-amber-500 via-amber-600 to-amber-700 hover:brightness-110 text-white font-bold text-xs shadow-md shadow-amber-500/25 transition-all cursor-pointer"
-          >
-            <Zap className="w-4 h-4 fill-white" />
-            <span>Unlock Certificate with QLearn Pro</span>
-          </button>
+          <div className="flex flex-wrap items-center justify-center gap-2.5">
+            <button
+              onClick={onUpgrade}
+              className="inline-flex items-center gap-2 px-5 py-2.5 rounded-2xl bg-gradient-to-r from-amber-500 via-amber-600 to-amber-700 hover:brightness-110 text-white font-bold text-xs shadow-md shadow-amber-500/25 transition-all cursor-pointer"
+            >
+              <Zap className="w-4 h-4 fill-white" />
+              <span>Unlock Certificate with QLearn Pro</span>
+            </button>
+            <button
+              onClick={onOpenCertificate}
+              className="inline-flex items-center gap-2 px-4 py-2.5 rounded-2xl border border-amber-300 bg-white hover:bg-amber-50 text-amber-900 font-bold text-xs transition-all cursor-pointer shadow-2xs"
+            >
+              <Trophy className="w-4 h-4 text-amber-600" />
+              <span>Preview Received Certificate</span>
+            </button>
+          </div>
         </div>
       </div>
     );
@@ -85,8 +107,8 @@ function CertificateCard({ moduleTitle, isPremium, onUpgrade }: { moduleTitle: s
         </div>
 
         <div className="space-y-1">
-          <p className="text-[10px] font-bold uppercase tracking-widest text-amber-700">Certificate of Achievement</p>
-          <h3 className="text-xl font-black text-dark-900">QLearn Algorithm Mastery</h3>
+          <p className="text-[10px] font-bold uppercase tracking-widest text-amber-700">Official Quantum Credential</p>
+          <h3 className="text-xl font-black text-dark-900">QLearn Quantum Algorithm Mastery</h3>
           <p className="text-sm font-semibold text-dark-700">{moduleTitle}</p>
         </div>
 
@@ -99,19 +121,18 @@ function CertificateCard({ moduleTitle, isPremium, onUpgrade }: { moduleTitle: s
 
         <div className="flex flex-wrap items-center justify-center gap-3">
           <button
-            onClick={() => {
-              try {
-                confetti({ particleCount: 150, spread: 80, origin: { y: 0.5 }, colors: ['#F59E0B', '#10B981', '#6366F1', '#EC4899'] });
-              } catch {}
-            }}
-            className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-gradient-to-r from-amber-500 to-amber-600 hover:brightness-110 text-white font-bold text-xs shadow-xs transition-all cursor-pointer"
+            onClick={onOpenCertificate}
+            className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-gradient-to-r from-amber-500 to-amber-600 hover:brightness-110 text-white font-bold text-xs shadow-md shadow-amber-500/25 transition-all cursor-pointer"
+          >
+            <Trophy className="w-4 h-4 text-amber-200" />
+            <span>View &amp; Print Certificate</span>
+          </button>
+          <button
+            onClick={onOpenCertificate}
+            className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl border border-amber-300 text-amber-800 hover:bg-amber-50 font-semibold text-xs transition-colors cursor-pointer"
           >
             <Download className="w-4 h-4" />
-            <span>Download Certificate</span>
-          </button>
-          <button className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl border border-amber-300 text-amber-800 hover:bg-amber-50 font-semibold text-xs transition-colors">
-            <Award className="w-4 h-4" />
-            <span>Share on LinkedIn</span>
+            <span>Download Certificate PDF</span>
           </button>
         </div>
       </div>
@@ -122,7 +143,8 @@ function CertificateCard({ moduleTitle, isPremium, onUpgrade }: { moduleTitle: s
 export function SkillBaseStage({ moduleSlug, moduleTitle = 'Quantum Algorithm' }: SkillBaseStageProps) {
   const router = useRouter();
   const { markModuleComplete } = useProgressStore();
-  const { userId, isPremium, openSubscriptionModal } = useStudentContext();
+  const { userId, studentName, isPremium, openSubscriptionModal } = useStudentContext();
+  const [showCertModal, setShowCertModal] = useState(false);
 
   // Get 10 curated problems: 4 Easy + 4 Medium + 2 Hard
   const problems = useMemo(() => getSkillBaseProblems(moduleSlug, { easy: 4, medium: 4, hard: 2 }), [moduleSlug]);
@@ -251,103 +273,137 @@ export function SkillBaseStage({ moduleSlug, moduleTitle = 'Quantum Algorithm' }
       )}
 
       {/* ── Problem groups ──────────────────────────────────────────────────── */}
-      {([
-        { label: '🟢 Easy Problems', items: easyProblems, diff: 'Easy' as const },
-        { label: '🔵 Medium Problems', items: mediumProblems, diff: 'Medium' as const },
-        { label: '🟣 Hard Problems', items: hardProblems, diff: 'Hard' as const },
-      ]).map(({ label, items, diff }) => {
-        if (items.length === 0) return null;
-        const colors = DIFF_COLORS[diff];
-        const Icon = DIFF_ICONS[diff];
-        return (
-          <div key={diff} className="space-y-3">
-            <div className="flex items-center gap-2">
-              <h3 className="text-xs font-black text-dark-900 uppercase tracking-wide">{label}</h3>
-              <span className="text-[10px] bg-dark-100 text-dark-500 px-2 py-0.5 rounded-full font-semibold">
-                {items.filter(p => solvedIds.has(p.id)).length}/{items.length} done
-              </span>
-            </div>
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-              {items.map((problem, idx) => {
-                const solved = solvedIds.has(problem.id);
-                return (
-                  <button
-                    key={problem.id}
-                    onClick={() => handleProblemClick(problem.id)}
-                    className={`group w-full text-left p-4 rounded-2xl border-2 transition-all duration-200 cursor-pointer relative overflow-hidden ${
-                      solved
-                        ? 'border-emerald-300 bg-emerald-50/60 hover:bg-emerald-50 hover:border-emerald-400'
-                        : `border-dark-200 bg-white hover:${colors.border} hover:${colors.bg} hover:shadow-sm`
-                    }`}
-                  >
-                    {/* Solved overlay glow */}
-                    {solved && (
-                      <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top_right,_rgba(16,185,129,0.07)_0%,_transparent_60%)] pointer-events-none" />
-                    )}
+      {(() => {
+        let qCounter = 0;
+        return ([
+          { label: '🟢 Easy Problems', items: easyProblems, diff: 'Easy' as const },
+          { label: '🔵 Medium Problems', items: mediumProblems, diff: 'Medium' as const },
+          { label: '🟣 Hard Problems · 👑 Premium', items: hardProblems, diff: 'Hard' as const },
+        ]).map(({ label, items, diff }) => {
+          if (items.length === 0) return null;
+          const colors = DIFF_COLORS[diff];
+          const Icon = DIFF_ICONS[diff];
+          const isPremiumGroup = diff === 'Hard';
+          return (
+            <div key={diff} className="space-y-3">
+              <div className="flex items-center gap-2">
+                <h3 className="text-xs font-black text-dark-900 uppercase tracking-wide">{label}</h3>
+                <span className="text-[10px] bg-dark-100 text-dark-500 px-2 py-0.5 rounded-full font-semibold">
+                  {items.filter(p => solvedIds.has(p.id)).length}/{items.length} done
+                </span>
+                {isPremiumGroup && (
+                  <span className="inline-flex items-center gap-0.5 text-[8px] font-extrabold text-amber-800 bg-amber-100 border border-amber-300 px-1.5 py-0.5 rounded">
+                    <Crown className="w-2.5 h-2.5 text-amber-600 fill-amber-500" />
+                    Premium
+                  </span>
+                )}
+              </div>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                {items.map((problem) => {
+                  qCounter++;
+                  const qNum = qCounter;
+                  const solved = solvedIds.has(problem.id);
+                  const isPremium = isPremiumGroup || problem.isPremium;
+                  return (
+                    <button
+                      key={problem.id}
+                      onClick={() => handleProblemClick(problem.id)}
+                      className={`group w-full text-left p-4 rounded-2xl border-2 transition-all duration-200 cursor-pointer relative overflow-hidden ${
+                        solved
+                          ? 'border-emerald-300 bg-emerald-50/60 hover:bg-emerald-50 hover:border-emerald-400'
+                          : isPremium
+                          ? 'border-amber-300 bg-amber-50/30 hover:border-amber-400 hover:bg-amber-50/60 hover:shadow-sm'
+                          : `border-dark-200 bg-white hover:${colors.border} hover:${colors.bg} hover:shadow-sm`
+                      }`}
+                    >
+                      {/* Solved overlay glow */}
+                      {solved && (
+                        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top_right,_rgba(16,185,129,0.07)_0%,_transparent_60%)] pointer-events-none" />
+                      )}
 
-                    <div className="relative flex items-start gap-3">
-                      {/* Status icon / number */}
-                      <div
-                        className={`w-8 h-8 rounded-xl flex items-center justify-center shrink-0 text-xs font-black shadow-xs ${
-                          solved
-                            ? 'bg-emerald-500 text-white'
-                            : `${colors.bg} ${colors.border} border ${colors.text}`
-                        }`}
-                      >
-                        {solved ? <CheckCircle2 className="w-4 h-4" /> : <Icon className="w-4 h-4" />}
-                      </div>
-
-                      <div className="flex-1 min-w-0">
-                        <div className="flex items-center justify-between gap-2 mb-1">
-                          <span className="text-xs font-black text-dark-900 leading-tight truncate">
-                            {problem.title}
-                          </span>
-                          <div className="flex items-center gap-1.5 shrink-0">
-                            <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full border ${colors.badge}`}>
-                              {diff}
-                            </span>
-                            {solved ? (
-                              <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800 border border-emerald-300">
-                                ✓ Solved
-                              </span>
-                            ) : (
-                              <ExternalLink className="w-3.5 h-3.5 text-dark-400 group-hover:text-dark-700 transition-colors" />
-                            )}
-                          </div>
+                      <div className="relative flex items-start gap-3">
+                        {/* Q number badge */}
+                        <div
+                          className={`w-8 h-8 rounded-xl flex items-center justify-center shrink-0 text-[11px] font-black shadow-xs ${
+                            solved
+                              ? 'bg-emerald-500 text-white'
+                              : isPremium
+                              ? 'bg-gradient-to-tr from-amber-500 to-yellow-400 text-white shadow-amber-500/25'
+                              : `${colors.bg} ${colors.border} border ${colors.text}`
+                          }`}
+                        >
+                          {solved ? <CheckCircle2 className="w-4 h-4" /> : `Q${qNum}`}
                         </div>
-                        <p className="text-[11px] text-dark-500 leading-snug line-clamp-2">
-                          {problem.description}
-                        </p>
-                        {!solved && (
-                          <div className="mt-2 flex items-center gap-1 text-[10px] text-primary-600 font-semibold group-hover:gap-1.5 transition-all">
-                            <span>Solve now</span>
-                            <ArrowRight className="w-3 h-3" />
+
+                        <div className="flex-1 min-w-0">
+                          <div className="flex items-center justify-between gap-2 mb-1">
+                            <div className="flex items-center gap-1.5 min-w-0">
+                              <span className="text-xs font-black text-dark-900 leading-tight truncate">
+                                {problem.title}
+                              </span>
+                              {isPremium && (
+                                <span className="inline-flex items-center gap-0.5 text-[8px] font-extrabold text-amber-800 bg-amber-100/80 border border-amber-300 px-1 py-0.5 rounded shrink-0">
+                                  <Crown className="w-2 h-2 text-amber-600 fill-amber-500" />
+                                  👑
+                                </span>
+                              )}
+                            </div>
+                            <div className="flex items-center gap-1.5 shrink-0">
+                              <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full border ${colors.badge}`}>
+                                {diff}
+                              </span>
+                              {solved ? (
+                                <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800 border border-emerald-300">
+                                  ✓ Solved
+                                </span>
+                              ) : (
+                                <ExternalLink className="w-3.5 h-3.5 text-dark-400 group-hover:text-dark-700 transition-colors" />
+                              )}
+                            </div>
                           </div>
-                        )}
+                          <p className="text-[11px] text-dark-500 leading-snug line-clamp-2">
+                            {problem.description}
+                          </p>
+                          {!solved && (
+                            <div className="mt-2 flex items-center gap-1 text-[10px] text-primary-600 font-semibold group-hover:gap-1.5 transition-all">
+                              <span>Solve now</span>
+                              <ArrowRight className="w-3 h-3" />
+                            </div>
+                          )}
+                        </div>
                       </div>
-                    </div>
-                  </button>
-                );
-              })}
+                    </button>
+                  );
+                })}
+              </div>
             </div>
-          </div>
-        );
-      })}
+          );
+        });
+      })()}
 
       {/* ── Certificate Section ─────────────────────────────────────────────── */}
-      {isAllSolved && (
-        <div className="space-y-3">
+      <div className="space-y-3 pt-2">
+        <div className="flex items-center justify-between">
           <h3 className="text-xs font-black text-dark-900 uppercase tracking-wide flex items-center gap-2">
             <Medal className="w-4 h-4 text-amber-500" />
-            Your Algorithm Certificate
+            {moduleSlug.includes('grover') ? "Grover's Algorithm Certificate" : 'Algorithm Certificate'}
           </h3>
-          <CertificateCard
-            moduleTitle={moduleTitle}
-            isPremium={isPremium}
-            onUpgrade={openSubscriptionModal}
-          />
+          <button
+            onClick={() => setShowCertModal(true)}
+            className="text-xs font-bold text-amber-700 hover:text-amber-900 flex items-center gap-1 cursor-pointer"
+          >
+            <Trophy className="w-3.5 h-3.5 text-amber-600" />
+            <span>🏆 Get {moduleSlug.includes('grover') ? 'Grover ' : ''}Certification</span>
+          </button>
         </div>
-      )}
+        <CertificateCard
+          moduleSlug={moduleSlug}
+          moduleTitle={moduleTitle}
+          isPremium={isPremium}
+          onUpgrade={openSubscriptionModal}
+          onOpenCertificate={() => setShowCertModal(false || true)}
+        />
+      </div>
 
       {/* ── Pro upsell (if not solved yet and not premium) ─────────────────── */}
       {!isAllSolved && !isPremium && (
@@ -383,6 +439,16 @@ export function SkillBaseStage({ moduleSlug, moduleTitle = 'Quantum Algorithm' }
           <li>Solve all 10 to unlock <strong>100% Algorithm Mastery</strong> and your Certificate.</li>
         </ul>
       </div>
+
+      {/* Quantum Algorithm Certificate Modal */}
+      <QuantumCertificateModal
+        isOpen={showCertModal}
+        onClose={() => setShowCertModal(false)}
+        moduleSlug={moduleSlug}
+        moduleTitle={moduleTitle}
+        studentName={studentName || 'Alex Mercer'}
+        isCompleted={isAllSolved}
+      />
     </div>
   );
 }
