@@ -48,8 +48,8 @@ export const BUILD_IT_CHALLENGES: Record<string, BuildItChallenge> = {
   'deutsch-jozsa': {
     moduleSlug: 'deutsch-jozsa',
     title: 'Construct the Deutsch-Jozsa Algorithm',
-    objective: 'Build the complete quantum circuit to evaluate a balanced oracle f(x) = x using Phase Kickback.',
-    taskDescription: '1. Initialize ancilla Qubit 1 to |1> with an X gate.\n2. Apply Hadamard gates on both Qubit 0 and Qubit 1 to create superposition.\n3. Apply the balanced oracle using a CNOT gate (Control: Q0, Target: Q1).\n4. Apply a final Hadamard gate on input Qubit 0 to cause interference.',
+    objective: 'Build the complete quantum circuit to evaluate a balanced oracle $f(x) = x$ using Phase Kickback.',
+    taskDescription: '1. Initialize ancilla Qubit 1 to $|1\\rangle$ to prepare for phase kickback.\n2. Create equal superposition across both registers.\n3. Apply the balanced oracle querying $f(x) = x$.\n4. Apply interference on the input register to cause destructive cancellation.',
     numQubits: 2,
     scaffoldGates: [
       { id: 'scaffold-x1', type: 'x', qubits: [1], step: 0 }
@@ -64,40 +64,40 @@ export const BUILD_IT_CHALLENGES: Record<string, BuildItChallenge> = {
     checkerType: 'measurement',
     targetOutcome: '11',
     hints: [
-      'Ancilla Q1 must be in |-> to kick back a -1 phase.',
-      'The balanced oracle f(x)=x is a CNOT with control Q0 and target Q1.',
-      'A final Hadamard on Q0 converts the phase kickback into measurable |1>.'
+      'Ancilla $Q_1$ must be in $|-\\rangle$ to kick back a $-1$ phase.',
+      'The balanced oracle $f(x)=x$ flips the target conditioned on $Q_0$.',
+      'Interference on $Q_0$ converts the relative phase into a deterministic computational measurement of $|1\\rangle$.'
     ],
     milestones: [
       {
         id: 'ancilla-init',
         label: 'Ancilla Setup',
-        shortAction: 'Place X gate on Q1',
-        simpleClue: 'Prepares Q1 so Hadamard turns it into |−⟩.',
+        shortAction: 'Initialize ancilla for phase kickback',
+        simpleClue: 'Which state must the ancilla hold so a subsequent rotation creates $|-\\rangle$?',
         requiredGateSignatures: ['X(Q1)'],
         minStep: 0
       },
       {
         id: 'superposition',
         label: 'Superposition',
-        shortAction: 'Place H on Q0 and Q1',
-        simpleClue: 'Puts both qubits into equal superposition.',
+        shortAction: 'Synthesize equal superposition across both registers',
+        simpleClue: 'Which single-qubit unitary rotates computational ground states into a balanced linear combination?',
         requiredGateSignatures: ['H(Q0)', 'H(Q1)'],
         minStep: 1
       },
       {
         id: 'balanced-oracle',
         label: 'CNOT Oracle',
-        shortAction: 'Place CNOT from Q0 to Q1',
-        simpleClue: 'Evaluates f(x) and kicks back a -1 phase to Q0.',
+        shortAction: 'Query the balanced oracle mapping',
+        simpleClue: 'How can the input register flip the ancilla conditioned on $f(x) = x$ to trigger kickback?',
         requiredGateSignatures: ['CX(Q0,1)'],
         minStep: 2
       },
       {
         id: 'interference',
         label: 'Interference',
-        shortAction: 'Place final H on Q0',
-        simpleClue: 'Converts kickback phase into measurable state |1⟩.',
+        shortAction: 'Convert phase difference into computational interference',
+        simpleClue: 'What unitary maps the relative phase shift back to a deterministic measurable basis state?',
         requiredGateSignatures: ['H(Q0)'],
         minStep: 3
       }
@@ -106,8 +106,8 @@ export const BUILD_IT_CHALLENGES: Record<string, BuildItChallenge> = {
   'grover': {
     moduleSlug: 'grover',
     title: "Construct Grover's 2-Qubit Search",
-    objective: 'Assemble the Oracle and Diffusion operators to amplify target state |11> to 100% probability.',
-    taskDescription: '1. Apply Hadamard gates on Q0 and Q1 to create uniform superposition.\n2. Apply the Phase Oracle (CZ gate on Q0 and Q1) to mark |11> with a -1 phase.\n3. Apply the Grover Diffusion operator (H gates, then Z gates, then CZ, or H + X + CZ + X + H).',
+    objective: 'Assemble the Oracle and Diffusion operators to amplify target state $|11\\rangle$ to 100% probability.',
+    taskDescription: '1. Create uniform superposition across the 2-qubit register.\n2. Apply the Phase Oracle to mark $|11\\rangle$ with a $\\pi$ phase shift.\n3. Apply the Grover Diffusion operator to invert amplitudes about the mean.',
     numQubits: 2,
     scaffoldGates: [
       { id: 'scaffold-h0', type: 'h', qubits: [0], step: 0 },
@@ -126,40 +126,40 @@ export const BUILD_IT_CHALLENGES: Record<string, BuildItChallenge> = {
     checkerType: 'measurement',
     targetOutcome: '11',
     hints: [
-      'Grover requires an Oracle (to mark |11>) and a Diffusion operator (to amplify it).',
-      'CZ acts directly as the phase oracle for |11>.',
-      'Diffusion inverts amplitudes about the mean.'
+      'Grover requires an Oracle (to mark $|11\\rangle$) and a Diffusion operator (to amplify it).',
+      'A controlled phase operation flips only the state where both control and target are active.',
+      'Diffusion inverts all amplitudes about the average mean amplitude.'
     ],
     milestones: [
       {
         id: 'uniform-superposition',
         label: 'Superposition',
-        shortAction: 'Place H on Q0 and Q1',
-        simpleClue: 'Creates equal superposition across all 4 states.',
+        shortAction: 'Initialize uniform database state space',
+        simpleClue: 'Consider which gate prepares all 4 basis states with equal probability amplitude.',
         requiredGateSignatures: ['H(Q0)', 'H(Q1)'],
         minStep: 0
       },
       {
         id: 'phase-oracle',
         label: 'Phase Oracle',
-        shortAction: 'Place CZ gate between Q0 and Q1',
-        simpleClue: 'CZ flips the phase of target |11⟩.',
+        shortAction: 'Mark the target state with a phase inversion',
+        simpleClue: 'What 2-qubit controlled phase transformation inverts only the amplitude of target $|11\\rangle$?',
         requiredGateSignatures: ['CZ(Q0,1)'],
         minStep: 1
       },
       {
         id: 'diffusion-basis',
         label: 'Diffusion H-Layer',
-        shortAction: 'Place H on Q0 and Q1',
-        simpleClue: 'Rotates states into the diffusion basis.',
+        shortAction: 'Transform register into the diffusion basis',
+        simpleClue: 'Which unitary rotates the state space so reflection about $|00\\rangle$ becomes reflection about $|s\\rangle$?',
         requiredGateSignatures: ['H(Q0)', 'H(Q1)'],
         minStep: 2
       },
       {
         id: 'diffusion-reflection',
         label: 'Diffusion Inversion',
-        shortAction: 'Place Z on Q0 & Q1, then CZ between them',
-        simpleClue: 'Reflects amplitudes about the mean to amplify |11⟩.',
+        shortAction: 'Apply reflection about the mean',
+        simpleClue: 'Synthesize the conditional phase shift around the uniform state to amplify the marked target.',
         requiredGateSignatures: ['Z(Q0)', 'Z(Q1)', 'CZ(Q0,1)'],
         minStep: 3
       }
@@ -168,11 +168,11 @@ export const BUILD_IT_CHALLENGES: Record<string, BuildItChallenge> = {
   'teleportation': {
     moduleSlug: 'teleportation',
     title: 'Construct Quantum Teleportation',
-    objective: "Transmit an unknown state from Alice's Qubit 0 to Bob's Qubit 2 using shared entanglement.",
-    taskDescription: "1. Create an entangled Bell pair between Qubit 1 (Alice) and Qubit 2 (Bob) using H(1) and CX(1, 2).\n2. Perform Bell Measurement on Alice's qubits: CX(0, 1) followed by H(0).\n3. Bob applies classical feedforward corrections (Z and X).",
+    objective: "Transmit an unknown state from Alice's $Q_0$ to Bob's $Q_2$ using shared entanglement.",
+    taskDescription: "1. Create an entangled Bell pair between $Q_1$ (Alice) and $Q_2$ (Bob).\n2. Perform Bell Measurement on Alice's qubits: couple $Q_0$ to $Q_1$ and rotate $Q_0$.\n3. Bob applies feedforward unitary corrections.",
     numQubits: 3,
     scaffoldGates: [
-      { id: 'scaffold-prep', type: 'h', qubits: [0], step: 0 } // Prepare test state
+      { id: 'scaffold-prep', type: 'h', qubits: [0], step: 0 }
     ],
     solutionGates: [
       { id: 'sol-prep', type: 'h', qubits: [0], step: 0 },
@@ -183,32 +183,32 @@ export const BUILD_IT_CHALLENGES: Record<string, BuildItChallenge> = {
     ],
     checkerType: 'fidelity',
     hints: [
-      'Teleportation requires shared entanglement between Alice (Q1) and Bob (Q2).',
-      'Alice performs Bell measurement by coupling Q0 to Q1 with CNOT, then H on Q0.',
-      'Only quantum information travels — no physical particle is transferred.'
+      'Teleportation requires shared entanglement between Alice ($Q_1$) and Bob ($Q_2$).',
+      'Alice performs Bell measurement by coupling $Q_0$ to $Q_1$ with CNOT, then applying $H$ on $Q_0$.',
+      'Only quantum information travels — no physical matter is transferred.'
     ],
     milestones: [
       {
         id: 'message-prep',
         label: 'Message Prep',
-        shortAction: 'Place H on Q0',
-        simpleClue: 'Prepares the quantum test state to teleport.',
+        shortAction: 'Prepare the input quantum state to teleport',
+        simpleClue: 'Synthesize a coherent test state on Alice’s source qubit $Q_0$.',
         requiredGateSignatures: ['H(Q0)'],
         minStep: 0
       },
       {
         id: 'bell-entanglement',
         label: 'Bell Entanglement',
-        shortAction: 'Place H on Q1 and CNOT (Q1 -> Q2)',
-        simpleClue: 'Creates shared entanglement between Alice & Bob.',
+        shortAction: 'Establish shared Bell pair entanglement',
+        simpleClue: 'How do you construct the maximally entangled channel $|\\Phi^+\\rangle$ between Alice ($Q_1$) and Bob ($Q_2$)?',
         requiredGateSignatures: ['H(Q1)', 'CX(Q1,2)'],
         minStep: 1
       },
       {
         id: 'bell-measurement',
         label: 'Bell Measurement',
-        shortAction: 'Place CNOT (Q0 -> Q1) and H on Q0',
-        simpleClue: 'Projects Alice’s qubits into the Bell basis.',
+        shortAction: 'Perform Bell basis measurement coupling',
+        simpleClue: 'How can Alice project her joint 2-qubit register onto the Bell measurement basis?',
         requiredGateSignatures: ['CX(Q0,1)', 'H(Q0)'],
         minStep: 3
       }
@@ -218,7 +218,7 @@ export const BUILD_IT_CHALLENGES: Record<string, BuildItChallenge> = {
     moduleSlug: 'superdense-coding',
     title: 'Construct Superdense Coding (2 Bits on 1 Qubit)',
     objective: 'Transmit 2 classical bits (message "11") using only 1 physical qubit transfer.',
-    taskDescription: "1. Prepare a shared Bell pair |Φ+> on Q0 and Q1 using H(0) and CX(0, 1).\n2. Alice encodes the two bits (1, 1) by applying Z followed by X on Q0.\n3. Bob decodes the 2 bits by applying CX(0, 1) followed by H(0).",
+    taskDescription: "1. Prepare a shared Bell pair $|\\Phi^+\\rangle$ on $Q_0$ and $Q_1$.\n2. Alice encodes two classical bits $(1, 1)$ with single-qubit unitaries on $Q_0$.\n3. Bob decodes both bits deterministically by inverting the Bell entanglement.",
     numQubits: 2,
     scaffoldGates: [
       { id: 'scaffold-h', type: 'h', qubits: [0], step: 0 },
@@ -235,32 +235,32 @@ export const BUILD_IT_CHALLENGES: Record<string, BuildItChallenge> = {
     checkerType: 'measurement',
     targetOutcome: '11',
     hints: [
-      'To transmit "11", apply both Z (flips phase) and X (flips bit) to Q0.',
-      'Bob decodes with inverse Bell: CNOT followed by Hadamard on Q0.',
-      'Two classical bits are recovered from a single transferred qubit.'
+      'To transmit "11", apply both phase-flip and bit-flip unitaries to $Q_0$.',
+      'Bob decodes with the inverse Bell circuit: CNOT followed by Hadamard on $Q_0$.',
+      'Two classical bits are recovered with 100% fidelity from a single transferred qubit.'
     ],
     milestones: [
       {
         id: 'bell-pair-prep',
         label: 'Bell Pair',
-        shortAction: 'Place H on Q0 and CNOT (Q0 -> Q1)',
-        simpleClue: 'Prepares shared Bell state between Alice & Bob.',
+        shortAction: 'Construct the shared EPR quantum link',
+        simpleClue: 'What circuit creates the entangled Bell state $|\\Phi^+\\rangle = \\frac{|00\\rangle + |11\\rangle}{\\sqrt{2}}$?',
         requiredGateSignatures: ['H(Q0)', 'CX(Q0,1)'],
         minStep: 0
       },
       {
         id: 'alice-encoding',
         label: '2-Bit Encoding',
-        shortAction: 'Place Z then X on Q0',
-        simpleClue: 'Encodes 2 classical bits ("11") into 1 qubit.',
+        shortAction: 'Encode classical message into local quantum operations',
+        simpleClue: 'Which combination of bit-flip and phase-flip operations maps $|\\Phi^+\\rangle$ to the target message state?',
         requiredGateSignatures: ['Z(Q0)', 'X(Q0)'],
         minStep: 2
       },
       {
         id: 'bob-decoding',
         label: 'Bell Decoding',
-        shortAction: 'Place CNOT (Q0 -> Q1) and H on Q0',
-        simpleClue: 'Decodes both transmitted bits deterministically.',
+        shortAction: 'Invert the Bell state for deterministic decoding',
+        simpleClue: 'How does Bob reverse the entanglement transformation to read out both bits with certainty?',
         requiredGateSignatures: ['CX(Q0,1)', 'H(Q0)'],
         minStep: 4
       }
@@ -387,16 +387,22 @@ export function evaluateBuildItCircuit(
     currentClue = 'Double-check which column (step) each gate occupies.';
   }
 
-  const diagnosisPrompt = `Challenge: "${challenge.title}"
-Progress: ${completionPercentage}% (${completedMilestonesCount}/${totalMilestones} steps)
-Placed: [${userGateTypes.join(', ') || 'empty'}]
-Expected: [${targetGateTypes.join(', ')}]
-Next Step: "${nextActionSuggestion}"
+  const completedMilestoneLabels = evaluatedMilestones.filter(m => m.completed).map(m => m.label).join(', ') || 'Initial scaffold';
+  const nextMilestone = firstIncomplete?.label || 'Final Verification';
 
-REQUIREMENT: Return 3 SHORT lines (max 40 words total):
-• Step Done: <what is done>
-• Next Step: <next gate to place>
-• Quick Clue: <1 simple clue>`;
+  const diagnosisPrompt = `Challenge: "${challenge.title}"
+Progress: ${completionPercentage}% (${completedMilestonesCount}/${totalMilestones} milestones completed)
+Current Stage Reached: ${completedMilestoneLabels}
+Target Milestone: "${nextMilestone}"
+Conceptual Target: "${nextActionSuggestion}"
+Socratic Inquiry: "${currentClue}"
+
+PEDAGOGICAL REQUIREMENT: Socratic coaching only.
+NEVER name any gate (do NOT mention H, X, CNOT, CZ, etc.) or wire index.
+Return 3 SHORT lines (max 50 words total):
+• ✓ Progress: <physical state achieved>
+• ➜ Quantum Concept: <physical transformation needed next>
+• 💡 Socratic Clue: <inquiry question guiding learner to deduce the unitary matrix>`;
 
   return {
     isCorrect,

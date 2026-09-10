@@ -20,11 +20,10 @@ function getGeminiApiKey(): string | null {
 }
 
 const CANDIDATE_MODELS = [
-  'gemini-3.5-flash-lite',
-  'gemini-flash-latest',
   'gemini-3.6-flash',
   'gemini-3.5-flash',
-  'gemini-2.5-pro',
+  'gemini-3.5-flash-lite',
+  'gemini-flash-latest',
 ];
 
 async function callGeminiCascade(
@@ -60,6 +59,20 @@ async function callGeminiCascade(
     }
   }
   return null;
+}
+
+function sanitizeSocraticFeedback(text: string): string {
+  if (!text) return text;
+  return text
+    .replace(/Place\s+(?:Hadamard|\(H\)|H)\s+gates?\s+on\s+(?:both\s+)?Q\d+(?:\s+and\s+Q\d+)?/gi, 'Synthesize equal superposition across both registers')
+    .replace(/Place\s+(?:an?\s+)?(?:Hadamard|H)\s+gates?\s+on\s+Q\d+/gi, 'Apply the superposition transformation')
+    .replace(/Place\s+(?:an?\s+)?(?:Pauli-X|X)\s+gates?\s+on\s+Q\d+/gi, 'Initialize the ancilla to state $|1\\rangle$')
+    .replace(/Place\s+(?:a\s+)?(?:CNOT|CX)\s+gates?/gi, 'Apply the controlled-NOT entanglement coupling')
+    .replace(/Place\s+(?:a\s+)?(?:CZ|controlled-Z)\s+gates?/gi, 'Apply the controlled phase transformation')
+    .replace(/Next Step:\s*(?:Place|Apply)\s+/gi, 'Quantum Concept: ')
+    .replace(/•?\s*Next Step:\s*/gi, '• ➜ Quantum Concept: ')
+    .replace(/•?\s*Step Done:\s*/gi, '• ✓ Progress: ')
+    .replace(/•?\s*Quick Clue:\s*/gi, '• 💡 Socratic Clue: ');
 }
 
 export const dynamic = 'force-dynamic';
@@ -182,7 +195,8 @@ FIXED_CODE:
       (query &&
         (query.includes("Student's circuit gates") ||
           query.includes("Build It") ||
-          query.includes("Observed Statevector Fidelity")));
+          query.includes("Observed Statevector Fidelity") ||
+          query.includes("Circuit Goal:")));
 
     if (apiKey) {
       try {
@@ -201,14 +215,21 @@ FIXED_CODE:
         const activeLangName = langMap[language] || 'English';
 
         const socraticSystemInstruction = isCircuitDiagnosis
-          ? `You are Schrödinger AI, an expert quantum physics coach on QLearn.
-STRICT USER REQUIREMENT: The user needs SHORT AND SIMPLE feedback (maximum 3 concise bullet points, under 60 words total).
-Do NOT write introductions, greetings, essays, or long paragraphs!
+          ? `You are Schrödinger AI, the autonomous Socratic quantum physics tutor on QLearn.
+The student is constructing a quantum circuit in the interactive "Build It" stage.
 
-Output format ONLY:
-• Step Done: <1 short sentence on what is correct so far>
-• Next Step: <1 short sentence on the specific gate to place next>
-• Quick Clue: <1 brief conceptual hint or question>`
+CRITICAL TEACHING RULES (ABSOLUTE):
+1. NEVER reveal gate names or acronyms (NEVER write "H", "Hadamard", "X", "Pauli-X", "CNOT", "CX", "CZ", "Z", "Swap").
+2. NEVER give direct placement commands (NEVER say "Place gate on Q0", "Apply to Q1", "Add H on wire 0").
+3. TEACH CONCEPTUALLY: Explain the physical state transformation needed next (e.g. quantum superposition, phase kickback, entangled Bell channel, destructive interference, amplitude reflection).
+4. SOCRATIC INQUIRY: Formulate a guiding question that helps the student deduce which unitary operation is needed from first principles.
+
+Format STRICTLY as 3 bullet points (under 70 words total):
+• ✓ Progress: <1 concise sentence on physical state achieved so far>
+• ➜ Quantum Concept: <1-2 sentences explaining what physical state change is needed next>
+• 💡 Socratic Clue: <1 targeted question to guide their unitary choice without naming the gate>
+
+Use LaTeX ($...$) for states like $|0\\rangle$, $|1\\rangle$, $|+\\rangle$, $|-\\rangle$.`
           : `You are Schrödinger AI, an expert Quantum Computing AI Tutor on the QLearn platform.
 Learner Mode: ${explanationMode === 'simple' ? 'Simple / School Student (intuitive analogies, clear metaphors)' : 'Technical / Researcher (Dirac notation, unitary matrices, state vectors)'}.
 Active Misconception Flag: ${activeMisconception || 'None'}.
@@ -230,7 +251,8 @@ QLEARN PLATFORM CAPABILITIES:
         });
 
         if (reply) {
-          return NextResponse.json({ reply });
+          const processed = isCircuitDiagnosis ? sanitizeSocraticFeedback(reply) : reply;
+          return NextResponse.json({ reply: processed });
         }
       } catch (e: any) {
         console.error("Gemini API Error:", e);
@@ -242,7 +264,7 @@ QLEARN PLATFORM CAPABILITIES:
       const userGateList = body.userGates?.map(
         (g: any) => `${g.type.toUpperCase()}(Q${g.qubits.join(',')})`
       );
-      const reply = generateSocraticCircuitFeedback({
+      const rawFallback = generateSocraticCircuitFeedback({
         moduleSlug: body.moduleSlug,
         userGateList,
         structuralDiff: body.structuralDiff,
@@ -250,7 +272,7 @@ QLEARN PLATFORM CAPABILITIES:
         explanationMode: explanationMode || 'simple',
         rawQuery: query,
       });
-      return NextResponse.json({ reply });
+      return NextResponse.json({ reply: sanitizeSocraticFeedback(rawFallback) });
     }
 
     const reply = generateSocraticResponse(query, {

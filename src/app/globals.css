@@ -23,6 +23,31 @@ html {
   font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
+  margin: 0 !important;
+  padding: 0 !important;
+}
+
+body {
+  top: 0px !important;
+  position: static !important;
+  margin: 0 !important;
+  padding: 0 !important;
+}
+
+/* Suppress Google Translate top banner pushing the layout down */
+.goog-te-banner-frame,
+.goog-te-banner-frame.skiptranslate,
+iframe.goog-te-banner-frame,
+.skiptranslate > iframe,
+body > .skiptranslate,
+#goog-gt-tt {
+  display: none !important;
+  visibility: hidden !important;
+  height: 0px !important;
+  width: 0px !important;
+  border: none !important;
+  margin: 0 !important;
+  padding: 0 !important;
 }
 
 html[data-font-size="sm"] {
@@ -197,6 +222,22 @@ pre {
 
 .animate-fadeIn {
   animation: fadeIn 0.3s ease-out;
+}
+
+/* Smooth bottom-to-top slide and fade animation */
+@keyframes slideUpFade {
+  0% {
+    opacity: 0;
+    transform: translateY(28px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-slideUp {
+  animation: slideUpFade 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards;
 }
 
 /* ========== Google Translate Hidden Integration Styles ========== */

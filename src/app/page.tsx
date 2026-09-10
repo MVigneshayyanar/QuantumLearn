@@ -17,12 +17,17 @@ import {
   Layers,
   Zap,
   Play,
-  CheckCircle2
+  CheckCircle2,
+  Info,
+  Compass,
+  ChevronDown,
+  ChevronUp
 } from 'lucide-react';
 import { BlochSphere3D } from '@/components/bloch-sphere/BlochSphere3D';
+import { MathRenderer } from '@/components/math/MathRenderer';
 
 export default function HomePage() {
-  const { language, setPrimerModalOpen } = useAccessibility();
+  const { language, explanationMode, setPrimerModalOpen } = useAccessibility();
   const { setIsOpen: setAITutorOpen } = useAITutorStore();
   const t = translations[language];
 
@@ -86,9 +91,9 @@ export default function HomePage() {
   ];
 
   return (
-    <div className="space-y-24 py-8">
+    <div className="space-y-16 py-6">
       {/* Hero Section */}
-      <section className="w-full mx-auto px-8 pt-6">
+      <section className="w-full mx-auto px-8 pt-2">
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 items-center">
           {/* Hero Left Content */}
           <div className="lg:col-span-7 space-y-6">
@@ -121,6 +126,14 @@ export default function HomePage() {
                 <Cpu className="w-4 h-4 text-primary-600" />
                 <span>{t.hero.openBuilder}</span>
               </Link>
+              <a
+                href="#what-is-quantum"
+                className="flex items-center gap-2 px-5 py-3.5 rounded-xl bg-indigo-50 hover:bg-indigo-100 border border-indigo-200 text-indigo-900 font-semibold text-sm shadow-subtle transition-all cursor-pointer group"
+              >
+                <Info className="w-4 h-4 text-indigo-600" />
+                <span>What is Quantum?</span>
+                <ChevronDown className="w-4 h-4 text-indigo-600 group-hover:translate-y-0.5 transition-transform" />
+              </a>
             </div>
 
             {/* Quick stats pills */}
@@ -204,6 +217,144 @@ export default function HomePage() {
         </div>
       </section>
 
+      {/* What is Quantum? Focused Educational Section */}
+      <section id="what-is-quantum" className="w-full mx-auto px-8 scroll-mt-6">
+        <div className="bg-white rounded-3xl border border-dark-200 p-6 sm:p-10 shadow-card space-y-6">
+          {/* Header with Explanation Mode Switcher */}
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-dark-100 pb-5">
+            <div className="space-y-1.5">
+              <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-indigo-50 border border-indigo-200 text-xs font-semibold text-indigo-800">
+                <Atom className="w-3.5 h-3.5 text-indigo-600" />
+                <span>Quantum Physics 101</span>
+              </div>
+              <h2 className="text-2xl sm:text-3xl font-extrabold text-dark-900 tracking-tight">
+                What is Quantum?
+              </h2>
+              <p className="text-xs sm:text-sm text-dark-600">
+                {explanationMode === 'simple'
+                  ? 'The physics of the ultra-small, where particles act like waves and possibilities stay open until you look.'
+                  : 'The fundamental physical framework governing subatomic matter, quantization of energy, and probability amplitudes in Hilbert space.'}
+              </p>
+            </div>
+
+            {/* Mode indicator — toggle is in the global AccessibilityBar */}
+            <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-primary-50 border border-primary-200 text-xs font-medium shrink-0 self-start sm:self-auto">
+              <span className="text-dark-500">Explanation:</span>
+              <span className="font-bold text-primary-700">
+                {explanationMode === 'simple' ? 'Simple Mode' : 'Technical / Math'}
+              </span>
+            </div>
+          </div>
+
+          {/* Dynamic Content based on explanationMode */}
+          {explanationMode === 'simple' ? (
+            /* Simple Mode: Intuitive Analogies */
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-5 text-xs animate-fadeIn">
+              <div className="bg-dark-50/70 p-5 rounded-2xl border border-dark-200 space-y-2.5">
+                <div className="w-8 h-8 rounded-lg bg-indigo-100 text-indigo-700 flex items-center justify-center font-bold">
+                  1
+                </div>
+                <h3 className="font-bold text-dark-900 text-sm">Energy in Tiny Packets ("Quanta")</h3>
+                <p className="text-dark-600 leading-relaxed">
+                  In everyday life, energy seems like a continuous stream of water from a tap. But in 1900, physicists discovered that energy actually travels only in indivisible, tiny drops called <strong>quanta</strong> (like coins or individual marbles). You can have 1 drop or 2 drops, but never half a drop!
+                </p>
+              </div>
+
+              <div className="bg-dark-50/70 p-5 rounded-2xl border border-dark-200 space-y-2.5">
+                <div className="w-8 h-8 rounded-lg bg-emerald-100 text-emerald-700 flex items-center justify-center font-bold">
+                  2
+                </div>
+                <h3 className="font-bold text-dark-900 text-sm">Particles Are Also Waves</h3>
+                <p className="text-dark-600 leading-relaxed">
+                  A baseball in your hand is always in one exact spot. But tiny quantum particles (like electrons and photons) spread out like ripples across a pond! They have the potential to be in multiple places at once until an instrument or human measures them.
+                </p>
+              </div>
+
+              <div className="bg-dark-50/70 p-5 rounded-2xl border border-dark-200 space-y-2.5">
+                <div className="w-8 h-8 rounded-lg bg-purple-100 text-purple-700 flex items-center justify-center font-bold">
+                  3
+                </div>
+                <h3 className="font-bold text-dark-900 text-sm">Why It Changes Computing</h3>
+                <p className="text-dark-600 leading-relaxed">
+                  Classical computers use regular light switches called <strong>bits</strong> (strictly 0 or 1). Quantum computers use <strong>qubits</strong>, which can be a blend of both. This lets them test millions of possibilities simultaneously to solve problems classical supercomputers never could!
+                </p>
+              </div>
+            </div>
+          ) : (
+            /* Technical / Math Mode: Rigorous Physics Formulations */
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-5 text-xs animate-fadeIn">
+              <div className="bg-dark-50/70 p-5 rounded-2xl border border-dark-200 space-y-2.5">
+                <div className="w-8 h-8 rounded-lg bg-primary-100 text-primary-700 flex items-center justify-center font-bold">
+                  1
+                </div>
+                <h3 className="font-bold text-dark-900 text-sm">Planck's Energy Quantization</h3>
+                <p className="text-dark-600 leading-relaxed">
+                  Formulated by Max Planck (1900) to resolve the black-body ultraviolet catastrophe. Energy exchange occurs in discrete integer multiples of the quantum:
+                </p>
+                <div className="p-2.5 rounded-xl bg-white border border-dark-200 font-mono text-center font-bold text-primary-900">
+                  <MathRenderer text="$E = h\nu = \hbar\omega$" />
+                </div>
+                <p className="text-dark-500">
+                  where <MathRenderer text="$h \approx 6.626 \times 10^{-34} \text{ J}\cdot\text{s}$" /> is Planck's constant and <MathRenderer text="$\hbar = h / (2\pi)$" />.
+                </p>
+              </div>
+
+              <div className="bg-dark-50/70 p-5 rounded-2xl border border-dark-200 space-y-2.5">
+                <div className="w-8 h-8 rounded-lg bg-emerald-100 text-emerald-700 flex items-center justify-center font-bold">
+                  2
+                </div>
+                <h3 className="font-bold text-dark-900 text-sm">de Broglie Wave-Particle Duality</h3>
+                <p className="text-dark-600 leading-relaxed">
+                  de Broglie relation (1924) establishing matter waves. Every particle with momentum <MathRenderer text="$p$" /> exhibits an associated wavelength:
+                </p>
+                <div className="p-2.5 rounded-xl bg-white border border-dark-200 font-mono text-center font-bold text-emerald-900">
+                  <MathRenderer text="$\lambda = \frac{h}{p} = \frac{h}{mv}$" />
+                </div>
+                <p className="text-dark-500">
+                  Confirmed through double-slit interference experiments using electrons and fullerenes.
+                </p>
+              </div>
+
+              <div className="bg-dark-50/70 p-5 rounded-2xl border border-dark-200 space-y-2.5">
+                <div className="w-8 h-8 rounded-lg bg-purple-100 text-purple-700 flex items-center justify-center font-bold">
+                  3
+                </div>
+                <h3 className="font-bold text-dark-900 text-sm">Schrödinger Equation & Born Rule</h3>
+                <p className="text-dark-600 leading-relaxed">
+                  Quantum systems evolve deterministically in complex Hilbert space <MathRenderer text="$\mathcal{H}$" /> via unitary generators:
+                </p>
+                <div className="p-2.5 rounded-xl bg-white border border-dark-200 font-mono text-center font-bold text-purple-900">
+                  <MathRenderer text="$i\hbar \frac{\partial |\psi\rangle}{\partial t} = \hat{H}|\psi\rangle$" />
+                </div>
+                <p className="text-dark-500">
+                  Measurement collapses <MathRenderer text="$|\psi\rangle$" /> into eigenstate <MathRenderer text="$|i\rangle$" /> with probability <MathRenderer text="$P(i) = |\langle i|\psi\rangle|^2$" />.
+                </p>
+              </div>
+            </div>
+          )}
+
+          {/* Action Banner: More Button going to /about */}
+          <div className="p-5 rounded-2xl bg-gradient-to-r from-primary-50 via-indigo-50 to-white border border-primary-200 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+            <div className="space-y-1">
+              <h3 className="font-bold text-sm text-primary-950 flex items-center gap-2">
+                <Sparkles className="w-4 h-4 text-primary-600" />
+                Want to learn all the quantum concepts in detail?
+              </h3>
+              <p className="text-xs text-dark-600">
+                Explore Qubits, Superposition, Entanglement, Quantum Speedup, and the Classical vs Quantum Comparison Matrix with full explanations in our About guide.
+              </p>
+            </div>
+            <Link
+              href="/about#quantum-guide"
+              className="px-5 py-2.5 rounded-xl bg-primary-600 hover:bg-primary-700 text-white font-bold text-xs flex items-center gap-2 shadow-sm transition-all shrink-0 self-start sm:self-auto group"
+            >
+              <span>Explore Complete Guide in About</span>
+              <ArrowRight className="w-4 h-4 group-hover:translate-x-0.5 transition-transform" />
+            </Link>
+          </div>
+        </div>
+      </section>
+
       {/* 4 Core Algorithm Modules Grid */}
       <section className="w-full mx-auto px-8">
         <div className="flex flex-col sm:flex-row sm:items-end justify-between mb-8 gap-4">
@@ -254,6 +405,40 @@ export default function HomePage() {
               </div>
             </div>
           ))}
+
+          {/* Adding More Soon card */}
+          <div className="bg-gradient-to-br from-dark-50 to-indigo-50/50 rounded-3xl border border-dashed border-primary-200 p-8 shadow-xs flex flex-col justify-between space-y-6 opacity-90">
+            <div className="space-y-3">
+              <div className="flex items-center justify-between">
+                <span className="text-xs font-semibold px-3 py-1 rounded-full border bg-amber-50 text-amber-700 border-amber-100">
+                  Coming Soon
+                </span>
+                <span className="text-xs font-mono text-dark-400">In Development</span>
+              </div>
+
+              <h3 className="text-xl font-bold text-dark-700">More Quantum Algorithms</h3>
+              <p className="text-sm text-dark-500 leading-relaxed">
+                We are actively building more algorithm modules with the same 6-stage pedagogy (Intuition → Math → Circuit → Build It → Quiz → Assessment).
+              </p>
+
+              <div className="flex flex-wrap gap-2 pt-1">
+                {["Shor's Algorithm", "Quantum Phase Estimation", "VQE", "Quantum Fourier Transform"].map((name) => (
+                  <span key={name} className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-white border border-dark-200 text-xs text-dark-600 font-medium">
+                    <span className="w-1.5 h-1.5 rounded-full bg-amber-400 inline-block" />
+                    {name}
+                  </span>
+                ))}
+              </div>
+            </div>
+
+            <div className="pt-4 border-t border-dark-100 flex items-center justify-between">
+              <span className="text-xs text-dark-400 italic">Adding more soon…</span>
+              <span className="flex items-center gap-1.5 text-xs font-bold text-amber-600">
+                <span>🚀</span>
+                <span>Stay tuned</span>
+              </span>
+            </div>
+          </div>
         </div>
       </section>
 
@@ -262,7 +447,7 @@ export default function HomePage() {
         <div className="w-full mx-auto px-8">
           <div className="text-center max-w-2xl mx-auto mb-12 space-y-3">
             <span className="text-xs font-semibold px-3 py-1 rounded-full bg-primary-50 text-primary-700">
-              Universal Design (WCAG 2.1 AA)
+              Adaptive Quantum Education
             </span>
             <h2 className="text-2xl sm:text-3xl font-bold text-dark-900 tracking-tight">
               Designed for School Students to Researchers

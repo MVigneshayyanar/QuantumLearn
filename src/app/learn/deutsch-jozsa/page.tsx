@@ -121,7 +121,7 @@ While any classical deterministic algorithm requires $\\Omega(2^{n-1} + 1)$ quer
       subtitle="The foundational demonstration of deterministic quantum advantage over classical computation."
       category="Quantum Parallelism"
       qubitCount={2}
-      speedup="Deterministic O(1) vs Classical Exponential"
+      speedup="Deterministic $\\mathcal{O}(1)$ vs Classical Exponential"
       intuitionSimple={intuitionSimple}
       intuitionTechnical={intuitionTechnical}
       mathWalkthrough={mathWalkthrough}

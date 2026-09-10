@@ -2,10 +2,12 @@
 
 import React, { useState, useEffect, useMemo } from 'react';
 import { useRouter } from 'next/navigation';
-import { getSkillBaseProblems } from '@/lib/practice-problems';
+import { ALGORITHM_OPTIONS } from '@/lib/practice-problems';
+import { ASSESSMENT_PROBLEMS } from '@/lib/assessment-problems';
 import { useProgressStore } from '@/lib/state-store';
 import { useStudentContext } from '@/lib/student-context';
 import { apiReportProgress } from '@/lib/api-helpers';
+import { MathRenderer } from '@/components/math/MathRenderer';
 import {
   CheckCircle2,
   Crown,
@@ -22,6 +24,12 @@ import {
   Medal,
   RefreshCw,
   Download,
+  Search,
+  RotateCcw,
+  Filter,
+  Clock,
+  Circle,
+  ShieldCheck,
 } from 'lucide-react';
 import confetti from 'canvas-confetti';
 import { QuantumCertificateModal } from '@/components/certificate/QuantumCertificateModal';
@@ -37,27 +45,25 @@ const DIFF_COLORS = {
   Hard:   { bg: 'bg-purple-50',    border: 'border-purple-200',  text: 'text-purple-800',    badge: 'bg-purple-100 text-purple-800 border-purple-300' },
 } as const;
 
-const DIFF_ICONS = {
-  Easy:   BookOpen,
-  Medium: Target,
-  Hard:   Flame,
-};
-
 function CertificateCard({
   moduleSlug,
   moduleTitle,
   isPremium,
+  isAllSolved = false,
   onUpgrade,
   onOpenCertificate,
 }: {
   moduleSlug: string;
   moduleTitle: string;
   isPremium: boolean;
+  isAllSolved?: boolean;
   onUpgrade: () => void;
   onOpenCertificate: () => void;
 }) {
   const date = new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
-  if (!isPremium) {
+  const isUnlocked = isPremium || isAllSolved;
+
+  if (!isUnlocked) {
     return (
       <div className="relative rounded-3xl border-2 border-dashed border-amber-300 bg-gradient-to-br from-amber-50 via-white to-orange-50/40 p-6 sm:p-8 text-center space-y-4 overflow-hidden">
         {/* Blurred certificate preview */}
@@ -66,29 +72,22 @@ function CertificateCard({
         </div>
         <div className="relative z-10 space-y-3">
           <div className="w-14 h-14 rounded-2xl bg-amber-500 text-white flex items-center justify-center mx-auto shadow-md shadow-amber-500/30">
-            <Crown className="w-7 h-7" />
+            <Award className="w-7 h-7" />
           </div>
           <div className="space-y-1">
-            <h4 className="text-base font-black text-dark-900">Certificate Locked</h4>
+            <h4 className="text-base font-black text-dark-900">Certificate In Progress</h4>
             <p className="text-xs text-dark-600 max-w-sm mx-auto leading-relaxed">
-              You've mastered all 6 stages! Upgrade to <strong>QLearn Pro</strong> to generate &amp; download your official{' '}
-              <em>{moduleTitle}</em> Algorithm Certificate.
+              Complete the assessment questions to claim and download your verified{' '}
+              <em>{moduleTitle}</em> Quantum Algorithm Certificate.
             </p>
           </div>
           <div className="flex flex-wrap items-center justify-center gap-2.5">
             <button
-              onClick={onUpgrade}
+              onClick={onOpenCertificate}
               className="inline-flex items-center gap-2 px-5 py-2.5 rounded-2xl bg-gradient-to-r from-amber-500 via-amber-600 to-amber-700 hover:brightness-110 text-white font-bold text-xs shadow-md shadow-amber-500/25 transition-all cursor-pointer"
             >
-              <Zap className="w-4 h-4 fill-white" />
-              <span>Unlock Certificate with QLearn Pro</span>
-            </button>
-            <button
-              onClick={onOpenCertificate}
-              className="inline-flex items-center gap-2 px-4 py-2.5 rounded-2xl border border-amber-300 bg-white hover:bg-amber-50 text-amber-900 font-bold text-xs transition-all cursor-pointer shadow-2xs"
-            >
-              <Trophy className="w-4 h-4 text-amber-600" />
-              <span>Preview Received Certificate</span>
+              <Award className="w-4 h-4 text-white" />
+              <span>Preview Certificate</span>
             </button>
           </div>
         </div>
@@ -102,19 +101,19 @@ function CertificateCard({
       <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,_rgba(251,191,36,0.15)_0%,_transparent_70%)] pointer-events-none" />
 
       <div className="relative z-10 space-y-4">
-        <div className="w-20 h-20 rounded-full bg-gradient-to-br from-amber-400 to-amber-600 text-white flex items-center justify-center mx-auto shadow-lg shadow-amber-400/40">
-          <Trophy className="w-10 h-10" />
+        <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-amber-400 to-amber-600 text-white flex items-center justify-center mx-auto shadow-lg shadow-amber-400/40">
+          <Award className="w-8 h-8 text-white" />
         </div>
 
         <div className="space-y-1">
-          <p className="text-[10px] font-bold uppercase tracking-widest text-amber-700">Official Quantum Credential</p>
+          <p className="text-[10px] font-bold uppercase tracking-widest text-amber-700">Official Quantum Credential · Claimed</p>
           <h3 className="text-xl font-black text-dark-900">QLearn Quantum Algorithm Mastery</h3>
           <p className="text-sm font-semibold text-dark-700">{moduleTitle}</p>
         </div>
 
         <div className="border-t border-b border-amber-200 py-3 space-y-0.5">
           <p className="text-xs text-dark-600">
-            This certifies completion of all 6 stages including the Skill Base Practice Track.
+            This certifies completion of all 6 stages including the Assessment Track.
           </p>
           <p className="text-[11px] text-amber-700 font-semibold">{date}</p>
         </div>
@@ -124,7 +123,7 @@ function CertificateCard({
             onClick={onOpenCertificate}
             className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-gradient-to-r from-amber-500 to-amber-600 hover:brightness-110 text-white font-bold text-xs shadow-md shadow-amber-500/25 transition-all cursor-pointer"
           >
-            <Trophy className="w-4 h-4 text-amber-200" />
+            <Award className="w-4 h-4 text-white" />
             <span>View &amp; Print Certificate</span>
           </button>
           <button
@@ -146,20 +145,28 @@ export function SkillBaseStage({ moduleSlug, moduleTitle = 'Quantum Algorithm' }
   const { userId, studentName, isPremium, openSubscriptionModal } = useStudentContext();
   const [showCertModal, setShowCertModal] = useState(false);
 
-  // Get 10 curated problems: 4 Easy + 4 Medium + 2 Hard
-  const problems = useMemo(() => getSkillBaseProblems(moduleSlug, { easy: 4, medium: 4, hard: 2 }), [moduleSlug]);
+  // Search and filter state
+  const [searchQuery, setSearchQuery] = useState('');
+  const [selectedDifficulty, setSelectedDifficulty] = useState<string>('All');
 
-  // Load solved IDs from localStorage (set by /practice/[id] page on ACCEPTED)
+  // Get 10 curated problems
+  const problems = useMemo(() => ASSESSMENT_PROBLEMS, []);
+
+  // Load solved and attempted IDs from localStorage
   const [solvedIds, setSolvedIds] = useState<Set<string>>(new Set());
+  const [attemptedIds, setAttemptedIds] = useState<Set<string>>(new Set());
   const [isAllSolved, setIsAllSolved] = useState(false);
   const [completionReported, setCompletionReported] = useState(false);
 
   const checkSolved = () => {
     try {
-      const stored: string[] = JSON.parse(localStorage.getItem('ql_practice_solved') || '[]');
-      const set = new Set(stored);
-      setSolvedIds(set);
-      const allDone = problems.length > 0 && problems.every((p) => set.has(p.id));
+      const storedSolved: string[] = JSON.parse(localStorage.getItem('ql_practice_solved') || '[]');
+      const storedAttempted: string[] = JSON.parse(localStorage.getItem('ql_practice_attempted') || '[]');
+      const solvedSet = new Set(storedSolved);
+      const attemptedSet = new Set(storedAttempted);
+      setSolvedIds(solvedSet);
+      setAttemptedIds(attemptedSet);
+      const allDone = problems.length > 0 && problems.every((p) => solvedSet.has(p.id));
       setIsAllSolved(allDone);
       return allDone;
     } catch {
@@ -192,15 +199,15 @@ export function SkillBaseStage({ moduleSlug, moduleTitle = 'Quantum Algorithm' }
   const progressPct = problems.length > 0 ? Math.round((solvedCount / problems.length) * 100) : 0;
 
   const handleProblemClick = (problemId: string) => {
-    // Navigate to practice page; returnTo lets the page know to show a "Back" link
     const returnTarget = `/learn/${moduleSlug}?stage=skill_base`;
     router.push(`/practice/${problemId}?returnTo=${encodeURIComponent(returnTarget)}`);
   };
 
-  // Group by difficulty for display
-  const easyProblems   = problems.filter((p) => p.difficulty === 'Easy');
-  const mediumProblems = problems.filter((p) => p.difficulty === 'Medium');
-  const hardProblems   = problems.filter((p) => p.difficulty === 'Hard');
+  const getStatus = (id: string) => {
+    if (solvedIds.has(id)) return 'SOLVED';
+    if (attemptedIds.has(id)) return 'ATTEMPTED';
+    return 'UNSOLVED';
+  };
 
   return (
     <div className="space-y-6">
@@ -212,8 +219,8 @@ export function SkillBaseStage({ moduleSlug, moduleTitle = 'Quantum Algorithm' }
               <Sparkles className="w-5 h-5" />
             </div>
             <div>
-              <h2 className="text-sm font-black text-dark-900">Stage 6 · Skill Base &amp; Practice</h2>
-              <p className="text-[11px] text-dark-500">Complete all 10 problems to earn 100% Algorithm Mastery</p>
+              <h2 className="text-sm font-black text-dark-900">Stage 6 · Assessment</h2>
+              <p className="text-[11px] text-dark-500">Complete all 10 assessment questions to earn 100% Algorithm Mastery</p>
             </div>
           </div>
           <div className="flex items-center gap-2">
@@ -222,7 +229,7 @@ export function SkillBaseStage({ moduleSlug, moduleTitle = 'Quantum Algorithm' }
             </span>
             <button
               onClick={() => { setSolvedIds(new Set()); checkSolved(); }}
-              className="text-dark-400 hover:text-dark-700 p-1.5 rounded-lg hover:bg-dark-100 transition-colors"
+              className="text-dark-400 hover:text-dark-700 p-1.5 rounded-lg hover:bg-dark-100 transition-colors cursor-pointer"
               title="Refresh progress"
             >
               <RefreshCw className="w-3.5 h-3.5" />
@@ -250,13 +257,6 @@ export function SkillBaseStage({ moduleSlug, moduleTitle = 'Quantum Algorithm' }
             </p>
           )}
         </div>
-
-        {/* Info row */}
-        <div className="flex flex-wrap gap-2 text-[10px] font-semibold">
-          <span className="bg-emerald-50 border border-emerald-200 text-emerald-800 px-2.5 py-1 rounded-lg">4 × Easy</span>
-          <span className="bg-blue-50 border border-blue-200 text-blue-800 px-2.5 py-1 rounded-lg">4 × Medium</span>
-          <span className="bg-purple-50 border border-purple-200 text-purple-800 px-2.5 py-1 rounded-lg">2 × Hard</span>
-        </div>
       </div>
 
       {/* ── 100% Completion Banner ──────────────────────────────────────────── */}
@@ -272,115 +272,149 @@ export function SkillBaseStage({ moduleSlug, moduleTitle = 'Quantum Algorithm' }
         </div>
       )}
 
-      {/* ── Problem groups ──────────────────────────────────────────────────── */}
-      {(() => {
-        let qCounter = 0;
-        return ([
-          { label: '🟢 Easy Problems', items: easyProblems, diff: 'Easy' as const },
-          { label: '🔵 Medium Problems', items: mediumProblems, diff: 'Medium' as const },
-          { label: '🟣 Hard Problems · 👑 Premium', items: hardProblems, diff: 'Hard' as const },
-        ]).map(({ label, items, diff }) => {
-          if (items.length === 0) return null;
-          const colors = DIFF_COLORS[diff];
-          const Icon = DIFF_ICONS[diff];
-          const isPremiumGroup = diff === 'Hard';
-          return (
-            <div key={diff} className="space-y-3">
-              <div className="flex items-center gap-2">
-                <h3 className="text-xs font-black text-dark-900 uppercase tracking-wide">{label}</h3>
-                <span className="text-[10px] bg-dark-100 text-dark-500 px-2 py-0.5 rounded-full font-semibold">
-                  {items.filter(p => solvedIds.has(p.id)).length}/{items.length} done
-                </span>
-                {isPremiumGroup && (
-                  <span className="inline-flex items-center gap-0.5 text-[8px] font-extrabold text-amber-800 bg-amber-100 border border-amber-300 px-1.5 py-0.5 rounded">
-                    <Crown className="w-2.5 h-2.5 text-amber-600 fill-amber-500" />
-                    Premium
-                  </span>
-                )}
-              </div>
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                {items.map((problem) => {
-                  qCounter++;
-                  const qNum = qCounter;
-                  const solved = solvedIds.has(problem.id);
-                  const isPremium = isPremiumGroup || problem.isPremium;
-                  return (
-                    <button
-                      key={problem.id}
-                      onClick={() => handleProblemClick(problem.id)}
-                      className={`group w-full text-left p-4 rounded-2xl border-2 transition-all duration-200 cursor-pointer relative overflow-hidden ${
-                        solved
-                          ? 'border-emerald-300 bg-emerald-50/60 hover:bg-emerald-50 hover:border-emerald-400'
-                          : isPremium
-                          ? 'border-amber-300 bg-amber-50/30 hover:border-amber-400 hover:bg-amber-50/60 hover:shadow-sm'
-                          : `border-dark-200 bg-white hover:${colors.border} hover:${colors.bg} hover:shadow-sm`
-                      }`}
-                    >
-                      {/* Solved overlay glow */}
-                      {solved && (
-                        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top_right,_rgba(16,185,129,0.07)_0%,_transparent_60%)] pointer-events-none" />
+      {/* ── Problem List Table ──────────────────────────────────────────────── */}
+      <div className="bg-white rounded-3xl border border-dark-200 shadow-xs overflow-hidden">
+        <div className="overflow-x-auto">
+          <table className="w-full text-xs text-left">
+            <thead>
+              <tr className="border-b border-dark-200 bg-dark-50/50 text-dark-500 font-semibold uppercase tracking-wider text-[10px]">
+                <th className="py-3.5 px-3 w-10 text-center">Q#</th>
+                <th className="py-3.5 px-3 w-12 text-center">Status</th>
+                <th className="py-3.5 px-5">Problem</th>
+                <th className="py-3.5 px-4">Algorithm</th>
+                <th className="py-3.5 px-4">Category</th>
+                <th className="py-3.5 px-4 text-center">Difficulty</th>
+                <th className="py-3.5 px-4 text-center">Qubits</th>
+                <th className="py-3.5 px-5 text-right">Action</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-dark-100">
+              {problems.map((prob, probIdx) => {
+                const status = getStatus(prob.id);
+                const isProblemPremium = prob.isPremium || prob.difficulty === 'Hard';
+                const displayNum = probIdx + 1;
+                return (
+                  <tr
+                    key={prob.id}
+                    onClick={() => handleProblemClick(prob.id)}
+                    className={`hover:bg-dark-50/60 transition-colors group cursor-pointer ${
+                      isProblemPremium ? 'bg-amber-50/30' : ''
+                    }`}
+                  >
+                    {/* Question Number */}
+                    <td className="py-4 px-3 text-center">
+                      <div
+                        className={`w-7 h-7 rounded-lg flex items-center justify-center text-[11px] font-black mx-auto ${
+                          isProblemPremium
+                            ? 'bg-gradient-to-tr from-amber-500 to-yellow-400 text-white shadow-xs shadow-amber-500/25'
+                            : 'bg-dark-100 text-dark-700'
+                        }`}
+                      >
+                        {displayNum}
+                      </div>
+                    </td>
+
+                    {/* Status Icon */}
+                    <td className="py-4 px-3 text-center">
+                      {status === 'SOLVED' ? (
+                        <CheckCircle2 className="w-4 h-4 text-emerald-600 mx-auto" />
+                      ) : status === 'ATTEMPTED' ? (
+                        <Clock className="w-4 h-4 text-amber-500 mx-auto" />
+                      ) : (
+                        <Circle className="w-3.5 h-3.5 text-dark-300 mx-auto" />
                       )}
+                    </td>
 
-                      <div className="relative flex items-start gap-3">
-                        {/* Q number badge */}
-                        <div
-                          className={`w-8 h-8 rounded-xl flex items-center justify-center shrink-0 text-[11px] font-black shadow-xs ${
-                            solved
-                              ? 'bg-emerald-500 text-white'
-                              : isPremium
-                              ? 'bg-gradient-to-tr from-amber-500 to-yellow-400 text-white shadow-amber-500/25'
-                              : `${colors.bg} ${colors.border} border ${colors.text}`
-                          }`}
-                        >
-                          {solved ? <CheckCircle2 className="w-4 h-4" /> : `Q${qNum}`}
-                        </div>
-
-                        <div className="flex-1 min-w-0">
-                          <div className="flex items-center justify-between gap-2 mb-1">
-                            <div className="flex items-center gap-1.5 min-w-0">
-                              <span className="text-xs font-black text-dark-900 leading-tight truncate">
-                                {problem.title}
-                              </span>
-                              {isPremium && (
-                                <span className="inline-flex items-center gap-0.5 text-[8px] font-extrabold text-amber-800 bg-amber-100/80 border border-amber-300 px-1 py-0.5 rounded shrink-0">
-                                  <Crown className="w-2 h-2 text-amber-600 fill-amber-500" />
-                                  👑
-                                </span>
-                              )}
-                            </div>
-                            <div className="flex items-center gap-1.5 shrink-0">
-                              <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full border ${colors.badge}`}>
-                                {diff}
-                              </span>
-                              {solved ? (
-                                <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800 border border-emerald-300">
-                                  ✓ Solved
-                                </span>
-                              ) : (
-                                <ExternalLink className="w-3.5 h-3.5 text-dark-400 group-hover:text-dark-700 transition-colors" />
-                              )}
-                            </div>
-                          </div>
-                          <p className="text-[11px] text-dark-500 leading-snug line-clamp-2">
-                            {problem.description}
-                          </p>
-                          {!solved && (
-                            <div className="mt-2 flex items-center gap-1 text-[10px] text-primary-600 font-semibold group-hover:gap-1.5 transition-all">
-                              <span>Solve now</span>
-                              <ArrowRight className="w-3 h-3" />
-                            </div>
+                    {/* Title & Description + Premium Badge */}
+                    <td className="py-4 px-5">
+                      <div className="block group-hover:text-primary-600 transition-colors">
+                        <div className="flex items-center gap-2">
+                          <span className="font-bold text-sm text-dark-900 group-hover:text-primary-600">
+                            <MathRenderer text={prob.title} />
+                          </span>
+                          {isProblemPremium && (
+                            <span className="inline-flex items-center gap-0.5 text-[8px] font-extrabold text-amber-800 bg-amber-100 border border-amber-300 px-1.5 py-0.5 rounded shrink-0">
+                              <Crown className="w-2.5 h-2.5 text-amber-600 fill-amber-500" />
+                              Premium
+                            </span>
                           )}
                         </div>
+                        <div className="text-xs text-dark-500 mt-0.5 line-clamp-1">
+                          <MathRenderer text={prob.description} />
+                        </div>
                       </div>
-                    </button>
-                  );
-                })}
-              </div>
-            </div>
-          );
-        });
-      })()}
+                    </td>
 
+                    {/* Algorithm Badge(s) */}
+                    <td className="py-4 px-4 text-dark-700">
+                      <div className="flex flex-wrap gap-1 max-w-[200px]">
+                        {prob.algorithms?.map((alg) => {
+                          const meta = ALGORITHM_OPTIONS.find((a) => a.slug === alg);
+                          const label = meta ? meta.shortLabel : alg;
+                          return (
+                            <span
+                              key={alg}
+                              className="px-2 py-0.5 rounded-md text-[10px] font-semibold bg-primary-50 text-primary-700 border border-primary-100 whitespace-nowrap"
+                            >
+                              {label}
+                            </span>
+                          );
+                        })}
+                      </div>
+                    </td>
+
+                    {/* Category */}
+                    <td className="py-4 px-4 text-dark-700 font-medium">
+                      <span className="px-2 py-0.5 rounded-md bg-dark-100 text-dark-700 text-[11px] whitespace-nowrap">
+                        {prob.category}
+                      </span>
+                    </td>
+
+                    {/* Difficulty Badge */}
+                    <td className="py-4 px-4 text-center">
+                      <span
+                        className={`inline-block px-2.5 py-0.5 rounded-full font-semibold text-[11px] ${
+                          prob.difficulty === 'Easy'
+                            ? 'bg-emerald-50 text-emerald-700 border border-emerald-200'
+                            : prob.difficulty === 'Medium'
+                            ? 'bg-amber-50 text-amber-700 border border-amber-200'
+                            : 'bg-rose-50 text-rose-700 border border-rose-200'
+                        }`}
+                      >
+                        {prob.difficulty}
+                      </span>
+                    </td>
+
+                    {/* Qubits */}
+                    <td className="py-4 px-4 text-center font-mono font-medium text-dark-600">
+                      {prob.numQubits}Q
+                    </td>
+
+                    {/* Solve Button */}
+                    <td className="py-4 px-5 text-right">
+                      <button
+                        type="button"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleProblemClick(prob.id);
+                        }}
+                        className={`inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl font-bold text-xs transition-all shadow-2xs cursor-pointer ${
+                          status === 'SOLVED'
+                            ? 'bg-dark-100 hover:bg-dark-200 text-dark-800'
+                            : 'bg-primary-600 hover:bg-primary-700 text-white'
+                        }`}
+                      >
+                        <span>{status === 'SOLVED' ? 'Review' : 'Solve'}</span>
+                        <ArrowRight className="w-3.5 h-3.5" />
+                      </button>
+                    </td>
+                  </tr>
+                );
+              })}
+            </tbody>
+          </table>
+        </div>
+      </div>
       {/* ── Certificate Section ─────────────────────────────────────────────── */}
       <div className="space-y-3 pt-2">
         <div className="flex items-center justify-between">
@@ -392,16 +426,17 @@ export function SkillBaseStage({ moduleSlug, moduleTitle = 'Quantum Algorithm' }
             onClick={() => setShowCertModal(true)}
             className="text-xs font-bold text-amber-700 hover:text-amber-900 flex items-center gap-1 cursor-pointer"
           >
-            <Trophy className="w-3.5 h-3.5 text-amber-600" />
-            <span>🏆 Get {moduleSlug.includes('grover') ? 'Grover ' : ''}Certification</span>
+            <Award className="w-3.5 h-3.5 text-amber-600" />
+            <span>{isAllSolved ? 'View Certificate' : 'Certificate Status'}</span>
           </button>
         </div>
         <CertificateCard
           moduleSlug={moduleSlug}
           moduleTitle={moduleTitle}
           isPremium={isPremium}
+          isAllSolved={isAllSolved}
           onUpgrade={openSubscriptionModal}
-          onOpenCertificate={() => setShowCertModal(false || true)}
+          onOpenCertificate={() => setShowCertModal(true)}
         />
       </div>
 
@@ -431,7 +466,7 @@ export function SkillBaseStage({ moduleSlug, moduleTitle = 'Quantum Algorithm' }
 
       {/* ── How it works info box ────────────────────────────────────────────── */}
       <div className="p-4 rounded-2xl bg-dark-50 border border-dark-200 text-xs text-dark-600 space-y-2">
-        <p className="font-bold text-dark-800">How Stage 6 works:</p>
+        <p className="font-bold text-dark-800">How Assessment works:</p>
         <ul className="space-y-1 list-disc list-inside leading-relaxed">
           <li>Click any problem card to open the <strong>interactive circuit judge</strong> on the Practice page.</li>
           <li>Build the quantum circuit, submit it, and get instant accept/wrong-answer feedback.</li>
@@ -448,6 +483,15 @@ export function SkillBaseStage({ moduleSlug, moduleTitle = 'Quantum Algorithm' }
         moduleTitle={moduleTitle}
         studentName={studentName || 'Alex Mercer'}
         isCompleted={isAllSolved}
+        onClaimCertificate={() => {
+          markModuleComplete(moduleSlug, 100);
+          if (userId) {
+            apiReportProgress(userId, moduleSlug, 'completed', { score: 100, stageReached: 6 });
+          }
+          try {
+            confetti({ particleCount: 120, spread: 75, origin: { y: 0.5 }, colors: ['#F59E0B', '#10B981', '#6366F1', '#EC4899'] });
+          } catch {}
+        }}
       />
     </div>
   );

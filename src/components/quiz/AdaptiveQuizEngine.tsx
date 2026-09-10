@@ -460,7 +460,7 @@ Could you teach me the core quantum principles behind these mistakes in simple t
           >
             <Trophy className="w-4 h-4 text-amber-200" />
             <span>
-              🏆 Get {moduleSlug.includes('grover') ? 'Grover ' : ''}Certification
+              Get {moduleSlug.includes('grover') ? 'Grover ' : ''}Certification
             </span>
           </button>
         </div>

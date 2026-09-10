@@ -97,6 +97,7 @@ function renderKatex(latex: string, displayMode: boolean): string {
       throwOnError: false,
       strict: false,
       trust: true,
+      output: 'htmlAndMathml',
       macros: {
         '\\ket': '|#1\\rangle',
         '\\bra': '\\langle #1|',
@@ -138,6 +139,31 @@ export function MathRenderer({ text, className = '', displayMode = false }: Math
 
           // Parse markdown italic (*text*)
           content = content.replace(/(?<!\*)\*([^\*\n]+?)\*(?!\*)/g, '<em class="italic">$1</em>');
+
+          // Remove any stray orphaned asterisks left from stripped headers
+          content = content.replace(/\*\*/g, '');
+
+          // Convert raw Dirac kets like |0⟩, |1⟩, |+⟩, |-⟩, |−⟩, |00⟩, |11⟩, |i⟩, |-i⟩
+          content = content.replace(/\|([01\+\-−i\w]+)[⟩>]/g, (_, state) => {
+            const cleanState = state.replace('−', '-');
+            return renderKatex(`|${cleanState}\\rangle`, false);
+          });
+
+          // Convert common quantum trace notation: Tr(ρ²)
+          content = content.replace(/Tr\(ρ²\)|Tr\(rho\^2\)/g, () => {
+            return renderKatex('\\operatorname{Tr}(\\rho^2)', false);
+          });
+
+          // Convert trigonometric exponents: cos²(x), sin²(x)
+          content = content.replace(/(cos|sin)²\(([^\)]+)\)/g, (_, func, arg) => {
+            const cleanArg = arg.replace(/θ/g, '\\theta').replace(/φ/g, '\\phi');
+            return renderKatex(`\\${func}^2(${cleanArg})`, false);
+          });
+
+          // Convert qubit subscript labels: q0, q1, Q0, Q1 when standalone or formatted
+          content = content.replace(/\b([qQ])_?([0-9])\b/g, (_, q, idx) => {
+            return renderKatex(`${q.toLowerCase()}_{${idx}}`, false);
+          });
 
           // Parse inline code (`code`) — protect variables from translation
           content = content.replace(/`([^`]+)`/g, '<code class="px-1.5 py-0.5 rounded bg-dark-100 text-primary-700 font-mono text-[11px] notranslate" translate="no">$1</code>');

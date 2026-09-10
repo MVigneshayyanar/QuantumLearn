@@ -331,7 +331,7 @@ export default function InstructorDashboard() {
   }) || [];
 
   return (
-    <div className="w-full mx-auto px-6 sm:px-8 py-4 space-y-4 animate-fadeIn">
+    <div className="w-full mx-auto px-8 py-3.5 space-y-3.5 animate-fadeIn">
       {/* Header */}
       <div className="bg-white rounded-2xl border border-dark-200 p-5 sm:p-6 shadow-xs">
         <div className="flex flex-wrap items-center justify-between gap-4">
@@ -740,31 +740,34 @@ export default function InstructorDashboard() {
       {/* STUDENT DEEP-DIVE MODAL */}
       {selectedStudent && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-xs p-4 animate-fadeIn">
-          <div className="relative bg-white rounded-3xl border border-dark-200 shadow-2xl w-full max-w-2xl p-6 space-y-5 max-h-[90vh] overflow-y-auto">
-            <button
-              onClick={() => setSelectedStudent(null)}
-              className="absolute top-5 right-5 p-2 rounded-xl text-dark-400 hover:text-dark-700 hover:bg-dark-100"
-            >
-              <X className="w-5 h-5" />
-            </button>
-
+          <div className="relative bg-white rounded-2xl border border-dark-200 shadow-2xl w-full max-w-2xl p-5 sm:p-6 space-y-4 max-h-[90vh] overflow-y-auto">
             {/* Modal Header */}
-            <div className="flex items-center gap-3">
-              <div className="w-12 h-12 rounded-2xl bg-primary-600 text-white flex items-center justify-center text-lg font-bold shadow-md shadow-primary-500/20">
-                {selectedStudent.name.charAt(0).toUpperCase()}
-              </div>
-              <div>
-                <h2 className="text-lg font-bold text-dark-900">{selectedStudent.name}</h2>
-                <p className="text-xs text-dark-500 font-mono">{selectedStudent.email}</p>
-                <div className="flex items-center gap-2 mt-1">
-                  <span className="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-primary-50 text-primary-700 border border-primary-200">
-                    🔥 {selectedStudent.streakDays} Day Streak
-                  </span>
-                  <span className="text-[10px] text-dark-400">
-                    Joined {new Date(selectedStudent.createdAt).toLocaleDateString()}
-                  </span>
+            <div className="flex items-center justify-between gap-4 pb-3 border-b border-dark-100">
+              <div className="flex items-center gap-3 min-w-0">
+                <div className="w-11 h-11 rounded-2xl bg-primary-600 text-white flex items-center justify-center text-lg font-bold shadow-md shadow-primary-500/20 shrink-0">
+                  {selectedStudent.name.charAt(0).toUpperCase()}
+                </div>
+                <div className="min-w-0">
+                  <h2 className="text-base sm:text-lg font-bold text-dark-900 truncate">{selectedStudent.name}</h2>
+                  <p className="text-xs text-dark-500 font-mono truncate">{selectedStudent.email}</p>
+                  <div className="flex flex-wrap items-center gap-2 mt-0.5">
+                    <span className="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-primary-50 text-primary-700 border border-primary-200">
+                      🔥 {selectedStudent.streakDays} Day Streak
+                    </span>
+                    <span className="text-[10px] text-dark-400">
+                      Joined {new Date(selectedStudent.createdAt).toLocaleDateString()}
+                    </span>
+                  </div>
                 </div>
               </div>
+
+              <button
+                onClick={() => setSelectedStudent(null)}
+                aria-label="Close student details"
+                className="w-8 h-8 rounded-xl bg-dark-100 hover:bg-dark-200 text-dark-500 hover:text-dark-800 flex items-center justify-center transition-colors cursor-pointer shrink-0"
+              >
+                <X className="w-4 h-4" />
+              </button>
             </div>
 
             {/* AI Usage & Problem Solving Card */}
@@ -814,24 +817,43 @@ export default function InstructorDashboard() {
                 {Object.entries(MODULE_LABELS).map(([slug, label]) => {
                   const mod = selectedStudent.moduleProgress?.find((m) => m.moduleSlug === slug);
                   const isDone = mod?.isCompleted || false;
-                  const score = mod?.masteryScore || 0;
+                  // Compute solved percentage: from masteryScore or stageReached (1-6 stages -> 17% to 100%)
+                  const stageScore = mod?.stageReached ? Math.round((mod.stageReached / 6) * 100) : 0;
+                  const score = isDone ? 100 : Math.max(Math.round(mod?.masteryScore || 0), stageScore);
+
                   return (
-                    <div key={slug} className="p-3 rounded-xl border border-dark-200 bg-white space-y-1">
+                    <div key={slug} className="p-3 rounded-xl border border-dark-200 bg-white space-y-1.5">
                       <div className="flex items-center justify-between">
                         <span className="text-xs font-bold text-dark-900">{label}</span>
                         {isDone ? (
-                          <span className="text-[10px] font-semibold text-emerald-700 bg-emerald-50 px-1.5 py-0.5 rounded">
-                            Done ({Math.round(score)}%)
+                          <span className="text-[10px] font-bold text-emerald-700 bg-emerald-50 border border-emerald-200 px-2 py-0.5 rounded-full">
+                            Done (100%)
+                          </span>
+                        ) : score > 0 ? (
+                          <span className="text-[10px] font-bold text-primary-700 bg-primary-50 border border-primary-200 px-2 py-0.5 rounded-full">
+                            {score}% Solved
                           </span>
                         ) : (
-                          <span className="text-[10px] text-dark-400">In Progress</span>
+                          <span className="text-[10px] font-medium text-dark-400 bg-dark-50 border border-dark-200 px-2 py-0.5 rounded-full">
+                            0%
+                          </span>
                         )}
                       </div>
-                      <div className="w-full bg-dark-100 h-1.5 rounded-full overflow-hidden">
+                      <div className="w-full bg-dark-100 h-2 rounded-full overflow-hidden">
                         <div
                           style={{ width: `${score}%` }}
-                          className={`h-full ${isDone ? 'bg-emerald-500' : 'bg-primary-500'}`}
+                          className={`h-full transition-all duration-300 ${isDone ? 'bg-emerald-500' : 'bg-primary-600'}`}
                         />
+                      </div>
+                      <div className="flex items-center justify-between text-[10px] text-dark-400">
+                        <span>
+                          {isDone
+                            ? 'All 6 stages complete'
+                            : mod?.stageReached
+                            ? `Stage ${mod.stageReached}/6 complete`
+                            : 'Not yet started'}
+                        </span>
+                        <span className="font-mono font-semibold text-dark-600">{score}%</span>
                       </div>
                     </div>
                   );
@@ -901,25 +923,28 @@ export default function InstructorDashboard() {
       {/* MAP / ADD STUDENT MODAL */}
       {showMappingModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-xs p-4 animate-fadeIn">
-          <div className="relative bg-white rounded-3xl border border-dark-200 shadow-2xl w-full max-w-xl p-6 space-y-4 max-h-[85vh] flex flex-col">
-            <button
-              onClick={() => {
-                setShowMappingModal(false);
-                setMappingMsg(null);
-              }}
-              className="absolute top-5 right-5 p-2 rounded-xl text-dark-400 hover:text-dark-700 hover:bg-dark-100"
-            >
-              <X className="w-5 h-5" />
-            </button>
+          <div className="relative bg-white rounded-2xl border border-dark-200 shadow-2xl w-full max-w-xl p-5 sm:p-6 space-y-4 max-h-[85vh] flex flex-col">
+            <div className="flex items-center justify-between gap-3 pb-3 border-b border-dark-100">
+              <div>
+                <span className="text-xs font-semibold px-2.5 py-0.5 rounded-full bg-primary-50 text-primary-700 border border-primary-200">
+                  Class Cohort Management
+                </span>
+                <h2 className="text-lg font-bold text-dark-900 mt-1">Map Students to Your Class</h2>
+                <p className="text-xs text-dark-500">
+                  Assign students to view their full performance statistics, AI usage metrics, and progress.
+                </p>
+              </div>
 
-            <div>
-              <span className="text-xs font-semibold px-2.5 py-0.5 rounded-full bg-primary-50 text-primary-700 border border-primary-200">
-                Class Cohort Management
-              </span>
-              <h2 className="text-lg font-bold text-dark-900 mt-1">Map Students to Your Class</h2>
-              <p className="text-xs text-dark-500">
-                Assign students to view their full performance statistics, AI usage metrics, and progress.
-              </p>
+              <button
+                onClick={() => {
+                  setShowMappingModal(false);
+                  setMappingMsg(null);
+                }}
+                aria-label="Close mapping modal"
+                className="w-8 h-8 rounded-xl bg-dark-100 hover:bg-dark-200 text-dark-500 hover:text-dark-800 flex items-center justify-center transition-colors cursor-pointer shrink-0 self-start"
+              >
+                <X className="w-4 h-4" />
+              </button>
             </div>
 
             {/* Notification alert */}

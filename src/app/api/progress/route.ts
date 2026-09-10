@@ -73,18 +73,24 @@ export async function POST(req: NextRequest) {
       ? Math.max(existing?.stageReached ?? 1, stageReached)
       : (existing?.stageReached ?? 1);
 
+    const calculatedScore = typeof score === 'number'
+      ? Math.max(0, Math.min(100, score))
+      : Math.max(existing?.masteryScore ?? 0, Math.round((newStage / 6) * 100));
+
     const progress = await prisma.userProgress.upsert({
       where: {
         userId_moduleSlug: { userId, moduleSlug },
       },
       update: {
         stageReached: newStage,
+        masteryScore: calculatedScore,
         lastVisitedAt: now,
       },
       create: {
         userId,
         moduleSlug,
         stageReached: typeof stageReached === 'number' ? stageReached : 1,
+        masteryScore: calculatedScore,
         lastVisitedAt: now,
       },
     });

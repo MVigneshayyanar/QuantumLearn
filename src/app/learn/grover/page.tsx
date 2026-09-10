@@ -120,7 +120,7 @@ The Grover iteration $G = U_s U_w = (2|s\\rangle\\langle s| - I)(I - 2|w\\rangle
       subtitle="Unstructured quantum search through phase oracle marking and amplitude amplification."
       category="Amplitude Amplification"
       qubitCount={numQubits}
-      speedup="Quadratic Speedup O(√N) vs Classical O(N)"
+      speedup="Quadratic Speedup $\\mathcal{O}(\\sqrt{N})$ vs Classical $\\mathcal{O}(N)$"
       intuitionSimple={intuitionSimple}
       intuitionTechnical={intuitionTechnical}
       mathWalkthrough={mathWalkthrough}

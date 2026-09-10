@@ -213,7 +213,7 @@ export default function AdminPortalPage() {
   const totalAICalls = students.reduce((acc, s) => acc + s.aiInteractionCount, 0);
 
   return (
-    <div className="w-full mx-auto px-6 sm:px-8 py-4 space-y-4 animate-fadeIn">
+    <div className="w-full mx-auto px-8 py-3.5 space-y-3.5 animate-fadeIn">
       {/* Top Banner Header */}
       <div className="bg-white rounded-2xl border border-dark-200 p-5 sm:p-6 shadow-xs flex flex-wrap items-center justify-between gap-4">
         <div>
@@ -497,28 +497,31 @@ export default function AdminPortalPage() {
       {/* CREATE USER MODAL */}
       {showCreateModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-xs p-4 animate-fadeIn">
-          <div className="relative bg-white rounded-3xl border border-dark-200 shadow-2xl w-full max-w-md p-6 space-y-5">
-            <button
-              onClick={() => {
-                setShowCreateModal(null);
-                setModalError(null);
-                setModalSuccess(null);
-              }}
-              className="absolute top-5 right-5 p-2 rounded-xl text-dark-400 hover:text-dark-700 hover:bg-dark-100"
-            >
-              <X className="w-5 h-5" />
-            </button>
+          <div className="relative bg-white rounded-2xl border border-dark-200 shadow-2xl w-full max-w-md p-5 sm:p-6 space-y-4">
+            <div className="flex items-center justify-between gap-3 pb-3 border-b border-dark-100">
+              <div>
+                <span className="text-xs font-semibold px-2.5 py-0.5 rounded-full bg-purple-50 text-purple-700 border border-purple-200">
+                  {showCreateModal === 'instructor' ? 'Faculty Provisioning' : 'Student Enrollment'}
+                </span>
+                <h2 className="text-lg font-bold text-dark-900 mt-1">
+                  {showCreateModal === 'instructor' ? 'Create Instructor Account' : 'Enroll New Student'}
+                </h2>
+                <p className="text-xs text-dark-500">
+                  Generate credentials for login. Passwords must be at least 6 characters.
+                </p>
+              </div>
 
-            <div>
-              <span className="text-xs font-semibold px-2.5 py-0.5 rounded-full bg-purple-50 text-purple-700 border border-purple-200">
-                {showCreateModal === 'instructor' ? 'Faculty Provisioning' : 'Student Enrollment'}
-              </span>
-              <h2 className="text-lg font-bold text-dark-900 mt-1">
-                {showCreateModal === 'instructor' ? 'Create Instructor Account' : 'Enroll New Student'}
-              </h2>
-              <p className="text-xs text-dark-500">
-                Generate credentials for login. Passwords must be at least 6 characters.
-              </p>
+              <button
+                onClick={() => {
+                  setShowCreateModal(null);
+                  setModalError(null);
+                  setModalSuccess(null);
+                }}
+                aria-label="Close creation modal"
+                className="w-8 h-8 rounded-xl bg-dark-100 hover:bg-dark-200 text-dark-500 hover:text-dark-800 flex items-center justify-center transition-colors cursor-pointer shrink-0 self-start"
+              >
+                <X className="w-4 h-4" />
+              </button>
             </div>
 
             {modalError && (

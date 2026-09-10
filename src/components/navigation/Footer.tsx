@@ -49,17 +49,18 @@ export function Footer() {
               <li><Link href="/simulator" className="hover:text-primary-600 transition-colors">Quantum Circuit Builder</Link></li>
               <li><Link href="/bloch-sphere" className="hover:text-primary-600 transition-colors">3D Bloch Sphere Explorer</Link></li>
               <li><Link href="/dashboard" className="hover:text-primary-600 transition-colors">Concept Mastery Dashboard</Link></li>
+              <li><Link href="/about" className="hover:text-primary-600 transition-colors font-medium text-primary-700">About &amp; Origin Story</Link></li>
             </ul>
           </div>
 
           <div>
-            <h4 className="font-semibold text-dark-900 mb-3">Accessibility & Standards</h4>
+            <h4 className="font-semibold text-dark-900 mb-3">Accessibility & Inclusion</h4>
             <div className="space-y-2 text-dark-500">
-              <div className="flex items-center gap-1.5 text-primary-700 font-medium">
-                <ShieldCheck className="w-4 h-4" />
-                <span>WCAG 2.1 AA Compliant</span>
+              <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-primary-50 text-primary-800 border border-primary-200 font-semibold text-xs">
+                <ShieldCheck className="w-4 h-4 text-primary-600 shrink-0" />
+                <span>Universal Design (WCAG 2.1 AA)</span>
               </div>
-              <p>Dual-mode simplified/technical explanations, full keyboard navigation, and screen reader ARIA support.</p>
+              <p className="text-xs">Dual-mode simplified/technical explanations, full keyboard navigation, and screen reader ARIA support.</p>
             </div>
           </div>
         </div>

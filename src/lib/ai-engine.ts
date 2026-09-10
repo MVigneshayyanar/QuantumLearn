@@ -205,33 +205,33 @@ export function generateSocraticCircuitFeedback(params: {
     const hasCZ = gateStrUpper.includes('CZ');
 
     if (hasHOnQ0 && hasXOnQ1 && !hasHOnQ1) {
-      return `• **Step Done:** Hadamard (H) gate placed on Qubit 0.
-• **Next Step:** Replace the X gate on Qubit 1 with a **Hadamard (H) gate**.
-• **Quick Clue:** Grover requires both qubits to start in an equal superposition $|+\\rangle$, whereas X creates a deterministic $|1\\rangle$.`;
+      return `• **Progress:** Query qubit initialized into superposition.
+• **Quantum Concept:** Grover's search requires uniform probability amplitudes across all computational basis states simultaneously. A bit-flip prepares a classical state rather than the required equal superposition.
+• **Socratic Inquiry:** Which unitary rotation transforms a computational ground state into a symmetric superposition of $|0\\rangle$ and $|1\\rangle$?`;
     }
 
     if (!hasHOnQ0 || !hasHOnQ1) {
-      return `• **Step Done:** Circuit started.
-• **Next Step:** Place **Hadamard (H) gates** on both Q0 and Q1 to create uniform 4-state superposition.
-• **Quick Clue:** What single-qubit gate transforms $|0\\rangle$ into an equal blend of $|0\\rangle$ and $|1\\rangle$?`;
+      return `• **Progress:** Circuit initialized.
+• **Quantum Concept:** To achieve quadratic speedup, the search must query all $2^n$ candidates simultaneously with equal probability amplitudes ($1/\\sqrt{N}$).
+• **Socratic Inquiry:** Which fundamental quantum gate creates an equal linear combination of computational basis states from $|0\\rangle$?`;
     }
 
     if (hasHOnQ0 && hasHOnQ1 && hasCX && !hasCZ) {
-      return `• **Step Done:** Uniform superposition established.
-• **Next Step:** Replace CNOT with a **Controlled-Z (CZ)** gate on Q0 and Q1 for the phase oracle.
-• **Quick Clue:** The Phase Oracle must negate the amplitude of target state $|11\\rangle$ without flipping bit values.`;
+      return `• **Progress:** Uniform 4-state superposition established across both qubits.
+• **Quantum Concept:** The Phase Oracle must negate the relative amplitude of target state $|11\\rangle$ without flipping bit values or perturbing orthogonal states.
+• **Socratic Inquiry:** Which controlled gate selectively imparts a $\\pi$ phase shift (multiplication by $-1$) strictly when both control and target qubits are $|1\\rangle$?`;
     }
 
     if (hasHOnQ0 && hasHOnQ1 && !hasCZ && !hasCX) {
-      return `• **Step Done:** Uniform 4-state superposition established on Q0 and Q1.
-• **Next Step:** Place a **Controlled-Z (CZ)** gate between Q0 and Q1 to mark target $|11\\rangle$.
-• **Quick Clue:** Which controlled gate flips the sign of $|11\\rangle$ while leaving other states untouched?`;
+      return `• **Progress:** Uniform 4-state superposition established across both registers.
+• **Quantum Concept:** The oracle must mark the target state $|11\\rangle$ by inverting its quantum phase (mapping $|11\\rangle \\to -|11\\rangle$) while leaving all non-target states unaltered.
+• **Socratic Inquiry:** Which controlled two-qubit gate shifts the phase by $\\pi$ only when both qubits are in the $|1\\rangle$ state?`;
     }
 
     if (hasCZ) {
-      return `• **Step Done:** Phase oracle marked $|11\\rangle$ with negative phase.
-• **Next Step:** Assemble the **Diffusion Operator** (H on Q0 & Q1, reflection, and final H).
-• **Quick Clue:** Diffusion inverts amplitudes about the mean, amplifying $|11\\rangle$ toward 100% probability.`;
+      return `• **Progress:** Phase oracle has marked target state $|11\\rangle$ with negative relative phase.
+• **Quantum Concept:** Marking the phase alone does not alter measurement probabilities ($|-1|^2 = 1$). You must now perform amplitude amplification by reflecting all state amplitudes about their average mean ($2|\\psi\\rangle\\langle\\psi| - I$).
+• **Socratic Inquiry:** What sequence of basis rotations and phase reflections inverts state amplitudes about the mean to concentrate probability onto the marked state?`;
     }
   }
 
@@ -243,27 +243,27 @@ export function generateSocraticCircuitFeedback(params: {
     const hasCX = gateStrUpper.includes('CX');
 
     if (!hasXOnQ1) {
-      return `• **Step Done:** Circuit started.
-• **Next Step:** Apply an **X gate** to Ancilla Qubit 1 to initialize it to $|1\\rangle$.
-• **Quick Clue:** Phase kickback requires ancilla Q1 to start in $|1\\rangle$ so that the subsequent Hadamard puts it in $|-\\rangle$.`;
+      return `• **Progress:** Circuit initialized in computational ground state $|00\\rangle$.
+• **Quantum Concept:** Phase kickback requires the ancilla register to be prepared in the $-1$ eigenstate of the bit-flip operator, which is state $|-\\rangle = (|0\\rangle - |1\\rangle)/\\sqrt{2}$.
+• **Socratic Inquiry:** How do you transform the ancilla from $|0\\rangle$ to $|1\\rangle$ before rotating it into the negative superposition state?`;
     }
 
     if (hasXOnQ1 && (!hasHOnQ0 || !hasHOnQ1)) {
-      return `• **Step Done:** Ancilla Q1 initialized with **X gate** ($|1\\rangle$). Excellent first step!
-• **Next Step:** Place **Hadamard (H) gates** on both Q0 and Q1 to create superposition.
-• **Quick Clue:** Both input Q0 and ancilla Q1 must enter the oracle in superposition ($|+, -\\rangle$) for phase kickback.`;
+      return `• **Progress:** Ancilla Q1 initialized in the $|1\\rangle$ state.
+• **Quantum Concept:** To evaluate whether the oracle is constant or balanced in a single quantum query, both the query register and ancilla register must enter the oracle in balanced superposition.
+• **Socratic Inquiry:** Which single-qubit unitary creates equal superposition from $|0\\rangle$ and converts $|1\\rangle$ into $|-\\rangle$ without changing state magnitudes?`;
     }
 
     if (hasXOnQ1 && hasHOnQ0 && hasHOnQ1 && !hasCX) {
-      return `• **Step Done:** Ancilla initialized and superposition established on both qubits.
-• **Next Step:** Place a **CNOT gate** (Control: Q0, Target: Q1) to evaluate the balanced oracle $f(x) = x$.
-• **Quick Clue:** Which 2-qubit gate adds input Q0 into ancilla Q1 modulo 2 ($y \\oplus x$)?`;
+      return `• **Progress:** Input and ancilla registers are prepared in balanced superposition ($|+, -\\rangle$).
+• **Quantum Concept:** The oracle evaluates balanced function $f(x) = x$ by computing $|x, y\\rangle \\to |x, y \\oplus f(x)\\rangle$. Because the ancilla is in $|-\\rangle$, this kicks back the factor $(-1)^{f(x)}$ into the relative phase of the input register.
+• **Socratic Inquiry:** What two-qubit reversible gate flips the ancilla target state conditioned on the input control qubit being in state $|1\\rangle$?`;
     }
 
     if (hasCX) {
-      return `• **Step Done:** Phase kickback completed across the oracle.
-• **Next Step:** Place a final **Hadamard (H) gate** on Qubit 0.
-• **Quick Clue:** Detectors measure in the Z basis; the final H converts kickback phase interference into a deterministic $|1\\rangle$ bit.`;
+      return `• **Progress:** Oracle phase kickback has encoded the function's balance into relative phase.
+• **Quantum Concept:** Detectors measure along the standard computational Z-axis ($|0\\rangle / |1\\rangle$). You must use quantum interference to convert phase information back into deterministic measurement probabilities.
+• **Socratic Inquiry:** Which self-inverse gate causes destructive interference on $|0\\rangle$ and constructive interference on $|1\\rangle$ for a balanced function?`;
     }
   }
 
@@ -273,15 +273,15 @@ export function generateSocraticCircuitFeedback(params: {
     const hasCX01 = gateStrUpper.includes('CX(Q0,1)') || gateStrUpper.includes('CX(0,1)');
 
     if (!hasCX12) {
-      return `• **Step Done:** Message state prepared.
-• **Next Step:** Create an entangled Bell pair between Alice (Q1) and Bob (Q2) using **H(Q1)** and **CX(Q1, Q2)**.
-• **Quick Clue:** Teleportation requires shared entanglement before Alice can measure and transmit.`;
+      return `• **Progress:** Input state prepared on Q0.
+• **Quantum Concept:** Quantum teleportation requires a non-local quantum resource shared between Alice and Bob before classical communication can transmit quantum information.
+• **Socratic Inquiry:** What canonical two-gate sequence creates a maximally entangled Bell pair $(|00\\rangle + |11\\rangle)/\\sqrt{2}$ between two independent qubits?`;
     }
 
     if (hasCX12 && !hasCX01) {
-      return `• **Step Done:** Entangled Bell pair established between Alice and Bob.
-• **Next Step:** Perform Bell measurement: apply **CNOT (Control: Q0, Target: Q1)** followed by **H(Q0)**.
-• **Quick Clue:** Coupling message Q0 to entangled Q1 enables joint Bell-basis projection.`;
+      return `• **Progress:** Shared entangled Bell channel established between Alice and Bob.
+• **Quantum Concept:** Alice needs to project her joint two-qubit system into the Bell basis to entangle the unknown message with her half of the EPR pair.
+• **Socratic Inquiry:** What sequence of operations reverses the Bell-state preparation to perform a Bell-basis measurement with standard Z detectors?`;
     }
   }
 
@@ -292,19 +292,15 @@ export function generateSocraticCircuitFeedback(params: {
     const hasCX = gateStrUpper.includes('CX');
 
     if (!hasZ || !hasX) {
-      return `• **Step Done:** Shared Bell pair prepared.
-• **Next Step:** Apply **Z** and **X gates** on Alice's Qubit 0 to encode the two classical bits '11'.
-• **Quick Clue:** Z flips phase ($|\\Phi^+\\rangle \\to |\\Phi^-\\rangle$) and X flips bit ($|\\Phi^-\\rangle \\to |\\Psi^-\\rangle$).`;
+      return `• **Progress:** Shared entangled Bell pair $(|00\\rangle + |11\\rangle)/\\sqrt{2}$ prepared.
+• **Quantum Concept:** Alice can transmit two classical bits by applying local single-qubit transformations to her half of the entangled pair, rotating it into one of four mutually orthogonal Bell states.
+• **Socratic Inquiry:** Which single-qubit unitaries respectively flip the relative phase ($+$ to $-$) and the bit value ($|0\\rangle$ to $|1\\rangle$) of her qubit?`;
     }
 
     if (hasZ && hasX && !hasCX) {
-      return `### 💡 Schrödinger AI Socratic Guidance
-
-**Alice has encoded her qubit! Now Bob must decode:**
-Bob receives Alice's qubit and now holds both entangled qubits. To read out the two classical bits deterministically, Bob must decode the Bell state.
-
-**Guiding Question:**
-*What two decoding gates (reversing the Bell state preparation) must Bob apply to transform the Bell state back into computational basis states?*`;
+      return `• **Progress:** Alice has encoded her message into the entangled state.
+• **Quantum Concept:** Bob receives Alice's qubit and holds the full entangled system. To decode the two classical bits deterministically, Bob must reverse the entanglement mapping back into computational basis states.
+• **Socratic Inquiry:** What sequence of two-qubit coupling and single-qubit basis rotation disentangles the Bell state so standard Z-basis detectors read the encoded bits?`;
     }
   }
 

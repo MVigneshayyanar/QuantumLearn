@@ -10,6 +10,7 @@ import {
   PracticeProblem,
   SubmissionVerdict
 } from '@/lib/practice-problems';
+import { ASSESSMENT_PROBLEMS } from '@/lib/assessment-problems';
 import { MathRenderer } from '@/components/math/MathRenderer';
 import { GateType, PlacedGate } from '@/lib/types';
 import { useStudentContext } from '@/lib/student-context';
@@ -65,7 +66,8 @@ export default function PracticeDetailPage() {
   const { userId, openLoginModal } = useStudentContext();
 
   const problemId = params?.id as string;
-  const problem = PRACTICE_PROBLEMS.find((p) => p.id === problemId);
+  const ALL_PROBLEMS = [...PRACTICE_PROBLEMS, ...ASSESSMENT_PROBLEMS];
+  const problem = ALL_PROBLEMS.find((p) => p.id === problemId);
 
   const [returnTo, setReturnTo] = useState<string | null>(null);
 
@@ -77,10 +79,10 @@ export default function PracticeDetailPage() {
     }
   }, []);
 
-  const currentProblemIdx = PRACTICE_PROBLEMS.findIndex((p) => p.id === problem?.id);
+  const currentProblemIdx = ALL_PROBLEMS.findIndex((p) => p.id === problem?.id);
   const nextProblem =
-    currentProblemIdx >= 0 && currentProblemIdx < PRACTICE_PROBLEMS.length - 1
-      ? PRACTICE_PROBLEMS[currentProblemIdx + 1]
+    currentProblemIdx >= 0 && currentProblemIdx < ALL_PROBLEMS.length - 1
+      ? ALL_PROBLEMS[currentProblemIdx + 1]
       : null;
 
   const [gates, setGates] = useState<PlacedGate[]>([]);
@@ -122,7 +124,7 @@ export default function PracticeDetailPage() {
   }
 
   const numQubits = problem.numQubits;
-  const problemIndex = PRACTICE_PROBLEMS.findIndex((p) => p.id === problem.id);
+  const problemIndex = ALL_PROBLEMS.findIndex((p) => p.id === problem.id);
   const qNum = problemIndex !== -1 ? problemIndex + 1 : 1;
   const isProblemPremium = problem.isPremium || problem.difficulty === 'Hard';
 

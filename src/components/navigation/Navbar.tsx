@@ -23,7 +23,8 @@ import {
   User,
   ShieldCheck,
   UserCheck,
-  Crown
+  Crown,
+  Info
 } from 'lucide-react';
 
 export function Navbar() {
@@ -68,6 +69,7 @@ export function Navbar() {
     { href: '/bloch-sphere', label: t.nav.blochSphere, icon: Globe },
     { href: '/practice', label: t.nav.practice, icon: Terminal },
     { href: '/simulator', label: t.nav.simulator, icon: Cpu },
+    { href: '/about', label: 'About', icon: Info },
   ];
 
   const algoLinks = [
@@ -139,7 +141,7 @@ export function Navbar() {
               </button>
               
               {/* Dropdown Menu */}
-              <div className="absolute top-full left-0 mt-1 w-52 bg-white border border-dark-200 rounded-xl shadow-card opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50 overflow-hidden transform origin-top scale-95 group-hover:scale-100">
+              <div className="absolute top-full left-0 mt-1 w-56 bg-white border border-dark-200 rounded-xl shadow-card opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50 overflow-hidden transform origin-top scale-95 group-hover:scale-100">
                 <div className="py-1.5 flex flex-col">
                   {algoLinks.map(algo => {
                     const isAlgoActive = pathname === algo.href;
@@ -158,6 +160,19 @@ export function Navbar() {
                       </Link>
                     );
                   })}
+
+                  {/* More Algorithms Coming Soon */}
+                  <div className="border-t border-dark-100 mt-1 pt-1">
+                    <div className="px-4 py-2 flex items-center justify-between text-xs bg-dark-50/60 select-none">
+                      <div className="flex items-center gap-2">
+                        <Sparkles className="w-3.5 h-3.5 text-amber-500 shrink-0" />
+                        <span className="font-medium text-dark-700">More Algorithms</span>
+                      </div>
+                      <span className="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-amber-50 text-amber-800 border border-amber-200 shrink-0">
+                        Coming Soon
+                      </span>
+                    </div>
+                  </div>
                 </div>
               </div>
             </div>

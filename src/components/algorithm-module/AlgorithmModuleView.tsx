@@ -28,12 +28,15 @@ import {
   Check,
   Target,
   Trophy,
-  Award
+  Award,
+  Lock,
+  ExternalLink
 } from 'lucide-react';
 import { ResponsiveContainer, BarChart, Bar, XAxis, YAxis, Tooltip, Cell } from 'recharts';
 import { BuildItTab } from './BuildItTab';
 import { SkillBaseStage } from './SkillBaseStage';
 import { QuantumCertificateModal } from '@/components/certificate/QuantumCertificateModal';
+import confetti from 'canvas-confetti';
 import {
   QuantumGateSymbol,
   ControlDotIcon,
@@ -157,19 +160,87 @@ export function AlgorithmModuleView({
   const [activeTab, setActiveTab] = useState<'intuition' | 'math' | 'circuit' | 'build_it' | 'quiz' | 'skill_base'>('intuition');
   const [simResult, setSimResult] = useState<SimulationResult | null>(null);
 
+  const STAGE_ORDER = ['intuition', 'math', 'circuit', 'build_it', 'quiz', 'skill_base'] as const;
+
+  // Track max unlocked stage index (0 to 5) for sequential 1-by-1 progression
+  const [maxUnlockedIdx, setMaxUnlockedIdx] = useState<number>(0);
+  const [isClientMounted, setIsClientMounted] = useState<boolean>(false);
+
+  useEffect(() => {
+    setIsClientMounted(true);
+    try {
+      const stored = localStorage.getItem(`ql_stage_progress_${moduleSlug}`);
+      if (stored !== null) {
+        setMaxUnlockedIdx(Math.min(5, Math.max(0, parseInt(stored, 10))));
+      }
+    } catch {}
+  }, [moduleSlug]);
+
+  const unlockStage = (stageIdx: number) => {
+    setMaxUnlockedIdx((prev) => {
+      const next = Math.max(prev, stageIdx);
+      try {
+        localStorage.setItem(`ql_stage_progress_${moduleSlug}`, next.toString());
+      } catch {}
+      return next;
+    });
+  };
+
+  // Scroll smoothly from bottom to top whenever changing to the next stage/module
+  useEffect(() => {
+    if (isClientMounted) {
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+  }, [activeTab, isClientMounted]);
+
+  const { completedModules, markModuleComplete } = useProgressStore();
+  const isModuleFullyComplete = Boolean(completedModules[moduleSlug]);
+
+  const handleClaimCertificate = async () => {
+    markModuleComplete(moduleSlug, 100);
+    unlockStage(5);
+    if (userId) {
+      await apiReportProgress(userId, moduleSlug, 'completed', { score: 100, stageReached: 6 });
+    }
+    try {
+      confetti({
+        particleCount: 120,
+        spread: 75,
+        origin: { y: 0.5 },
+        colors: ['#F59E0B', '#10B981', '#6366F1', '#EC4899']
+      });
+    } catch {}
+  };
+
+  useEffect(() => {
+    if (isModuleFullyComplete) {
+      unlockStage(5);
+    }
+  }, [isModuleFullyComplete]);
+
   // Sync tab with URL search params (?stage=skill_base or ?tab=skill_base)
   useEffect(() => {
     if (typeof window !== 'undefined') {
       const sp = new URLSearchParams(window.location.search);
       const stageParam = sp.get('stage') || sp.get('tab');
-      if (
-        stageParam &&
-        ['intuition', 'math', 'circuit', 'build_it', 'quiz', 'skill_base'].includes(stageParam)
-      ) {
-        setActiveTab(stageParam as any);
+      if (stageParam) {
+        const targetIdx = STAGE_ORDER.indexOf(stageParam as any);
+        if (targetIdx !== -1) {
+          if (targetIdx <= maxUnlockedIdx || isModuleFullyComplete) {
+            setActiveTab(stageParam as any);
+          }
+        }
       }
     }
-  }, []);
+  }, [maxUnlockedIdx, isModuleFullyComplete]);
+
+  // Smooth scroll to top when switching stages so user starts at top of next module
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+  }, [activeTab]);
+
   const [circuitGates, setCircuitGates] = useState<PlacedGate[]>(() => getDefaultGatesForAlgorithm(algorithmBackendId));
   const [currentStepIdx, setCurrentStepIdx] = useState<number>(0);
   const [isLoading, setIsLoading] = useState<boolean>(false);
@@ -223,10 +294,6 @@ export function AlgorithmModuleView({
     }
   }, [userId, moduleSlug]);
 
-
-  const { completedModules } = useProgressStore();
-  const isModuleFullyComplete = Boolean(completedModules[moduleSlug]);
-
   const snapshots: StepSnapshot[] = simResult?.step_by_step || [];
   const currentSnapshot = snapshots[currentStepIdx] || null;
 
@@ -252,87 +319,112 @@ export function AlgorithmModuleView({
     { id: 'circuit', label: '3. Circuit', icon: Cpu },
     { id: 'build_it', label: '4. Build It', icon: Wand2 },
     { id: 'quiz', label: '5. Knowledge Check', icon: GraduationCap },
-    { id: 'skill_base', label: '6. Skill Base & Practice', icon: Target }
+    { id: 'skill_base', label: '6. Assessment', icon: Target }
   ];
 
   return (
     <div className="w-full mx-auto px-8 py-3 space-y-3.5">
       {/* Module Header */}
-      <div className="bg-white rounded-2xl border border-dark-200 p-5 sm:p-6 shadow-xs relative overflow-hidden space-y-4">
-        <div className="flex flex-wrap items-center justify-between gap-4">
-          <div className="space-y-1.5 max-w-3xl">
-            <div className="flex flex-wrap items-center gap-2">
-              <span className="px-2.5 py-0.5 rounded-full text-xs font-semibold bg-primary-50 text-primary-700 border border-primary-100">
+      <div className="bg-white rounded-2xl border border-dark-200 p-4 sm:p-5 shadow-xs relative overflow-hidden space-y-3">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+          {/* Left Column: Badges, Title & Subtitle */}
+          <div className="space-y-1.5 max-w-2xl">
+            <div className="flex flex-wrap items-center gap-1.5">
+              <span className="px-2.5 py-0.5 rounded-full text-[11px] font-semibold bg-primary-50 text-primary-700 border border-primary-100">
                 {category}
               </span>
-              <span className="px-2.5 py-0.5 rounded-full text-xs font-semibold bg-dark-100 text-dark-800">
+              <span className="px-2 py-0.5 rounded-full text-[11px] font-semibold bg-dark-100 text-dark-800">
                 {qubitCount} Qubits
               </span>
-              <span className="px-2.5 py-0.5 rounded-full text-xs font-semibold bg-emerald-50 text-emerald-700 border border-emerald-100">
-                {speedup}
+              <span className="px-2.5 py-0.5 rounded-full text-[11px] font-semibold bg-emerald-50 text-emerald-700 border border-emerald-100 flex items-center gap-1">
+                <MathRenderer text={speedup} />
               </span>
-              <span className="px-2.5 py-0.5 rounded-full text-xs font-semibold bg-indigo-50 text-indigo-700 border border-indigo-100">
+              <span className="px-2 py-0.5 rounded-full text-[11px] font-semibold bg-indigo-50 text-indigo-700 border border-indigo-100">
                 6 Learning Stages
               </span>
             </div>
-            <h1 className="text-xl sm:text-2xl font-bold text-dark-900 tracking-tight">{title}</h1>
-            <p className="text-xs sm:text-sm text-dark-600 leading-normal">{subtitle}</p>
+            <div>
+              <h1 className="text-lg sm:text-xl font-bold text-dark-900 tracking-tight">{title}</h1>
+              <p className="text-xs text-dark-600 leading-normal">{subtitle}</p>
+            </div>
           </div>
 
-          {/* Module Completion Status Badge & Get Certification Button */}
-          <div className="flex flex-wrap items-center gap-3">
-            <button
-              onClick={() => setShowCertificate(true)}
-              className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-gradient-to-r from-amber-500 via-amber-600 to-amber-700 hover:brightness-110 text-white font-bold text-xs shadow-md shadow-amber-500/25 transition-all cursor-pointer ring-2 ring-amber-300/40"
-              title="Get or View Official Quantum Algorithm Certificate"
-            >
-              <Trophy className="w-4 h-4 text-amber-200" />
-              <span>
-                {isModuleFullyComplete
-                  ? '🏆 View Received Certificate'
-                  : `🏆 Get ${moduleSlug.includes('grover') ? 'Grover ' : ''}Certification`}
-              </span>
-            </button>
-
-            <div className="text-right hidden sm:block">
-              <span className="text-[11px] text-dark-500 font-medium block">Module Status:</span>
-              <span className="text-xs font-bold text-dark-900 font-mono">
-                {isModuleFullyComplete ? '100% Mastered (6/6 Stages)' : 'In Progress (Stage 6 Required)'}
-              </span>
-            </div>
+          {/* Right Column: Unified Single Certificate Trigger */}
+          <button
+            onClick={() => setShowCertificate(true)}
+            className="group/cert cursor-pointer flex items-center gap-3 px-3.5 py-2.5 rounded-xl border border-amber-200/90 bg-gradient-to-r from-amber-50/80 via-white to-orange-50/40 hover:border-amber-400 hover:shadow-xs transition-all text-left shrink-0 self-start sm:self-auto"
+            title={isModuleFullyComplete ? 'View Official Certificate' : 'Preview Quantum Credential'}
+          >
             <div
-              className={`px-3 py-1.5 rounded-xl border text-xs font-bold shadow-2xs ${
+              className={`w-9 h-9 rounded-xl flex items-center justify-center shrink-0 shadow-2xs ${
                 isModuleFullyComplete
-                  ? 'bg-emerald-500 text-white border-emerald-600'
-                  : 'bg-amber-50 text-amber-800 border-amber-200'
+                  ? 'bg-gradient-to-br from-emerald-500 to-teal-600 text-white'
+                  : 'bg-gradient-to-br from-amber-400 to-amber-600 text-white'
               }`}
             >
-              {isModuleFullyComplete ? '✓ Certified' : 'Stage 6 Required'}
+              <Award className="w-5 h-5 text-white" />
             </div>
-          </div>
+
+            <div className="min-w-0 pr-1 leading-tight">
+              <div className="flex items-center gap-2">
+                <span className="text-xs font-bold text-dark-900 group-hover/cert:text-amber-700 transition-colors">
+                  {isModuleFullyComplete ? 'Official Certificate' : 'Certificate of Mastery'}
+                </span>
+                <span
+                  className={`px-1.5 py-0.5 rounded text-[9px] font-bold uppercase tracking-wider ${
+                    isModuleFullyComplete
+                      ? 'bg-emerald-100 text-emerald-800 border border-emerald-200'
+                      : 'bg-amber-100 text-amber-900 border border-amber-200'
+                  }`}
+                >
+                  {isModuleFullyComplete ? 'Claimed' : 'Stage 6 Req.'}
+                </span>
+              </div>
+              <div className="text-[10px] text-dark-500 flex items-center gap-1 mt-1">
+                <span suppressHydrationWarning>
+                  {isModuleFullyComplete
+                    ? 'View & download verified credential'
+                    : `${(isClientMounted && studentName) ? studentName : 'Alex Mercer'} · Click to preview`}
+                </span>
+                <ExternalLink className="w-2.5 h-2.5 text-dark-400 group-hover/cert:text-amber-600" />
+              </div>
+            </div>
+          </button>
         </div>
 
-        {/* Tab Navigation */}
+        {/* Tab Navigation with Sequential 1-by-1 Lock */}
         <div className="flex flex-wrap gap-1.5 border-t border-dark-100 pt-3" role="tablist">
-          {tabs.map((tab) => {
+          {tabs.map((tab, idx) => {
             const Icon = tab.icon;
             const isActive = activeTab === tab.id;
+            const isLocked = isClientMounted
+              ? idx > maxUnlockedIdx && !isModuleFullyComplete
+              : idx > 0 && !isModuleFullyComplete;
             return (
               <button
                 key={tab.id}
                 role="tab"
                 aria-selected={isActive}
+                disabled={isLocked}
                 onClick={() => {
+                  if (isLocked) return;
                   setActiveTab(tab.id as any);
                   announce(`Switched to stage: ${tab.label}`);
                 }}
+                title={isLocked ? `Locked: Complete Stage ${idx} first` : tab.label}
                 className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg font-semibold text-xs transition-all ${
                   isActive
                     ? 'bg-primary-600 text-white shadow-xs'
-                    : 'text-dark-700 hover:text-dark-900 hover:bg-dark-50'
+                    : isLocked
+                    ? 'text-dark-400 bg-dark-50/60 cursor-not-allowed opacity-60'
+                    : 'text-dark-700 hover:text-dark-900 hover:bg-dark-50 cursor-pointer'
                 }`}
               >
-                <Icon className="w-3.5 h-3.5" />
+                {isLocked ? (
+                  <Lock className="w-3.5 h-3.5 text-dark-400" />
+                ) : (
+                  <Icon className="w-3.5 h-3.5" />
+                )}
                 <span>{tab.label}</span>
               </button>
             );
@@ -340,8 +432,10 @@ export function AlgorithmModuleView({
         </div>
       </div>
 
-      {/* Stage 1: Intuition */}
-      {activeTab === 'intuition' && (
+      {/* Active Stage Content with bottom-to-top slideUp animation */}
+      <div key={activeTab} className="animate-slideUp">
+        {/* Stage 1: Intuition */}
+        {activeTab === 'intuition' && (
         <div className="bg-white rounded-2xl border border-dark-200 p-5 sm:p-6 shadow-xs space-y-4 animate-fadeIn">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
@@ -363,6 +457,7 @@ export function AlgorithmModuleView({
                 if (userId) {
                   apiReportProgress(userId, moduleSlug, 'in_progress', { stageReached: 2 });
                 }
+                unlockStage(1);
                 setActiveTab('math');
               }}
               className="flex items-center gap-2 px-6 py-3 rounded-xl bg-primary-600 hover:bg-primary-700 text-white font-semibold text-xs shadow-xs transition-colors cursor-pointer"
@@ -457,6 +552,7 @@ export function AlgorithmModuleView({
                 if (userId) {
                   apiReportProgress(userId, moduleSlug, 'in_progress', { stageReached: 3 });
                 }
+                unlockStage(2);
                 setActiveTab('circuit');
               }}
               className="flex items-center gap-2 px-5 py-2 rounded-xl bg-primary-600 hover:bg-primary-700 text-white font-semibold text-xs shadow-xs transition-colors cursor-pointer"
@@ -776,6 +872,7 @@ export function AlgorithmModuleView({
                 if (userId) {
                   apiReportProgress(userId, moduleSlug, 'in_progress', { stageReached: 4 });
                 }
+                unlockStage(3);
                 setActiveTab('build_it');
               }}
               className="flex items-center gap-2 px-5 py-2 rounded-xl bg-primary-600 hover:bg-primary-700 text-white font-semibold text-xs shadow-xs transition-colors cursor-pointer"
@@ -795,6 +892,7 @@ export function AlgorithmModuleView({
             if (userId) {
               apiReportProgress(userId, moduleSlug, 'in_progress', { stageReached: 5 });
             }
+            unlockStage(4);
             setActiveTab('quiz');
           }}
         />
@@ -807,6 +905,7 @@ export function AlgorithmModuleView({
             moduleSlug={moduleSlug}
             moduleTitle={title}
             onProceedToSkillBase={() => {
+              unlockStage(5);
               setActiveTab('skill_base');
             }}
           />
@@ -820,6 +919,7 @@ export function AlgorithmModuleView({
           moduleTitle={title}
         />
       )}
+      </div>
 
       {/* Quantum Algorithm Certificate Modal */}
       <QuantumCertificateModal
@@ -829,6 +929,7 @@ export function AlgorithmModuleView({
         moduleTitle={title}
         studentName={studentName || undefined}
         isCompleted={isModuleFullyComplete}
+        onClaimCertificate={handleClaimCertificate}
       />
     </div>
   );
