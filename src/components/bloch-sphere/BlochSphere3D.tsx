@@ -25,12 +25,12 @@ interface BlochSphere3DProps {
 // +Y = Imaginary (|i>) -> (0, 0, 1.55)
 // -Y = Imaginary (|-i>) -> (0, 0, -1.55)
 const AXIS_ANCHORS = [
-  { id: 'z-pos', label: '$|0\\rangle$', axis: '+Z', pos: new THREE.Vector3(0, 1.55, 0), badgeClass: 'text-primary-800 border-primary-300' },
-  { id: 'z-neg', label: '$|1\\rangle$', axis: '-Z', pos: new THREE.Vector3(0, -1.55, 0), badgeClass: 'text-sky-800 border-sky-300' },
-  { id: 'x-pos', label: '$|+\\rangle$', axis: '+X', pos: new THREE.Vector3(1.55, 0, 0), badgeClass: 'text-indigo-800 border-indigo-300' },
-  { id: 'x-neg', label: '$|-\\rangle$', axis: '-X', pos: new THREE.Vector3(-1.55, 0, 0), badgeClass: 'text-purple-800 border-purple-300' },
-  { id: 'y-pos', label: '$|i\\rangle$', axis: '+Y', pos: new THREE.Vector3(0, 0, 1.55), badgeClass: 'text-emerald-800 border-emerald-300' },
-  { id: 'y-neg', label: '$|-i\\rangle$', axis: '-Y', pos: new THREE.Vector3(0, 0, -1.55), badgeClass: 'text-teal-800 border-teal-300' }
+  { id: 'z-pos', label: '$|0\\rangle$', axis: '+Z', pos: new THREE.Vector3(0, 1.55, 0), badgeClass: 'text-primary-800 dark:text-primary-300 border-primary-300 dark:border-primary-700/60' },
+  { id: 'z-neg', label: '$|1\\rangle$', axis: '-Z', pos: new THREE.Vector3(0, -1.55, 0), badgeClass: 'text-sky-800 dark:text-sky-300 border-sky-300 dark:border-sky-700/60' },
+  { id: 'x-pos', label: '$|+\\rangle$', axis: '+X', pos: new THREE.Vector3(1.55, 0, 0), badgeClass: 'text-indigo-800 dark:text-indigo-300 border-indigo-300 dark:border-indigo-700/60' },
+  { id: 'x-neg', label: '$|-\\rangle$', axis: '-X', pos: new THREE.Vector3(-1.55, 0, 0), badgeClass: 'text-purple-800 dark:text-purple-300 border-purple-300 dark:border-purple-700/60' },
+  { id: 'y-pos', label: '$|i\\rangle$', axis: '+Y', pos: new THREE.Vector3(0, 0, 1.55), badgeClass: 'text-emerald-800 dark:text-emerald-300 border-emerald-300 dark:border-emerald-700/60' },
+  { id: 'y-neg', label: '$|-i\\rangle$', axis: '-Y', pos: new THREE.Vector3(0, 0, -1.55), badgeClass: 'text-teal-800 dark:text-teal-300 border-teal-300 dark:border-teal-700/60' }
 ];
 
 export function BlochSphere3D({
@@ -504,20 +504,20 @@ export function BlochSphere3D({
   const isPhiSweepActive = (showSweepArcs || activeSweep === 'phi' || activeSweep === 'both') && bloch && bloch.is_pure && bloch.phi > 0.02;
 
   return (
-    <div className="flex flex-col items-center bg-white rounded-xl border border-dark-200 p-2 sm:p-2.5 shadow-2xs relative w-full">
+    <div className="flex flex-col items-center bg-white dark:bg-dark-800/90 rounded-xl border border-dark-200 dark:border-dark-700 p-2 sm:p-2.5 shadow-2xs relative w-full isolate">
       {/* Header Info */}
       <div className="w-full flex items-center justify-between mb-1">
         <div className="flex items-center gap-2">
-          <span className="font-bold text-sm text-dark-900">
+          <span className="font-bold text-sm text-dark-900 dark:text-white">
             Qubit {qubitIndex} Bloch Sphere
           </span>
           {isEntangled ? (
-            <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-semibold bg-amber-100 text-amber-900 border border-amber-300">
+            <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-semibold bg-amber-100 dark:bg-amber-950/70 text-amber-900 dark:text-amber-300 border border-amber-300 dark:border-amber-700/60">
               <AlertTriangle className="w-3 h-3" />
               Entangled / Mixed
             </span>
           ) : (
-            <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-semibold bg-primary-50 text-primary-700 border border-primary-200">
+            <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-semibold bg-primary-50 dark:bg-primary-950/70 text-primary-700 dark:text-primary-300 border border-primary-200 dark:border-primary-800/60">
               <Sparkles className="w-3 h-3" />
               Pure State
             </span>
@@ -526,14 +526,14 @@ export function BlochSphere3D({
         <button
           onClick={resetView}
           title="Reset 3D camera orientation"
-          className="p-1 rounded text-dark-400 hover:text-dark-700 hover:bg-dark-100 transition-colors"
+          className="p-1 rounded text-dark-400 hover:text-dark-700 dark:hover:text-dark-200 hover:bg-dark-100 dark:hover:bg-dark-700 transition-colors"
         >
           <RotateCcw className="w-4 h-4" />
         </button>
       </div>
 
       {/* 3D Canvas Container with Dynamic Screen-Projected 6-Axis Labels */}
-      <div className="relative flex items-center justify-center overflow-visible select-none" style={{ width: size, height: size }}>
+      <div className="relative flex items-center justify-center overflow-visible select-none z-0" style={{ width: size, height: size }}>
         <div
           ref={containerRef}
           className="cursor-grab active:cursor-grabbing"
@@ -551,11 +551,11 @@ export function BlochSphere3D({
             className="absolute top-0 left-0 pointer-events-none will-change-transform transition-all duration-150"
             style={{ transform: 'translate3d(-999px, -999px, 0)' }}
           >
-            <div className={`px-1.5 py-0.5 rounded-md text-xs font-semibold border shadow-xs flex items-center gap-1 notranslate whitespace-nowrap bg-white select-none ${anchor.badgeClass}`} translate="no">
+            <div className={`px-1.5 py-0.5 rounded-md text-xs font-semibold border shadow-xs flex items-center gap-1 notranslate whitespace-nowrap bg-white dark:bg-dark-900 select-none ${anchor.badgeClass}`} translate="no">
               <span className="font-semibold text-xs">
                 <MathRenderer text={anchor.label} />
               </span>
-              <span className="font-mono text-[10px] font-medium text-dark-600">({anchor.axis})</span>
+              <span className="font-mono text-[10px] font-medium text-dark-600 dark:text-dark-300">({anchor.axis})</span>
             </div>
           </div>
         ))}
@@ -564,7 +564,7 @@ export function BlochSphere3D({
         {isThetaSweepActive && (
           <div
             ref={thetaLabelRef}
-            className="absolute top-0 left-0 pointer-events-none will-change-transform z-30"
+            className="absolute top-0 left-0 pointer-events-none will-change-transform z-10"
             style={{ transform: 'translate3d(-999px, -999px, 0)' }}
           >
             <div className="px-1.5 py-0.5 rounded-md bg-indigo-600 text-white text-[11px] font-mono font-medium shadow-xs border border-indigo-400/80 flex items-center gap-1 notranslate" translate="no">
@@ -578,7 +578,7 @@ export function BlochSphere3D({
         {isPhiSweepActive && (
           <div
             ref={phiLabelRef}
-            className="absolute top-0 left-0 pointer-events-none will-change-transform z-30"
+            className="absolute top-0 left-0 pointer-events-none will-change-transform z-10"
             style={{ transform: 'translate3d(-999px, -999px, 0)' }}
           >
             <div className="px-1.5 py-0.5 rounded-md bg-cyan-600 text-white text-[11px] font-mono font-medium shadow-xs border border-cyan-400/80 flex items-center gap-1 notranslate" translate="no">
@@ -591,11 +591,11 @@ export function BlochSphere3D({
 
       {/* Warning Alert if Entangled */}
       {isEntangled && (
-        <div className="w-full mt-2 p-3 rounded-xl bg-amber-50 border border-amber-200 text-amber-900 text-xs flex items-start gap-2">
-          <AlertTriangle className="w-4 h-4 shrink-0 mt-0.5 text-amber-600" />
+        <div className="w-full mt-2 p-3 rounded-xl bg-amber-50 dark:bg-amber-950/50 border border-amber-200 dark:border-amber-800 text-amber-900 dark:text-amber-200 text-xs flex items-start gap-2">
+          <AlertTriangle className="w-4 h-4 shrink-0 mt-0.5 text-amber-600 dark:text-amber-400" />
           <div>
             <p className="font-semibold">Pure Bloch Vector Undefined</p>
-            <p className="mt-0.5 text-amber-800 leading-relaxed">
+            <p className="mt-0.5 text-amber-800 dark:text-amber-300 leading-relaxed">
               {warning || (
                 <>
                   Qubit {qubitIndex} is entangled with another qubit. Its reduced density matrix has purity{' '}
@@ -610,25 +610,25 @@ export function BlochSphere3D({
       {/* Coordinates readout table with LaTeX/MathML formatting */}
       {bloch && bloch.is_pure && (
         <div className="w-full mt-3 grid grid-cols-3 gap-2 text-center text-xs notranslate" translate="no">
-          <div className="p-2 bg-dark-50 rounded-lg border border-dark-100">
-            <span className="text-dark-500 block text-[10px] uppercase font-mono">X, Y, Z</span>
-            <span className="font-mono font-bold text-dark-800 text-[11px]">
+          <div className="p-2 bg-dark-50 dark:bg-dark-900 rounded-lg border border-dark-100 dark:border-dark-700">
+            <span className="text-dark-500 dark:text-dark-400 block text-[10px] uppercase font-mono">X, Y, Z</span>
+            <span className="font-mono font-bold text-dark-800 dark:text-dark-200 text-[11px]">
               ({bloch.x}, {bloch.y}, {bloch.z})
             </span>
           </div>
-          <div className="p-2 bg-dark-50 rounded-lg border border-dark-100">
-            <span className="text-dark-500 block text-[10px] uppercase font-mono">
+          <div className="p-2 bg-dark-50 dark:bg-dark-900 rounded-lg border border-dark-100 dark:border-dark-700">
+            <span className="text-dark-500 dark:text-dark-400 block text-[10px] uppercase font-mono">
               <MathRenderer text="$\theta$ (Polar)" />
             </span>
-            <span className="font-mono font-bold text-primary-700 text-[11px]">
+            <span className="font-mono font-bold text-primary-700 dark:text-primary-400 text-[11px]">
               {((bloch.theta * 180) / Math.PI).toFixed(1)}°
             </span>
           </div>
-          <div className="p-2 bg-dark-50 rounded-lg border border-dark-100">
-            <span className="text-dark-500 block text-[10px] uppercase font-mono">
+          <div className="p-2 bg-dark-50 dark:bg-dark-900 rounded-lg border border-dark-100 dark:border-dark-700">
+            <span className="text-dark-500 dark:text-dark-400 block text-[10px] uppercase font-mono">
               <MathRenderer text="$\phi$ (Azimuth)" />
             </span>
-            <span className="font-mono font-bold text-primary-700 text-[11px]">
+            <span className="font-mono font-bold text-primary-700 dark:text-primary-400 text-[11px]">
               {((bloch.phi * 180) / Math.PI).toFixed(1)}°
             </span>
           </div>

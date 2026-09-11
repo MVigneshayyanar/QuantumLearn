@@ -144,22 +144,22 @@ export function AITutorDrawer() {
     <aside
       role="dialog"
       aria-label="Schrödinger AI Quantum Tutor"
-      className="fixed inset-y-0 right-0 z-50 w-full sm:w-[420px] bg-white shadow-2xl border-l border-dark-200 flex flex-col animate-slideLeft"
+      className="fixed inset-y-0 right-0 z-[60] w-full sm:w-[420px] bg-white dark:bg-dark-900 shadow-2xl border-l border-dark-200 dark:border-dark-800 flex flex-col animate-slideLeft"
     >
       {/* Header */}
-      <div className="p-4 border-b border-dark-200 flex items-center justify-between bg-gradient-to-r from-primary-50/70 to-white">
+      <div className="p-4 border-b border-dark-200 dark:border-dark-800 flex items-center justify-between bg-gradient-to-r from-primary-50/70 to-white dark:from-primary-950/40 dark:to-dark-900">
         <div className="flex items-center gap-2.5">
           <div className="w-8 h-8 rounded-xl bg-primary-600 text-white flex items-center justify-center shadow-xs">
             <Bot className="w-4 h-4" />
           </div>
           <div>
-            <h3 className="font-bold text-sm text-dark-900 flex items-center gap-1.5">
+            <h3 className="font-bold text-sm text-dark-900 dark:text-white flex items-center gap-1.5">
               Schrödinger AI
-              <span className="text-[10px] px-2 py-0.5 rounded-full bg-primary-100 text-primary-800 font-mono">
+              <span className="text-[10px] px-2 py-0.5 rounded-full bg-primary-100 dark:bg-primary-950/70 text-primary-800 dark:text-primary-300 font-mono">
                 {explanationMode.toUpperCase()}
               </span>
             </h3>
-            <p className="text-[11px] text-dark-500">Guides through inquiry & physics insights</p>
+            <p className="text-[11px] text-dark-500 dark:text-dark-400">Guides through inquiry & physics insights</p>
           </div>
         </div>
 
@@ -167,14 +167,14 @@ export function AITutorDrawer() {
           <button
             onClick={clearChat}
             title="Reset conversation"
-            className="p-1.5 rounded-lg text-dark-400 hover:text-dark-700 hover:bg-dark-100 transition-colors"
+            className="p-1.5 rounded-lg text-dark-400 hover:text-dark-700 dark:hover:text-dark-200 hover:bg-dark-100 dark:hover:bg-dark-800 transition-colors"
           >
             <RotateCcw className="w-3.5 h-3.5" />
           </button>
           <button
             onClick={() => setIsOpen(false)}
             aria-label="Close AI Tutor"
-            className="p-1.5 rounded-lg text-dark-400 hover:text-dark-700 hover:bg-dark-100 transition-colors"
+            className="p-1.5 rounded-lg text-dark-400 hover:text-dark-700 dark:hover:text-dark-200 hover:bg-dark-100 dark:hover:bg-dark-800 transition-colors"
           >
             <X className="w-4 h-4" />
           </button>
@@ -191,7 +191,7 @@ export function AITutorDrawer() {
               className={`flex gap-3 text-xs leading-relaxed ${isUser ? 'justify-end' : 'justify-start'}`}
             >
               {!isUser && (
-                <div className="w-6 h-6 rounded-lg bg-primary-100 text-primary-700 flex items-center justify-center shrink-0 mt-0.5">
+                <div className="w-6 h-6 rounded-lg bg-primary-100 dark:bg-primary-950/70 text-primary-700 dark:text-primary-300 flex items-center justify-center shrink-0 mt-0.5">
                   <Sparkles className="w-3.5 h-3.5" />
                 </div>
               )}
@@ -199,7 +199,7 @@ export function AITutorDrawer() {
                 className={`p-3.5 rounded-2xl max-w-[85%] whitespace-pre-wrap ${
                   isUser
                     ? 'bg-primary-600 text-white rounded-br-xs shadow-xs'
-                    : 'bg-dark-50 text-dark-800 border border-dark-200 rounded-bl-xs'
+                    : 'bg-dark-50 dark:bg-dark-800 text-dark-800 dark:text-dark-100 border border-dark-200 dark:border-dark-700 rounded-bl-xs'
                 }`}
               >
                 {isUser ? msg.content : <MathRenderer text={msg.content} />}
@@ -209,8 +209,8 @@ export function AITutorDrawer() {
         })}
 
         {isGenerating && (
-          <div className="flex gap-3 items-center text-xs text-dark-500 italic">
-            <div className="w-6 h-6 rounded-lg bg-primary-100 text-primary-700 flex items-center justify-center shrink-0">
+          <div className="flex gap-3 items-center text-xs text-dark-500 dark:text-dark-400 italic">
+            <div className="w-6 h-6 rounded-lg bg-primary-100 dark:bg-primary-950/70 text-primary-700 dark:text-primary-300 flex items-center justify-center shrink-0">
               <Sparkles className="w-3.5 h-3.5 animate-spin" />
             </div>
             <span>Tutor is formulating a guiding inquiry...</span>
@@ -220,12 +220,12 @@ export function AITutorDrawer() {
       </div>
 
       {/* Quick Prompts */}
-      <div className="px-4 py-2 bg-dark-50/50 border-t border-dark-100 flex flex-wrap gap-1.5">
+      <div className="px-4 py-2 bg-dark-50/50 dark:bg-dark-950/50 border-t border-dark-100 dark:border-dark-800 flex flex-wrap gap-1.5">
         {quickPrompts.map((qp, i) => (
           <button
             key={i}
             onClick={() => handleSend(qp.prompt)}
-            className="text-[11px] px-2.5 py-1 rounded-full bg-white hover:bg-primary-50 border border-dark-200 text-dark-700 hover:text-primary-700 font-medium transition-colors"
+            className="text-[11px] px-2.5 py-1 rounded-full bg-white dark:bg-dark-800 hover:bg-primary-50 dark:hover:bg-dark-700 border border-dark-200 dark:border-dark-700 text-dark-700 dark:text-dark-300 hover:text-primary-700 dark:hover:text-white font-medium transition-colors"
           >
             {qp.label}
           </button>
@@ -238,14 +238,14 @@ export function AITutorDrawer() {
           e.preventDefault();
           handleSend();
         }}
-        className="p-3 border-t border-dark-200 bg-white flex items-center gap-2"
+        className="p-3 border-t border-dark-200 dark:border-dark-800 bg-white dark:bg-dark-900 flex items-center gap-2"
       >
         <input
           type="text"
           value={inputVal}
           onChange={(e) => setInputVal(e.target.value)}
           placeholder={placeholders[language] || placeholders.en}
-          className="flex-1 px-3 py-2 rounded-xl border border-dark-200 text-xs text-dark-900 placeholder:text-dark-400 focus:ring-1 focus:ring-primary-500 focus:border-primary-500"
+          className="flex-1 px-3 py-2 rounded-xl border border-dark-200 dark:border-dark-700 bg-white dark:bg-dark-800 text-xs text-dark-900 dark:text-white placeholder:text-dark-400 focus:ring-1 focus:ring-primary-500 focus:border-primary-500"
         />
         <button
           type="submit"

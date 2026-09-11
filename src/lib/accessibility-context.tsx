@@ -5,6 +5,7 @@ import React, { createContext, useContext, useState, useEffect, ReactNode } from
 export type FontSizeOption = 'sm' | 'md' | 'lg' | 'xl';
 export type ExplanationMode = 'simple' | 'technical';
 export type Language = 'en' | 'hi' | 'es' | 'fr' | 'de' | 'ta' | 'te' | 'ja' | 'zh-CN';
+export type ThemeMode = 'light' | 'dark';
 
 interface AccessibilityContextType {
   fontSize: FontSizeOption;
@@ -17,6 +18,9 @@ interface AccessibilityContextType {
   setLanguage: (lang: Language) => void;
   highContrast: boolean;
   setHighContrast: (val: boolean) => void;
+  theme: ThemeMode;
+  setTheme: (theme: ThemeMode) => void;
+  toggleTheme: () => void;
   primerModalOpen: boolean;
   setPrimerModalOpen: (open: boolean) => void;
   announce: (message: string) => void;
@@ -31,6 +35,7 @@ export function AccessibilityProvider({ children }: { children: ReactNode }) {
   const [reducedMotion, setReducedMotionState] = useState<boolean>(false);
   const [language, setLanguageState] = useState<Language>('en');
   const [highContrast, setHighContrastState] = useState<boolean>(false);
+  const [theme, setThemeState] = useState<ThemeMode>('light');
   const [primerModalOpen, setPrimerModalOpen] = useState<boolean>(false);
   const [liveAnnouncement, setLiveAnnouncement] = useState<string>('');
 
@@ -48,6 +53,23 @@ export function AccessibilityProvider({ children }: { children: ReactNode }) {
       const savedLang = localStorage.getItem('ql_language') as Language;
       if (savedLang) setLanguageState(savedLang);
 
+      // Load initial theme from localStorage or system preference
+      const savedTheme = localStorage.getItem('ql_theme') as ThemeMode | null;
+      let initialTheme: ThemeMode = 'light';
+      if (savedTheme === 'dark' || savedTheme === 'light') {
+        initialTheme = savedTheme;
+      } else if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
+        initialTheme = 'dark';
+      }
+      setThemeState(initialTheme);
+      if (initialTheme === 'dark') {
+        document.documentElement.classList.add('dark');
+        document.documentElement.setAttribute('data-theme', 'dark');
+      } else {
+        document.documentElement.classList.remove('dark');
+        document.documentElement.setAttribute('data-theme', 'light');
+      }
+
       // Check if user has seen primer onboarding
       const seenPrimer = localStorage.getItem('ql_seen_primer');
       if (!seenPrimer) {
@@ -55,6 +77,25 @@ export function AccessibilityProvider({ children }: { children: ReactNode }) {
       }
     }
   }, []);
+
+  const setTheme = (newTheme: ThemeMode) => {
+    setThemeState(newTheme);
+    if (typeof window !== 'undefined') {
+      localStorage.setItem('ql_theme', newTheme);
+      if (newTheme === 'dark') {
+        document.documentElement.classList.add('dark');
+        document.documentElement.setAttribute('data-theme', 'dark');
+      } else {
+        document.documentElement.classList.remove('dark');
+        document.documentElement.setAttribute('data-theme', 'light');
+      }
+    }
+    announce(newTheme === 'dark' ? 'Dark theme enabled' : 'Light theme enabled');
+  };
+
+  const toggleTheme = () => {
+    setTheme(theme === 'dark' ? 'light' : 'dark');
+  };
 
   const setFontSize = (size: FontSizeOption) => {
     setFontSizeState(size);
@@ -124,6 +165,9 @@ export function AccessibilityProvider({ children }: { children: ReactNode }) {
         setLanguage,
         highContrast,
         setHighContrast,
+        theme,
+        setTheme,
+        toggleTheme,
         primerModalOpen,
         setPrimerModalOpen,
         announce,
@@ -150,4 +194,14 @@ export function useAccessibility() {
     throw new Error('useAccessibility must be used within an AccessibilityProvider');
   }
   return context;
+}
+
+export function useTheme() {
+  const { theme, setTheme, toggleTheme } = useAccessibility();
+  return {
+    theme,
+    setTheme,
+    toggleTheme,
+    isDark: theme === 'dark',
+  };
 }

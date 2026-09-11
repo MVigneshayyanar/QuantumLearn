@@ -15,6 +15,17 @@
   --accent-light: #EEF2FF;
 }
 
+html.dark {
+  color-scheme: dark;
+  --bg-main: #0B0F19;
+  --bg-card: #111827;
+  --text-main: #F9FAFB;
+  --text-muted: #94A3B8;
+  --border-color: #1E293B;
+  --accent: #6366F1;
+  --accent-light: #1E1B4B;
+}
+
 html {
   font-size: var(--font-scale);
   scroll-behavior: smooth;
@@ -276,4 +287,378 @@ body {
 .goog-te-balloon-frame {
   display: none !important;
 }
+
+/* ==========================================================================
+   Dark Theme System & Component Styling
+   ========================================================================== */
+
+/* Smooth transitions on theme switch */
+body, header, nav, footer, main, .math-step-card {
+  transition: background-color 0.25s ease, border-color 0.25s ease, color 0.25s ease;
+}
+
+/* Base Body and Surface in Dark Mode */
+html.dark body {
+  background-color: #0B0F19 !important;
+  color: #F9FAFB !important;
+}
+
+/* Surfaces and Cards */
+html.dark .bg-white {
+  background-color: #111827 !important;
+}
+
+html.dark .bg-\[\#FAFAFA\],
+html.dark .bg-\[\#F8FAFC\] {
+  background-color: #0B0F19 !important;
+}
+
+html.dark .bg-dark-50 {
+  background-color: #151D2E !important;
+}
+
+html.dark .bg-dark-50\/50,
+html.dark .bg-dark-50\/60,
+html.dark .bg-dark-50\/80 {
+  background-color: rgba(21, 29, 46, 0.75) !important;
+}
+
+html.dark .bg-dark-100 {
+  background-color: #1E293B !important;
+}
+
+html.dark .bg-dark-200 {
+  background-color: #2E3B52 !important;
+}
+
+/* Typography in Dark Mode */
+html.dark .text-dark-900 {
+  color: #F9FAFB !important;
+}
+
+html.dark .text-dark-800 {
+  color: #F1F5F9 !important;
+}
+
+html.dark .text-dark-700 {
+  color: #E2E8F0 !important;
+}
+
+html.dark .text-dark-600 {
+  color: #CBD5E1 !important;
+}
+
+html.dark .text-dark-500 {
+  color: #94A3B8 !important;
+}
+
+html.dark .text-dark-400 {
+  color: #64748B !important;
+}
+
+html.dark .text-dark-300 {
+  color: #475569 !important;
+}
+
+/* Borders in Dark Mode */
+html.dark .border-dark-100 {
+  border-color: #1E293B !important;
+}
+
+html.dark .border-dark-200 {
+  border-color: #1E293B !important;
+}
+
+html.dark .border-dark-200\/60,
+html.dark .border-dark-200\/80 {
+  border-color: rgba(30, 41, 59, 0.7) !important;
+}
+
+html.dark .border-dark-300 {
+  border-color: #334155 !important;
+}
+
+html.dark .border-dark-400 {
+  border-color: #475569 !important;
+}
+
+/* Hover & Interactive States */
+html.dark .hover\:bg-dark-50:hover {
+  background-color: #1A2438 !important;
+}
+
+html.dark .hover\:bg-dark-100:hover {
+  background-color: #243047 !important;
+}
+
+html.dark .hover\:text-dark-900:hover {
+  color: #FFFFFF !important;
+}
+
+html.dark .hover\:border-dark-300:hover {
+  border-color: #475569 !important;
+}
+
+html.dark .hover\:border-dark-400:hover {
+  border-color: #64748B !important;
+}
+
+/* Colored Pills & Badges in Dark Mode */
+html.dark .bg-primary-50 {
+  background-color: rgba(99, 102, 241, 0.16) !important;
+}
+html.dark .bg-primary-100 {
+  background-color: rgba(99, 102, 241, 0.28) !important;
+}
+html.dark .text-primary-700,
+html.dark .text-primary-800,
+html.dark .text-primary-900,
+html.dark .text-primary-950 {
+  color: #A5B4FC !important;
+}
+html.dark .border-primary-100,
+html.dark .border-primary-200 {
+  border-color: rgba(99, 102, 241, 0.35) !important;
+}
+
+html.dark .bg-emerald-50 {
+  background-color: rgba(16, 185, 129, 0.16) !important;
+}
+html.dark .bg-emerald-100 {
+  background-color: rgba(16, 185, 129, 0.28) !important;
+}
+html.dark .text-emerald-700,
+html.dark .text-emerald-800,
+html.dark .text-emerald-900 {
+  color: #6EE7B7 !important;
+}
+html.dark .border-emerald-100,
+html.dark .border-emerald-200 {
+  border-color: rgba(16, 185, 129, 0.35) !important;
+}
+
+html.dark .bg-amber-50 {
+  background-color: rgba(245, 158, 11, 0.16) !important;
+}
+html.dark .bg-amber-100 {
+  background-color: rgba(245, 158, 11, 0.28) !important;
+}
+html.dark .text-amber-700,
+html.dark .text-amber-800,
+html.dark .text-amber-900,
+html.dark .text-amber-950 {
+  color: #FCD34D !important;
+}
+html.dark .border-amber-100,
+html.dark .border-amber-200,
+html.dark .border-amber-300 {
+  border-color: rgba(245, 158, 11, 0.35) !important;
+}
+
+html.dark .bg-purple-50 {
+  background-color: rgba(168, 85, 247, 0.16) !important;
+}
+html.dark .bg-purple-100 {
+  background-color: rgba(168, 85, 247, 0.28) !important;
+}
+html.dark .text-purple-700,
+html.dark .text-purple-800,
+html.dark .text-purple-900 {
+  color: #D8B4FE !important;
+}
+html.dark .border-purple-100,
+html.dark .border-purple-200 {
+  border-color: rgba(168, 85, 247, 0.35) !important;
+}
+
+html.dark .bg-blue-50 {
+  background-color: rgba(59, 130, 246, 0.16) !important;
+}
+html.dark .bg-blue-100 {
+  background-color: rgba(59, 130, 246, 0.28) !important;
+}
+html.dark .text-blue-700,
+html.dark .text-blue-800,
+html.dark .text-blue-900 {
+  color: #93C5FD !important;
+}
+html.dark .border-blue-100,
+html.dark .border-blue-200 {
+  border-color: rgba(59, 130, 246, 0.35) !important;
+}
+
+html.dark .bg-violet-50 {
+  background-color: rgba(139, 92, 246, 0.16) !important;
+}
+html.dark .bg-violet-100 {
+  background-color: rgba(139, 92, 246, 0.28) !important;
+}
+html.dark .text-violet-700,
+html.dark .text-violet-800,
+html.dark .text-violet-900 {
+  color: #C4B5FD !important;
+}
+html.dark .border-violet-100,
+html.dark .border-violet-200 {
+  border-color: rgba(139, 92, 246, 0.35) !important;
+}
+
+html.dark .bg-indigo-50 {
+  background-color: rgba(99, 102, 241, 0.16) !important;
+}
+html.dark .bg-indigo-100 {
+  background-color: rgba(99, 102, 241, 0.28) !important;
+}
+html.dark .text-indigo-700,
+html.dark .text-indigo-800,
+html.dark .text-indigo-900 {
+  color: #A5B4FC !important;
+}
+html.dark .border-indigo-100,
+html.dark .border-indigo-200 {
+  border-color: rgba(99, 102, 241, 0.35) !important;
+}
+
+html.dark .bg-rose-50 {
+  background-color: rgba(244, 63, 94, 0.16) !important;
+}
+html.dark .text-rose-700,
+html.dark .text-rose-800 {
+  color: #FDA4AF !important;
+}
+html.dark .border-rose-100,
+html.dark .border-rose-200 {
+  border-color: rgba(244, 63, 94, 0.35) !important;
+}
+
+/* Opacity variants of backgrounds in Dark Mode */
+html.dark [class*="bg-dark-50/"] {
+  background-color: rgba(26, 36, 56, 0.8) !important;
+}
+html.dark [class*="bg-dark-100/"] {
+  background-color: rgba(30, 41, 59, 0.8) !important;
+}
+html.dark [class*="bg-white/"] {
+  background-color: rgba(17, 24, 39, 0.8) !important;
+}
+
+/* Gradients in Dark Mode */
+html.dark [class*="from-dark-50"] {
+  --tw-gradient-from: #111827 var(--tw-gradient-from-position) !important;
+  --tw-gradient-to: rgba(17, 24, 39, 0) var(--tw-gradient-to-position) !important;
+  --tw-gradient-stops: var(--tw-gradient-from), var(--tw-gradient-to) !important;
+}
+html.dark [class*="to-indigo-50"] {
+  --tw-gradient-to: #1E1B4B var(--tw-gradient-to-position) !important;
+}
+html.dark [class*="from-primary-50"] {
+  --tw-gradient-from: #1E1B4B var(--tw-gradient-from-position) !important;
+  --tw-gradient-to: rgba(30, 27, 75, 0) var(--tw-gradient-to-position) !important;
+  --tw-gradient-stops: var(--tw-gradient-from), var(--tw-gradient-to) !important;
+}
+html.dark [class*="via-indigo-50"] {
+  --tw-gradient-stops: var(--tw-gradient-from), #172033 var(--tw-gradient-via-position), var(--tw-gradient-to) !important;
+}
+html.dark [class*="to-white"] {
+  --tw-gradient-to: #111827 var(--tw-gradient-to-position) !important;
+}
+
+/* Form Controls in Dark Mode */
+html.dark input:not([type="checkbox"]):not([type="radio"]),
+html.dark select,
+html.dark textarea {
+  background-color: #172033 !important;
+  color: #F9FAFB !important;
+  border-color: #334155 !important;
+}
+
+html.dark input::placeholder,
+html.dark textarea::placeholder {
+  color: #64748B !important;
+}
+
+/* Math Cards & Interactive Blocks in Dark Mode */
+html.dark .math-step-card {
+  background: #111827 !important;
+  border-color: #1E293B !important;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.35) !important;
+}
+
+html.dark .math-step-card:hover {
+  box-shadow: 0 6px 20px rgba(99, 102, 241, 0.15) !important;
+  border-color: #4F46E5 !important;
+}
+
+html.dark .intuition-text-block {
+  background: linear-gradient(135deg, #111827 0%, #1E1B4B 100%) !important;
+  border-color: #1E293B !important;
+  color: #E2E8F0 !important;
+}
+
+/* Circuit Wires */
+html.dark .circuit-wire::before {
+  background-color: #3B4861 !important;
+}
+
+/* Scrollbars in Dark Mode */
+html.dark ::-webkit-scrollbar-track {
+  background: #0B0F19;
+}
+
+html.dark ::-webkit-scrollbar-thumb {
+  background: #2D3748;
+}
+
+html.dark ::-webkit-scrollbar-thumb:hover {
+  background: #4A5568;
+}
+
+/* ==========================================================================
+   Dark Mode Shadow Elevation & Depth System
+   Eliminates washed-out or white glows; provides crisp, modern dark depth.
+   ========================================================================== */
+
+html.dark {
+  --tw-shadow-color: rgba(0, 0, 0, 0.7);
+}
+
+html.dark * {
+  --tw-ring-offset-color: #111827;
+}
+
+html.dark .shadow-2xs,
+html.dark .shadow-xs,
+html.dark .shadow-subtle {
+  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.5), 0 1px 2px -1px rgba(0, 0, 0, 0.4) !important;
+}
+
+html.dark .shadow-sm,
+html.dark .shadow {
+  box-shadow: 0 2px 8px -1px rgba(0, 0, 0, 0.55), 0 1px 4px -1px rgba(0, 0, 0, 0.4) !important;
+}
+
+html.dark .shadow-card {
+  box-shadow: 0 6px 20px -2px rgba(0, 0, 0, 0.65), 0 2px 8px -2px rgba(0, 0, 0, 0.5) !important;
+}
+
+html.dark .shadow-card-hover,
+html.dark .hover\:shadow-card:hover,
+html.dark .hover\:shadow-card-hover:hover {
+  box-shadow: 0 16px 32px -4px rgba(0, 0, 0, 0.8), 0 4px 14px -2px rgba(0, 0, 0, 0.55) !important;
+}
+
+html.dark .shadow-md {
+  box-shadow: 0 6px 18px -2px rgba(0, 0, 0, 0.6), 0 3px 8px -2px rgba(0, 0, 0, 0.45) !important;
+}
+
+html.dark .shadow-lg {
+  box-shadow: 0 12px 28px -4px rgba(0, 0, 0, 0.7), 0 4px 12px -2px rgba(0, 0, 0, 0.5) !important;
+}
+
+html.dark .shadow-xl,
+html.dark .shadow-2xl {
+  box-shadow: 0 24px 48px -8px rgba(0, 0, 0, 0.85), 0 8px 20px -4px rgba(0, 0, 0, 0.6) !important;
+}
+
+
 

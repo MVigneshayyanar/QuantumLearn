@@ -86,7 +86,7 @@ export function Navbar() {
 
   return (
     <>
-    <header className="bg-white border-b border-dark-200 sticky top-0 z-30 shadow-subtle">
+    <header className="bg-white dark:bg-dark-900/95 dark:border-dark-800 border-b border-dark-200 sticky top-0 z-50 backdrop-blur-md shadow-subtle">
       <div className="w-full mx-auto px-8">
         <div className="flex items-center justify-between h-16">
           {/* Brand Logo */}
@@ -95,10 +95,10 @@ export function Navbar() {
               <Atom className="w-5 h-5 animate-pulse" />
             </div>
             <div>
-              <span className="font-bold text-lg text-dark-900 tracking-tight whitespace-nowrap">
+              <span className="font-bold text-lg text-dark-900 dark:text-white tracking-tight whitespace-nowrap">
                 {t.nav.brand}
               </span>
-              <span className="hidden sm:inline-block ml-2 text-xs font-semibold px-2.5 py-0.5 rounded-full bg-primary-50 text-primary-700 border border-primary-100 whitespace-nowrap shrink-0">
+              <span className="hidden sm:inline-block ml-2 text-xs font-semibold px-2.5 py-0.5 rounded-full bg-primary-50 dark:bg-primary-950/70 text-primary-700 dark:text-primary-300 border border-primary-100 dark:border-primary-800/60 whitespace-nowrap shrink-0">
                 Multi-Simulator
               </span>
             </div>
@@ -115,12 +115,12 @@ export function Navbar() {
                   href={link.href}
                   className={`px-2.5 lg:px-3 py-2 rounded-lg text-xs lg:text-sm font-medium transition-colors flex items-center gap-1.5 whitespace-nowrap shrink-0 ${
                     isActive
-                      ? 'bg-primary-50 text-primary-700 font-semibold'
-                      : 'text-dark-700 hover:text-dark-900 hover:bg-dark-50'
+                      ? 'bg-primary-50 dark:bg-primary-950/60 text-primary-700 dark:text-primary-200 font-semibold'
+                      : 'text-dark-700 dark:text-dark-300 hover:text-dark-900 dark:hover:text-white hover:bg-dark-50 dark:hover:bg-dark-800'
                   }`}
                   aria-current={isActive ? 'page' : undefined}
                 >
-                  <Icon className={`w-4 h-4 shrink-0 ${isActive ? 'text-primary-600' : 'text-dark-500'}`} />
+                  <Icon className={`w-4 h-4 shrink-0 ${isActive ? 'text-primary-600 dark:text-primary-400' : 'text-dark-500 dark:text-dark-400'}`} />
                   <span>{link.label}</span>
                 </Link>
               );
@@ -131,17 +131,17 @@ export function Navbar() {
               <button
                 className={`px-2.5 lg:px-3 py-2 rounded-lg text-xs lg:text-sm font-medium transition-colors flex items-center gap-1.5 whitespace-nowrap shrink-0 ${
                   pathname.startsWith('/learn')
-                    ? 'bg-primary-50 text-primary-700 font-semibold'
-                    : 'text-dark-700 hover:text-dark-900 hover:bg-dark-50'
+                    ? 'bg-primary-50 dark:bg-primary-950/60 text-primary-700 dark:text-primary-200 font-semibold'
+                    : 'text-dark-700 dark:text-dark-300 hover:text-dark-900 dark:hover:text-white hover:bg-dark-50 dark:hover:bg-dark-800'
                 }`}
               >
-                <BookOpen className={`w-4 h-4 shrink-0 ${pathname.startsWith('/learn') ? 'text-primary-600' : 'text-dark-500'}`} />
+                <BookOpen className={`w-4 h-4 shrink-0 ${pathname.startsWith('/learn') ? 'text-primary-600 dark:text-primary-400' : 'text-dark-500 dark:text-dark-400'}`} />
                 <span>{t.nav.algorithms}</span>
-                <ChevronDown className="w-3.5 h-3.5 text-dark-500 opacity-70 group-hover:rotate-180 transition-transform duration-200" />
+                <ChevronDown className="w-3.5 h-3.5 text-dark-500 dark:text-dark-400 opacity-70 group-hover:rotate-180 transition-transform duration-200" />
               </button>
               
               {/* Dropdown Menu */}
-              <div className="absolute top-full left-0 mt-1 w-56 bg-white border border-dark-200 rounded-xl shadow-card opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50 overflow-hidden transform origin-top scale-95 group-hover:scale-100">
+              <div className="absolute top-full left-0 mt-1 w-56 bg-white dark:bg-dark-900 border border-dark-200 dark:border-dark-700 rounded-xl shadow-xl opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50 overflow-hidden transform origin-top scale-95 group-hover:scale-100">
                 <div className="py-1.5 flex flex-col">
                   {algoLinks.map(algo => {
                     const isAlgoActive = pathname === algo.href;
@@ -151,24 +151,24 @@ export function Navbar() {
                         href={algo.href}
                         className={`px-4 py-2.5 text-sm flex items-center gap-2.5 transition-colors whitespace-nowrap ${
                           isAlgoActive 
-                            ? 'bg-primary-50 text-primary-700 font-semibold' 
-                            : 'text-dark-700 hover:bg-dark-50 hover:text-dark-900'
+                            ? 'bg-primary-50 dark:bg-primary-950/60 text-primary-700 dark:text-primary-200 font-semibold' 
+                            : 'text-dark-700 dark:text-dark-300 hover:bg-dark-50 dark:hover:bg-dark-800 hover:text-dark-900 dark:hover:text-white'
                         }`}
                       >
-                        <algo.icon className={`w-4 h-4 shrink-0 ${isAlgoActive ? 'text-primary-600' : 'text-dark-500'}`} />
+                        <algo.icon className={`w-4 h-4 shrink-0 ${isAlgoActive ? 'text-primary-600 dark:text-primary-400' : 'text-dark-500 dark:text-dark-400'}`} />
                         <span>{algo.label}</span>
                       </Link>
                     );
                   })}
 
                   {/* More Algorithms Coming Soon */}
-                  <div className="border-t border-dark-100 mt-1 pt-1">
-                    <div className="px-4 py-2 flex items-center justify-between text-xs bg-dark-50/60 select-none">
+                  <div className="border-t border-dark-100 dark:border-dark-700 mt-1 pt-1">
+                    <div className="px-4 py-2 flex items-center justify-between text-xs bg-dark-50/60 dark:bg-dark-800/60 select-none">
                       <div className="flex items-center gap-2">
                         <Sparkles className="w-3.5 h-3.5 text-amber-500 shrink-0" />
-                        <span className="font-medium text-dark-700">More Algorithms</span>
+                        <span className="font-medium text-dark-700 dark:text-dark-300">More Algorithms</span>
                       </div>
-                      <span className="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-amber-50 text-amber-800 border border-amber-200 shrink-0">
+                      <span className="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-amber-50 dark:bg-amber-950/70 text-amber-800 dark:text-amber-300 border border-amber-200 dark:border-amber-700/60 shrink-0">
                         Coming Soon
                       </span>
                     </div>
@@ -186,12 +186,12 @@ export function Navbar() {
                   href={link.href}
                   className={`px-2.5 lg:px-3 py-2 rounded-lg text-xs lg:text-sm font-medium transition-colors flex items-center gap-1.5 whitespace-nowrap shrink-0 ${
                     isActive
-                      ? 'bg-primary-50 text-primary-700 font-semibold'
-                      : 'text-dark-700 hover:text-dark-900 hover:bg-dark-50'
+                      ? 'bg-primary-50 dark:bg-primary-950/60 text-primary-700 dark:text-primary-200 font-semibold'
+                      : 'text-dark-700 dark:text-dark-300 hover:text-dark-900 dark:hover:text-white hover:bg-dark-50 dark:hover:bg-dark-800'
                   }`}
                   aria-current={isActive ? 'page' : undefined}
                 >
-                  <Icon className={`w-4 h-4 shrink-0 ${isActive ? 'text-primary-600' : 'text-dark-500'}`} />
+                  <Icon className={`w-4 h-4 shrink-0 ${isActive ? 'text-primary-600 dark:text-primary-400' : 'text-dark-500 dark:text-dark-400'}`} />
                   <span>{link.label}</span>
                 </Link>
               );
@@ -211,18 +211,18 @@ export function Navbar() {
               <span className="xl:hidden">AI Tutor</span>
             </button>
 
-            {userId ? (
-              /* Profile Dropdown Container */
-              <div className="relative pl-1.5 border-l border-dark-200 shrink-0" ref={profileDropdownRef}>
+            {/* Profile Dropdown or Sign In */}
+            {studentEmail ? (
+              <div className="relative shrink-0" ref={profileDropdownRef}>
                 <button
                   type="button"
-                  onClick={() => setProfileDropdownOpen((prev) => !prev)}
+                  onClick={() => setProfileDropdownOpen(!profileDropdownOpen)}
                   aria-expanded={profileDropdownOpen}
                   aria-haspopup="true"
                   className={`h-10 px-2.5 rounded-xl border flex items-center gap-2 transition-all select-none cursor-pointer ${
                     profileDropdownOpen
-                      ? 'bg-dark-100 border-dark-300 shadow-xs ring-2 ring-primary-500/20'
-                      : 'border-dark-200 hover:border-dark-300 hover:bg-dark-50 bg-white'
+                      ? 'bg-dark-100 dark:bg-dark-800 border-dark-300 dark:border-dark-600 shadow-xs ring-2 ring-primary-500/20'
+                      : 'border-dark-200 dark:border-dark-700 hover:border-dark-300 dark:hover:border-dark-600 hover:bg-dark-50 dark:hover:bg-dark-800 bg-white dark:bg-dark-900'
                   }`}
                   title="Open user profile menu"
                 >
@@ -240,7 +240,7 @@ export function Navbar() {
 
                   <div className="flex flex-col items-start text-left leading-tight hidden sm:flex">
                     <div className="flex items-center gap-1">
-                      <span className="font-bold text-xs text-dark-900 max-w-[90px] xl:max-w-[120px] truncate">
+                      <span className="font-bold text-xs text-dark-900 dark:text-white max-w-[90px] xl:max-w-[120px] truncate">
                         {studentName}
                       </span>
                       {isPremium && !isAdmin && !isInstructor && (
@@ -250,12 +250,12 @@ export function Navbar() {
                     <span
                       className={`text-[9px] font-bold uppercase tracking-wider ${
                         isAdmin
-                          ? 'text-purple-700'
+                          ? 'text-purple-700 dark:text-purple-400'
                           : isInstructor
-                          ? 'text-indigo-700'
+                          ? 'text-indigo-700 dark:text-indigo-400'
                           : isPremium
-                          ? 'text-amber-700 font-black'
-                          : 'text-primary-700'
+                          ? 'text-amber-700 dark:text-amber-400 font-black'
+                          : 'text-primary-700 dark:text-primary-400'
                       }`}
                     >
                       {isAdmin ? 'Admin' : isInstructor ? 'Instructor' : isPremium ? 'Pro Student' : 'Student'}
@@ -264,16 +264,16 @@ export function Navbar() {
 
                   <ChevronDown
                     className={`w-3.5 h-3.5 text-dark-400 transition-transform duration-200 ${
-                      profileDropdownOpen ? 'rotate-180 text-dark-800' : ''
+                      profileDropdownOpen ? 'rotate-180 text-dark-800 dark:text-dark-200' : ''
                     }`}
                   />
                 </button>
 
                 {/* Dropdown Floating Menu */}
                 {profileDropdownOpen && (
-                  <div className="absolute right-0 top-full mt-2 w-64 bg-white border border-dark-200 rounded-2xl shadow-xl z-50 p-2 animate-fadeIn text-xs">
+                  <div className="absolute right-0 top-full mt-2 w-64 bg-white dark:bg-dark-900 border border-dark-200 dark:border-dark-700 rounded-2xl shadow-xl z-50 p-2 animate-fadeIn text-xs">
                     {/* User Header Info */}
-                    <div className="p-2.5 rounded-xl bg-dark-50/80 mb-1 border border-dark-100">
+                    <div className="p-2.5 rounded-xl bg-dark-50/80 dark:bg-dark-800/90 mb-1 border border-dark-100 dark:border-dark-700">
                       <div className="flex items-center gap-2.5">
                         <div
                           className={`w-9 h-9 rounded-xl text-white font-bold flex items-center justify-center text-sm shadow-xs shrink-0 ${
@@ -287,22 +287,22 @@ export function Navbar() {
                           {(studentName || 'U').charAt(0).toUpperCase()}
                         </div>
                         <div className="overflow-hidden leading-tight">
-                          <p className="font-bold text-xs text-dark-900 truncate">{studentName}</p>
-                          <p className="text-[11px] text-dark-500 font-mono truncate">{studentEmail}</p>
+                          <p className="font-bold text-xs text-dark-900 dark:text-white truncate">{studentName}</p>
+                          <p className="text-[11px] text-dark-500 dark:text-dark-400 font-mono truncate">{studentEmail}</p>
                         </div>
                       </div>
 
-                      <div className="mt-2 pt-1.5 border-t border-dark-200/60 flex items-center justify-between">
-                        <span className="text-[10px] text-dark-500 font-medium">Role:</span>
+                      <div className="mt-2 pt-1.5 border-t border-dark-200/60 dark:border-dark-700/60 flex items-center justify-between">
+                        <span className="text-[10px] text-dark-500 dark:text-dark-400 font-medium">Role:</span>
                         <span
                           className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${
                             isAdmin
-                              ? 'bg-purple-100 text-purple-800'
+                              ? 'bg-purple-100 dark:bg-purple-950/70 text-purple-800 dark:text-purple-300 border border-transparent dark:border-purple-800/60'
                               : isInstructor
-                              ? 'bg-indigo-100 text-indigo-800'
+                              ? 'bg-indigo-100 dark:bg-indigo-950/70 text-indigo-800 dark:text-indigo-300 border border-transparent dark:border-indigo-800/60'
                               : isPremium
-                              ? 'bg-amber-100 text-amber-900 border border-amber-300'
-                              : 'bg-primary-100 text-primary-800'
+                              ? 'bg-amber-100 dark:bg-amber-950/70 text-amber-900 dark:text-amber-300 border border-amber-300 dark:border-amber-700/70'
+                              : 'bg-primary-100 dark:bg-primary-950/70 text-primary-800 dark:text-primary-300 border border-transparent dark:border-primary-800/60'
                           }`}
                         >
                           {isAdmin
@@ -325,14 +325,14 @@ export function Navbar() {
                           onClick={() => setProfileDropdownOpen(false)}
                           className={`flex items-center gap-2.5 px-3 py-2 rounded-xl transition-colors ${
                             pathname.startsWith('/admin')
-                              ? 'bg-purple-50 text-purple-900 font-bold border border-purple-200/60'
-                              : 'text-dark-700 hover:bg-dark-100 hover:text-dark-900'
+                              ? 'bg-purple-50 dark:bg-purple-950/60 text-purple-900 dark:text-purple-200 font-bold border border-purple-200/60 dark:border-purple-800/60'
+                              : 'text-dark-700 dark:text-dark-300 hover:bg-dark-100 dark:hover:bg-dark-800 hover:text-dark-900 dark:hover:text-white'
                           }`}
                         >
-                          <ShieldCheck className="w-4 h-4 text-purple-600 shrink-0" />
+                          <ShieldCheck className="w-4 h-4 text-purple-600 dark:text-purple-400 shrink-0" />
                           <div className="flex flex-col">
-                            <span className="font-semibold text-xs text-dark-900">Admin Dashboard</span>
-                            <span className="text-[10px] text-dark-500">User & cohort management</span>
+                            <span className="font-semibold text-xs text-dark-900 dark:text-white">Admin Dashboard</span>
+                            <span className="text-[10px] text-dark-500 dark:text-dark-400">User & cohort management</span>
                           </div>
                         </Link>
                       ) : isInstructor ? (
@@ -343,14 +343,14 @@ export function Navbar() {
                             onClick={() => setProfileDropdownOpen(false)}
                             className={`flex items-center gap-2.5 px-3 py-2 rounded-xl transition-colors ${
                               pathname === '/dashboard'
-                                ? 'bg-primary-50 text-primary-900 font-bold border border-primary-200/60'
-                                : 'text-dark-700 hover:bg-dark-100 hover:text-dark-900'
+                                ? 'bg-primary-50 dark:bg-primary-950/60 text-primary-900 dark:text-primary-200 font-bold border border-primary-200/60 dark:border-primary-800/60'
+                                : 'text-dark-700 dark:text-dark-300 hover:bg-dark-100 dark:hover:bg-dark-800 hover:text-dark-900 dark:hover:text-white'
                             }`}
                           >
-                            <LayoutDashboard className="w-4 h-4 text-primary-600 shrink-0" />
+                            <LayoutDashboard className="w-4 h-4 text-primary-600 dark:text-primary-400 shrink-0" />
                             <div className="flex flex-col">
-                              <span className="font-semibold text-xs text-dark-900">Personal Record</span>
-                              <span className="text-[10px] text-dark-500">Your personal learning journey</span>
+                              <span className="font-semibold text-xs text-dark-900 dark:text-white">Personal Record</span>
+                              <span className="text-[10px] text-dark-500 dark:text-dark-400">Your personal learning journey</span>
                             </div>
                           </Link>
 
@@ -359,14 +359,14 @@ export function Navbar() {
                             onClick={() => setProfileDropdownOpen(false)}
                             className={`flex items-center gap-2.5 px-3 py-2 rounded-xl transition-colors ${
                               pathname.startsWith('/instructor')
-                                ? 'bg-indigo-50 text-indigo-900 font-bold border border-indigo-200/60'
-                                : 'text-dark-700 hover:bg-dark-100 hover:text-dark-900'
+                                ? 'bg-indigo-50 dark:bg-indigo-950/60 text-indigo-900 dark:text-indigo-200 font-bold border border-indigo-200/60 dark:border-indigo-800/60'
+                                : 'text-dark-700 dark:text-dark-300 hover:bg-dark-100 dark:hover:bg-dark-800 hover:text-dark-900 dark:hover:text-white'
                             }`}
                           >
-                            <GraduationCap className="w-4 h-4 text-indigo-600 shrink-0" />
+                            <GraduationCap className="w-4 h-4 text-indigo-600 dark:text-indigo-400 shrink-0" />
                             <div className="flex flex-col">
-                              <span className="font-semibold text-xs text-dark-900">Student Record</span>
-                              <span className="text-[10px] text-dark-500">Class roster & AI analytics</span>
+                              <span className="font-semibold text-xs text-dark-900 dark:text-white">Student Record</span>
+                              <span className="text-[10px] text-dark-500 dark:text-dark-400">Class roster & AI analytics</span>
                             </div>
                           </Link>
                         </>
@@ -377,21 +377,21 @@ export function Navbar() {
                           onClick={() => setProfileDropdownOpen(false)}
                           className={`flex items-center gap-2.5 px-3 py-2 rounded-xl transition-colors ${
                             pathname === '/dashboard'
-                              ? 'bg-primary-50 text-primary-900 font-bold border border-primary-200/60'
-                              : 'text-dark-700 hover:bg-dark-100 hover:text-dark-900'
+                              ? 'bg-primary-50 dark:bg-primary-950/60 text-primary-900 dark:text-primary-200 font-bold border border-primary-200/60 dark:border-primary-800/60'
+                              : 'text-dark-700 dark:text-dark-300 hover:bg-dark-100 dark:hover:bg-dark-800 hover:text-dark-900 dark:hover:text-white'
                           }`}
                         >
-                          <LayoutDashboard className="w-4 h-4 text-primary-600 shrink-0" />
+                          <LayoutDashboard className="w-4 h-4 text-primary-600 dark:text-primary-400 shrink-0" />
                           <div className="flex flex-col">
-                            <span className="font-semibold text-xs text-dark-900">Dashboard</span>
-                            <span className="text-[10px] text-dark-500">Your learning & progress</span>
+                            <span className="font-semibold text-xs text-dark-900 dark:text-white">Dashboard</span>
+                            <span className="text-[10px] text-dark-500 dark:text-dark-400">Your learning & progress</span>
                           </div>
                         </Link>
                       )}
                     </div>
 
                     {/* Pro Subscription Status / Upgrade Card */}
-                    <div className="pt-1 mt-1 border-t border-dark-100">
+                    <div className="pt-1 mt-1 border-t border-dark-100 dark:border-dark-700">
                       {!isPremium ? (
                         <button
                           type="button"
@@ -399,13 +399,13 @@ export function Navbar() {
                             setProfileDropdownOpen(false);
                             openSubscriptionModal();
                           }}
-                          className="w-full flex items-center justify-between px-3 py-2 rounded-xl text-amber-900 bg-gradient-to-r from-amber-50 to-orange-50 border border-amber-200/80 hover:bg-amber-100/70 transition-colors font-semibold text-xs cursor-pointer"
+                          className="w-full flex items-center justify-between px-3 py-2 rounded-xl text-amber-900 dark:text-amber-200 bg-gradient-to-r from-amber-50 to-orange-50 dark:from-amber-950/40 dark:to-orange-950/30 border border-amber-200/80 dark:border-amber-700/50 hover:bg-amber-100/70 dark:hover:bg-amber-900/40 transition-colors font-semibold text-xs cursor-pointer"
                         >
                           <div className="flex items-center gap-2">
-                            <Crown className="w-3.5 h-3.5 text-amber-600 fill-amber-400 shrink-0" />
+                            <Crown className="w-3.5 h-3.5 text-amber-600 dark:text-amber-400 fill-amber-400 shrink-0" />
                             <div className="flex flex-col text-left">
-                              <span className="font-bold text-[11px] text-amber-950">Upgrade to Pro</span>
-                              <span className="text-[9px] text-amber-700">Unlock all questions & AI</span>
+                              <span className="font-bold text-[11px] text-amber-950 dark:text-amber-200">Upgrade to Pro</span>
+                              <span className="text-[9px] text-amber-700 dark:text-amber-400">Unlock all questions & AI</span>
                             </div>
                           </div>
                           <span className="text-[10px] bg-amber-500 text-white font-bold px-1.5 py-0.5 rounded shadow-2xs">
@@ -419,27 +419,27 @@ export function Navbar() {
                             setProfileDropdownOpen(false);
                             openSubscriptionModal();
                           }}
-                          className="w-full flex items-center justify-between px-2.5 py-1.5 rounded-xl bg-amber-50/80 border border-amber-200 hover:bg-amber-100/60 text-amber-900 transition-colors text-[11px] font-bold cursor-pointer"
+                          className="w-full flex items-center justify-between px-3 py-2 rounded-xl bg-amber-500/10 dark:bg-amber-950/40 border border-amber-300/80 dark:border-amber-600/40 hover:bg-amber-500/20 dark:hover:bg-amber-950/60 transition-colors text-[11px] font-bold cursor-pointer"
                         >
                           <div className="flex items-center gap-1.5">
-                            <Crown className="w-3.5 h-3.5 text-amber-600 fill-amber-400" />
-                            <span>QLearn Pro Member</span>
+                            <Crown className="w-3.5 h-3.5 text-amber-600 dark:text-amber-400 fill-amber-400" />
+                            <span className="text-amber-950 dark:text-amber-200 font-bold">QLearn Pro Member</span>
                           </div>
-                          <span className="text-[10px] text-amber-700 underline font-medium">Manage</span>
+                          <span className="text-[10px] text-amber-700 dark:text-amber-400 underline font-semibold">Manage</span>
                         </button>
                       )}
                     </div>
 
                     {/* Sign Out Action */}
-                    <div className="pt-1 mt-1 border-t border-dark-100">
+                    <div className="pt-1 mt-1 border-t border-dark-100 dark:border-dark-700">
                       <button
                         onClick={() => {
                           setProfileDropdownOpen(false);
                           logout();
                         }}
-                        className="w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-dark-600 hover:text-red-600 hover:bg-red-50 transition-colors font-semibold text-xs"
+                        className="w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-dark-600 dark:text-dark-300 hover:text-red-600 dark:hover:text-red-400 hover:bg-red-50 dark:hover:bg-red-950/40 transition-colors font-semibold text-xs"
                       >
-                        <LogOut className="w-4 h-4 text-dark-400 group-hover:text-red-600" />
+                        <LogOut className="w-4 h-4 text-dark-400 group-hover:text-red-600 dark:text-dark-400 dark:group-hover:text-red-400" />
                         <span>Sign Out</span>
                       </button>
                     </div>
@@ -447,13 +447,13 @@ export function Navbar() {
                 )}
               </div>
             ) : (
-              <div className="flex items-center gap-2 pl-2 border-l border-dark-200 shrink-0">
+              <div className="flex items-center gap-2 pl-2 border-l border-dark-200 dark:border-dark-700 shrink-0">
                 <button
                   onClick={() => openLoginModal()}
-                  className="h-10 px-3.5 rounded-xl border border-dark-200 hover:border-dark-300 hover:bg-dark-50 text-dark-700 text-xs font-semibold flex items-center gap-1.5 whitespace-nowrap transition-colors shrink-0"
+                  className="h-10 px-3.5 rounded-xl border border-dark-200 dark:border-dark-700 hover:border-dark-300 dark:hover:border-dark-600 hover:bg-dark-50 dark:hover:bg-dark-800 bg-white dark:bg-dark-900 text-dark-700 dark:text-dark-200 text-xs font-semibold flex items-center gap-1.5 whitespace-nowrap transition-colors shrink-0"
                   title="Sign in to view your dashboard"
                 >
-                  <User className="w-3.5 h-3.5 text-dark-500" />
+                  <User className="w-3.5 h-3.5 text-dark-500 dark:text-dark-400" />
                   <span>Sign In</span>
                 </button>
               </div>
@@ -464,11 +464,11 @@ export function Navbar() {
     </header>
 
     {/* Mobile Bottom Navigation */}
-    <nav className="md:hidden fixed bottom-0 left-0 right-0 bg-white border-t border-dark-200 z-50 flex justify-around items-center h-16 pb-safe shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.05)]">
+    <nav className="md:hidden fixed bottom-0 left-0 right-0 bg-white dark:bg-dark-900 border-t border-dark-200 dark:border-dark-800 z-50 flex justify-around items-center h-16 pb-safe shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.05)]">
       <Link
         href="/"
         className={`flex flex-col items-center justify-center w-full h-full gap-1 transition-colors ${
-          pathname === '/' ? 'text-primary-600' : 'text-dark-500 hover:text-dark-700'
+          pathname === '/' ? 'text-primary-600 dark:text-primary-400' : 'text-dark-500 dark:text-dark-400 hover:text-dark-700 dark:hover:text-dark-200'
         }`}
       >
         <Atom className="w-5 h-5" />

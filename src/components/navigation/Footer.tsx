@@ -18,7 +18,7 @@ export function Footer() {
   }
 
   return (
-    <footer className="bg-white border-t border-dark-200 mt-20 text-xs text-dark-600" role="contentinfo">
+    <footer className="bg-white dark:bg-dark-900 border-t border-dark-200 dark:border-dark-800 mt-20 text-xs text-dark-600 dark:text-dark-400" role="contentinfo">
       <div className="w-full mx-auto px-8 py-10">
         <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
           {/* Brand column */}
@@ -27,9 +27,9 @@ export function Footer() {
               <div className="w-7 h-7 rounded-lg bg-primary-600 text-white flex items-center justify-center">
                 <Atom className="w-4 h-4" />
               </div>
-              <span className="font-bold text-dark-900 text-base">{t.nav.brand}</span>
+              <span className="font-bold text-dark-900 dark:text-white text-base">{t.nav.brand}</span>
             </Link>
-            <p className="text-dark-500 leading-relaxed">
+            <p className="text-dark-500 dark:text-dark-400 leading-relaxed">
               Free interactive quantum computing education platform with multi-backend simulation (Qiskit, Cirq, PennyLane), real-time 3D Bloch sphere visualization, and Schrödinger AI tutoring.
             </p>
             <address className="not-italic text-dark-400 text-[11px] space-y-0.5">
@@ -40,7 +40,7 @@ export function Footer() {
 
           {/* Quantum Algorithm Modules */}
           <nav aria-label="Quantum algorithm modules">
-            <h2 className="font-semibold text-dark-900 mb-3 text-xs uppercase tracking-wide">Quantum Algorithm Modules</h2>
+            <h2 className="font-semibold text-dark-900 dark:text-white mb-3 text-xs uppercase tracking-wide">Quantum Algorithm Modules</h2>
             <ul className="space-y-2">
               <li>
                 <Link href="/learn/deutsch-jozsa" className="hover:text-primary-600 transition-colors">
@@ -67,25 +67,25 @@ export function Footer() {
 
           {/* Tools and Visualizers */}
           <nav aria-label="Quantum tools and simulators">
-            <h2 className="font-semibold text-dark-900 mb-3 text-xs uppercase tracking-wide">Tools & Simulators</h2>
+            <h2 className="font-semibold text-dark-900 dark:text-white mb-3 text-xs uppercase tracking-wide">Tools & Simulators</h2>
             <ul className="space-y-2">
               <li>
-                <Link href="/simulator" className="hover:text-primary-600 transition-colors">
+                <Link href="/simulator" className="hover:text-primary-600 dark:hover:text-primary-400 transition-colors">
                   Online Quantum Circuit Builder & Simulator
                 </Link>
               </li>
               <li>
-                <Link href="/bloch-sphere" className="hover:text-primary-600 transition-colors">
+                <Link href="/bloch-sphere" className="hover:text-primary-600 dark:hover:text-primary-400 transition-colors">
                   Interactive 3D Bloch Sphere Visualizer
                 </Link>
               </li>
               <li>
-                <Link href="/practice" className="hover:text-primary-600 transition-colors">
+                <Link href="/practice" className="hover:text-primary-600 dark:hover:text-primary-400 transition-colors">
                   Quantum Computing Practice Problems
                 </Link>
               </li>
               <li>
-                <Link href="/about" className="hover:text-primary-600 transition-colors font-medium text-primary-700">
+                <Link href="/about" className="hover:text-primary-600 dark:hover:text-primary-400 transition-colors font-medium text-primary-700 dark:text-primary-400">
                   About QLearn — Platform & Mission
                 </Link>
               </li>
@@ -94,7 +94,7 @@ export function Footer() {
                   href="https://github.com/MVigneshayyanar/QuantumLearn"
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="hover:text-primary-600 transition-colors inline-flex items-center gap-1"
+                  className="hover:text-primary-600 dark:hover:text-primary-400 transition-colors inline-flex items-center gap-1"
                 >
                   GitHub — Open Source <ExternalLink className="w-3 h-3" />
                 </a>
@@ -104,16 +104,16 @@ export function Footer() {
 
           {/* Accessibility & Standards */}
           <div>
-            <h2 className="font-semibold text-dark-900 mb-3 text-xs uppercase tracking-wide">Accessibility & Standards</h2>
-            <div className="space-y-3 text-dark-500">
-              <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-primary-50 text-primary-800 border border-primary-200 font-semibold text-xs">
-                <ShieldCheck className="w-4 h-4 text-primary-600 shrink-0" />
+            <h2 className="font-semibold text-dark-900 dark:text-white mb-3 text-xs uppercase tracking-wide">Accessibility & Standards</h2>
+            <div className="space-y-3 text-dark-500 dark:text-dark-400">
+              <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-primary-50 dark:bg-primary-950/60 text-primary-800 dark:text-primary-300 border border-primary-200 dark:border-primary-800/60 font-semibold text-xs">
+                <ShieldCheck className="w-4 h-4 text-primary-600 dark:text-primary-400 shrink-0" />
                 <span>WCAG 2.1 AA Compliant</span>
               </div>
               <p className="text-xs leading-relaxed">
                 Dual-mode explanations (intuitive &amp; Dirac notation), full keyboard navigation, screen reader ARIA, dynamic font scaling, and multilingual support.
               </p>
-              <div className="space-y-1 text-[11px] text-dark-400">
+              <div className="space-y-1 text-[11px] text-dark-400 dark:text-dark-500">
                 <p>✓ Quantum Simulator — Qiskit, Cirq, PennyLane</p>
                 <p>✓ 3D Bloch Sphere — Three.js WebGL</p>
                 <p>✓ Schrödinger AI — Socratic hints</p>
@@ -123,7 +123,7 @@ export function Footer() {
           </div>
         </div>
 
-        <div className="border-t border-dark-100 mt-8 pt-6 flex flex-col sm:flex-row items-center justify-between gap-4">
+        <div className="border-t border-dark-100 dark:border-dark-800 mt-8 pt-6 flex flex-col sm:flex-row items-center justify-between gap-4">
           <p>
             Learn quantum computing free at{' '}
             <Link href="/" className="text-primary-700 font-semibold hover:underline">
