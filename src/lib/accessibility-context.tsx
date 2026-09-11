@@ -53,14 +53,9 @@ export function AccessibilityProvider({ children }: { children: ReactNode }) {
       const savedLang = localStorage.getItem('ql_language') as Language;
       if (savedLang) setLanguageState(savedLang);
 
-      // Load initial theme from localStorage or system preference
+      // Load initial theme from localStorage (defaults directly to light mode)
       const savedTheme = localStorage.getItem('ql_theme') as ThemeMode | null;
-      let initialTheme: ThemeMode = 'light';
-      if (savedTheme === 'dark' || savedTheme === 'light') {
-        initialTheme = savedTheme;
-      } else if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
-        initialTheme = 'dark';
-      }
+      const initialTheme: ThemeMode = savedTheme === 'dark' ? 'dark' : 'light';
       setThemeState(initialTheme);
       if (initialTheme === 'dark') {
         document.documentElement.classList.add('dark');

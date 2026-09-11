@@ -74,133 +74,134 @@ export function SubscriptionModal() {
   ];
 
   return (
-    <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/60 backdrop-blur-sm animate-fadeIn p-4 overflow-y-auto">
-      <div className="relative bg-white rounded-3xl border border-amber-200 shadow-2xl w-full max-w-lg p-6 sm:p-8 space-y-6 my-8">
+    <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/75 backdrop-blur-sm animate-fadeIn p-3 sm:p-4 overflow-y-auto">
+      <div className="relative bg-white dark:bg-dark-900 rounded-3xl border border-amber-200/90 dark:border-amber-600/40 shadow-2xl w-full max-w-lg max-h-[92vh] flex flex-col my-auto overflow-hidden">
         {/* Glow accent */}
-        <div className="absolute -top-12 -left-12 w-40 h-40 bg-amber-400/20 rounded-full blur-3xl pointer-events-none" />
-        <div className="absolute -bottom-12 -right-12 w-40 h-40 bg-primary-500/20 rounded-full blur-3xl pointer-events-none" />
+        <div className="absolute -top-12 -left-12 w-40 h-40 bg-amber-400/20 dark:bg-amber-500/10 rounded-full blur-3xl pointer-events-none" />
+        <div className="absolute -bottom-12 -right-12 w-40 h-40 bg-primary-500/20 dark:bg-primary-500/10 rounded-full blur-3xl pointer-events-none" />
 
         {/* Close Button */}
         <button
           onClick={closeSubscriptionModal}
-          className="absolute top-5 right-5 p-2 rounded-xl text-dark-400 hover:text-dark-700 hover:bg-dark-100 transition-colors"
+          className="absolute top-4 right-4 z-10 p-2 rounded-xl text-dark-400 hover:text-dark-700 dark:hover:text-dark-200 hover:bg-dark-100 dark:hover:bg-dark-800 transition-colors cursor-pointer"
           title="Close modal"
         >
           <X className="w-5 h-5" />
         </button>
 
-        {/* Header */}
-        <div className="text-center space-y-2">
-          <div className="w-14 h-14 rounded-2xl bg-gradient-to-tr from-amber-500 to-amber-300 text-white flex items-center justify-center mx-auto shadow-lg shadow-amber-500/30">
-            <Crown className="w-7 h-7" />
+        {/* Fixed Header */}
+        <div className="shrink-0 p-5 sm:p-6 pb-2 text-center">
+          <div className="w-12 h-12 rounded-2xl bg-gradient-to-tr from-amber-500 to-amber-300 text-white flex items-center justify-center mx-auto shadow-md shadow-amber-500/30 mb-2">
+            <Crown className="w-6 h-6" />
           </div>
-          <div>
-            <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-amber-100 text-amber-900 border border-amber-300 text-[11px] font-bold mb-1">
-              <Sparkles className="w-3 h-3 text-amber-600" />
-              <span>QLearn Pro Membership</span>
-            </div>
-            <h2 className="text-2xl font-black text-dark-900 tracking-tight">
-              Unlock the Full Quantum Experience
-            </h2>
-            <p className="text-xs text-dark-500 max-w-sm mx-auto">
-              Master enterprise quantum algorithms, solve advanced research challenges, and get certified.
-            </p>
+          <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-amber-100 dark:bg-amber-950/70 text-amber-900 dark:text-amber-300 border border-amber-300 dark:border-amber-700/60 text-[10px] font-bold mb-1">
+            <Sparkles className="w-3 h-3 text-amber-600 dark:text-amber-400" />
+            <span>QLearn Pro Membership</span>
           </div>
+          <h2 className="text-xl sm:text-2xl font-black text-dark-900 dark:text-white tracking-tight leading-tight">
+            Unlock the Full Quantum Experience
+          </h2>
+          <p className="text-xs text-dark-500 dark:text-dark-400 max-w-sm mx-auto mt-1">
+            Master enterprise quantum algorithms, solve advanced research challenges, and get certified.
+          </p>
         </div>
 
-        {/* Billing Cycle Toggle */}
-        <div className="flex items-center justify-center gap-2 p-1 bg-dark-100 rounded-2xl text-xs font-semibold max-w-xs mx-auto">
-          <button
-            type="button"
-            onClick={() => setBillingCycle('monthly')}
-            className={`flex-1 py-1.5 px-3 rounded-xl transition-all ${
-              billingCycle === 'monthly'
-                ? 'bg-white text-dark-900 shadow-xs'
-                : 'text-dark-600 hover:text-dark-900'
-            }`}
-          >
-            Monthly
-          </button>
-          <button
-            type="button"
-            onClick={() => setBillingCycle('annual')}
-            className={`flex-1 py-1.5 px-3 rounded-xl transition-all flex items-center justify-center gap-1.5 ${
-              billingCycle === 'annual'
-                ? 'bg-amber-500 text-white shadow-xs'
-                : 'text-dark-600 hover:text-dark-900'
-            }`}
-          >
-            <span>Annual</span>
-            <span className="text-[10px] px-1.5 py-0.2 bg-white/20 rounded-md font-bold">
-              Save 30%
-            </span>
-          </button>
-        </div>
-
-        {/* Pricing Card */}
-        <div className="p-4 rounded-2xl border-2 border-amber-400 bg-gradient-to-b from-amber-50/70 to-white flex items-center justify-between">
-          <div>
-            <span className="text-xs font-bold uppercase tracking-wider text-amber-800">
-              {billingCycle === 'annual' ? 'Annual Plan' : 'Monthly Plan'}
-            </span>
-            <div className="flex items-baseline gap-1 mt-0.5">
-              <span className="text-3xl font-black text-dark-900">
-                {billingCycle === 'annual' ? '$99' : '$12'}
+        {/* Scrollable Body */}
+        <div className="flex-1 overflow-y-auto px-5 sm:px-6 py-2 space-y-3.5">
+          {/* Billing Cycle Toggle */}
+          <div className="flex items-center justify-center gap-2 p-1 bg-dark-100 dark:bg-dark-800/90 rounded-2xl text-xs font-semibold max-w-xs mx-auto border border-dark-200/50 dark:border-dark-700/70">
+            <button
+              type="button"
+              onClick={() => setBillingCycle('monthly')}
+              className={`flex-1 py-1.5 px-3 rounded-xl transition-all cursor-pointer ${
+                billingCycle === 'monthly'
+                  ? 'bg-white dark:bg-dark-700 text-dark-900 dark:text-white shadow-xs'
+                  : 'text-dark-600 dark:text-dark-400 hover:text-dark-900 dark:hover:text-white'
+              }`}
+            >
+              Monthly
+            </button>
+            <button
+              type="button"
+              onClick={() => setBillingCycle('annual')}
+              className={`flex-1 py-1.5 px-3 rounded-xl transition-all flex items-center justify-center gap-1.5 cursor-pointer ${
+                billingCycle === 'annual'
+                  ? 'bg-amber-500 text-white shadow-xs font-bold'
+                  : 'text-dark-600 dark:text-dark-400 hover:text-dark-900 dark:hover:text-white'
+              }`}
+            >
+              <span>Annual</span>
+              <span className="text-[10px] px-1.5 py-0.2 bg-white/20 rounded-md font-bold">
+                Save 30%
               </span>
-              <span className="text-xs text-dark-500 font-medium">
-                {billingCycle === 'annual' ? '/ year ($8.25/mo)' : '/ month'}
-              </span>
-            </div>
+            </button>
           </div>
-          <div className="text-right">
-            <span className="text-[11px] font-bold text-emerald-700 bg-emerald-100/80 px-2 py-0.5 rounded-full border border-emerald-300">
-              {billingCycle === 'annual' ? '7-Day Free Trial' : 'Cancel Anytime'}
-            </span>
-          </div>
-        </div>
 
-        {/* Perks list */}
-        <div className="space-y-2.5">
-          {perks.map((p, idx) => (
-            <div key={idx} className="flex items-start gap-3 p-2 rounded-xl hover:bg-dark-50/80 transition-colors">
-              <div className="w-7 h-7 rounded-lg bg-amber-100 text-amber-800 flex items-center justify-center shrink-0 mt-0.5 border border-amber-200">
-                <p.icon className="w-3.5 h-3.5" />
-              </div>
-              <div>
-                <h4 className="text-xs font-bold text-dark-900">{p.title}</h4>
-                <p className="text-[11px] text-dark-500 leading-tight mt-0.5">{p.description}</p>
+          {/* Pricing Card */}
+          <div className="p-3.5 sm:p-4 rounded-2xl border-2 border-amber-400 dark:border-amber-500/50 bg-gradient-to-b from-amber-50/70 to-white dark:from-amber-950/40 dark:to-dark-800/90 flex items-center justify-between shadow-2xs">
+            <div>
+              <span className="text-[11px] font-bold uppercase tracking-wider text-amber-800 dark:text-amber-300">
+                {billingCycle === 'annual' ? 'Annual Plan' : 'Monthly Plan'}
+              </span>
+              <div className="flex items-baseline gap-1 mt-0.5">
+                <span className="text-2xl sm:text-3xl font-black text-dark-900 dark:text-white">
+                  {billingCycle === 'annual' ? '$99' : '$12'}
+                </span>
+                <span className="text-xs text-dark-500 dark:text-dark-400 font-medium">
+                  {billingCycle === 'annual' ? '/ year ($8.25/mo)' : '/ month'}
+                </span>
               </div>
             </div>
-          ))}
+            <div className="text-right">
+              <span className="text-[11px] font-bold text-emerald-700 dark:text-emerald-300 bg-emerald-100/80 dark:bg-emerald-950/80 px-2.5 py-1 rounded-full border border-emerald-300 dark:border-emerald-700/60 shadow-2xs">
+                {billingCycle === 'annual' ? '7-Day Free Trial' : 'Cancel Anytime'}
+              </span>
+            </div>
+          </div>
+
+          {/* Perks list */}
+          <div className="space-y-1.5">
+            {perks.map((p, idx) => (
+              <div key={idx} className="flex items-start gap-3 p-2 rounded-xl hover:bg-dark-50/80 dark:hover:bg-dark-800/60 transition-colors">
+                <div className="w-7 h-7 rounded-lg bg-amber-100 dark:bg-amber-950/70 text-amber-800 dark:text-amber-300 flex items-center justify-center shrink-0 mt-0.5 border border-amber-200 dark:border-amber-700/60">
+                  <p.icon className="w-3.5 h-3.5" />
+                </div>
+                <div>
+                  <h4 className="text-xs font-bold text-dark-900 dark:text-white">{p.title}</h4>
+                  <p className="text-[11px] text-dark-500 dark:text-dark-400 leading-tight mt-0.5">{p.description}</p>
+                </div>
+              </div>
+            ))}
+          </div>
         </div>
 
-        {/* Actions */}
-        <div className="space-y-2 pt-2 border-t border-dark-100">
+        {/* Fixed Footer / Actions */}
+        <div className="shrink-0 p-4 sm:p-5 pt-3 border-t border-dark-100 dark:border-dark-800 bg-white/70 dark:bg-dark-900/80 backdrop-blur-xs space-y-2">
           {!isPremium ? (
             <>
               <button
                 type="button"
                 onClick={handleSubscribe}
                 disabled={isProcessing}
-                className="w-full py-3 px-4 rounded-2xl bg-gradient-to-r from-amber-500 via-amber-600 to-amber-700 hover:brightness-110 active:scale-[0.99] text-white font-bold text-sm shadow-md shadow-amber-500/25 flex items-center justify-center gap-2 transition-all cursor-pointer"
+                className="w-full py-2.5 sm:py-3 px-4 rounded-2xl bg-gradient-to-r from-amber-500 via-amber-600 to-amber-700 hover:brightness-110 active:scale-[0.99] text-white font-bold text-sm shadow-md shadow-amber-500/25 flex items-center justify-center gap-2 transition-all cursor-pointer"
               >
                 <Zap className="w-4 h-4 fill-white" />
                 <span>{isProcessing ? 'Activating Pro...' : 'Activate QLearn Pro (1-Click Demo)'}</span>
               </button>
-              <p className="text-[10px] text-center text-dark-400">
+              <p className="text-[10px] text-center text-dark-400 dark:text-dark-500">
                 Instant trial demo activation • Zero credit card required for evaluation
               </p>
             </>
           ) : (
-            <div className="space-y-2 text-center">
-              <div className="p-3 rounded-xl bg-emerald-50 border border-emerald-200 text-emerald-800 text-xs font-semibold flex items-center justify-center gap-2">
-                <CheckCircle2 className="w-4 h-4 text-emerald-600" />
+            <div className="space-y-1.5 text-center">
+              <div className="p-2.5 rounded-xl bg-emerald-50 dark:bg-emerald-950/60 border border-emerald-200 dark:border-emerald-800/80 text-emerald-800 dark:text-emerald-300 text-xs font-semibold flex items-center justify-center gap-2">
+                <CheckCircle2 className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />
                 <span>You currently have active QLearn Pro status!</span>
               </div>
               <button
                 type="button"
                 onClick={handleDowngrade}
-                className="text-xs text-dark-500 hover:text-red-600 transition-colors underline"
+                className="text-xs text-dark-500 dark:text-dark-400 hover:text-red-600 dark:hover:text-red-400 transition-colors underline cursor-pointer"
               >
                 Switch back to Free tier (for testing)
               </button>
