@@ -29,16 +29,17 @@ export async function POST(req: NextRequest) {
 
     // ==========================================
     // SPECIAL CREDENTIALS CHECK
-    // Admin: admin@qlearn.com | Pass: admin123
-    // Instructor: instructor@qlearn.com | Pass: qlearn123
-    // Student Demo: student@qlearn.com | Pass: student123
+    // Admin: admin@quantabit.com / admin@qlearn.com | Pass: admin123
+    // Instructor: instructor@quantabit.com / instructor@qlearn.com | Pass: quantabit123 / qlearn123
+    // Student Demo: student@quantabit.com / student@qlearn.com | Pass: student123
     // ==========================================
     const isAdminCredentials =
-      normalizedEmail === 'admin@qlearn.com' && trimmedPassword === 'admin123';
+      (normalizedEmail === 'admin@quantabit.com' || normalizedEmail === 'admin@qlearn.com') && trimmedPassword === 'admin123';
     const isInstructorCredentials =
-      normalizedEmail === 'instructor@qlearn.com' && trimmedPassword === 'qlearn123';
+      (normalizedEmail === 'instructor@quantabit.com' || normalizedEmail === 'instructor@qlearn.com') &&
+      (trimmedPassword === 'quantabit123' || trimmedPassword === 'qlearn123');
     const isStudentCredentials =
-      normalizedEmail === 'student@qlearn.com' && trimmedPassword === 'student123';
+      (normalizedEmail === 'student@quantabit.com' || normalizedEmail === 'student@qlearn.com') && trimmedPassword === 'student123';
 
     if (action === 'signup') {
       if (!trimmedName || trimmedName.length < 2) {
@@ -118,7 +119,7 @@ export async function POST(req: NextRequest) {
         user = await (prisma.user as any).create({
           data: {
             name: 'System Administrator',
-            email: 'admin@qlearn.com',
+            email: normalizedEmail,
             passwordHash,
             role: 'ADMIN',
             lastActiveAt: new Date()
@@ -131,7 +132,7 @@ export async function POST(req: NextRequest) {
         user = await (prisma.user as any).create({
           data: {
             name: 'Instructor Admin',
-            email: 'instructor@qlearn.com',
+            email: normalizedEmail,
             passwordHash,
             role: 'EDUCATOR',
             lastActiveAt: new Date()
@@ -144,7 +145,7 @@ export async function POST(req: NextRequest) {
         user = await (prisma.user as any).create({
           data: {
             name: 'Alex Mercer (Student)',
-            email: 'student@qlearn.com',
+            email: normalizedEmail,
             passwordHash,
             role: 'STUDENT',
             lastActiveAt: new Date()

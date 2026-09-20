@@ -1,7 +1,7 @@
 import type { Metadata } from 'next';
 import Script from 'next/script';
 
-const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://www.qlearn.tech';
+const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://www.quantabit.tech';
 
 const breadcrumb = {
   '@context': 'https://schema.org',
@@ -23,7 +23,7 @@ const learningResource = {
   teaches: 'Quantum Circuit Design, Qiskit, Google Cirq, PennyLane, OpenQASM, Quantum Gates, Statevector',
   isAccessibleForFree: true,
   inLanguage: 'en',
-  provider: { '@type': 'EducationalOrganization', name: 'QLearn', url: siteUrl },
+  provider: { '@type': 'EducationalOrganization', name: 'QuantaBit', url: siteUrl },
 };
 
 export const metadata: Metadata = {
@@ -46,7 +46,7 @@ export const metadata: Metadata = {
   ],
   alternates: { canonical: '/simulator' },
   openGraph: {
-    title: 'Online Quantum Circuit Simulator (Qiskit, Cirq, PennyLane) | QLearn',
+    title: 'Online Quantum Circuit Simulator (Qiskit, Cirq, PennyLane) | QuantaBit',
     description: 'Interactive quantum circuit editor with instant code generation for IBM Qiskit, Google Cirq, and PennyLane.',
     url: '/simulator',
   },

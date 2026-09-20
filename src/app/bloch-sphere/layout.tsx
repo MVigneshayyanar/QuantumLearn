@@ -1,7 +1,7 @@
 import type { Metadata } from 'next';
 import Script from 'next/script';
 
-const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://www.qlearn.tech';
+const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://www.quantabit.tech';
 
 const breadcrumb = {
   '@context': 'https://schema.org',
@@ -23,7 +23,7 @@ const learningResource = {
   teaches: 'Bloch Sphere, Qubit Statevector, Quantum Superposition, Dirac Notation, Pauli Gates, Quantum Measurement',
   isAccessibleForFree: true,
   inLanguage: 'en',
-  provider: { '@type': 'EducationalOrganization', name: 'QLearn', url: siteUrl },
+  provider: { '@type': 'EducationalOrganization', name: 'QuantaBit', url: siteUrl },
 };
 
 export const metadata: Metadata = {
@@ -46,7 +46,7 @@ export const metadata: Metadata = {
   ],
   alternates: { canonical: '/bloch-sphere' },
   openGraph: {
-    title: '3D Bloch Sphere Simulator & Interactive Qubit Visualizer | QLearn',
+    title: '3D Bloch Sphere Simulator & Interactive Qubit Visualizer | QuantaBit',
     description: 'Real-time 3D Bloch sphere visualization. Control theta and phi angles, test quantum gates, and see qubit statevectors collapse upon measurement.',
     url: '/bloch-sphere',
   },

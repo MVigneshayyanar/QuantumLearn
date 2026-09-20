@@ -107,7 +107,7 @@ function CertificateCard({
 
         <div className="space-y-1">
           <p className="text-[10px] font-bold uppercase tracking-widest text-amber-700">Official Quantum Credential · Claimed</p>
-          <h3 className="text-xl font-black text-dark-900">QLearn Quantum Algorithm Mastery</h3>
+          <h3 className="text-xl font-black text-dark-900">QuantaBit Quantum Algorithm Mastery</h3>
           <p className="text-sm font-semibold text-dark-700">{moduleTitle}</p>
         </div>
 
@@ -448,7 +448,7 @@ export function SkillBaseStage({ moduleSlug, moduleTitle = 'Quantum Algorithm' }
               <Crown className="w-5 h-5" />
             </div>
             <div className="text-left">
-              <h4 className="text-xs font-black text-amber-950">Earn your Certificate with QLearn Pro</h4>
+              <h4 className="text-xs font-black text-amber-950">Earn your Certificate with QuantaBit Pro</h4>
               <p className="text-[11px] text-amber-800">
                 Complete all 10 practice problems and unlock a downloadable Algorithm Certificate.
               </p>

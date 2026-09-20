@@ -2,8 +2,8 @@ import { MetadataRoute } from 'next';
 
 export default function manifest(): MetadataRoute.Manifest {
   return {
-    name: 'QLearn - Quantum Algorithm Learning Platform',
-    short_name: 'QLearn',
+    name: 'QuantaBit - Quantum Algorithm Learning Platform',
+    short_name: 'QuantaBit',
     description: 'Master quantum algorithms through multi-simulator simulation, 3D Bloch sphere, and Schrödinger AI tutor.',
     start_url: '/',
     display: 'standalone',

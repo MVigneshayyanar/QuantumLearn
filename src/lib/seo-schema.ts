@@ -1,5 +1,5 @@
 /**
- * seo-schema.ts — Complete Schema.org JSON-LD Library for QLearn
+ * seo-schema.ts — Complete Schema.org JSON-LD Library for QuantaBit
  *
  * Structured data types in use:
  *  - WebSite (Sitelinks SearchBox for Google)
@@ -12,7 +12,7 @@
  *  - ItemList (algorithm list for Google carousel snippets)
  */
 
-export const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://www.qlearn.tech';
+export const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://www.quantabit.tech';
 
 const NOW = new Date().toISOString();
 
@@ -24,8 +24,8 @@ export const websiteSchema = {
   '@type': 'WebSite',
   '@id': `${siteUrl}/#website`,
   url: siteUrl,
-  name: 'QLearn',
-  alternateName: ['QuantumLearn', 'QLearn.tech', 'qlearn.tech', 'quantum learn'],
+  name: 'QuantaBit',
+  alternateName: ['QLearn', 'QuantumLearn', 'QuantaBit.tech', 'quantabit.tech', 'qlearn.tech', 'quantum learn'],
   description:
     'Free interactive quantum computing platform with 3D Bloch spheres, multi-simulator engine (Qiskit, Cirq, PennyLane), and Socratic AI tutoring.',
   inLanguage: 'en-US',
@@ -34,7 +34,7 @@ export const websiteSchema = {
   publisher: {
     '@type': 'EducationalOrganization',
     '@id': `${siteUrl}/#organization`,
-    name: 'QLearn',
+    name: 'QuantaBit',
     url: siteUrl,
     logo: {
       '@type': 'ImageObject',
@@ -66,8 +66,8 @@ export const organizationSchema = {
   '@context': 'https://schema.org',
   '@type': 'EducationalOrganization',
   '@id': `${siteUrl}/#organization`,
-  name: 'QLearn',
-  legalName: 'QLearn Interactive Quantum Education Platform',
+  name: 'QuantaBit',
+  legalName: 'QuantaBit Interactive Quantum Education Platform',
   url: siteUrl,
   logo: {
     '@type': 'ImageObject',
@@ -94,7 +94,7 @@ export const organizationSchema = {
   ],
   sameAs: [
     'https://github.com/MVigneshayyanar/QuantumLearn',
-    'https://twitter.com/qlearn_tech',
+    'https://twitter.com/quantabit_tech',
   ],
   contactPoint: {
     '@type': 'ContactPoint',
@@ -109,7 +109,7 @@ export const organizationSchema = {
 export const softwareApplicationSchema = {
   '@context': 'https://schema.org',
   '@type': 'SoftwareApplication',
-  name: 'QLearn — Quantum Circuit Simulator & 3D Bloch Sphere',
+  name: 'QuantaBit — Quantum Circuit Simulator & 3D Bloch Sphere',
   applicationCategory: 'EducationalApplication',
   applicationSubCategory: 'Quantum Computing Simulator',
   operatingSystem: 'Any (Web Browser)',
@@ -148,7 +148,7 @@ export const softwareApplicationSchema = {
     'Interactive web-based quantum circuit simulator supporting IBM Qiskit, Google Cirq, and Xanadu PennyLane code export with real-time 3D Bloch sphere statevector rendering.',
   author: {
     '@type': 'Organization',
-    name: 'QLearn',
+    name: 'QuantaBit',
   },
   datePublished: '2024-01-01',
   dateModified: NOW,
@@ -175,7 +175,7 @@ export const courseSchemaList = [
       { '@type': 'Thing', name: 'Quantum Superposition' },
       { '@type': 'Thing', name: 'Dirac Notation' },
     ],
-    provider: { '@type': 'EducationalOrganization', name: 'QLearn', sameAs: siteUrl },
+    provider: { '@type': 'EducationalOrganization', name: 'QuantaBit', sameAs: siteUrl },
     hasCourseInstance: { '@type': 'CourseInstance', courseMode: 'online', courseWorkload: 'PT1H' },
   },
   {
@@ -194,7 +194,7 @@ export const courseSchemaList = [
       { '@type': 'Thing', name: 'Quantum Search' },
       { '@type': 'Thing', name: 'Amplitude Amplification' },
     ],
-    provider: { '@type': 'EducationalOrganization', name: 'QLearn', sameAs: siteUrl },
+    provider: { '@type': 'EducationalOrganization', name: 'QuantaBit', sameAs: siteUrl },
     hasCourseInstance: { '@type': 'CourseInstance', courseMode: 'online', courseWorkload: 'PT2H' },
   },
   {
@@ -213,7 +213,7 @@ export const courseSchemaList = [
       { '@type': 'Thing', name: 'Quantum Parallelism' },
       { '@type': 'Thing', name: 'Quantum Oracle' },
     ],
-    provider: { '@type': 'EducationalOrganization', name: 'QLearn', sameAs: siteUrl },
+    provider: { '@type': 'EducationalOrganization', name: 'QuantaBit', sameAs: siteUrl },
     hasCourseInstance: { '@type': 'CourseInstance', courseMode: 'online', courseWorkload: 'PT1H30M' },
   },
   {
@@ -232,7 +232,7 @@ export const courseSchemaList = [
       { '@type': 'Thing', name: 'Bell State' },
       { '@type': 'Thing', name: 'Quantum Entanglement' },
     ],
-    provider: { '@type': 'EducationalOrganization', name: 'QLearn', sameAs: siteUrl },
+    provider: { '@type': 'EducationalOrganization', name: 'QuantaBit', sameAs: siteUrl },
     hasCourseInstance: { '@type': 'CourseInstance', courseMode: 'online', courseWorkload: 'PT2H' },
   },
   {
@@ -251,7 +251,7 @@ export const courseSchemaList = [
       { '@type': 'Thing', name: 'Quantum Communication' },
       { '@type': 'Thing', name: 'Quantum Entanglement' },
     ],
-    provider: { '@type': 'EducationalOrganization', name: 'QLearn', sameAs: siteUrl },
+    provider: { '@type': 'EducationalOrganization', name: 'QuantaBit', sameAs: siteUrl },
     hasCourseInstance: { '@type': 'CourseInstance', courseMode: 'online', courseWorkload: 'PT1H30M' },
   },
 ];
@@ -263,7 +263,7 @@ export const courseSchemaList = [
 export const algorithmListSchema = {
   '@context': 'https://schema.org',
   '@type': 'ItemList',
-  name: 'Quantum Algorithm Learning Modules on QLearn',
+  name: 'Quantum Algorithm Learning Modules on QuantaBit',
   description: 'Interactive step-by-step quantum algorithm tutorials with circuit simulation, Bloch sphere visualization, and AI tutor feedback.',
   url: siteUrl,
   numberOfItems: 5,
@@ -313,21 +313,21 @@ export const algorithmListSchema = {
 export const howToSchema = {
   '@context': 'https://schema.org',
   '@type': 'HowTo',
-  name: 'How to Build and Simulate a Quantum Circuit on QLearn',
+  name: 'How to Build and Simulate a Quantum Circuit on QuantaBit',
   description:
-    'Step-by-step guide to building quantum circuits, applying quantum gates, and exporting to IBM Qiskit, Google Cirq, or PennyLane using the QLearn online simulator.',
+    'Step-by-step guide to building quantum circuits, applying quantum gates, and exporting to IBM Qiskit, Google Cirq, or PennyLane using the QuantaBit online simulator.',
   image: `${siteUrl}/og-image.png`,
   totalTime: 'PT15M',
   estimatedCost: { '@type': 'MonetaryAmount', currency: 'USD', value: '0' },
   supply: [
     { '@type': 'HowToSupply', name: 'Modern web browser (Chrome, Firefox, Edge, Safari)' },
-    { '@type': 'HowToSupply', name: 'Free QLearn account (optional, for saving circuits)' },
+    { '@type': 'HowToSupply', name: 'Free QuantaBit account (optional, for saving circuits)' },
   ],
   step: [
     {
       '@type': 'HowToStep',
       name: 'Open the Quantum Circuit Builder',
-      text: 'Navigate to https://qlearn.tech/simulator to open the drag-and-drop quantum circuit editor.',
+      text: 'Navigate to https://quantabit.tech/simulator to open the drag-and-drop quantum circuit editor.',
       url: `${siteUrl}/simulator`,
       position: 1,
     },
@@ -362,15 +362,15 @@ export const faqSchema = {
   mainEntity: [
     {
       '@type': 'Question',
-      name: 'What is QLearn and how does it help learn quantum computing?',
+      name: 'What is QuantaBit and how does it help learn quantum computing?',
       acceptedAnswer: {
         '@type': 'Answer',
-        text: 'QLearn is a free AI-powered interactive quantum computing learning platform. It lets you visualize qubits in real-time 3D using the Bloch sphere, build quantum circuits with multi-backend simulation (IBM Qiskit, Google Cirq, Xanadu PennyLane), and get guided Socratic hints from the Schrödinger AI tutor — all directly in your browser.',
+        text: 'QuantaBit is a free AI-powered interactive quantum computing learning platform. It lets you visualize qubits in real-time 3D using the Bloch sphere, build quantum circuits with multi-backend simulation (IBM Qiskit, Google Cirq, Xanadu PennyLane), and get guided Socratic hints from the Schrödinger AI tutor — all directly in your browser.',
       },
     },
     {
       '@type': 'Question',
-      name: 'Is QLearn completely free to use?',
+      name: 'Is QuantaBit completely free to use?',
       acceptedAnswer: {
         '@type': 'Answer',
         text: 'Yes! All core features are completely free: interactive algorithm tutorials, 3D Bloch sphere simulations, the quantum circuit builder, algorithm modules (Deutsch-Jozsa, Grover, Teleportation, Superdense Coding), practice problems, and AI tutor hints.',
@@ -378,10 +378,10 @@ export const faqSchema = {
     },
     {
       '@type': 'Question',
-      name: 'Which quantum programming frameworks does QLearn support?',
+      name: 'Which quantum programming frameworks does QuantaBit support?',
       acceptedAnswer: {
         '@type': 'Answer',
-        text: 'QLearn generates and exports quantum circuit code for IBM Qiskit, Google Cirq, and Xanadu PennyLane. It also exports OpenQASM 2.0 and 3.0 format circuits. All generated code is copy-pasteable and runnable on real quantum hardware or local simulators.',
+        text: 'QuantaBit generates and exports quantum circuit code for IBM Qiskit, Google Cirq, and Xanadu PennyLane. It also exports OpenQASM 2.0 and 3.0 format circuits. All generated code is copy-pasteable and runnable on real quantum hardware or local simulators.',
       },
     },
     {
@@ -389,15 +389,15 @@ export const faqSchema = {
       name: 'What is a Bloch Sphere in quantum computing?',
       acceptedAnswer: {
         '@type': 'Answer',
-        text: 'The Bloch sphere is a geometric representation of the pure state space of a single qubit (two-level quantum system). The north pole (|0⟩) represents the ground state, the south pole (|1⟩) the excited state, and any superposition state lies on the surface of the sphere. The polar angle θ (theta) controls the probability amplitudes while φ (phi) is the relative phase. You can explore this interactively at https://qlearn.tech/bloch-sphere.',
+        text: 'The Bloch sphere is a geometric representation of the pure state space of a single qubit (two-level quantum system). The north pole (|0⟩) represents the ground state, the south pole (|1⟩) the excited state, and any superposition state lies on the surface of the sphere. The polar angle θ (theta) controls the probability amplitudes while φ (phi) is the relative phase. You can explore this interactively at https://quantabit.tech/bloch-sphere.',
       },
     },
     {
       '@type': 'Question',
-      name: 'What quantum algorithms can I learn on QLearn?',
+      name: 'What quantum algorithms can I learn on QuantaBit?',
       acceptedAnswer: {
         '@type': 'Answer',
-        text: 'QLearn currently offers interactive modules for: Deutsch-Jozsa Algorithm (quantum parallelism), Grover\'s Quantum Search (amplitude amplification, O(√N) speedup), Quantum Teleportation (Bell state entanglement), and Superdense Coding (quantum communication protocol). Quantum Fourier Transform (QFT), Shor\'s Algorithm, and Variational Quantum Eigensolver (VQE) are coming soon.',
+        text: 'QuantaBit currently offers interactive modules for: Deutsch-Jozsa Algorithm (quantum parallelism), Grover\'s Quantum Search (amplitude amplification, O(√N) speedup), Quantum Teleportation (Bell state entanglement), and Superdense Coding (quantum communication protocol). Quantum Fourier Transform (QFT), Shor\'s Algorithm, and Variational Quantum Eigensolver (VQE) are coming soon.',
       },
     },
     {
@@ -410,10 +410,10 @@ export const faqSchema = {
     },
     {
       '@type': 'Question',
-      name: 'What is quantum entanglement and how does QLearn demonstrate it?',
+      name: 'What is quantum entanglement and how does QuantaBit demonstrate it?',
       acceptedAnswer: {
         '@type': 'Answer',
-        text: 'Quantum entanglement is a phenomenon where two or more qubits become correlated so strongly that the quantum state of each cannot be described independently. In QLearn, you can create Bell states (maximally entangled pairs) in the circuit simulator by applying a Hadamard gate followed by a CNOT gate. The Quantum Teleportation and Superdense Coding modules heavily rely on entanglement.',
+        text: 'Quantum entanglement is a phenomenon where two or more qubits become correlated so strongly that the quantum state of each cannot be described independently. In QuantaBit, you can create Bell states (maximally entangled pairs) in the circuit simulator by applying a Hadamard gate followed by a CNOT gate. The Quantum Teleportation and Superdense Coding modules heavily rely on entanglement.',
       },
     },
     {
@@ -426,10 +426,10 @@ export const faqSchema = {
     },
     {
       '@type': 'Question',
-      name: 'Can I use QLearn without any prior quantum computing knowledge?',
+      name: 'Can I use QuantaBit without any prior quantum computing knowledge?',
       acceptedAnswer: {
         '@type': 'Answer',
-        text: 'Absolutely! QLearn is designed for all skill levels. Every module has a "Simple Mode" with intuitive analogies and everyday language, and an "Advanced / Math Mode" with full Dirac notation, unitary matrices, and Schrödinger equation formulations. The Schrödinger AI tutor also adapts its hints to your level.',
+        text: 'Absolutely! QuantaBit is designed for all skill levels. Every module has a "Simple Mode" with intuitive analogies and everyday language, and an "Advanced / Math Mode" with full Dirac notation, unitary matrices, and Schrödinger equation formulations. The Schrödinger AI tutor also adapts its hints to your level.',
       },
     },
     {
@@ -437,7 +437,7 @@ export const faqSchema = {
       name: "What is Grover's Algorithm and what speedup does it offer?",
       acceptedAnswer: {
         '@type': 'Answer',
-        text: "Grover's Algorithm is a quantum search algorithm that finds a marked item in an unsorted database of N items in O(√N) queries, compared to O(N) for classical brute-force search — a quadratic speedup. It uses amplitude amplification, oracle phase inversion, and the Grover diffusion operator. Explore it interactively at https://qlearn.tech/learn/grover.",
+        text: "Grover's Algorithm is a quantum search algorithm that finds a marked item in an unsorted database of N items in O(√N) queries, compared to O(N) for classical brute-force search — a quadratic speedup. It uses amplitude amplification, oracle phase inversion, and the Grover diffusion operator. Explore it interactively at https://quantabit.tech/learn/grover.",
       },
     },
   ],

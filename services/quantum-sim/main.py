@@ -11,7 +11,7 @@ from circuits.algorithms import get_algorithm_simulation
 from simulate.engine import simulate_circuit
 
 app = FastAPI(
-    title="QLearn Simulation Microservice",
+    title="QuantaBit Simulation Microservice",
     description="High-fidelity quantum circuit simulation powered by Qiskit",
     version="1.0.0"
 )

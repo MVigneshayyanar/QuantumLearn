@@ -1,7 +1,7 @@
 const rawTranslations = {
   en: {
     nav: {
-      brand: "QLearn",
+      brand: "QuantaBit",
       tagline: "Interactive Quantum Computing",
       home: "Home",
       algorithms: "Algorithms",
@@ -94,7 +94,7 @@ const rawTranslations = {
   },
   hi: {
     nav: {
-      brand: "क्वांटम लर्न (QLearn)",
+      brand: "क्वांटाबिट (QuantaBit)",
       tagline: "इंटरैक्टिव क्वांटम कंप्यूटिंग",
       home: "होम",
       algorithms: "एल्गोरिदम",
@@ -187,7 +187,7 @@ const rawTranslations = {
   },
   es: {
     nav: {
-      brand: "QLearn",
+      brand: "QuantaBit",
       tagline: "Computación Cuántica Interactiva",
       home: "Inicio",
       algorithms: "Algoritmos",
@@ -280,7 +280,7 @@ const rawTranslations = {
   },
   fr: {
     nav: {
-      brand: "QLearn",
+      brand: "QuantaBit",
       tagline: "Informatique Quantique Interactive",
       home: "Accueil",
       algorithms: "Algorithmes",
@@ -373,7 +373,7 @@ const rawTranslations = {
   },
   de: {
     nav: {
-      brand: "QLearn",
+      brand: "QuantaBit",
       tagline: "Interaktives Quantencomputing",
       home: "Startseite",
       algorithms: "Algorithmen",
@@ -466,7 +466,7 @@ const rawTranslations = {
   },
   ta: {
     nav: {
-      brand: "குவாண்டம் லேர்ன் (QLearn)",
+      brand: "குவாண்டாபிட் (QuantaBit)",
       tagline: "ஊடாடும் குவாண்டம் கணினியியல்",
       home: "முகப்பு",
       algorithms: "அல்காரிதம்கள்",
@@ -559,7 +559,7 @@ const rawTranslations = {
   },
   te: {
     nav: {
-      brand: "క్వాంటం లెర్న్ (QLearn)",
+      brand: "క్వాంటాబిట్ (QuantaBit)",
       tagline: "ఇంటరాక్టివ్ క్వాంటం కంప్యూటింగ్",
       home: "హోమ్",
       algorithms: "అల్గారిథమ్స్",
@@ -652,7 +652,7 @@ const rawTranslations = {
   },
   ja: {
     nav: {
-      brand: "QLearn",
+      brand: "QuantaBit",
       tagline: "インタラクティブ量子コンピューティング",
       home: "ホーム",
       algorithms: "アルゴリズム",
@@ -745,7 +745,7 @@ const rawTranslations = {
   },
   "zh-CN": {
     nav: {
-      brand: "QLearn 量子学堂",
+      brand: "QuantaBit 量子学堂",
       tagline: "交互式量子计算学习平台",
       home: "首页",
       algorithms: "量子算法",

@@ -1,7 +1,7 @@
 import type { Metadata } from 'next';
 import Script from 'next/script';
 
-const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://www.qlearn.tech';
+const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://www.quantabit.tech';
 
 const breadcrumb = {
   '@context': 'https://schema.org',
@@ -24,7 +24,7 @@ const learningResource = {
   teaches: 'Superdense Coding, Quantum Communication, Bell Basis Measurement, Quantum Entanglement, Pauli Gate Encoding',
   isAccessibleForFree: true,
   inLanguage: 'en',
-  provider: { '@type': 'EducationalOrganization', name: 'QLearn', url: siteUrl },
+  provider: { '@type': 'EducationalOrganization', name: 'QuantaBit', url: siteUrl },
 };
 
 export const metadata: Metadata = {
@@ -43,7 +43,7 @@ export const metadata: Metadata = {
   ],
   alternates: { canonical: '/learn/superdense-coding' },
   openGraph: {
-    title: 'Superdense Coding Protocol Simulator & Guide | QLearn',
+    title: 'Superdense Coding Protocol Simulator & Guide | QuantaBit',
     description: 'Learn how to transmit two classical bits with one entangled qubit using the superdense coding quantum circuit.',
     url: '/learn/superdense-coding',
   },

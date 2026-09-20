@@ -19,7 +19,7 @@ export const metadata: Metadata = {
     canonical: '/practice',
   },
   openGraph: {
-    title: 'Quantum Computing Practice Problems & Challenges | QLearn',
+    title: 'Quantum Computing Practice Problems & Challenges | QuantaBit',
     description:
       'Solve interactive quantum computing problems with instant feedback and Socratic AI hints.',
     url: '/practice',

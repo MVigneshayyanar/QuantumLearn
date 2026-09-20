@@ -1,7 +1,7 @@
 import type { Metadata } from 'next';
 
 export const metadata: Metadata = {
-  title: 'Certificate Verification | QLearn',
+  title: 'Certificate Verification | QuantaBit',
   robots: {
     index: false,
     follow: true,

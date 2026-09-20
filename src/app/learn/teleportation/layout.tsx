@@ -1,7 +1,7 @@
 import type { Metadata } from 'next';
 import Script from 'next/script';
 
-const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://www.qlearn.tech';
+const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://www.quantabit.tech';
 
 const breadcrumb = {
   '@context': 'https://schema.org',
@@ -24,7 +24,7 @@ const learningResource = {
   teaches: 'Quantum Teleportation, Bell State, EPR Pairs, No-Cloning Theorem, Quantum Entanglement',
   isAccessibleForFree: true,
   inLanguage: 'en',
-  provider: { '@type': 'EducationalOrganization', name: 'QLearn', url: siteUrl },
+  provider: { '@type': 'EducationalOrganization', name: 'QuantaBit', url: siteUrl },
 };
 
 export const metadata: Metadata = {
@@ -44,7 +44,7 @@ export const metadata: Metadata = {
   ],
   alternates: { canonical: '/learn/teleportation' },
   openGraph: {
-    title: 'Quantum Teleportation Protocol Simulator | QLearn',
+    title: 'Quantum Teleportation Protocol Simulator | QuantaBit',
     description: 'Step-by-step interactive simulator transmitting unknown quantum states through Bell-state entanglement and classical bits.',
     url: '/learn/teleportation',
   },

@@ -47,6 +47,7 @@ export async function verifyInstructorAccess(req: NextRequest): Promise<AuthChec
       user.role === 'EDUCATOR' ||
       user.role === 'ADMIN' ||
       (user.role as string) === 'INSTRUCTOR' ||
+      user.email === 'instructor@quantabit.com' ||
       user.email === 'instructor@qlearn.com';
 
     if (!isAuthorized) {
@@ -112,7 +113,7 @@ export async function verifyAdminAccess(req: NextRequest): Promise<AuthCheckResu
       };
     }
 
-    const isAuthorized = user.role === 'ADMIN' || user.email === 'admin@qlearn.com';
+    const isAuthorized = user.role === 'ADMIN' || user.email === 'admin@quantabit.com' || user.email === 'admin@qlearn.com';
 
     if (!isAuthorized) {
       return {

@@ -54,15 +54,15 @@ export default function AboutPage() {
         <div className="relative z-10 max-w-3xl space-y-4">
           <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/10 text-indigo-200 text-xs font-semibold backdrop-blur-xs border border-white/10">
             <Compass className="w-3.5 h-3.5 text-indigo-300" />
-            <span>The Story & Mission Behind QLearn</span>
+            <span>The Story & Mission Behind QuantaBit</span>
           </div>
 
           <h1 className="text-3xl sm:text-4xl lg:text-5xl font-extrabold tracking-tight leading-tight">
-            Why We Created QLearn: Demystifying Quantum Computing for Everyone
+            Why We Created QuantaBit: Demystifying Quantum Computing for Everyone
           </h1>
 
           <p className="text-base sm:text-lg text-indigo-100/90 leading-relaxed">
-            Quantum computing is often taught as an impenetrable fortress of dense linear algebra, complex numbers, and abstract tensor products. We created QLearn to dismantle that barrier—transforming abstract Hilbert spaces into interactive 3D geometry, hands-on circuit simulation, and personalized Socratic AI tutoring.
+            Quantum computing is often taught as an impenetrable fortress of dense linear algebra, complex numbers, and abstract tensor products. We created QuantaBit to dismantle that barrier—transforming abstract Hilbert spaces into interactive 3D geometry, hands-on circuit simulation, and personalized Socratic AI tutoring.
           </p>
 
           <div className="pt-2 flex flex-wrap items-center gap-3">
@@ -629,7 +629,7 @@ export default function AboutPage() {
           <div className="p-5 rounded-xl bg-primary-50/40 border border-primary-100 space-y-2.5">
             <h3 className="font-bold text-primary-950 flex items-center gap-2">
               <span className="w-2 h-2 rounded-full bg-primary-600" />
-              The QLearn Interactive Paradigm
+              The QuantaBit Interactive Paradigm
             </h3>
             <p>
               We realized that single-qubit quantum gates are literally <strong>3D spatial rotations</strong> on a sphere! By giving users a 3D unit sphere with 6 dynamically projected poles (<MathRenderer text="$\pm Z, \pm X, \pm Y$" />) and real-time sweep arcs, quantum phase angles cease to be abstract complex phases and become tangible coordinates.
@@ -641,11 +641,11 @@ export default function AboutPage() {
         </div>
       </section>
 
-      {/* How to Use QLearn Properly: The 4-Stage Pathway */}
+      {/* How to Use QuantaBit Properly: The 4-Stage Pathway */}
       <section className="space-y-4">
         <div>
           <span className="text-xs font-bold uppercase tracking-wider text-primary-600">User Guide</span>
-          <h2 className="text-2xl font-bold text-dark-900">How to Use QLearn Properly (The 4-Stage Pathway)</h2>
+          <h2 className="text-2xl font-bold text-dark-900">How to Use QuantaBit Properly (The 4-Stage Pathway)</h2>
           <p className="text-xs sm:text-sm text-dark-600">
             Follow this structured sequence to build true, intuitive quantum mastery from ground principles.
           </p>
@@ -740,7 +740,7 @@ export default function AboutPage() {
 
       {/* Role-Based Instructions */}
       <section className="bg-white rounded-2xl border border-dark-200 p-6 sm:p-8 shadow-xs space-y-4">
-        <h2 className="text-xl font-bold text-dark-900">How Different Users Can Use QLearn</h2>
+        <h2 className="text-xl font-bold text-dark-900">How Different Users Can Use QuantaBit</h2>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 pt-2">
           {/* For Students */}
           <div className="space-y-2 p-4 rounded-xl bg-dark-50 border border-dark-100">
@@ -775,7 +775,7 @@ export default function AboutPage() {
               <span>For Educators & Instructors</span>
             </div>
             <ul className="text-xs text-dark-600 space-y-1.5 list-disc pl-4">
-              <li>Sign in as an Instructor (`instructor@qlearn.com`) to access the <strong>Instructor Dashboard</strong>.</li>
+              <li>Sign in as an Instructor (`instructor@quantabit.com`) to access the <strong>Instructor Dashboard</strong>.</li>
               <li>Map students to your class cohort, seed sample test rosters, and diagnose common misconceptions.</li>
               <li>Monitor real-time completion rates across all curriculum modules.</li>
             </ul>
@@ -789,7 +789,7 @@ export default function AboutPage() {
           <span className="text-xs font-bold uppercase tracking-wider text-primary-400">Engineering & Design</span>
           <h2 className="text-xl sm:text-2xl font-bold">Behind the Platform Technology</h2>
           <p className="text-xs sm:text-sm text-dark-400">
-            QLearn combines cutting-edge web rendering with rigorous scientific Python simulation backends.
+            QuantaBit combines cutting-edge web rendering with rigorous scientific Python simulation backends.
           </p>
         </div>
 

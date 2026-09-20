@@ -105,7 +105,7 @@ export function QuantumCertificateModal({
                 </span>
               </div>
               <p className="text-[10px] text-dark-400 truncate">
-                QLearn Quantum Computing Institute &amp; Schrödinger AI
+                QuantaBit Quantum Computing Institute &amp; Schrödinger AI
               </p>
             </div>
           </div>
@@ -160,7 +160,7 @@ export function QuantumCertificateModal({
                   <Sparkles className="w-3 h-3" />
                 </div>
                 <span className="font-mono text-[9px] font-bold tracking-[0.2em] uppercase text-amber-800">
-                  QLEARN QUANTUM INSTITUTE
+                  QUANTABIT QUANTUM INSTITUTE
                 </span>
               </div>
               <h1 className="text-sm sm:text-base font-black text-dark-950 uppercase tracking-widest font-serif">
@@ -216,7 +216,7 @@ export function QuantumCertificateModal({
               {/* Signature 2 */}
               <div className="space-y-0.5 text-center w-24 sm:w-28">
                 <div className="font-serif italic text-xs text-dark-800 font-bold border-b border-dark-300 pb-0.5">
-                  QLearn Faculty
+                  QuantaBit Faculty
                 </div>
                 <p className="text-[7px] text-dark-500 font-mono">{issueDate}</p>
               </div>
@@ -226,7 +226,7 @@ export function QuantumCertificateModal({
             <div className="mt-2 pt-1.5 border-t border-amber-100 flex items-center justify-between text-[7px] text-dark-500 font-mono">
               <span className="truncate">ID: {credentialId}</span>
               <span className="hidden sm:inline">SHA-256 VALIDATED</span>
-              <span>QLEARN</span>
+              <span>QUANTABIT</span>
             </div>
           </div>
         </div>

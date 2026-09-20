@@ -23,7 +23,7 @@ export function Footer() {
         <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
           {/* Brand column */}
           <div className="space-y-3">
-            <Link href="/" className="flex items-center gap-2 w-fit" aria-label="QLearn - Quantum Computing Learning Platform">
+            <Link href="/" className="flex items-center gap-2 w-fit" aria-label="QuantaBit - Quantum Computing Learning Platform">
               <div className="w-7 h-7 rounded-lg bg-primary-600 text-white flex items-center justify-center">
                 <Atom className="w-4 h-4" />
               </div>
@@ -33,7 +33,7 @@ export function Footer() {
               Free interactive quantum computing education platform with multi-backend simulation (Qiskit, Cirq, PennyLane), real-time 3D Bloch sphere visualization, and Schrödinger AI tutoring.
             </p>
             <address className="not-italic text-dark-400 text-[11px] space-y-0.5">
-              <p>© {new Date().getFullYear()} QLearn — qlearn.tech</p>
+              <p>© {new Date().getFullYear()} QuantaBit — quantabit.tech</p>
               <p>Open access quantum education, worldwide.</p>
             </address>
           </div>
@@ -86,7 +86,7 @@ export function Footer() {
               </li>
               <li>
                 <Link href="/about" className="hover:text-primary-600 dark:hover:text-primary-400 transition-colors font-medium text-primary-700 dark:text-primary-400">
-                  About QLearn — Platform & Mission
+                  About QuantaBit — Platform & Mission
                 </Link>
               </li>
               <li>
@@ -127,7 +127,7 @@ export function Footer() {
           <p>
             Learn quantum computing free at{' '}
             <Link href="/" className="text-primary-700 font-semibold hover:underline">
-              qlearn.tech
+              quantabit.tech
             </Link>
             {' '}— Deutsch-Jozsa, Grover&apos;s Search, Quantum Teleportation, Superdense Coding.
           </p>

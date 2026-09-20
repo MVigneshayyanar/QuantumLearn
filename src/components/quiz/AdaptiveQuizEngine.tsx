@@ -443,7 +443,7 @@ Could you teach me the core quantum principles behind these mistakes in simple t
                 <span className="text-[10px] font-extrabold tracking-wider uppercase px-2 py-0.5 rounded-md bg-amber-200 text-amber-900 border border-amber-300">
                   Official Quantum Credential
                 </span>
-                <span className="text-[11px] font-bold text-amber-800">QLearn Quantum Academy</span>
+                <span className="text-[11px] font-bold text-amber-800">QuantaBit Quantum Academy</span>
               </div>
               <h4 className="text-sm sm:text-base font-black text-dark-900 mt-0.5">
                 {moduleTitle || (moduleSlug.includes('grover') ? "Grover's Algorithm" : 'Quantum Algorithm')} Certification

@@ -177,7 +177,7 @@ export default function AdminPortalPage() {
         <div className="space-y-2">
           <h1 className="text-2xl font-bold text-dark-900">Administrator Access Required</h1>
           <p className="text-sm text-dark-600 max-w-md mx-auto">
-            This management console is restricted to system administrators (`admin@qlearn.com`). Please sign in with an authorized administrator account to manage instructors and cohorts.
+            This management console is restricted to system administrators (`admin@quantabit.com`). Please sign in with an authorized administrator account to manage instructors and cohorts.
           </p>
         </div>
         <div className="flex items-center justify-center gap-3 pt-2">

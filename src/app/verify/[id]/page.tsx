@@ -123,7 +123,7 @@ function CertificateVerificationContent() {
           </Link>
 
           <span className="text-xs font-mono text-dark-400">
-            QLearn Public Credential Registry
+            QuantaBit Public Credential Registry
           </span>
         </div>
 
@@ -147,10 +147,10 @@ function CertificateVerificationContent() {
                   </span>
                 </div>
                 <h1 className="text-xl sm:text-2xl font-black text-dark-900 tracking-tight">
-                  Official QLearn Quantum Credential
+                  Official QuantaBit Quantum Credential
                 </h1>
                 <p className="text-xs text-dark-600">
-                  This cryptographic credential has been issued by QLearn Quantum Institute &amp; Schrödinger AI Lab.
+                  This cryptographic credential has been issued by QuantaBit Quantum Institute &amp; Schrödinger AI Lab.
                 </p>
               </div>
             </div>
@@ -228,7 +228,7 @@ function CertificateVerificationContent() {
                   <Sparkles className="w-4 h-4" />
                 </div>
                 <span className="font-mono text-[11px] font-bold tracking-[0.25em] uppercase text-amber-800">
-                  QLEARN QUANTUM INSTITUTE
+                  QUANTABIT QUANTUM INSTITUTE
                 </span>
               </div>
               <h2 className="text-2xl sm:text-3xl font-black text-dark-950 uppercase tracking-widest font-serif">
@@ -290,7 +290,7 @@ function CertificateVerificationContent() {
               {/* Signature 2 */}
               <div className="space-y-1 text-center w-36 sm:w-44">
                 <div className="font-serif italic text-base sm:text-lg text-dark-800 font-bold border-b border-dark-300 pb-0.5">
-                  QLearn Faculty
+                  QuantaBit Faculty
                 </div>
                 <p className="text-[9px] font-bold uppercase tracking-wider text-dark-700">
                   Director of Quantum Curriculum
@@ -303,7 +303,7 @@ function CertificateVerificationContent() {
             <div className="mt-3 pt-2 border-t border-amber-100 flex items-center justify-between text-[8px] text-dark-500 font-mono">
               <span>CREDENTIAL ID: {decodedId}</span>
               <span>VERIFICATION LEDGER: SHA-256 VALIDATED</span>
-              <span>ISSUED BY QLEARN PLATFORM</span>
+              <span>ISSUED BY QUANTABIT PLATFORM</span>
             </div>
           </div>
         </div>

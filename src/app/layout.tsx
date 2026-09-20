@@ -31,8 +31,8 @@ export const viewport: Viewport = {
 export const metadata: Metadata = {
   metadataBase: new URL(siteUrl),
   title: {
-    default: 'QLearn | Learn Quantum Computing Online - 3D Bloch Sphere & Circuit Simulator',
-    template: '%s | QLearn',
+    default: 'QuantaBit | Learn Quantum Computing Online - 3D Bloch Sphere & Circuit Simulator',
+    template: '%s | QuantaBit',
   },
   description:
     'Master quantum algorithms through multi-simulator execution (IBM Qiskit, Google Cirq, Xanadu PennyLane), interactive 3D Bloch spheres, and Schrödinger AI tutoring. Learn Grover, Deutsch-Jozsa, quantum teleportation, and superdense coding online.',
@@ -71,6 +71,8 @@ export const metadata: Metadata = {
     'quantum computing tutorial',
     'quantum computing course',
     'quantum education',
+    'quantabit',
+    'quantabit tech',
     'qlearn',
     'qlearn tech',
     'quantum python',
@@ -78,10 +80,10 @@ export const metadata: Metadata = {
     'quantum phase kickback',
     'amplitude amplification',
   ],
-  authors: [{ name: 'QLearn Team', url: siteUrl }],
-  creator: 'QLearn',
-  publisher: 'QLearn',
-  applicationName: 'QLearn',
+  authors: [{ name: 'QuantaBit Team', url: siteUrl }],
+  creator: 'QuantaBit',
+  publisher: 'QuantaBit',
+  applicationName: 'QuantaBit',
   category: 'Quantum Computing Education',
   classification: 'Educational Technology',
   alternates: {
@@ -94,8 +96,8 @@ export const metadata: Metadata = {
     type: 'website',
     locale: 'en_US',
     url: siteUrl,
-    siteName: 'QLearn',
-    title: 'QLearn | Learn Quantum Computing Online - 3D Bloch Sphere & Circuit Simulator',
+    siteName: 'QuantaBit',
+    title: 'QuantaBit | Learn Quantum Computing Online - 3D Bloch Sphere & Circuit Simulator',
     description:
       'Master quantum algorithms through multi-simulator execution (Qiskit, Cirq, PennyLane), 3D Bloch sphere, and Schrödinger AI. Built for all learners from beginners to researchers.',
     images: [
@@ -103,17 +105,17 @@ export const metadata: Metadata = {
         url: '/og-image.png',
         width: 1200,
         height: 630,
-        alt: 'QLearn - Interactive Quantum Algorithm Learning Platform',
+        alt: 'QuantaBit - Interactive Quantum Algorithm Learning Platform',
       },
     ],
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'QLearn | Interactive Quantum Algorithm Learning Platform',
+    title: 'QuantaBit | Interactive Quantum Algorithm Learning Platform',
     description:
       'Learn quantum computing with interactive 3D Bloch spheres, quantum circuit simulator (Qiskit, Cirq, PennyLane), Grover, Deutsch-Jozsa, and AI tutor.',
     images: ['/og-image.png'],
-    creator: '@qlearn_tech',
+    creator: '@quantabit_tech',
   },
   robots: {
     index: true,
@@ -233,7 +235,7 @@ export default function RootLayout({
             {/* Student Identity Modal — shown on first visit */}
             <StudentIdentityModal />
 
-            {/* QLearn Pro Subscription Modal */}
+            {/* QuantaBit Pro Subscription Modal */}
             <SubscriptionModal />
 
             {/* Onboarding Primer Modal */}

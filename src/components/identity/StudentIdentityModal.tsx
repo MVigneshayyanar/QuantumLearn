@@ -88,7 +88,7 @@ export function StudentIdentityModal() {
             </div>
             <div>
               <h2 className="text-xl font-bold text-dark-900 dark:text-white">
-                {mode === 'signin' ? 'Sign In to QLearn' : 'Create Student Account'}
+                {mode === 'signin' ? 'Sign In to QuantaBit' : 'Create Student Account'}
               </h2>
               <p className="text-xs text-dark-500 dark:text-dark-400 mt-0.5">
                 Sign in to submit your quantum circuits to the judge and track progress.
@@ -213,7 +213,7 @@ export function StudentIdentityModal() {
                 <button
                   type="button"
                   onClick={() => {
-                    setEmail('admin@qlearn.com');
+                    setEmail('admin@quantabit.com');
                     setPassword('admin123');
                   }}
                   className="py-1.5 px-2 rounded-xl bg-purple-50 dark:bg-purple-950/60 hover:bg-purple-100 dark:hover:bg-purple-900/60 text-purple-700 dark:text-purple-300 font-semibold text-[11px] border border-purple-200 dark:border-purple-800/60 transition-colors text-center cursor-pointer"
@@ -223,8 +223,8 @@ export function StudentIdentityModal() {
                 <button
                   type="button"
                   onClick={() => {
-                    setEmail('instructor@qlearn.com');
-                    setPassword('qlearn123');
+                    setEmail('instructor@quantabit.com');
+                    setPassword('quantabit123');
                   }}
                   className="py-1.5 px-2 rounded-xl bg-indigo-50 dark:bg-indigo-950/60 hover:bg-indigo-100 dark:hover:bg-indigo-900/60 text-indigo-700 dark:text-indigo-300 font-semibold text-[11px] border border-indigo-200 dark:border-indigo-800/60 transition-colors text-center cursor-pointer"
                 >
@@ -233,7 +233,7 @@ export function StudentIdentityModal() {
                 <button
                   type="button"
                   onClick={() => {
-                    setEmail('student@qlearn.com');
+                    setEmail('student@quantabit.com');
                     setPassword('student123');
                   }}
                   className="py-1.5 px-2 rounded-xl bg-primary-50 dark:bg-primary-950/60 hover:bg-primary-100 dark:hover:bg-primary-900/60 text-primary-700 dark:text-primary-300 font-semibold text-[11px] border border-primary-200 dark:border-primary-800/60 transition-colors text-center cursor-pointer"
