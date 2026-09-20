@@ -245,7 +245,7 @@ const INITIAL_AI_MESSAGES: ChatMessage[] = [
   {
     id: 'welcome-msg',
     role: 'assistant',
-    content: "Hello! I'm Schrödinger AI, your Quantum Tutor on QuantaBit. As you build circuits or explore algorithms, feel free to ask questions. If you get stuck on a quiz or wonder why a qubit behaves a certain way, I'll guide you step-by-step through the physics!",
+    content: "Hello! I'm Schrödinger AI, your Quantum Tutor on QuanBit. As you build circuits or explore algorithms, feel free to ask questions. If you get stuck on a quiz or wonder why a qubit behaves a certain way, I'll guide you step-by-step through the physics!",
     timestamp: Date.now()
   }
 ];
@@ -276,7 +276,7 @@ export const useAITutorStore = create<AITutorState>((set, get) => ({
       {
         id: `welcome-msg-${Date.now()}`,
         role: 'assistant',
-        content: "Hello! I'm Schrödinger AI, your Quantum Tutor on QuantaBit. As you build circuits or explore algorithms, feel free to ask questions. If you get stuck on a quiz or wonder why a qubit behaves a certain way, I'll guide you step-by-step through the physics!",
+        content: "Hello! I'm Schrödinger AI, your Quantum Tutor on QuanBit. As you build circuits or explore algorithms, feel free to ask questions. If you get stuck on a quiz or wonder why a qubit behaves a certain way, I'll guide you step-by-step through the physics!",
         timestamp: Date.now()
       }
     ],

@@ -1,7 +1,7 @@
 import type { Metadata } from 'next';
 import Script from 'next/script';
 
-const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://www.quantabit.tech';
+const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://www.quanbit.tech';
 
 const breadcrumb = {
   '@context': 'https://schema.org',
@@ -16,7 +16,7 @@ const breadcrumb = {
 const learningResource = {
   '@context': 'https://schema.org',
   '@type': 'LearningResource',
-  name: "Grover's Quantum Search Algorithm Tutorial & Interactive Simulator",
+  name: "Grover's Quantum Search Algorithm Tutorial & Interactive Simulator | QuanBit",
   description: "Interactive tutorial for Grover's algorithm demonstrating quadratic quantum speedup O(√N) via amplitude amplification.",
   url: `${siteUrl}/learn/grover`,
   educationalLevel: 'Intermediate',
@@ -24,11 +24,11 @@ const learningResource = {
   teaches: "Grover's Algorithm, Amplitude Amplification, Quantum Oracle, Quadratic Speedup",
   isAccessibleForFree: true,
   inLanguage: 'en',
-  provider: { '@type': 'EducationalOrganization', name: 'QuantaBit', url: siteUrl },
+  provider: { '@type': 'EducationalOrganization', name: 'QuanBit', url: siteUrl },
 };
 
 export const metadata: Metadata = {
-  title: "Grover's Quantum Search Algorithm Tutorial & Interactive Simulator",
+  title: "Grover's Quantum Search Algorithm Tutorial & Interactive Simulator | QuanBit",
   description:
     "Master Grover's algorithm with interactive phase inversion oracles, diffusion operators, and amplitude amplification. Understand how quantum computing provides a quadratic speedup O(sqrt(N)) over classical brute-force search.",
   keywords: [
@@ -41,10 +41,11 @@ export const metadata: Metadata = {
     'quadratic speedup quantum',
     'grovers algorithm step by step',
     'grover simulation online',
+    'quanbit grover algorithm',
   ],
   alternates: { canonical: '/learn/grover' },
   openGraph: {
-    title: "Grover's Quantum Search Algorithm Step-by-Step Simulator | QuantaBit",
+    title: "Grover's Quantum Search Algorithm Step-by-Step Simulator | QuanBit",
     description: "Interactive tutorial and visualizer for Grover's quantum search algorithm and amplitude amplification.",
     url: '/learn/grover',
   },

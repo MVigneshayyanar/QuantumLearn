@@ -276,7 +276,7 @@ export default function InstructorDashboard() {
         <div className="space-y-2">
           <h1 className="text-2xl font-bold text-dark-900">Instructor Access Required</h1>
           <p className="text-sm text-dark-600 max-w-md mx-auto">
-            This dashboard is restricted to verified instructors and teaching assistants (`instructor@quantabit.com`). Please sign in with an instructor-authorized account to view class analytics and student diagnostics.
+            This dashboard is restricted to verified instructors and teaching assistants (`instructor@quanbit.com`). Please sign in with an instructor-authorized account to view class analytics and student diagnostics.
           </p>
         </div>
         <div className="flex items-center justify-center gap-3 pt-2">

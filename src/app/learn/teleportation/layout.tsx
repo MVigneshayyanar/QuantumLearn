@@ -1,7 +1,7 @@
 import type { Metadata } from 'next';
 import Script from 'next/script';
 
-const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://www.quantabit.tech';
+const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://www.quanbit.tech';
 
 const breadcrumb = {
   '@context': 'https://schema.org',
@@ -16,7 +16,7 @@ const breadcrumb = {
 const learningResource = {
   '@context': 'https://schema.org',
   '@type': 'LearningResource',
-  name: 'Quantum Teleportation Protocol Simulator & Step-by-Step Guide',
+  name: 'Quantum Teleportation Protocol Simulator & Step-by-Step Guide | QuanBit',
   description: 'Interactive simulation of quantum teleportation using Bell state entanglement and classical communication channels.',
   url: `${siteUrl}/learn/teleportation`,
   educationalLevel: 'Intermediate',
@@ -24,11 +24,11 @@ const learningResource = {
   teaches: 'Quantum Teleportation, Bell State, EPR Pairs, No-Cloning Theorem, Quantum Entanglement',
   isAccessibleForFree: true,
   inLanguage: 'en',
-  provider: { '@type': 'EducationalOrganization', name: 'QuantaBit', url: siteUrl },
+  provider: { '@type': 'EducationalOrganization', name: 'QuanBit', url: siteUrl },
 };
 
 export const metadata: Metadata = {
-  title: 'Quantum Teleportation Protocol Simulator & Step-by-Step Guide',
+  title: 'Quantum Teleportation Protocol Simulator & Step-by-Step Guide | QuanBit',
   description:
     'Explore the quantum teleportation protocol. Understand Bell state entanglement, Einstein-Podolsky-Rosen (EPR) pairs, quantum measurement collapse, classical communication channels, and the no-cloning theorem.',
   keywords: [
@@ -41,10 +41,11 @@ export const metadata: Metadata = {
     'teleporting quantum states',
     'quantum teleportation circuit',
     'alice and bob quantum',
+    'quanbit teleportation',
   ],
   alternates: { canonical: '/learn/teleportation' },
   openGraph: {
-    title: 'Quantum Teleportation Protocol Simulator | QuantaBit',
+    title: 'Quantum Teleportation Protocol Simulator | QuanBit',
     description: 'Step-by-step interactive simulator transmitting unknown quantum states through Bell-state entanglement and classical bits.',
     url: '/learn/teleportation',
   },

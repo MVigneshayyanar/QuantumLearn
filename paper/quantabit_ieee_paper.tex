@@ -26,7 +26,7 @@
 \setlength{\abovedisplayshortskip}{1.5pt plus 1pt}
 \setlength{\belowdisplayshortskip}{1.5pt plus 1pt}
 
-\title{QuantaBit: An Interactive Multi-Backend Quantum Pedagogical Platform with 3D Statevector Mechanics, Density Matrix Diagnostics, and Schr{\"o}dinger AI Socratic Guidance}
+\title{QuanBit: An Interactive Multi-Backend Quantum Pedagogical Platform with 3D Statevector Mechanics, Density Matrix Diagnostics, and Schr{\"o}dinger AI Socratic Guidance}
 
 \author{
 \IEEEauthorblockN{
@@ -51,7 +51,7 @@ saravanan1442005@gmail.com & sowmiyaramesh183@gmail.com & vigneshayyanar134@gmai
 \begin{abstract}
 Introductory education in Quantum Information Science and Technology (QIST) suffers from an acute conceptual and operational bottleneck: novice computer science learners are abruptly confronted with abstract Hilbert space mathematics ($\mathcal{H} = \mathbb{C}^{2^n}$), non-commutative unitary matrix algebras, and high-dimensional Kronecker tensor products without developing requisite geometric intuition. Compounding this challenge, practical software training is severely fractured across competing, vendor-locked quantum Software Development Kits (SDKs) that enforce conflicting qubit endianness and API paradigms. Existing educational visualizers further fail when multi-qubit entanglement is introduced, as single-qubit Bloch spheres either freeze or display misleading projections when pure states collapse into mixed statistical ensembles. Simultaneously, generic generative artificial intelligence models provide complete gate sequences upon prompt, inducing passive cognitive offloading and bypassing authentic constructivist schema acquisition.
 
-To systematically dismantle these pedagogical barriers, this paper presents \textbf{QuantaBit}, an open-access, full-stack interactive quantum educational platform that harmonizes real-time visual circuit construction, continuous 3D statevector mechanics, multi-target compiler transpilation, and autonomous Socratic guidance. QuantaBit features: (1) a custom 6-axis WebGL Three.js Bloch sphere engine that animates continuous geodesic state trajectories and dynamically computes reduced density matrix trace purity $\gamma = \text{Tr}(\rho_w^2) \in [0.5, 1.0]$, visually shrinking the vector toward the sphere's origin and triggering warnings when bipartite entanglement renders single-qubit pure statevectors physically undefined; (2) a universal Abstract Syntax Tree (AST) transpilation engine that bidirectionally compiles visual circuits into production-grade IBM Qiskit, Google Cirq, Xanadu PennyLane, and OpenQASM (2.0/3.0) code; (3) \textbf{Schr{\"o}dinger AI}, an intelligent pedagogical tutoring agent governed by strict negative-constraint prompt engineering ($\mathcal{C}_1-\mathcal{C}_4$) that actively forbids direct gate disclosures and instead prompts learners via geometric statevector discrepancy analysis ($\Delta\theta, \Delta\phi$); (4) a structured 4-Stage Learning Pathway (Dual Intuition/Dirac Theory, 3D Sandbox Simulation, Milestone-Driven Build-It Synthesis, and Adaptive Mastery Testing) grounded in Cognitive Load Theory and Bloom's Revised Taxonomy; (5) an automated 8-tag quantum misconception diagnostic ontology logging cohort error patterns; and (6) a cryptographically verifiable SHA-256 certificate registry. In a controlled empirical evaluation ($N=30$), QuantaBit achieved a 75.0\% reduction in circuit synthesis latency, a 97.2\% decrease in syntactical errors, a high normalized learning gain (Hake's $\langle g \rangle = 0.75$, $p < 0.001$, Cohen's $d = 1.84$), and sustained a 92.4\% concept retention rate 14 days post-intervention.
+To systematically dismantle these pedagogical barriers, this paper presents \textbf{QuanBit}, an open-access, full-stack interactive quantum educational platform that harmonizes real-time visual circuit construction, continuous 3D statevector mechanics, multi-target compiler transpilation, and autonomous Socratic guidance. QuanBit features: (1) a custom 6-axis WebGL Three.js Bloch sphere engine that animates continuous geodesic state trajectories and dynamically computes reduced density matrix trace purity $\gamma = \text{Tr}(\rho_w^2) \in [0.5, 1.0]$, visually shrinking the vector toward the sphere's origin and triggering warnings when bipartite entanglement renders single-qubit pure statevectors physically undefined; (2) a universal Abstract Syntax Tree (AST) transpilation engine that bidirectionally compiles visual circuits into production-grade IBM Qiskit, Google Cirq, Xanadu PennyLane, and OpenQASM (2.0/3.0) code; (3) \textbf{Schr{\"o}dinger AI}, an intelligent pedagogical tutoring agent governed by strict negative-constraint prompt engineering ($\mathcal{C}_1-\mathcal{C}_4$) that actively forbids direct gate disclosures and instead prompts learners via geometric statevector discrepancy analysis ($\Delta\theta, \Delta\phi$); (4) a structured 4-Stage Learning Pathway (Dual Intuition/Dirac Theory, 3D Sandbox Simulation, Milestone-Driven Build-It Synthesis, and Adaptive Mastery Testing) grounded in Cognitive Load Theory and Bloom's Revised Taxonomy; (5) an automated 8-tag quantum misconception diagnostic ontology logging cohort error patterns; and (6) a cryptographically verifiable SHA-256 certificate registry. In a controlled empirical evaluation ($N=30$), QuanBit achieved a 75.0\% reduction in circuit synthesis latency, a 97.2\% decrease in syntactical errors, a high normalized learning gain (Hake's $\langle g \rangle = 0.75$, $p < 0.001$, Cohen's $d = 1.84$), and sustained a 92.4\% concept retention rate 14 days post-intervention.
 \end{abstract}
 
 \begin{IEEEkeywords}
@@ -74,7 +74,7 @@ Unlike classical computer science education, where learners progress intuitively
 \end{enumerate}
 
 \subsection{Comparative Analysis with Prior Platforms}
-Table~\ref{tab:comparison} presents a multi-dimensional capability matrix comparing QuantaBit with leading quantum educational visualizers and platforms. While existing tools provide isolated strengths---such as rapid client-side circuit evaluation (Quirk) or physical hardware connectivity (IBM Composer)---they lack integrated Socratic AI scaffolding, formal reduced density matrix purity diagnostics, multi-framework transpilation, and rigorous milestone-driven pedagogical scaffolding.
+Table~\ref{tab:comparison} presents a multi-dimensional capability matrix comparing QuanBit with leading quantum educational visualizers and platforms. While existing tools provide isolated strengths---such as rapid client-side circuit evaluation (Quirk) or physical hardware connectivity (IBM Composer)---they lack integrated Socratic AI scaffolding, formal reduced density matrix purity diagnostics, multi-framework transpilation, and rigorous milestone-driven pedagogical scaffolding.
 
 \begin{table*}[t]
 \caption{Systematic Architectural and Pedagogical Comparison Across Quantum Educational Platforms}
@@ -84,7 +84,7 @@ Table~\ref{tab:comparison} presents a multi-dimensional capability matrix compar
 \resizebox{\textwidth}{!}{%
 \begin{tabular}{@{}lcccccc@{}}
 \toprule
-\textbf{Architectural \& Pedagogical Feature} & \textbf{IBM Composer \cite{b6}} & \textbf{Quirk \cite{b5}} & \textbf{Black Opal \cite{b9}} & \textbf{Quantum Katas \cite{b10}} & \textbf{Q-World \cite{b11}} & \textbf{QuantaBit (Ours)} \\
+\textbf{Architectural \& Pedagogical Feature} & \textbf{IBM Composer \cite{b6}} & \textbf{Quirk \cite{b5}} & \textbf{Black Opal \cite{b9}} & \textbf{Quantum Katas \cite{b10}} & \textbf{Q-World \cite{b11}} & \textbf{QuanBit (Ours)} \\
 \midrule
 Interactive 3D WebGL Bloch Sphere & 2D Projection & 2D Stereographic & Pre-rendered 3D & None & Static 2D & \textbf{Dynamic 6-Axis Three.js WebGL} \\
 Real-Time Entanglement Purity Detection ($\text{Tr}(\rho_w^2)$) & No (Undefined) & Partial (Displays Mix) & No & No & No & \textbf{Yes (Automatic Radial Shrinkage \& Alert)} \\
@@ -102,7 +102,7 @@ Universal Multilingual Support (WCAG 2.1 AA) & English & English & English & Eng
 \end{table*}
 
 \subsection{Key Contributions}
-To resolve these foundational challenges, we introduce \textbf{QuantaBit}, a unified, browser-native quantum pedagogical platform designed from the ground up to optimize cognitive load and accelerate schema construction. The primary contributions of this work are:
+To resolve these foundational challenges, we introduce \textbf{QuanBit}, a unified, browser-native quantum pedagogical platform designed from the ground up to optimize cognitive load and accelerate schema construction. The primary contributions of this work are:
 \begin{itemize}[leftmargin=*,itemsep=3pt]
     \item \textbf{A 6-Axis WebGL 3D Statevector Engine}: A Three.js rendering pipeline that visualizes the Bloch sphere with dynamic spatial orientation ($\pm X, \pm Y, \pm Z$ poles), continuous geodesic unitary rotations via spherical linear interpolation (SLERP), and a mathematically rigorous reduced density matrix purity gauge $\gamma = \text{Tr}(\rho_w^2) \in [0.5, 1.0]$.
     \item \textbf{A Universal Multi-Backend AST Transpiler}: An Abstract Syntax Tree (AST) scheduling engine that maps visual gate placements across time slices and compiles runnable, syntactically verified code simultaneously for IBM Qiskit, Google Cirq, Xanadu PennyLane, and OpenQASM 2.0/3.0.
@@ -116,7 +116,7 @@ To resolve these foundational challenges, we introduce \textbf{QuantaBit}, a uni
 \section{Theoretical Framework and Learning Science}
 \label{sec:theory}
 
-QuantaBit is grounded in foundational learning science paradigms, specifically Sweller's Cognitive Load Theory \cite{b7}, Paivio's Dual-Coding Theory \cite{b12}, and Bloom's Revised Cognitive Taxonomy \cite{b13}.
+QuanBit is grounded in foundational learning science paradigms, specifically Sweller's Cognitive Load Theory \cite{b7}, Paivio's Dual-Coding Theory \cite{b12}, and Bloom's Revised Cognitive Taxonomy \cite{b13}.
 
 \subsection{Cognitive Load Optimization in Quantum Education}
 Cognitive Load Theory posits that working memory capacity is strictly bounded, and learning occurs when instructional designs maximize \textit{germane load} (schema construction) while minimizing \textit{extraneous load} (mental effort wasted on poor instructional representation or fragmented tooling). Total cognitive load $L_{\text{total}}$ is expressed as:
@@ -125,13 +125,13 @@ L_{\text{total}} = L_{\text{intrinsic}} + L_{\text{extraneous}} + L_{\text{germa
 \end{equation}
 where $C_{\text{WM}}$ represents the student's finite working memory bandwidth.
 \begin{itemize}[leftmargin=*,itemsep=2pt]
-    \item \textbf{Managing Intrinsic Load ($L_{\text{intrinsic}}$)}: Intrinsic load is inherently dictated by the complex degree of element interactivity in quantum mechanics ($2^n$ state amplitudes, phase interference). QuantaBit manages this through a ``Dual Explanation Mode'' toggle. Beginners start in \textit{Simple Mode} (using real-world analogies such as beam splitters, coin tosses, and polarized sunglasses) before progressing to \textit{Technical Mode} (formal Dirac bra-ket notations, complex statevector amplitudes, and unitary operator matrices).
+    \item \textbf{Managing Intrinsic Load ($L_{\text{intrinsic}}$)}: Intrinsic load is inherently dictated by the complex degree of element interactivity in quantum mechanics ($2^n$ state amplitudes, phase interference). QuanBit manages this through a ``Dual Explanation Mode'' toggle. Beginners start in \textit{Simple Mode} (using real-world analogies such as beam splitters, coin tosses, and polarized sunglasses) before progressing to \textit{Technical Mode} (formal Dirac bra-ket notations, complex statevector amplitudes, and unitary operator matrices).
     \item \textbf{Minimizing Extraneous Load ($L_{\text{extraneous}}$)}: Extraneous load is dismantled by eliminating local Python runtime installations, virtual environment troubleshooting, package dependency conflicts, and syntax lookups. The zero-installation WebGL interface compiles circuits into four SDKs synchronously.
     \item \textbf{Fostering Germane Load ($L_{\text{germane}}$)}: Germane load is fostered by milestone-driven circuit synthesis challenges, where students must construct circuits from scratch to achieve analytical target states under automated fidelity verification.
 \end{itemize}
 
 \subsection{Dual-Coding and Representational Translation}
-According to Dual-Coding Theory \cite{b12}, learning is significantly amplified when information is encoded simultaneously through non-verbal (spatial/visual) and verbal (algebraic/symbolic) channels. QuantaBit enforces real-time synchronization between three distinct representations of the same quantum state $|\psi\rangle$:
+According to Dual-Coding Theory \cite{b12}, learning is significantly amplified when information is encoded simultaneously through non-verbal (spatial/visual) and verbal (algebraic/symbolic) channels. QuanBit enforces real-time synchronization between three distinct representations of the same quantum state $|\psi\rangle$:
 \begin{equation}
 \label{eq:dualcoding}
 \underbrace{\begin{bmatrix} \cos(\theta/2) \\ e^{i\phi}\sin(\theta/2) \end{bmatrix}}_{\text{Dirac / Matrix Space}} \iff \underbrace{\vec{r} = (\sin\theta\cos\phi, \sin\theta\sin\phi, \cos\theta)}_{\text{3D WebGL Bloch Sphere}} \iff \underbrace{\mathcal{B}_{\text{SDK}}(\mathcal{C})}_{\text{Production SDK Code}}
@@ -153,7 +153,7 @@ $\Big\downarrow$ High-Dimension REST / WebSocket \hspace{5.2cm} $\Big\downarrow$
 \fbox{\parbox{7.2cm}{\centering \textbf{FastAPI Simulation Microservice (Python / Qiskit Aer)}\\Statevector $\mathbb{C}^{2^n}$, Partial Trace Density Operators, Shot Sampling}} \hspace{0.6cm}
 \fbox{\parbox{7.2cm}{\centering \textbf{Public Verification Ledger (\texttt{/verify/[id]})}\\SHA-256 Digest Signature, Tamper-Proof Audit, Prisma/Postgres}}
 \vspace{4pt}}}
-\caption{Architectural Blueprint of QuantaBit: Distributed reactive presentation tier, WebGL engine, multi-target transpiler, Python simulation microservice, and Schr{\"o}dinger AI Socratic guidance engine.}
+\caption{Architectural Blueprint of QuanBit: Distributed reactive presentation tier, WebGL engine, multi-target transpiler, Python simulation microservice, and Schr{\"o}dinger AI Socratic guidance engine.}
 \label{fig:arch}
 \end{figure*}
 
@@ -161,13 +161,13 @@ $\Big\downarrow$ High-Dimension REST / WebSocket \hspace{5.2cm} $\Big\downarrow$
 \section{System Architecture and Technical Implementation}
 \label{sec:arch_impl}
 
-QuantaBit is engineered as a responsive, multi-tier distributed architecture illustrated in Figure~\ref{fig:arch}.
+QuanBit is engineered as a responsive, multi-tier distributed architecture illustrated in Figure~\ref{fig:arch}.
 
 \subsection{Client Presentation and Reactive State Tier}
 The frontend presentation layer is developed using Next.js 14 (App Router) and React 18, strictly written in TypeScript. Reactive client state is managed via lightweight Zustand stores, which decouple high-frequency visual updates (drag-and-drop wire reordering, timeline scrubbing) from asynchronous backend simulation calls. The application implements an optimized mathematical engine capable of evaluating complex single-qubit and two-qubit unitary operations locally in JavaScript using typed arrays (`Float64Array`), delivering sub-16 ms UI update latencies (60 FPS) for registers up to $n=5$ qubits.
 
 \subsection{Python Simulation Microservice (FastAPI \& Qiskit Aer)}
-For deep statevector evaluations, arbitrary multi-qubit unitary matrices, and shot-based quantum measurements ($N=1024$ to $8192$), QuantaBit deploys an asynchronous Python microservice (`services/quantum-sim`) powered by FastAPI and Qiskit Aer. The microservice ingests circuit payloads formatted as JSON ASTs and executes native simulation kernels. In addition to statevector extraction, the engine computes reduced density matrices via partial traces and returns Pauli expectation values $\langle X \rangle, \langle Y \rangle, \langle Z \rangle$ for each individual wire.
+For deep statevector evaluations, arbitrary multi-qubit unitary matrices, and shot-based quantum measurements ($N=1024$ to $8192$), QuanBit deploys an asynchronous Python microservice (`services/quantum-sim`) powered by FastAPI and Qiskit Aer. The microservice ingests circuit payloads formatted as JSON ASTs and executes native simulation kernels. In addition to statevector extraction, the engine computes reduced density matrices via partial traces and returns Pauli expectation values $\langle X \rangle, \langle Y \rangle, \langle Z \rangle$ for each individual wire.
 
 %%------------------------------------------------------------
 \section{3D Statevector Mechanics and Density Matrix Diagnostics}
@@ -194,7 +194,7 @@ Our WebGL renderer anchors six spatial HTML labels projected from 3D space:
 \end{itemize}
 
 \subsection{Geodesic Rotation Trajectories}
-When a unitary gate $U(\beta, \vec{n}) = \exp(-i \frac{\beta}{2} \vec{n} \cdot \vec{\sigma})$ is applied, the statevector undergoes a continuous spatial rotation of angle $\beta$ about axis $\vec{n}$. Rather than snapping instantly to the terminal state, QuantaBit's animation loop computes continuous geodesic trajectories using spherical linear interpolation (SLERP):
+When a unitary gate $U(\beta, \vec{n}) = \exp(-i \frac{\beta}{2} \vec{n} \cdot \vec{\sigma})$ is applied, the statevector undergoes a continuous spatial rotation of angle $\beta$ about axis $\vec{n}$. Rather than snapping instantly to the terminal state, QuanBit's animation loop computes continuous geodesic trajectories using spherical linear interpolation (SLERP):
 \begin{equation}
 \vec{r}(t) = \frac{\sin((1-t)\Omega)}{\sin\Omega}\vec{r}_0 + \frac{\sin(t\Omega)}{\sin\Omega}\vec{r}_1, \quad \Omega = \arccos(\vec{r}_0 \cdot \vec{r}_1)
 \end{equation}
@@ -246,7 +246,7 @@ Calculating the corresponding Bloch vector magnitude:
 \end{equation}
 \end{IEEEproof}
 
-When $\gamma < 0.999$, QuantaBit visually contracts the 3D statevector toward the origin $\vec{0} = (0,0,0)$ and replaces the standard vector arrow with an amber pulsating entanglement halo. Simultaneously, an interactive diagnostic tooltip alerts the student: \textit{``Qubit 0 is in a maximally mixed state ($\gamma=0.500$). Because of bipartite entanglement with Qubit 1, single-qubit Bloch coordinates are physically undefined.''} This mechanism directly resolves a ubiquitous educational flaw in visual simulators.
+When $\gamma < 0.999$, QuanBit visually contracts the 3D statevector toward the origin $\vec{0} = (0,0,0)$ and replaces the standard vector arrow with an amber pulsating entanglement halo. Simultaneously, an interactive diagnostic tooltip alerts the student: \textit{``Qubit 0 is in a maximally mixed state ($\gamma=0.500$). Because of bipartite entanglement with Qubit 1, single-qubit Bloch coordinates are physically undefined.''} This mechanism directly resolves a ubiquitous educational flaw in visual simulators.
 
 \begin{algorithm}[t]
 \caption{Multi-Backend AST Transpilation and Density Purity}
@@ -281,7 +281,7 @@ When $\gamma < 0.999$, QuantaBit visually contracts the 3D statevector toward th
 \section{Universal Multi-Backend AST Transpilation Engine}
 \label{sec:transpiler}
 
-To guarantee industrial transferability, QuantaBit abstracts visual circuit layouts into a formal Intermediate Representation (IR) Abstract Syntax Tree:
+To guarantee industrial transferability, QuanBit abstracts visual circuit layouts into a formal Intermediate Representation (IR) Abstract Syntax Tree:
 \begin{equation}
 \mathcal{C}_{\text{AST}} = \left( n_{\text{qubits}}, \{ g_k = (\tau_k, \text{type}_k, \mathbf{q}_k, \mathbf{\theta}_k) \}_{k=1}^M \right)
 \end{equation}
@@ -306,13 +306,13 @@ A major source of confusion among novice programmers is register endianness. In 
     \item \textbf{Big-Endian (Cirq, PennyLane, KaTeX Dirac)}: $|q_0 q_1\rangle = |10\rangle$ (basis state index 2).
     \item \textbf{Little-Endian (IBM Qiskit)}: $|q_1 q_0\rangle = |01\rangle$ (basis state index 1).
 \end{itemize}
-QuantaBit automatically normalizes this transformation in real-time, providing side-by-side terminal tabs and annotating probability distributions so learners visually understand why identical physical states produce inverted binary labels across SDK outputs.
+QuanBit automatically normalizes this transformation in real-time, providing side-by-side terminal tabs and annotating probability distributions so learners visually understand why identical physical states produce inverted binary labels across SDK outputs.
 
 %%------------------------------------------------------------
 \section{The 4-Stage Pathway and Algorithmic Modules}
 \label{sec:curriculum}
 
-QuantaBit structures instruction across a 4-Stage Learning Pathway covering four foundational quantum algorithms: Deutsch-Jozsa, Grover's Search, Quantum Teleportation, and Superdense Coding.
+QuanBit structures instruction across a 4-Stage Learning Pathway covering four foundational quantum algorithms: Deutsch-Jozsa, Grover's Search, Quantum Teleportation, and Superdense Coding.
 
 \subsection{Curricular Algorithm Formulations}
 
@@ -345,7 +345,7 @@ where $U_\omega = I - 2|\omega\rangle\langle\omega|$ is the phase oracle marking
 \begin{equation}
 R \approx \left\lfloor \frac{\pi}{4}\sqrt{N} \right\rfloor
 \end{equation}
-QuantaBit animates this rotation in the two-dimensional Hilbert subspace spanned by $\{|\omega\rangle, |\omega^\perp\rangle\}$.
+QuanBit animates this rotation in the two-dimensional Hilbert subspace spanned by $\{|\omega\rangle, |\omega^\perp\rangle\}$.
 
 \subsubsection{Quantum Teleportation Protocol}
 Transmits an unknown arbitrary quantum state $|\psi\rangle = \alpha|0\rangle + \beta|1\rangle$ using two classical bits and one pre-shared Bell pair $|\Phi^+\rangle = \frac{|00\rangle + |11\rangle}{\sqrt{2}}$. Alice couples $|\psi\rangle$ with her half of the Bell pair using a CNOT and Hadamard gate before performing projective measurements, yielding outcomes $(M_1, M_2) \in \{0, 1\}^2$. Bob reconstructs the original state by applying conditional unitary Pauli corrections:
@@ -365,7 +365,7 @@ Bob performs a decoding CNOT and Hadamard gate, measuring $(b_1, b_2)$ with 100\
 \section{Schr{\"o}dinger AI: Socratic Guidance Engine}
 \label{sec:ai_engine}
 
-To eliminate passive cognitive offloading, QuantaBit introduces \textbf{Schr{\"o}dinger AI}, an intelligent pedagogical agent embedded directly inside the workbench drawer (`src/components/ai-tutor`).
+To eliminate passive cognitive offloading, QuanBit introduces \textbf{Schr{\"o}dinger AI}, an intelligent pedagogical agent embedded directly inside the workbench drawer (`src/components/ai-tutor`).
 
 \subsection{Formal Negative Constraint Specification}
 Unlike generic LLMs that emit direct code snippets upon request, Schr{\"o}dinger AI is bounded by a formal prompt grammar enforcing four strict pedagogical constraints $\mathcal{C} = \{\mathcal{C}_1, \mathcal{C}_2, \mathcal{C}_3, \mathcal{C}_4\}$:
@@ -415,7 +415,7 @@ d_{\text{FS}}(|\psi_{\text{target}}\rangle, |\psi_{\text{stu}}\rangle) = \arccos
 Instead of saying \textit{``Add a Hadamard gate to qubit 0''}, Schr{\"o}dinger AI observes that $\Delta\theta = \pi/2$ and $\Delta\phi = 0$ and guides the student: \textit{``Notice that your statevector currently points directly toward the North Pole ($|0\rangle$). To create equal probability of measuring 0 or 1, which unitary rotation maps the $Z$-axis onto the equatorial $X$-axis without altering magnitude?''} This preserves constructivist learning.
 
 \subsection{Quantum Misconception Diagnostic Ontology}
-QuantaBit incorporates an automated diagnostic classifier (`src/lib/ai-engine.ts`) mapping learner errors to 8 validated misconceptions:
+QuanBit incorporates an automated diagnostic classifier (`src/lib/ai-engine.ts`) mapping learner errors to 8 validated misconceptions:
 \begin{enumerate}[leftmargin=*,itemsep=2pt]
     \item \texttt{SUPERPOSITION\_VS\_CLASSICAL\_PROB}: Confusing quantum probability amplitudes with classical coin-toss probabilities.
     \item \texttt{ENTANGLEMENT\_COMMUNICATION}: Assuming quantum entanglement enables faster-than-light communication.
@@ -433,7 +433,7 @@ Instructor dashboards aggregate these diagnostic logs in PostgreSQL, generating 
 \label{sec:practice_ledger}
 
 \subsection{LeetCode-Style Practice Arena}
-QuantaBit includes 40+ curated coding challenges organized into Beginner, Intermediate, and Advanced tiers across Foundations, Deutsch-Jozsa, Grover, Teleportation, and Superdense Coding. Submissions are judged against gate count limits and target statevector tolerances ($F \ge 0.9999$).
+QuanBit includes 40+ curated coding challenges organized into Beginner, Intermediate, and Advanced tiers across Foundations, Deutsch-Jozsa, Grover, Teleportation, and Superdense Coding. Submissions are judged against gate count limits and target statevector tolerances ($F \ge 0.9999$).
 
 \subsection{SHA-256 Public Verification Ledger}
 Upon completing all module milestones and achieving $\ge 75\%$ on the Stage 4 adaptive quiz, learners receive a Certificate of Quantum Mastery. The certificate is cryptographically minted using SHA-256:
@@ -460,7 +460,7 @@ To evaluate pedagogical efficacy, a controlled empirical study was conducted wit
 Participants were stratified by baseline GPA and randomly partitioned into two equal cohorts ($N=15$ each):
 \begin{itemize}[leftmargin=*,itemsep=2pt]
     \item \textbf{Control Group (Classical Pedagogy)}: Instructed through standard textbooks, blackboard derivations, and local unassisted Jupyter notebooks using Qiskit.
-    \item \textbf{Experimental Group (QuantaBit)}: Instructed using QuantaBit's 4-Stage Pathway, 3D Bloch sphere, multi-backend transpiler, and Schr{\"o}dinger AI tutor.
+    \item \textbf{Experimental Group (QuanBit)}: Instructed using QuanBit's 4-Stage Pathway, 3D Bloch sphere, multi-backend transpiler, and Schr{\"o}dinger AI tutor.
 \end{itemize}
 Both cohorts completed a comprehensive baseline pre-test evaluating linear algebra prerequisites ($\text{Pre}_{\text{Ctrl}} = 48.6 \pm 8.2$, $\text{Pre}_{\text{Exp}} = 49.1 \pm 7.9$, $p=0.86$, confirming initial cohort equivalence).
 
@@ -472,7 +472,7 @@ Both cohorts completed a comprehensive baseline pre-test evaluating linear algeb
 \resizebox{\columnwidth}{!}{%
 \begin{tabular}{@{}lccc@{}}
 \toprule
-\textbf{Evaluation Metric} & \textbf{Control Group} & \textbf{QuantaBit Group} & \textbf{Statistical Significance} \\
+\textbf{Evaluation Metric} & \textbf{Control Group} & \textbf{QuanBit Group} & \textbf{Statistical Significance} \\
 \midrule
 Task 1 Time (Bell State $|\Phi^+\rangle$) & $8.4 \pm 2.1$ min & $2.1 \pm 0.6$ min & $p < 0.001$, $t=11.2$ \\
 Task 2 Time (Deutsch-Jozsa) & $19.6 \pm 4.3$ min & $5.8 \pm 1.2$ min & $p < 0.001$, $t=12.1$ \\
@@ -488,13 +488,13 @@ Hake Normalized Learning Gain $\langle g \rangle$ & $0.11 \pm 0.08$ & $0.75 \pm 
 \end{table}
 
 \subsection{Quantitative Results and Knowledge Gain}
-As summarized in Table~\ref{tab:results}, QuantaBit students completed circuit construction tasks in approximately one-fourth the time required by the control cohort ($p < 0.001$). Syntax errors were reduced by 97.2\%, demonstrating that visual AST transpilation effectively eliminates SDK configuration friction.
+As summarized in Table~\ref{tab:results}, QuanBit students completed circuit construction tasks in approximately one-fourth the time required by the control cohort ($p < 0.001$). Syntax errors were reduced by 97.2\%, demonstrating that visual AST transpilation effectively eliminates SDK configuration friction.
 
 Evaluating \textbf{Hake's normalized gain} $\langle g \rangle$ \cite{b14}:
 \begin{equation}
 \langle g \rangle = \frac{\% \text{Post} - \% \text{Pre}}{100 - \% \text{Pre}}
 \end{equation}
-revealed an exceptional gain of $\langle g \rangle = 0.75 \pm 0.09$ for the QuantaBit cohort compared to $\langle g \rangle = 0.11 \pm 0.08$ for the control group. In learning science, $\langle g \rangle \ge 0.70$ categorizes an intervention as a \textit{high-gain pedagogical environment}. The effect size was \textbf{Cohen's $d = 1.84$}, indicating an exceptionally large educational impact.
+revealed an exceptional gain of $\langle g \rangle = 0.75 \pm 0.09$ for the QuanBit cohort compared to $\langle g \rangle = 0.11 \pm 0.08$ for the control group. In learning science, $\langle g \rangle \ge 0.70$ categorizes an intervention as a \textit{high-gain pedagogical environment}. The effect size was \textbf{Cohen's $d = 1.84$}, indicating an exceptionally large educational impact.
 
 \begin{table}[htbp]
 \caption{Domain-Specific Conceptual Mastery Breakdown ($N=30$)}
@@ -547,7 +547,7 @@ Planned extensions include:
 \section{Conclusion}
 \label{sec:conclusion}
 
-QuantaBit provides a zero-installation, open-access educational ecosystem that transforms abstract quantum information science into intuitive software engineering. By unifying 6-axis 3D WebGL Bloch mechanics, reduced density matrix purity diagnostics for entangled states, universal multi-backend AST transpilation across Qiskit, Cirq, PennyLane, and OpenQASM, and Socratic guidance from Schr{\"o}dinger AI, the platform dramatically accelerates student learning. Controlled empirical evaluations demonstrate substantial reductions in synthesis time, elimination of syntax errors, and sustained 92.4\% concept retention, establishing QuantaBit as an effective paradigm for next-generation quantum computing education.
+QuanBit provides a zero-installation, open-access educational ecosystem that transforms abstract quantum information science into intuitive software engineering. By unifying 6-axis 3D WebGL Bloch mechanics, reduced density matrix purity diagnostics for entangled states, universal multi-backend AST transpilation across Qiskit, Cirq, PennyLane, and OpenQASM, and Socratic guidance from Schr{\"o}dinger AI, the platform dramatically accelerates student learning. Controlled empirical evaluations demonstrate substantial reductions in synthesis time, elimination of syntax errors, and sustained 92.4\% concept retention, establishing QuanBit as an effective paradigm for next-generation quantum computing education.
 
 %%------------------------------------------------------------
 \begin{thebibliography}{00}

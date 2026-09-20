@@ -1,10 +1,11 @@
 import type { Metadata } from 'next';
 
 export const metadata: Metadata = {
-  title: 'About QuantaBit | The Future of Interactive Quantum Education',
+  title: 'About QuanBit | The Future of Interactive Quantum Education',
   description:
-    'Discover QuantaBit’s mission to democratize quantum computing education. Learn how our multi-backend simulation engine (Qiskit, Cirq, PennyLane), 3D Bloch sphere, and Socratic AI tutor empower the next generation of quantum researchers and developers.',
+    'Discover QuanBit’s mission to democratize quantum computing education. Learn how our multi-backend simulation engine (Qiskit, Cirq, PennyLane), 3D Bloch sphere, and Socratic AI tutor empower the next generation of quantum researchers and developers.',
   keywords: [
+    'about quanbit',
     'about quantabit',
     'about qlearn',
     'quantum computing education platform',
@@ -18,9 +19,9 @@ export const metadata: Metadata = {
     canonical: '/about',
   },
   openGraph: {
-    title: 'About QuantaBit | Interactive Quantum Computing Platform',
+    title: 'About QuanBit | Interactive Quantum Computing Platform',
     description:
-      'Learn about QuantaBit - an interactive quantum algorithm learning platform bridging physics, mathematics, and quantum software engineering.',
+      'Learn about QuanBit - an interactive quantum algorithm learning platform bridging physics, mathematics, and quantum software engineering.',
     url: '/about',
   },
 };

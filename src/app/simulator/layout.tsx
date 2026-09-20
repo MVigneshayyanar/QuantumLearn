@@ -1,7 +1,7 @@
 import type { Metadata } from 'next';
 import Script from 'next/script';
 
-const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://www.quantabit.tech';
+const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://www.quanbit.tech';
 
 const breadcrumb = {
   '@context': 'https://schema.org',
@@ -15,19 +15,19 @@ const breadcrumb = {
 const learningResource = {
   '@context': 'https://schema.org',
   '@type': 'LearningResource',
-  name: 'Online Quantum Circuit Simulator & Multi-Backend Builder (Qiskit, Cirq, PennyLane)',
+  name: 'Online Quantum Circuit Simulator & Multi-Backend Builder (Qiskit, Cirq, PennyLane) | QuanBit',
   description: 'Drag-and-drop quantum circuit editor with real-time statevector visualization and code export for IBM Qiskit, Google Cirq, and Xanadu PennyLane.',
   url: `${siteUrl}/simulator`,
   educationalLevel: 'Beginner to Advanced',
   learningResourceType: 'Simulation Tool',
-  teaches: 'Quantum Circuit Design, Qiskit, Google Cirq, PennyLane, OpenQASM, Quantum Gates, Statevector',
+  teaches: 'Quantum Circuit Design, Qiskit, Google Cirq, PennyLane, OpenQASM, Quantum Gates, Statevector, Quantum Algorithms',
   isAccessibleForFree: true,
   inLanguage: 'en',
-  provider: { '@type': 'EducationalOrganization', name: 'QuantaBit', url: siteUrl },
+  provider: { '@type': 'EducationalOrganization', name: 'QuanBit', url: siteUrl },
 };
 
 export const metadata: Metadata = {
-  title: 'Quantum Circuit Simulator & Multi-Backend Builder (Qiskit, Cirq, PennyLane)',
+  title: 'Quantum Circuit Simulator & Multi-Backend Builder (Qiskit, Cirq, PennyLane) | QuanBit',
   description:
     'Build and simulate quantum circuits directly in your browser. Drag-and-drop Hadamard, Pauli, Phase, and CNOT gates with real-time statevector calculations and export to IBM Qiskit, Google Cirq, Xanadu PennyLane, and OpenQASM.',
   keywords: [
@@ -43,10 +43,11 @@ export const metadata: Metadata = {
     'hadamard gate online',
     'multi qubit circuit builder',
     'quantum computing ide',
+    'quanbit circuit simulator',
   ],
   alternates: { canonical: '/simulator' },
   openGraph: {
-    title: 'Online Quantum Circuit Simulator (Qiskit, Cirq, PennyLane) | QuantaBit',
+    title: 'Online Quantum Circuit Simulator (Qiskit, Cirq, PennyLane) | QuanBit',
     description: 'Interactive quantum circuit editor with instant code generation for IBM Qiskit, Google Cirq, and PennyLane.',
     url: '/simulator',
   },

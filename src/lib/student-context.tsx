@@ -4,7 +4,7 @@
  * Provides authentication state for the app.
  * Allows guest browsing, but gates "Submit & Verify Circuit" (Build It)
  * and "Submit Solution to Judge" (Practice) until signed in / signed up.
- * Supports the special Instructor account: instructor@quantabit.com / quantabit123.
+ * Supports the special Instructor account: instructor@quanbit.com / quanbit123.
  */
 
 'use client';

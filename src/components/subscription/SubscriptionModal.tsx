@@ -96,7 +96,7 @@ export function SubscriptionModal() {
           </div>
           <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-amber-100 dark:bg-amber-950/70 text-amber-900 dark:text-amber-300 border border-amber-300 dark:border-amber-700/60 text-[10px] font-bold mb-1">
             <Sparkles className="w-3 h-3 text-amber-600 dark:text-amber-400" />
-            <span>QuantaBit Pro Membership</span>
+            <span>QuanBit Pro Membership</span>
           </div>
           <h2 className="text-xl sm:text-2xl font-black text-dark-900 dark:text-white tracking-tight leading-tight">
             Unlock the Full Quantum Experience
@@ -186,7 +186,7 @@ export function SubscriptionModal() {
                 className="w-full py-2.5 sm:py-3 px-4 rounded-2xl bg-gradient-to-r from-amber-500 via-amber-600 to-amber-700 hover:brightness-110 active:scale-[0.99] text-white font-bold text-sm shadow-md shadow-amber-500/25 flex items-center justify-center gap-2 transition-all cursor-pointer"
               >
                 <Zap className="w-4 h-4 fill-white" />
-                <span>{isProcessing ? 'Activating Pro...' : 'Activate QuantaBit Pro (1-Click Demo)'}</span>
+                <span>{isProcessing ? 'Activating Pro...' : 'Activate QuanBit Pro (1-Click Demo)'}</span>
               </button>
               <p className="text-[10px] text-center text-dark-400 dark:text-dark-500">
                 Instant trial demo activation • Zero credit card required for evaluation
@@ -196,7 +196,7 @@ export function SubscriptionModal() {
             <div className="space-y-1.5 text-center">
               <div className="p-2.5 rounded-xl bg-emerald-50 dark:bg-emerald-950/60 border border-emerald-200 dark:border-emerald-800/80 text-emerald-800 dark:text-emerald-300 text-xs font-semibold flex items-center justify-center gap-2">
                 <CheckCircle2 className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />
-                <span>You currently have active QuantaBit Pro status!</span>
+                <span>You currently have active QuanBit Pro status!</span>
               </div>
               <button
                 type="button"

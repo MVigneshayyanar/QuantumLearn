@@ -31,13 +31,13 @@ export default function VerifyIndexPage() {
 
         <div className="space-y-2">
           <span className="px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider bg-emerald-100 text-emerald-800 border border-emerald-200">
-            QuantaBit Cryptographic Ledger
+            QuanBit Cryptographic Ledger
           </span>
           <h1 className="text-3xl sm:text-4xl font-black text-dark-900 tracking-tight">
             Verify Quantum Credential
           </h1>
           <p className="text-sm text-dark-600 max-w-md mx-auto">
-            Validate the authenticity and cryptographic proof of completion for any official QuantaBit Quantum Algorithm Certificate.
+            Validate the authenticity and cryptographic proof of completion for any official QuanBit Quantum Algorithm Certificate.
           </p>
         </div>
 

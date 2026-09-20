@@ -1,7 +1,7 @@
 import type { Metadata } from 'next';
 import Script from 'next/script';
 
-const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://www.quantabit.tech';
+const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://www.quanbit.tech';
 
 const breadcrumb = {
   '@context': 'https://schema.org',
@@ -16,7 +16,7 @@ const breadcrumb = {
 const learningResource = {
   '@context': 'https://schema.org',
   '@type': 'LearningResource',
-  name: 'Deutsch-Jozsa Quantum Algorithm Interactive Tutorial & Simulator',
+  name: 'Deutsch-Jozsa Quantum Algorithm Interactive Tutorial & Simulator | QuanBit',
   description: 'Interactive tutorial demonstrating quantum parallelism: determine whether a function is constant or balanced in a single query.',
   url: `${siteUrl}/learn/deutsch-jozsa`,
   educationalLevel: 'Beginner to Intermediate',
@@ -24,11 +24,11 @@ const learningResource = {
   teaches: 'Deutsch-Jozsa Algorithm, Quantum Parallelism, Phase Kickback, Quantum Oracle, Exponential Speedup',
   isAccessibleForFree: true,
   inLanguage: 'en',
-  provider: { '@type': 'EducationalOrganization', name: 'QuantaBit', url: siteUrl },
+  provider: { '@type': 'EducationalOrganization', name: 'QuanBit', url: siteUrl },
 };
 
 export const metadata: Metadata = {
-  title: 'Deutsch-Jozsa Quantum Algorithm Interactive Tutorial & Simulator',
+  title: 'Deutsch-Jozsa Quantum Algorithm Interactive Tutorial & Simulator | QuanBit',
   description:
     'Learn the Deutsch-Jozsa quantum algorithm step-by-step. Understand quantum parallelism, balanced vs constant oracles, phase kickback, and how quantum computers solve oracular problems with exponential speedup.',
   keywords: [
@@ -41,10 +41,11 @@ export const metadata: Metadata = {
     'deutsch jozsa tutorial',
     'deutsch algorithm interactive',
     'quantum oracle tutorial',
+    'quanbit deutsch jozsa',
   ],
   alternates: { canonical: '/learn/deutsch-jozsa' },
   openGraph: {
-    title: 'Deutsch-Jozsa Quantum Algorithm Simulator & Guide | QuantaBit',
+    title: 'Deutsch-Jozsa Quantum Algorithm Simulator & Guide | QuanBit',
     description: 'Step-by-step interactive simulation of the Deutsch-Jozsa algorithm demonstrating quantum superposition and parallelism.',
     url: '/learn/deutsch-jozsa',
   },

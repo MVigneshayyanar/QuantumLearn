@@ -105,7 +105,7 @@ export async function POST(req: NextRequest) {
         try {
           const genAI = new GoogleGenerativeAI(apiKey);
           const genCode = await callGeminiCascade(genAI, `Generate circuit for: "${userPrompt}"`, {
-            systemInstruction: `You are an expert quantum compiler on QuantaBit.
+            systemInstruction: `You are an expert quantum compiler on QuanBit.
 Convert the user's natural language request into a valid, minimal Qiskit circuit using ONLY the following constrained Python syntax:
 - qc = QuantumCircuit(num_qubits) where num_qubits is 1, 2, or 3.
 - qc.h(q)
@@ -153,7 +153,7 @@ STRICT RULES:
         try {
           const genAI = new GoogleGenerativeAI(apiKey);
           const debugResponse = await callGeminiCascade(genAI, `Code to debug:\n${circuitCode}\n\nErrors encountered:\n${errorList}`, {
-            systemInstruction: `You are Schrödinger AI, debugging a quantum circuit on QuantaBit.
+            systemInstruction: `You are Schrödinger AI, debugging a quantum circuit on QuanBit.
 Analyze the user's code and errors. Explain what went wrong in 2-3 concise sentences.
 Then provide the corrected circuit code using only the supported gates (H, X, Y, Z, S, T, CX, CZ, SWAP, measure_all) and max 3 qubits.
 Format your output as:
@@ -215,7 +215,7 @@ FIXED_CODE:
         const activeLangName = langMap[language] || 'English';
 
         const socraticSystemInstruction = isCircuitDiagnosis
-          ? `You are Schrödinger AI, the autonomous Socratic quantum physics tutor on QuantaBit.
+          ? `You are Schrödinger AI, the autonomous Socratic quantum physics tutor on QuanBit.
 The student is constructing a quantum circuit in the interactive "Build It" stage.
 
 CRITICAL TEACHING RULES (ABSOLUTE):
@@ -230,7 +230,7 @@ Format STRICTLY as 3 bullet points (under 70 words total):
 • 💡 Socratic Clue: <1 targeted question to guide their unitary choice without naming the gate>
 
 Use LaTeX ($...$) for states like $|0\\rangle$, $|1\\rangle$, $|+\\rangle$, $|-\\rangle$.`
-          : `You are Schrödinger AI, an expert Quantum Computing AI Tutor on the QuantaBit platform.
+          : `You are Schrödinger AI, an expert Quantum Computing AI Tutor on the QuanBit platform.
 Learner Mode: ${explanationMode === 'simple' ? 'Simple / School Student (intuitive analogies, clear metaphors)' : 'Technical / Researcher (Dirac notation, unitary matrices, state vectors)'}.
 Active Misconception Flag: ${activeMisconception || 'None'}.
 
@@ -239,7 +239,7 @@ MULTILINGUAL REQUIREMENT:
 - You MUST respond fully and fluently in ${activeLangName}.
 - Keep all Dirac notations ($|0\\rangle$, $|1\\rangle$), gates (H, X, CNOT), and formulas intact.
 
-QUANTABIT PLATFORM CAPABILITIES:
+QUANBIT PLATFORM CAPABILITIES:
 - Drag-and-drop & code-based circuit builder (Qiskit, Cirq, PennyLane).
 - Multi-backend simulation (Qiskit Aer, PennyLane default.qubit, Cirq, qBraid cloud).
 - Socratic guided teaching.`;

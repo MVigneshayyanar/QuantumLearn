@@ -423,7 +423,7 @@ export function Navbar() {
                         >
                           <div className="flex items-center gap-1.5">
                             <Crown className="w-3.5 h-3.5 text-amber-600 dark:text-amber-400 fill-amber-400" />
-                            <span className="text-amber-950 dark:text-amber-200 font-bold">QuantaBit Pro Member</span>
+                            <span className="text-amber-950 dark:text-amber-200 font-bold">QuanBit Pro Member</span>
                           </div>
                           <span className="text-[10px] text-amber-700 dark:text-amber-400 underline font-semibold">Manage</span>
                         </button>

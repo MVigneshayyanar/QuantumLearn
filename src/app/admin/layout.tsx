@@ -1,7 +1,7 @@
 import type { Metadata } from 'next';
 
 export const metadata: Metadata = {
-  title: 'Admin Management Portal | QuantaBit',
+  title: 'Admin Management Portal | QuanBit',
   robots: {
     index: false,
     follow: false,

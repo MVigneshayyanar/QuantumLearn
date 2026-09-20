@@ -1,7 +1,7 @@
 import type { Metadata } from 'next';
 
 export const metadata: Metadata = {
-  title: 'Instructor Portal | QuantaBit',
+  title: 'Instructor Portal | QuanBit',
   robots: {
     index: false,
     follow: false,

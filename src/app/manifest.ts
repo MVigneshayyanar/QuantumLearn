@@ -2,8 +2,8 @@ import { MetadataRoute } from 'next';
 
 export default function manifest(): MetadataRoute.Manifest {
   return {
-    name: 'QuantaBit - Quantum Algorithm Learning Platform',
-    short_name: 'QuantaBit',
+    name: 'QuanBit - Quantum Algorithm Learning Platform',
+    short_name: 'QuanBit',
     description: 'Master quantum algorithms through multi-simulator simulation, 3D Bloch sphere, and Schrödinger AI tutor.',
     start_url: '/',
     display: 'standalone',

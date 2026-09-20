@@ -1,7 +1,7 @@
 import type { Metadata } from 'next';
 
 export const metadata: Metadata = {
-  title: 'Quantum Computing Practice Problems & Algorithm Challenges',
+  title: 'Quantum Computing Practice Problems & Algorithm Challenges | QuanBit',
   description:
     'Test and sharpen your quantum computing skills with interactive exercises, qubit math problems, Dirac notation calculations, quantum circuit puzzles, and AI-guided hints from Schrödinger AI.',
   keywords: [
@@ -14,12 +14,13 @@ export const metadata: Metadata = {
     'quantum coding questions',
     'bloch sphere exercises',
     'qubit superposition problems',
+    'quanbit practice',
   ],
   alternates: {
     canonical: '/practice',
   },
   openGraph: {
-    title: 'Quantum Computing Practice Problems & Challenges | QuantaBit',
+    title: 'Quantum Computing Practice Problems & Challenges | QuanBit',
     description:
       'Solve interactive quantum computing problems with instant feedback and Socratic AI hints.',
     url: '/practice',

@@ -1,7 +1,7 @@
 import type { Metadata } from 'next';
 import Script from 'next/script';
 
-const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://www.quantabit.tech';
+const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://www.quanbit.tech';
 
 const breadcrumb = {
   '@context': 'https://schema.org',
@@ -15,19 +15,19 @@ const breadcrumb = {
 const learningResource = {
   '@context': 'https://schema.org',
   '@type': 'LearningResource',
-  name: '3D Bloch Sphere Simulator & Interactive Qubit Visualizer',
+  name: '3D Bloch Sphere Simulator & Interactive Qubit Visualizer | QuanBit',
   description: 'Real-time 3D Bloch sphere simulation for exploring qubit superposition, theta/phi angles, Pauli gate rotations, and quantum measurement collapse.',
   url: `${siteUrl}/bloch-sphere`,
   educationalLevel: 'Beginner',
   learningResourceType: 'Interactive Simulation',
-  teaches: 'Bloch Sphere, Qubit Statevector, Quantum Superposition, Dirac Notation, Pauli Gates, Quantum Measurement',
+  teaches: 'Bloch Sphere, Qubit Statevector, Quantum Superposition, Dirac Notation, Pauli Gates, Quantum Measurement, Quantum Computing Fundamentals',
   isAccessibleForFree: true,
   inLanguage: 'en',
-  provider: { '@type': 'EducationalOrganization', name: 'QuantaBit', url: siteUrl },
+  provider: { '@type': 'EducationalOrganization', name: 'QuanBit', url: siteUrl },
 };
 
 export const metadata: Metadata = {
-  title: '3D Bloch Sphere Simulator & Interactive Qubit Visualizer',
+  title: '3D Bloch Sphere Simulator & Interactive Qubit Visualizer | QuanBit',
   description:
     'Interactive 3D Bloch sphere simulator. Visualize qubit superposition, theta polar angle, phi azimuth, Dirac bra-ket notation, Pauli-X/Y/Z rotations, and statevector measurements in real-time.',
   keywords: [
@@ -43,10 +43,12 @@ export const metadata: Metadata = {
     'pauli matrices bloch sphere',
     'dirac notation bloch sphere',
     'hadamard transformation sphere',
+    'learn quantum computing 3d',
+    'quanbit bloch sphere',
   ],
   alternates: { canonical: '/bloch-sphere' },
   openGraph: {
-    title: '3D Bloch Sphere Simulator & Interactive Qubit Visualizer | QuantaBit',
+    title: '3D Bloch Sphere Simulator & Interactive Qubit Visualizer | QuanBit',
     description: 'Real-time 3D Bloch sphere visualization. Control theta and phi angles, test quantum gates, and see qubit statevectors collapse upon measurement.',
     url: '/bloch-sphere',
   },

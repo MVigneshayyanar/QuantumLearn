@@ -29,17 +29,17 @@ export async function POST(req: NextRequest) {
 
     // ==========================================
     // SPECIAL CREDENTIALS CHECK
-    // Admin: admin@quantabit.com / admin@qlearn.com | Pass: admin123
-    // Instructor: instructor@quantabit.com / instructor@qlearn.com | Pass: quantabit123 / qlearn123
-    // Student Demo: student@quantabit.com / student@qlearn.com | Pass: student123
+    // Admin: admin@quanbit.com / admin@quantabit.com / admin@qlearn.com | Pass: admin123
+    // Instructor: instructor@quanbit.com / instructor@quantabit.com | Pass: quanbit123 / quantabit123 / qlearn123
+    // Student Demo: student@quanbit.com / student@quantabit.com | Pass: student123
     // ==========================================
     const isAdminCredentials =
-      (normalizedEmail === 'admin@quantabit.com' || normalizedEmail === 'admin@qlearn.com') && trimmedPassword === 'admin123';
+      (normalizedEmail === 'admin@quanbit.com' || normalizedEmail === 'admin@quantabit.com' || normalizedEmail === 'admin@qlearn.com') && trimmedPassword === 'admin123';
     const isInstructorCredentials =
-      (normalizedEmail === 'instructor@quantabit.com' || normalizedEmail === 'instructor@qlearn.com') &&
-      (trimmedPassword === 'quantabit123' || trimmedPassword === 'qlearn123');
+      (normalizedEmail === 'instructor@quanbit.com' || normalizedEmail === 'instructor@quantabit.com' || normalizedEmail === 'instructor@qlearn.com') &&
+      (trimmedPassword === 'quanbit123' || trimmedPassword === 'quantabit123' || trimmedPassword === 'qlearn123');
     const isStudentCredentials =
-      (normalizedEmail === 'student@quantabit.com' || normalizedEmail === 'student@qlearn.com') && trimmedPassword === 'student123';
+      (normalizedEmail === 'student@quanbit.com' || normalizedEmail === 'student@quantabit.com' || normalizedEmail === 'student@qlearn.com') && trimmedPassword === 'student123';
 
     if (action === 'signup') {
       if (!trimmedName || trimmedName.length < 2) {
