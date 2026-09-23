@@ -141,16 +141,20 @@ export function StudentProvider({ children }: { children: React.ReactNode }) {
   }, []);
 
   const openLoginModal = useCallback((callback?: (id?: string) => void) => {
-    // GUARD: If already logged in, immediately run the callback and NEVER re-open the modal!
-    const currentId =
-      userIdRef.current ||
-      (typeof window !== 'undefined' ? localStorage.getItem(LS_STUDENT_ID) : null);
+    // Only bypass if both state/ref AND localStorage agree user is logged in
+    const storedId = typeof window !== 'undefined' ? localStorage.getItem(LS_STUDENT_ID) : null;
+    const currentId = storedId || userIdRef.current;
 
-    if (currentId) {
+    if (currentId && storedId) {
       if (callback) {
         callback(currentId);
       }
       return;
+    }
+
+    // Ensure stale ref is cleared if localStorage has no ID
+    if (!storedId) {
+      userIdRef.current = null;
     }
 
     if (callback) {
@@ -304,7 +308,9 @@ export function StudentProvider({ children }: { children: React.ReactNode }) {
     useAITutorStore.getState().resetChat();
     useCircuitStore.getState().clearCircuit();
 
-    // 4. Reset React context state
+    // 4. Reset React context state and synchronous refs
+    userIdRef.current = null;
+    pendingActionRef.current = null;
     setUserId(null);
     setStudentName(null);
     setStudentEmail(null);

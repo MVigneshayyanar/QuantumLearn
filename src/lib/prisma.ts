@@ -28,3 +28,38 @@ export const prisma =
 if (process.env.NODE_ENV !== 'production') {
   globalForPrisma.prisma = prisma;
 }
+
+/**
+ * Execute an operation with automatic retry on severed connection pool connections (e.g. E57P01, disconnects).
+ */
+export async function withPrismaRetry<T>(fn: () => Promise<T>, retries = 2): Promise<T> {
+  let attempt = 0;
+  while (true) {
+    try {
+      return await fn();
+    } catch (err: any) {
+      attempt++;
+      const isConnectionError =
+        err?.code === 'P1001' ||
+        err?.code === 'P1017' ||
+        err?.message?.includes('ProcessInterrupts') ||
+        err?.message?.includes('terminating connection') ||
+        err?.message?.includes('closed') ||
+        err?.message?.includes('Connection') ||
+        err?.cause?.message?.includes('terminating connection');
+
+      if (isConnectionError && attempt <= retries) {
+        console.warn(`[Prisma] Serverless connection severed, reconnecting (attempt ${attempt}/${retries})...`);
+        try {
+          await prisma.$disconnect();
+          await prisma.$connect();
+        } catch {}
+        // Wait 300ms before retry
+        await new Promise((res) => setTimeout(res, 300));
+        continue;
+      }
+      throw err;
+    }
+  }
+}
+

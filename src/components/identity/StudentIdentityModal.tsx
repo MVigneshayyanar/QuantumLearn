@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useStudentContext } from '@/lib/student-context';
 import {
@@ -23,6 +23,13 @@ export function StudentIdentityModal() {
   const [password, setPassword] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (showIdentityModal) {
+      setError(null);
+      setIsSubmitting(false);
+    }
+  }, [showIdentityModal]);
 
   if (!showIdentityModal) return null;
 
