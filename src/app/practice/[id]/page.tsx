@@ -48,6 +48,7 @@ import {
   TargetPlusIcon,
   SwapXIcon
 } from '@/components/circuit/QuantumGateSymbol';
+import { QuantumCircuitCodePanel } from '@/components/circuit/QuantumCircuitCodePanel';
 
 const MAX_STEPS = 8;
 const AVAILABLE_GATES = AVAILABLE_GATE_LIST;
@@ -249,7 +250,8 @@ export default function PracticeDetailPage() {
   }));
 
   const [activeLeftTab, setActiveLeftTab] = useState<'description' | 'submissions' | 'hints'>('description');
-  const [activeRightBottomTab, setActiveRightBottomTab] = useState<'testresult' | 'probabilities'>('testresult');
+  const [activeRightBottomTab, setActiveRightBottomTab] = useState<'testresult' | 'probabilities' | 'code'>('testresult');
+  const [practiceViewMode, setPracticeViewMode] = useState<'split' | 'visual' | 'code'>('split');
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
   const [activeSettingsTab, setActiveSettingsTab] = useState<'layout' | 'editor' | 'shortcuts'>('layout');
   const [buttonPlacement, setButtonPlacement] = useState<'toolbar' | 'editor'>('toolbar');
@@ -1168,9 +1170,49 @@ export default function PracticeDetailPage() {
                 </div>
               )}
 
+              {/* Workspace View Mode: Split / Visual / Code */}
+              <div className="flex items-center gap-1 bg-white p-0.5 rounded-lg border border-dark-200 ml-auto shrink-0">
+                <button
+                  onClick={() => setPracticeViewMode('split')}
+                  style={{ fontSize: `calc(${fontSizeSetting} * 0.85)` }}
+                  className={`px-2 py-0.5 rounded font-bold transition-all cursor-pointer ${
+                    practiceViewMode === 'split'
+                      ? 'bg-primary-600 text-white shadow-2xs'
+                      : 'text-dark-600 hover:text-dark-900'
+                  }`}
+                  title="Side-by-side Circuit Grid & Code"
+                >
+                  Split
+                </button>
+                <button
+                  onClick={() => setPracticeViewMode('visual')}
+                  style={{ fontSize: `calc(${fontSizeSetting} * 0.85)` }}
+                  className={`px-2 py-0.5 rounded font-bold transition-all cursor-pointer ${
+                    practiceViewMode === 'visual'
+                      ? 'bg-primary-600 text-white shadow-2xs'
+                      : 'text-dark-600 hover:text-dark-900'
+                  }`}
+                  title="Visual Circuit Grid"
+                >
+                  Gates
+                </button>
+                <button
+                  onClick={() => setPracticeViewMode('code')}
+                  style={{ fontSize: `calc(${fontSizeSetting} * 0.85)` }}
+                  className={`px-2 py-0.5 rounded font-bold transition-all cursor-pointer ${
+                    practiceViewMode === 'code'
+                      ? 'bg-primary-600 text-white shadow-2xs'
+                      : 'text-dark-600 hover:text-dark-900'
+                  }`}
+                  title="Live Code Editor (Type to place gates)"
+                >
+                  Code
+                </button>
+              </div>
+
               {/* In-Editor Placement Actions when enabled */}
               {buttonPlacement === 'editor' && (
-                <div className="flex items-center gap-1.5 shrink-0 ml-auto">
+                <div className="flex items-center gap-1.5 shrink-0 ml-1">
                   <button
                     onClick={handleClearCircuit}
                     title="Reset Circuit"
@@ -1192,178 +1234,199 @@ export default function PracticeDetailPage() {
               )}
             </div>
 
-            {/* Circuit Grid Canvas */}
-            <div className="flex-1 overflow-auto p-4 flex flex-col justify-center bg-[#FAFAFA]">
-              <div className="space-y-4 min-w-[500px]">
-                {Array.from({ length: numQubits }, (_, qIdx) => (
-                  <div key={qIdx} className="flex items-center gap-3">
-                    <div 
-                      style={{ fontSize: `calc(${fontSizeSetting} * 0.92)` }}
-                      className="w-16 shrink-0 flex items-center gap-1.5 font-mono text-dark-700"
-                    >
-                      <span className="font-bold text-dark-900">q[{qIdx}]</span>
-                      <span className="px-1.5 py-0.5 rounded bg-dark-100 text-[10px] text-dark-600 border border-dark-200">|0⟩</span>
-                    </div>
+            {/* Workspace Area: Visual Grid and/or Live Synchronized Python Code Editor */}
+            <div className="flex-1 overflow-hidden flex flex-col md:flex-row bg-[#FAFAFA]">
+              {/* Visual Circuit Canvas (Shown in 'split' or 'visual' mode) */}
+              {(practiceViewMode === 'split' || practiceViewMode === 'visual') && (
+                <div className={`${practiceViewMode === 'split' ? 'w-full md:w-1/2 border-b md:border-b-0 md:border-r border-dark-200' : 'w-full'} overflow-auto p-4 flex flex-col justify-center bg-[#FAFAFA]`}>
+                  <div className="space-y-4 min-w-[460px]">
+                    {Array.from({ length: numQubits }, (_, qIdx) => (
+                      <div key={qIdx} className="flex items-center gap-3">
+                        <div 
+                          style={{ fontSize: `calc(${fontSizeSetting} * 0.92)` }}
+                          className="w-16 shrink-0 flex items-center gap-1.5 font-mono text-dark-700"
+                        >
+                          <span className="font-bold text-dark-900">q[{qIdx}]</span>
+                          <span className="px-1.5 py-0.5 rounded bg-dark-100 text-[10px] text-dark-600 border border-dark-200">|0⟩</span>
+                        </div>
 
-                    <div className="flex-1 flex items-center gap-2 circuit-wire">
-                      {Array.from({ length: MAX_STEPS }, (_, sIdx) => {
-                        const placed = gates.find((g) => g.step === sIdx && g.qubits.includes(qIdx));
-                        const isSelected = selectedSlot?.qubit === qIdx && selectedSlot?.step === sIdx;
-                        const isDragOver = dragOverSlot?.qubit === qIdx && dragOverSlot?.step === sIdx;
-                        const isControl = placed && placed.qubits.length > 1 && placed.qubits[0] === qIdx;
-                        const isTarget = placed && placed.qubits.length > 1 && placed.qubits[1] === qIdx;
+                        <div className="flex-1 flex items-center gap-2 circuit-wire">
+                          {Array.from({ length: MAX_STEPS }, (_, sIdx) => {
+                            const placed = gates.find((g) => g.step === sIdx && g.qubits.includes(qIdx));
+                            const isSelected = selectedSlot?.qubit === qIdx && selectedSlot?.step === sIdx;
+                            const isDragOver = dragOverSlot?.qubit === qIdx && dragOverSlot?.step === sIdx;
+                            const isControl = placed && placed.qubits.length > 1 && placed.qubits[0] === qIdx;
+                            const isTarget = placed && placed.qubits.length > 1 && placed.qubits[1] === qIdx;
 
-                        return (
-                          <div
-                            key={sIdx}
-                            onDragOver={(e) => {
-                              e.preventDefault();
-                              e.dataTransfer.dropEffect = 'copy';
-                            }}
-                            onDragEnter={(e) => {
-                              e.preventDefault();
-                              setDragOverSlot({ qubit: qIdx, step: sIdx });
-                            }}
-                            onDragLeave={(e) => {
-                              e.preventDefault();
-                              if (dragOverSlot?.qubit === qIdx && dragOverSlot?.step === sIdx) {
-                                setDragOverSlot(null);
-                              }
-                            }}
-                            onDrop={(e) => {
-                              e.preventDefault();
-                              setDragOverSlot(null);
-                              setIsDraggingActive(false);
-
-                              const moveData = e.dataTransfer.getData('application/quantum-move');
-                              if (moveData) {
-                                try {
-                                  const parsed = JSON.parse(moveData);
-                                  const filtered = gates.filter(
-                                    (g) => g.id !== parsed.gateId && !(g.step === sIdx && g.qubits.includes(qIdx))
-                                  );
-                                  if (['cx', 'cz', 'swap'].includes(parsed.type)) {
-                                    const tgt = qIdx === 0 ? 1 : 0;
-                                    filtered.push({
-                                      id: `prac-gate-${Date.now()}-${sIdx}`,
-                                      type: parsed.type,
-                                      qubits: [qIdx, tgt],
-                                      step: sIdx
-                                    });
-                                  } else {
-                                    filtered.push({
-                                      id: `prac-gate-${Date.now()}-${sIdx}`,
-                                      type: parsed.type,
-                                      qubits: [qIdx],
-                                      step: sIdx
-                                    });
+                            return (
+                              <div
+                                key={sIdx}
+                                onDragOver={(e) => {
+                                  e.preventDefault();
+                                  e.dataTransfer.dropEffect = 'copy';
+                                }}
+                                onDragEnter={(e) => {
+                                  e.preventDefault();
+                                  setDragOverSlot({ qubit: qIdx, step: sIdx });
+                                }}
+                                onDragLeave={(e) => {
+                                  e.preventDefault();
+                                  if (dragOverSlot?.qubit === qIdx && dragOverSlot?.step === sIdx) {
+                                    setDragOverSlot(null);
                                   }
-                                  setGates(filtered);
-                                  return;
-                                } catch {}
-                              }
-
-                              const droppedType = (e.dataTransfer.getData('application/quantum-gate') ||
-                                e.dataTransfer.getData('text/plain') ||
-                                selectedGateType) as GateType;
-
-                              if (droppedType && problem.allowedGates.includes(droppedType)) {
-                                setSelectedGateType(droppedType);
-                                placeGateOnSlot(qIdx, sIdx, droppedType);
-                              }
-                            }}
-                            onClick={() => {
-                              setSelectedSlot({ qubit: qIdx, step: sIdx });
-                              placeGateOnSlot(qIdx, sIdx);
-                            }}
-                            onContextMenu={(e) => {
-                              e.preventDefault();
-                              removeGateAt(qIdx, sIdx);
-                            }}
-                            className={`relative z-10 w-10 h-10 rounded-xl flex items-center justify-center cursor-pointer transition-all border ${
-                              isDragOver
-                                ? 'ring-3 ring-primary-500 ring-offset-1 border-primary-600 bg-primary-100 scale-105 shadow-md'
-                                : isSelected
-                                ? 'ring-2 ring-primary-600 border-primary-600 bg-primary-50'
-                                : placed
-                                ? 'border-dark-300 bg-white shadow-xs'
-                                : isDraggingActive
-                                ? 'border-dashed border-primary-400 bg-primary-50/40 animate-pulse'
-                                : 'border-dashed border-dark-200 hover:border-primary-400 bg-white/90 hover:bg-primary-50/30'
-                            }`}
-                            title={
-                              placed
-                                ? `Step ${sIdx}: ${placed.type.toUpperCase()} on Q${placed.qubits.join(', Q')}. Drag to move, or right-click to remove.`
-                                : `Click or drag to place ${selectedGateType.toUpperCase()}`
-                            }
-                          >
-                            {/* Vertical connector line */}
-                            {isControl && placed && (
-                              <div
-                                className="absolute left-1/2 -translate-x-1/2 w-0.5 bg-blue-600 pointer-events-none z-0"
-                                style={{
-                                  top: '50%',
-                                  height: `${(placed.qubits[1] - placed.qubits[0]) * 58}px`
                                 }}
-                              />
-                            )}
-
-                            {placed ? (
-                              <div
-                                draggable={true}
-                                onDragStart={(e) => {
-                                  e.stopPropagation();
-                                  e.dataTransfer.setData('text/plain', placed.type);
-                                  e.dataTransfer.setData('application/quantum-gate', placed.type);
-                                  e.dataTransfer.setData(
-                                    'application/quantum-move',
-                                    JSON.stringify({ qubit: qIdx, step: sIdx, gateId: placed.id, type: placed.type })
-                                  );
-                                  e.dataTransfer.effectAllowed = 'move';
-                                  setIsDraggingActive(true);
-                                }}
-                                onDragEnd={() => {
-                                  setIsDraggingActive(false);
+                                onDrop={(e) => {
+                                  e.preventDefault();
                                   setDragOverSlot(null);
+                                  setIsDraggingActive(false);
+
+                                  const moveData = e.dataTransfer.getData('application/quantum-move');
+                                  if (moveData) {
+                                    try {
+                                      const parsed = JSON.parse(moveData);
+                                      const filtered = gates.filter(
+                                        (g) => g.id !== parsed.gateId && !(g.step === sIdx && g.qubits.includes(qIdx))
+                                      );
+                                      if (['cx', 'cz', 'swap'].includes(parsed.type)) {
+                                        const tgt = qIdx === 0 ? 1 : 0;
+                                        filtered.push({
+                                          id: `prac-gate-${Date.now()}-${sIdx}`,
+                                          type: parsed.type,
+                                          qubits: [qIdx, tgt],
+                                          step: sIdx
+                                        });
+                                      } else {
+                                        filtered.push({
+                                          id: `prac-gate-${Date.now()}-${sIdx}`,
+                                          type: parsed.type,
+                                          qubits: [qIdx],
+                                          step: sIdx
+                                        });
+                                      }
+                                      setGates(filtered);
+                                      return;
+                                    } catch {}
+                                  }
+
+                                  const droppedType = (e.dataTransfer.getData('application/quantum-gate') ||
+                                    e.dataTransfer.getData('text/plain') ||
+                                    selectedGateType) as GateType;
+
+                                  if (droppedType && problem.allowedGates.includes(droppedType)) {
+                                    setSelectedGateType(droppedType);
+                                    placeGateOnSlot(qIdx, sIdx, droppedType);
+                                  }
                                 }}
-                                className="w-full h-full flex items-center justify-center cursor-grab active:cursor-grabbing select-none"
+                                onClick={() => {
+                                  setSelectedSlot({ qubit: qIdx, step: sIdx });
+                                  placeGateOnSlot(qIdx, sIdx);
+                                }}
+                                onContextMenu={(e) => {
+                                  e.preventDefault();
+                                  removeGateAt(qIdx, sIdx);
+                                }}
+                                className={`relative z-10 w-9 h-9 sm:w-10 sm:h-10 rounded-xl flex items-center justify-center cursor-pointer transition-all border ${
+                                  isDragOver
+                                    ? 'ring-3 ring-primary-500 ring-offset-1 border-primary-600 bg-primary-100 scale-105 shadow-md'
+                                    : isSelected
+                                    ? 'ring-2 ring-primary-600 border-primary-600 bg-primary-50'
+                                    : placed
+                                    ? 'border-dark-300 bg-white shadow-xs'
+                                    : isDraggingActive
+                                    ? 'border-dashed border-primary-400 bg-primary-50/40 animate-pulse'
+                                    : 'border-dashed border-dark-200 hover:border-primary-400 bg-white/90 hover:bg-primary-50/30'
+                                }`}
+                                title={
+                                  placed
+                                    ? `Step ${sIdx}: ${placed.type.toUpperCase()} on Q${placed.qubits.join(', Q')}. Drag to move, or right-click to remove.`
+                                    : `Click or drag to place ${selectedGateType.toUpperCase()}`
+                                }
                               >
-                                {placed.type === 'cx' ? (
-                                  isControl ? (
-                                    <ControlDotIcon size={12} />
-                                  ) : isTarget ? (
-                                    <TargetPlusIcon size={24} />
-                                  ) : (
-                                    <QuantumGateSymbol type={placed.type} size="sm" />
-                                  )
-                                ) : placed.type === 'cz' ? (
-                                  isControl ? (
-                                    <ControlDotIcon size={12} />
-                                  ) : isTarget ? (
-                                    <QuantumGateSymbol type="z" size="sm" />
-                                  ) : (
-                                    <QuantumGateSymbol type={placed.type} size="sm" />
-                                  )
-                                ) : placed.type === 'swap' ? (
-                                  <SwapXIcon size={20} />
+                                {/* Vertical connector line */}
+                                {isControl && placed && (
+                                  <div
+                                    className="absolute left-1/2 -translate-x-1/2 w-0.5 bg-blue-600 pointer-events-none z-0"
+                                    style={{
+                                      top: '50%',
+                                      height: `${(placed.qubits[1] - placed.qubits[0]) * 58}px`
+                                    }}
+                                  />
+                                )}
+
+                                {placed ? (
+                                  <div
+                                    draggable={true}
+                                    onDragStart={(e) => {
+                                      e.stopPropagation();
+                                      e.dataTransfer.setData('text/plain', placed.type);
+                                      e.dataTransfer.setData('application/quantum-gate', placed.type);
+                                      e.dataTransfer.setData(
+                                        'application/quantum-move',
+                                        JSON.stringify({ qubit: qIdx, step: sIdx, gateId: placed.id, type: placed.type })
+                                      );
+                                      e.dataTransfer.effectAllowed = 'move';
+                                      setIsDraggingActive(true);
+                                    }}
+                                    onDragEnd={() => {
+                                      setIsDraggingActive(false);
+                                      setDragOverSlot(null);
+                                    }}
+                                    className="w-full h-full flex items-center justify-center cursor-grab active:cursor-grabbing select-none"
+                                  >
+                                    {placed.type === 'cx' ? (
+                                      isControl ? (
+                                        <ControlDotIcon size={12} />
+                                      ) : isTarget ? (
+                                        <TargetPlusIcon size={24} />
+                                      ) : (
+                                        <QuantumGateSymbol type={placed.type} size="sm" />
+                                      )
+                                    ) : placed.type === 'cz' ? (
+                                      isControl ? (
+                                        <ControlDotIcon size={12} />
+                                      ) : isTarget ? (
+                                        <QuantumGateSymbol type="z" size="sm" />
+                                      ) : (
+                                        <QuantumGateSymbol type={placed.type} size="sm" />
+                                      )
+                                    ) : placed.type === 'swap' ? (
+                                      <SwapXIcon size={20} />
+                                    ) : (
+                                      <QuantumGateSymbol type={placed.type} size="sm" />
+                                    )}
+                                  </div>
+                                ) : isDragOver ? (
+                                  <span className="text-[8px] font-mono font-bold text-primary-700">DROP</span>
                                 ) : (
-                                  <QuantumGateSymbol type={placed.type} size="sm" />
+                                  <span className="text-[9px] font-mono text-dark-400 opacity-60">
+                                    {relativeLineNumbers ? `[${sIdx}]` : `S${sIdx}`}
+                                  </span>
                                 )}
                               </div>
-                            ) : isDragOver ? (
-                              <span className="text-[8px] font-mono font-bold text-primary-700">DROP</span>
-                            ) : (
-                              <span className="text-[9px] font-mono text-dark-400 opacity-60">
-                                {relativeLineNumbers ? `[${sIdx}]` : `S${sIdx}`}
-                              </span>
-                            )}
-                          </div>
-                        );
-                      })}
-                    </div>
+                            );
+                          })}
+                        </div>
+                      </div>
+                    ))}
                   </div>
-                ))}
-              </div>
+                </div>
+              )}
+
+              {/* Live Synchronized Python Code Editor (Shown in 'split' or 'code' mode) */}
+              {(practiceViewMode === 'split' || practiceViewMode === 'code') && (
+                <div className={`${practiceViewMode === 'split' ? 'w-full md:w-1/2' : 'w-full'} flex flex-col bg-dark-950 overflow-hidden`}>
+                  <QuantumCircuitCodePanel
+                    numQubits={numQubits}
+                    gates={gates}
+                    onCircuitCodeChange={(newNum, newGates) => {
+                      setGates(newGates);
+                    }}
+                    title="Live Python / Qiskit Code (Edit to Update Circuit)"
+                    className="h-full border-0 rounded-none flex-1"
+                    editable={true}
+                  />
+                </div>
+              )}
             </div>
 
             {/* Circuit Footer Stats */}
@@ -1371,8 +1434,8 @@ export default function PracticeDetailPage() {
               style={{ fontSize: `calc(${fontSizeSetting} * 0.85)` }}
               className="bg-white border-t border-dark-200 px-3 py-1.5 flex items-center justify-between text-dark-500 shrink-0"
             >
-              <span>Click slot to place selected gate. Right-click to remove.</span>
-              <span className="font-mono font-semibold text-dark-700">{gates.length} gates in circuit</span>
+              <span>{gates.length} gates placed</span>
+              <span className="font-mono font-semibold text-dark-700">{numQubits} Qubits · {MAX_STEPS} Steps</span>
             </div>
           </div>
 

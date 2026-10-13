@@ -429,11 +429,13 @@ html.dark .bg-emerald-100 {
 }
 html.dark .text-emerald-700,
 html.dark .text-emerald-800,
-html.dark .text-emerald-900 {
+html.dark .text-emerald-900,
+html.dark .text-emerald-950 {
   color: #6EE7B7 !important;
 }
 html.dark .border-emerald-100,
-html.dark .border-emerald-200 {
+html.dark .border-emerald-200,
+html.dark .border-emerald-300 {
   border-color: rgba(16, 185, 129, 0.35) !important;
 }
 
@@ -541,6 +543,27 @@ html.dark [class*="bg-dark-100/"] {
 html.dark [class*="bg-white/"] {
   background-color: rgba(17, 24, 39, 0.8) !important;
 }
+html.dark [class*="bg-emerald-50/"] {
+  background-color: rgba(6, 78, 59, 0.45) !important;
+}
+html.dark [class*="bg-emerald-100/"] {
+  background-color: rgba(6, 78, 59, 0.6) !important;
+}
+html.dark [class*="bg-amber-50/"] {
+  background-color: rgba(120, 53, 15, 0.4) !important;
+}
+html.dark [class*="bg-amber-100/"] {
+  background-color: rgba(120, 53, 15, 0.55) !important;
+}
+html.dark [class*="bg-red-50/"] {
+  background-color: rgba(127, 29, 29, 0.4) !important;
+}
+html.dark [class*="bg-indigo-50/"] {
+  background-color: rgba(49, 46, 129, 0.45) !important;
+}
+html.dark [class*="bg-primary-50/"] {
+  background-color: rgba(49, 46, 129, 0.45) !important;
+}
 
 /* Gradients in Dark Mode */
 html.dark [class*="from-dark-50"] {
@@ -561,6 +584,20 @@ html.dark [class*="via-indigo-50"] {
 }
 html.dark [class*="to-white"] {
   --tw-gradient-to: #111827 var(--tw-gradient-to-position) !important;
+}
+html.dark [class*="via-white"] {
+  --tw-gradient-stops: var(--tw-gradient-from), #172033 var(--tw-gradient-via-position), var(--tw-gradient-to) !important;
+}
+html.dark [class*="from-amber-50"] {
+  --tw-gradient-from: #271b0e var(--tw-gradient-from-position) !important;
+  --tw-gradient-to: rgba(39, 27, 14, 0) var(--tw-gradient-to-position) !important;
+  --tw-gradient-stops: var(--tw-gradient-from), var(--tw-gradient-to) !important;
+}
+html.dark [class*="to-orange-50"] {
+  --tw-gradient-to: #25180f var(--tw-gradient-to-position) !important;
+}
+html.dark [class*="to-yellow-50"] {
+  --tw-gradient-to: #241d0e var(--tw-gradient-to-position) !important;
 }
 
 /* Form Controls in Dark Mode */
@@ -658,6 +695,45 @@ html.dark .shadow-lg {
 html.dark .shadow-xl,
 html.dark .shadow-2xl {
   box-shadow: 0 24px 48px -8px rgba(0, 0, 0, 0.85), 0 8px 20px -4px rgba(0, 0, 0, 0.6) !important;
+}
+
+/* ==========================================================================
+   Certificate Modal Dark Mode Preservation
+   Ensure credentials look sharp and readable with dark parchment aesthetic
+   ========================================================================== */
+html.dark #quantum-certificate-printable {
+  background-color: #0f172a !important;
+  background-image: radial-gradient(ellipse at center, rgba(30, 41, 59, 0.9) 0%, rgba(15, 23, 42, 1) 75%) !important;
+  border-color: rgba(245, 158, 11, 0.7) !important;
+  color: #f8fafc !important;
+}
+
+html.dark #quantum-certificate-printable h1,
+html.dark #quantum-certificate-printable h2,
+html.dark #quantum-certificate-printable span,
+html.dark #quantum-certificate-printable p {
+  color: #f8fafc !important;
+}
+
+html.dark #quantum-certificate-printable .text-amber-800,
+html.dark #quantum-certificate-printable .text-amber-950 {
+  color: #fbbf24 !important;
+}
+
+html.dark #quantum-certificate-printable .text-dark-600,
+html.dark #quantum-certificate-printable .text-dark-500 {
+  color: #cbd5e1 !important;
+}
+
+html.dark #quantum-certificate-printable .border-amber-300,
+html.dark #quantum-certificate-printable .border-amber-200\/80,
+html.dark #quantum-certificate-printable .border-amber-100 {
+  border-color: rgba(245, 158, 11, 0.4) !important;
+}
+
+html.dark #quantum-certificate-printable .bg-amber-100\/70 {
+  background-color: rgba(245, 158, 11, 0.2) !important;
+  border-color: rgba(245, 158, 11, 0.5) !important;
 }
 
 

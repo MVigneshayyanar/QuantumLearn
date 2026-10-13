@@ -4,7 +4,7 @@ import React, { useState, useRef } from 'react';
 import { BlochSphere3D } from '@/components/bloch-sphere/BlochSphere3D';
 import { useAccessibility } from '@/lib/accessibility-context';
 import { BlochVector } from '@/lib/types';
-import { Globe, Sparkles, RotateCcw } from 'lucide-react';
+import { Globe, Sparkles, RotateCcw, Code2, Copy, Check, Terminal } from 'lucide-react';
 import { MathRenderer } from '@/components/math/MathRenderer';
 
 export default function BlochSpherePage() {
@@ -268,6 +268,48 @@ export default function BlochSpherePage() {
                 ? 'The north pole is |0⟩, the south pole is |1⟩. Any other point on the globe is a unique quantum superposition of both, with latitude controlling probability and longitude controlling the quantum relative phase!'
                 : 'Unitary single-qubit operations correspond isomorphically to 3D rotations in SO(3) acting on the Bloch vector needle about the rotation axis defined by the gate generator.'}
             </p>
+          </div>
+
+          {/* Python Qiskit Code for Current Bloch State */}
+          <div className="bg-dark-950 text-dark-100 rounded-2xl border border-dark-800 p-3.5 shadow-xs space-y-2">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-1.5">
+                <Code2 className="w-3.5 h-3.5 text-primary-400" />
+                <span className="font-bold text-xs text-dark-200">Python (Qiskit Statevector Code)</span>
+              </div>
+              <button
+                onClick={() => {
+                  const pyCode = `# Create exact quantum statevector from Bloch angles
+import numpy as np
+from qiskit.quantum_info import Statevector
+
+theta = ${theta.toFixed(4)}  # ${((theta * 180) / Math.PI).toFixed(1)}°
+phi = ${phi.toFixed(4)}    # ${((phi * 180) / Math.PI).toFixed(1)}°
+
+# Statevector: |ψ⟩ = cos(θ/2)|0⟩ + exp(i*φ)*sin(θ/2)|1⟩
+state = Statevector([
+    np.cos(theta / 2),
+    np.exp(1j * phi) * np.sin(theta / 2)
+])
+print("Statevector:", state)
+print("Bloch Vector [x, y, z]:", [${(Math.sin(theta) * Math.cos(phi)).toFixed(3)}, ${(Math.sin(theta) * Math.sin(phi)).toFixed(3)}, ${Math.cos(theta).toFixed(3)}])
+print("Measurement Probabilities:", state.probabilities_dict())`;
+                  navigator.clipboard.writeText(pyCode);
+                }}
+                className="flex items-center gap-1 px-2 py-0.5 rounded bg-dark-800 hover:bg-dark-700 text-dark-300 hover:text-white text-[10px] font-medium transition-colors cursor-pointer"
+              >
+                <Copy className="w-3 h-3" />
+                <span>Copy Python</span>
+              </button>
+            </div>
+            <pre className="p-2.5 rounded-xl bg-dark-900 text-dark-200 font-mono text-[11px] overflow-x-auto leading-relaxed">
+{`from qiskit.quantum_info import Statevector
+import numpy as np
+
+# |ψ⟩ = cos(${((theta*180)/Math.PI).toFixed(1)}°/2)|0⟩ + e^{i(${((phi*180)/Math.PI).toFixed(1)}°)}sin(${((theta*180)/Math.PI).toFixed(1)}°/2)|1⟩
+psi = Statevector([np.cos(${theta.toFixed(3)}/2), np.exp(1j*${phi.toFixed(3)}) * np.sin(${theta.toFixed(3)}/2)])
+bloch = [${(Math.sin(theta) * Math.cos(phi)).toFixed(3)}, ${(Math.sin(theta) * Math.sin(phi)).toFixed(3)}, ${Math.cos(theta).toFixed(3)}]`}
+            </pre>
           </div>
         </div>
       </div>

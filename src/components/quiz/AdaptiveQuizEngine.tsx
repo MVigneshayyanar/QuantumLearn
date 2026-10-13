@@ -325,7 +325,7 @@ Could you teach me the core quantum principles behind these mistakes in simple t
                   )}
                 </div>
 
-                <p className="text-[11px] font-medium text-dark-800 leading-snug line-clamp-2 min-h-[2.5rem]">
+                <p className="text-[11px] font-medium text-dark-800 dark:text-dark-100 leading-snug line-clamp-2 min-h-[2.5rem]">
                   {qText}
                 </p>
 
@@ -335,8 +335,8 @@ Could you teach me the core quantum principles behind these mistakes in simple t
                       correct === undefined
                         ? 'bg-dark-100 text-dark-500'
                         : correct
-                        ? 'bg-emerald-100 text-emerald-800'
-                        : 'bg-red-100 text-red-800'
+                        ? 'bg-emerald-100 dark:bg-emerald-900/80 text-emerald-800 dark:text-emerald-200'
+                        : 'bg-red-100 dark:bg-red-900/80 text-red-800 dark:text-red-200'
                     }`}
                   >
                     {correct === undefined ? 'Skipped' : correct ? 'Correct ✓' : 'Incorrect ✗'}
@@ -609,13 +609,13 @@ Could you teach me the core quantum principles behind these mistakes in simple t
   const isCurrentCorrect = selectedOption?.is_correct || false;
 
   return (
-    <div className="bg-white rounded-3xl border border-dark-200 p-5 sm:p-7 shadow-xs space-y-5 max-w-3xl mx-auto">
+    <div className="bg-white rounded-2xl border border-dark-200 p-4 sm:p-5 shadow-xs space-y-3.5 max-w-2xl mx-auto text-xs">
       {/* ── Retrying Banner ───────────────────────────────────────────────── */}
       {isRetryingFromFinish && (
-        <div className="p-3 rounded-2xl bg-amber-50 border border-amber-200 flex flex-wrap items-center justify-between gap-2 text-xs text-amber-900 animate-fadeIn">
+        <div className="p-2 rounded-xl bg-amber-50 border border-amber-200 flex flex-wrap items-center justify-between gap-2 text-xs text-amber-900 animate-fadeIn">
           <div className="flex items-center gap-2 font-semibold">
-            <RotateCcw className="w-4 h-4 text-amber-600 shrink-0" />
-            <span>Retrying Mistake: Select the correct answer to raise your score to 100%!</span>
+            <RotateCcw className="w-3.5 h-3.5 text-amber-600 shrink-0" />
+            <span>Retrying Mistake: Select the correct answer to raise score to 100%!</span>
           </div>
           <button
             onClick={() => {
@@ -632,14 +632,14 @@ Could you teach me the core quantum principles behind these mistakes in simple t
       )}
 
       {/* ── Header: Quiz title & progress dots with Question Numbers ─────────── */}
-      <div className="flex items-center justify-between gap-3 pb-4 border-b border-dark-100">
-        <div className="flex items-center gap-2.5">
-          <div className="w-9 h-9 rounded-xl bg-primary-600 text-white flex items-center justify-center font-black text-xs shadow-xs">
+      <div className="flex items-center justify-between gap-3 pb-2.5 border-b border-dark-100">
+        <div className="flex items-center gap-2">
+          <div className="w-7 h-7 rounded-lg bg-primary-600 text-white flex items-center justify-center font-black text-xs shadow-xs">
             Q{currentIdx + 1}
           </div>
           <div>
             <div className="flex items-center gap-2">
-              <h3 className="text-sm font-black text-dark-900 leading-none">
+              <h3 className="text-xs font-black text-dark-900 leading-none">
                 Question {currentIdx + 1} of {TOTAL_QUESTIONS}
               </h3>
             </div>
@@ -696,28 +696,28 @@ Could you teach me the core quantum principles behind these mistakes in simple t
 
       {/* ── Question text ─────────────────────────────────────────────────── */}
       <div>
-        <h3 className="text-base sm:text-lg font-bold text-dark-900 leading-snug">
+        <h3 className="text-sm sm:text-base font-bold text-dark-900 leading-snug">
           {language === 'hi' && currentQ.question_hi ? currentQ.question_hi : currentQ.question}
         </h3>
       </div>
 
       {/* ── Options ──────────────────────────────────────────────────────── */}
-      <div className="space-y-3" role="radiogroup" aria-label="Quiz question options">
+      <div className="space-y-2" role="radiogroup" aria-label="Quiz question options">
         {currentQ.options.map((opt) => {
           const isSelected = selectedOptionId === opt.id;
           const optText = language === 'hi' && opt.text_hi ? opt.text_hi : opt.text;
 
-          let optionStyle = 'border-dark-200 bg-white hover:border-dark-300 hover:bg-dark-50/50';
+          let optionStyle = 'border-dark-200 bg-white dark:bg-dark-900 text-dark-800 dark:text-dark-100 hover:border-dark-300 hover:bg-dark-50/50';
           if (isSubmitted) {
             if (opt.is_correct) {
-              optionStyle = 'border-emerald-500 bg-emerald-50/70 text-emerald-950 font-semibold';
+              optionStyle = 'border-emerald-500 bg-emerald-50/70 dark:bg-emerald-950/60 text-emerald-950 dark:text-emerald-100 font-semibold';
             } else if (isSelected && !opt.is_correct) {
-              optionStyle = 'border-red-400 bg-red-50/70 text-red-950';
+              optionStyle = 'border-red-400 bg-red-50/70 dark:bg-red-950/60 text-red-950 dark:text-red-100';
             } else {
-              optionStyle = 'border-dark-200 bg-dark-50 opacity-60';
+              optionStyle = 'border-dark-200 bg-dark-50 dark:bg-dark-900/50 text-dark-400 opacity-60';
             }
           } else if (isSelected) {
-            optionStyle = 'border-primary-600 bg-primary-50/80 text-primary-900 ring-2 ring-primary-500/20 font-medium';
+            optionStyle = 'border-primary-600 bg-primary-50/80 dark:bg-primary-950/60 text-primary-900 dark:text-primary-100 ring-2 ring-primary-500/20 font-medium';
           }
 
           return (
@@ -728,17 +728,17 @@ Could you teach me the core quantum principles behind these mistakes in simple t
               aria-checked={isSelected}
               tabIndex={0}
               onKeyDown={(e) => { if (e.key === ' ' || e.key === 'Enter') handleSelectOption(opt.id); }}
-              className={`p-4 rounded-xl border cursor-pointer transition-all flex items-start gap-3 text-xs leading-relaxed ${optionStyle}`}
+              className={`p-2.5 sm:p-3 rounded-xl border cursor-pointer transition-all flex items-start gap-2.5 text-xs leading-relaxed ${optionStyle}`}
             >
-              <div className="w-5 h-5 rounded-full border border-dark-300 flex items-center justify-center shrink-0 mt-0.5 bg-white">
+              <div className="w-4 h-4 rounded-full border border-dark-300 flex items-center justify-center shrink-0 mt-0.5 bg-white">
                 {isSubmitted ? (
                   opt.is_correct ? (
-                    <CheckCircle2 className="w-4 h-4 text-emerald-600" />
+                    <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600" />
                   ) : isSelected ? (
-                    <XCircle className="w-4 h-4 text-red-500" />
+                    <XCircle className="w-3.5 h-3.5 text-red-500" />
                   ) : null
                 ) : isSelected ? (
-                  <div className="w-2.5 h-2.5 rounded-full bg-primary-600" />
+                  <div className="w-2 h-2 rounded-full bg-primary-600" />
                 ) : null}
               </div>
               <span className="flex-1">{optText}</span>
@@ -799,7 +799,7 @@ Could you teach me the core quantum principles behind these mistakes in simple t
       )}
 
       {/* ── Footer actions ────────────────────────────────────────────────── */}
-      <div className="flex items-center justify-between pt-3 border-t border-dark-100">
+      <div className="flex items-center justify-between pt-2 border-t border-dark-100">
         <div className="flex items-center gap-2">
           {!isSubmitted && (
             <button
@@ -812,19 +812,19 @@ Could you teach me the core quantum principles behind these mistakes in simple t
             </button>
           )}
           {showHint && !isSubmitted && currentQ.hint && (
-            <span className="text-xs text-amber-800 bg-amber-50 border border-amber-200 px-3 py-1 rounded-lg animate-fadeIn">
+            <span className="text-xs text-amber-800 bg-amber-50 border border-amber-200 px-2.5 py-0.5 rounded-lg animate-fadeIn">
               💡 {currentQ.hint}
             </span>
           )}
         </div>
 
-        <div className="flex items-center gap-2.5">
+        <div className="flex items-center gap-2">
           {!isSubmitted ? (
             <button
               type="button"
               onClick={handleSubmit}
               disabled={!selectedOptionId}
-              className="px-5 py-2.5 rounded-xl bg-primary-600 hover:bg-primary-700 disabled:opacity-50 text-white font-bold text-xs shadow-xs transition-all cursor-pointer"
+              className="px-4 py-2 rounded-lg bg-primary-600 hover:bg-primary-700 disabled:opacity-50 text-white font-bold text-xs shadow-xs transition-all cursor-pointer"
             >
               Check Answer
             </button>
@@ -837,16 +837,16 @@ Could you teach me the core quantum principles behind these mistakes in simple t
                     setIsSubmitted(false);
                     setSelectedOptionId(null);
                   }}
-                  className="flex items-center gap-1.5 px-4 py-2.5 rounded-xl border border-dark-300 hover:bg-dark-50 text-dark-800 font-semibold text-xs transition-all cursor-pointer"
+                  className="flex items-center gap-1 px-3 py-2 rounded-lg border border-dark-300 hover:bg-dark-50 text-dark-800 font-semibold text-xs transition-all cursor-pointer"
                 >
                   <RotateCcw className="w-3.5 h-3.5" />
-                  <span>Retry Question</span>
+                  <span>Retry</span>
                 </button>
               )}
               <button
                 type="button"
                 onClick={handleNext}
-                className="flex items-center gap-1.5 px-5 py-2.5 rounded-xl bg-primary-600 hover:bg-primary-700 text-white font-bold text-xs shadow-xs transition-all cursor-pointer"
+                className="flex items-center gap-1 px-4 py-2 rounded-lg bg-primary-600 hover:bg-primary-700 text-white font-bold text-xs shadow-xs transition-all cursor-pointer"
               >
                 <span>
                   {isRetryingFromFinish

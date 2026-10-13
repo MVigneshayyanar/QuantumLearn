@@ -65,7 +65,7 @@ function CertificateCard({
 
   if (!isUnlocked) {
     return (
-      <div className="relative rounded-3xl border-2 border-dashed border-amber-300 bg-gradient-to-br from-amber-50 via-white to-orange-50/40 p-6 sm:p-8 text-center space-y-4 overflow-hidden">
+      <div className="relative rounded-3xl border-2 border-dashed border-amber-300 dark:border-amber-700/60 bg-gradient-to-br from-amber-50 via-white to-orange-50/40 dark:from-dark-900 dark:via-dark-850 dark:to-dark-900 p-6 sm:p-8 text-center space-y-4 overflow-hidden">
         {/* Blurred certificate preview */}
         <div className="absolute inset-0 flex items-center justify-center pointer-events-none opacity-10">
           <Medal className="w-48 h-48 text-amber-500" />
@@ -75,8 +75,8 @@ function CertificateCard({
             <Award className="w-7 h-7" />
           </div>
           <div className="space-y-1">
-            <h4 className="text-base font-black text-dark-900">Certificate In Progress</h4>
-            <p className="text-xs text-dark-600 max-w-sm mx-auto leading-relaxed">
+            <h4 className="text-base font-black text-dark-900 dark:text-dark-100">Certificate In Progress</h4>
+            <p className="text-xs text-dark-600 dark:text-dark-400 max-w-sm mx-auto leading-relaxed">
               Complete the assessment questions to claim and download your verified{' '}
               <em>{moduleTitle}</em> Quantum Algorithm Certificate.
             </p>
@@ -96,7 +96,7 @@ function CertificateCard({
   }
 
   return (
-    <div className="relative rounded-3xl border-2 border-amber-300 bg-gradient-to-br from-amber-50 via-white to-yellow-50/60 p-6 sm:p-8 text-center space-y-4 overflow-hidden shadow-md shadow-amber-100">
+    <div className="relative rounded-3xl border-2 border-amber-300 dark:border-amber-700/60 bg-gradient-to-br from-amber-50 via-white to-yellow-50/60 dark:from-dark-900 dark:via-dark-850 dark:to-dark-900 p-6 sm:p-8 text-center space-y-4 overflow-hidden shadow-md shadow-amber-100 dark:shadow-none">
       {/* Decorative glow */}
       <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,_rgba(251,191,36,0.15)_0%,_transparent_70%)] pointer-events-none" />
 
@@ -210,29 +210,29 @@ export function SkillBaseStage({ moduleSlug, moduleTitle = 'Quantum Algorithm' }
   };
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-3 text-xs">
       {/* ── Header ─────────────────────────────────────────────────────────── */}
-      <div className="bg-gradient-to-br from-indigo-50/80 via-white to-primary-50/60 rounded-3xl border border-primary-200/60 p-5 sm:p-6 space-y-4 shadow-xs">
-        <div className="flex flex-wrap items-center justify-between gap-3">
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-2xl bg-primary-600 text-white flex items-center justify-center shadow-sm">
-              <Sparkles className="w-5 h-5" />
+      <div className="bg-gradient-to-br from-indigo-50/80 via-white to-primary-50/60 rounded-xl border border-primary-200/60 px-4 py-2.5 space-y-2 shadow-xs">
+        <div className="flex flex-wrap items-center justify-between gap-2">
+          <div className="flex items-center gap-2">
+            <div className="w-7 h-7 rounded-lg bg-primary-600 text-white flex items-center justify-center shadow-xs">
+              <Sparkles className="w-3.5 h-3.5" />
             </div>
             <div>
-              <h2 className="text-sm font-black text-dark-900">Stage 6 · Assessment</h2>
-              <p className="text-[11px] text-dark-500">Complete all 10 assessment questions to earn 100% Algorithm Mastery</p>
+              <h2 className="text-xs font-black text-dark-900 leading-tight">Stage 6 · Assessment Problems</h2>
+              <p className="text-[10px] text-dark-500">Complete all problems to earn 100% Algorithm Mastery</p>
             </div>
           </div>
           <div className="flex items-center gap-2">
-            <span className="text-xs font-bold text-dark-600 bg-white border border-dark-200 px-3 py-1.5 rounded-xl shadow-xs">
+            <span className="text-[11px] font-bold text-dark-600 bg-white border border-dark-200 px-2.5 py-1 rounded-lg shadow-2xs">
               {solvedCount}/{problems.length} solved
             </span>
             <button
               onClick={() => { setSolvedIds(new Set()); checkSolved(); }}
-              className="text-dark-400 hover:text-dark-700 p-1.5 rounded-lg hover:bg-dark-100 transition-colors cursor-pointer"
+              className="text-dark-400 hover:text-dark-700 p-1 rounded hover:bg-dark-100 transition-colors cursor-pointer"
               title="Refresh progress"
             >
-              <RefreshCw className="w-3.5 h-3.5" />
+              <RefreshCw className="w-3 h-3" />
             </button>
           </div>
         </div>
@@ -273,19 +273,19 @@ export function SkillBaseStage({ moduleSlug, moduleTitle = 'Quantum Algorithm' }
       )}
 
       {/* ── Problem List Table ──────────────────────────────────────────────── */}
-      <div className="bg-white rounded-3xl border border-dark-200 shadow-xs overflow-hidden">
+      <div className="bg-white rounded-2xl border border-dark-200 shadow-xs overflow-hidden">
         <div className="overflow-x-auto">
           <table className="w-full text-xs text-left">
             <thead>
               <tr className="border-b border-dark-200 bg-dark-50/50 text-dark-500 font-semibold uppercase tracking-wider text-[10px]">
-                <th className="py-3.5 px-3 w-10 text-center">Q#</th>
-                <th className="py-3.5 px-3 w-12 text-center">Status</th>
-                <th className="py-3.5 px-5">Problem</th>
-                <th className="py-3.5 px-4">Algorithm</th>
-                <th className="py-3.5 px-4">Category</th>
-                <th className="py-3.5 px-4 text-center">Difficulty</th>
-                <th className="py-3.5 px-4 text-center">Qubits</th>
-                <th className="py-3.5 px-5 text-right">Action</th>
+                <th className="py-2.5 px-3 w-10 text-center">Q#</th>
+                <th className="py-2.5 px-3 w-12 text-center">Status</th>
+                <th className="py-2.5 px-4">Problem</th>
+                <th className="py-2.5 px-3">Algorithm</th>
+                <th className="py-2.5 px-3">Category</th>
+                <th className="py-2.5 px-3 text-center">Difficulty</th>
+                <th className="py-2.5 px-3 text-center">Qubits</th>
+                <th className="py-2.5 px-4 text-right">Action</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-dark-100">
@@ -302,11 +302,11 @@ export function SkillBaseStage({ moduleSlug, moduleTitle = 'Quantum Algorithm' }
                     }`}
                   >
                     {/* Question Number */}
-                    <td className="py-4 px-3 text-center">
+                    <td className="py-2.5 px-3 text-center">
                       <div
-                        className={`w-7 h-7 rounded-lg flex items-center justify-center text-[11px] font-black mx-auto ${
+                        className={`w-6 h-6 rounded-md flex items-center justify-center text-[10px] font-black mx-auto ${
                           isProblemPremium
-                            ? 'bg-gradient-to-tr from-amber-500 to-yellow-400 text-white shadow-xs shadow-amber-500/25'
+                            ? 'bg-gradient-to-tr from-amber-500 to-yellow-400 text-white shadow-2xs'
                             : 'bg-dark-100 text-dark-700'
                         }`}
                       >
@@ -442,14 +442,14 @@ export function SkillBaseStage({ moduleSlug, moduleTitle = 'Quantum Algorithm' }
 
       {/* ── Pro upsell (if not solved yet and not premium) ─────────────────── */}
       {!isAllSolved && !isPremium && (
-        <div className="p-4 rounded-2xl border border-amber-200 bg-gradient-to-r from-amber-50/80 to-orange-50/40 flex flex-col sm:flex-row items-center justify-between gap-3">
+        <div className="p-4 rounded-2xl border border-amber-200 dark:border-amber-700/60 bg-gradient-to-r from-amber-50/80 to-orange-50/40 dark:from-dark-900 dark:to-dark-850 flex flex-col sm:flex-row items-center justify-between gap-3">
           <div className="flex items-center gap-3">
             <div className="w-10 h-10 rounded-xl bg-amber-500 text-white flex items-center justify-center shrink-0 shadow-xs">
               <Crown className="w-5 h-5" />
             </div>
             <div className="text-left">
-              <h4 className="text-xs font-black text-amber-950">Earn your Certificate with QuanBit Pro</h4>
-              <p className="text-[11px] text-amber-800">
+              <h4 className="text-xs font-black text-amber-950 dark:text-amber-200">Earn your Certificate with QuanBit Pro</h4>
+              <p className="text-[11px] text-amber-800 dark:text-amber-300">
                 Complete all 10 practice problems and unlock a downloadable Algorithm Certificate.
               </p>
             </div>
