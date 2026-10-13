@@ -161,6 +161,9 @@ export function AlgorithmModuleView({
   const t = translations[language];
 
   const [activeTab, setActiveTab] = useState<'intuition' | 'math' | 'circuit' | 'build_it' | 'quiz' | 'skill_base'>('intuition');
+  const [currentMathStep, setCurrentMathStep] = useState(0);
+  const [showAllMathSteps, setShowAllMathSteps] = useState(false);
+  const moduleTopRef = useRef<HTMLDivElement>(null);
   const [simResult, setSimResult] = useState<SimulationResult | null>(null);
 
   const STAGE_ORDER = ['intuition', 'math', 'circuit', 'build_it', 'quiz', 'skill_base'] as const;
@@ -221,6 +224,21 @@ export function AlgorithmModuleView({
     }
   }, [isModuleFullyComplete]);
 
+  const scrollPageToTop = () => {
+    if (typeof window === 'undefined') return;
+
+    const resetScroll = () => {
+      window.scrollTo(0, 0);
+      document.documentElement.scrollTop = 0;
+      document.body.scrollTop = 0;
+      document.scrollingElement?.scrollTo(0, 0);
+    };
+
+    resetScroll();
+    window.requestAnimationFrame(resetScroll);
+    window.setTimeout(resetScroll, 50);
+  };
+
   // Sync tab with URL search params (?stage=circuit or ?tab=circuit)
   useEffect(() => {
     if (typeof window !== 'undefined') {
@@ -236,14 +254,19 @@ export function AlgorithmModuleView({
     }
   }, []);
 
-  const handleTabChange = (tabId: typeof activeTab) => {
+  const handleTabChange = (tabId: typeof activeTab, resetMathView = true) => {
     setActiveTab(tabId);
+    if (tabId === 'math' && resetMathView) {
+      setCurrentMathStep(0);
+      setShowAllMathSteps(false);
+    }
     announce(`Switched to stage: ${tabId}`);
     if (typeof window !== 'undefined') {
       const url = new URL(window.location.href);
       url.searchParams.set('tab', tabId);
       window.history.replaceState(null, '', url.toString());
     }
+    scrollPageToTop();
   };
 
   // Smooth scroll to top when switching stages (except circuit tab so user stays in cockpit)
@@ -252,6 +275,19 @@ export function AlgorithmModuleView({
       window.scrollTo({ top: 0, behavior: 'smooth' });
     }
   }, [activeTab]);
+
+  useEffect(() => {
+    if (typeof window !== 'undefined' && activeTab === 'math') {
+      const scrollToTop = () => {
+        moduleTopRef.current?.scrollIntoView({ block: 'start', inline: 'nearest', behavior: 'auto' });
+        scrollPageToTop();
+      };
+
+      scrollToTop();
+      const frame = window.requestAnimationFrame(scrollToTop);
+      return () => window.cancelAnimationFrame(frame);
+    }
+  }, [currentMathStep, activeTab]);
 
   const [circuitGates, setCircuitGates] = useState<PlacedGate[]>(() => getDefaultGatesForAlgorithm(algorithmBackendId));
   const [currentStepIdx, setCurrentStepIdx] = useState<number>(0);
@@ -343,39 +379,32 @@ export function AlgorithmModuleView({
   const isCompactCockpitTab = ['circuit', 'build_it', 'quiz', 'skill_base'].includes(activeTab);
 
   return (
-    <div className={`w-full mx-auto ${isCompactCockpitTab ? 'px-3 sm:px-6 py-1.5 space-y-2' : 'px-8 py-3 space-y-3.5'}`}>
+    <div id="algorithm-module-root" ref={moduleTopRef} className={`w-full mx-auto lg:min-h-[calc(100vh-80px)] ${isCompactCockpitTab ? 'px-3 sm:px-6 lg:pl-8 lg:pr-8 py-1.5' : 'px-3 sm:px-6 lg:pl-8 lg:pr-8 py-3'}`}>
+      <div className="lg:flex lg:items-stretch lg:gap-4 lg:h-[87.5vh]">
       {/* Module Header: Compact Cockpit Header on interactive tabs, Full Header on intuition/math */}
       {isCompactCockpitTab ? (
-        <div className="bg-white rounded-xl border border-dark-200 px-3.5 py-2 shadow-xs space-y-1.5">
-          <div className="flex flex-wrap items-center justify-between gap-2">
+        <aside className="bg-white rounded-2xl border border-dark-200 p-4 shadow-xs relative space-y-4 flex flex-col lg:w-[17.5%] lg:h-full lg:shrink-0 lg:sticky lg:top-4">
+          <div className="flex flex-col gap-3">
             {/* Left: Title & Badges */}
-            <div className="flex items-center gap-2 flex-wrap">
-              <h1 className="text-sm sm:text-base font-bold text-dark-900 tracking-tight">{title}</h1>
-              <span className="px-2 py-0.5 rounded-full text-[10px] font-semibold bg-primary-50 text-primary-700 border border-primary-100">
+            <div className="space-y-2">
+              <h1 className="text-base font-bold text-dark-900 tracking-tight leading-tight">{title}</h1>
+              <div className="flex flex-wrap items-center gap-1.5 min-w-0">
+              <span className="shrink-0 px-2 py-0.5 rounded-full text-[11px] font-semibold bg-primary-50 text-primary-700 border border-primary-100">
                 {category}
               </span>
-              <span className="px-2 py-0.5 rounded-full text-[10px] font-semibold bg-dark-100 text-dark-800">
+              <span className="shrink-0 px-2 py-0.5 rounded-full text-[11px] font-semibold bg-dark-100 text-dark-800">
                 {qubitCount} Qubits
               </span>
-              <span className="px-2 py-0.5 rounded-full text-[10px] font-semibold bg-emerald-50 text-emerald-700 border border-emerald-100 hidden sm:inline-flex items-center gap-1">
+              <span className="w-full px-2 py-1 rounded-lg text-[11px] font-semibold bg-emerald-50 text-emerald-700 border border-emerald-100 inline-flex items-center gap-1 whitespace-normal leading-snug">
                 <MathRenderer text={speedup} />
               </span>
+              </div>
             </div>
 
-            {/* Right: Certificate Trigger */}
-            <button
-              onClick={() => setShowCertificate(true)}
-              className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg border border-amber-200 bg-amber-50/70 hover:bg-amber-100 text-[11px] font-bold text-amber-900 transition-colors cursor-pointer"
-              title="Preview Certificate of Mastery"
-            >
-              <Award className="w-3.5 h-3.5 text-amber-600" />
-              <span>{isModuleFullyComplete ? 'Official Certificate' : 'Certificate'}</span>
-              <ExternalLink className="w-2.5 h-2.5 text-amber-700" />
-            </button>
           </div>
 
           {/* Compact Tab Navigation */}
-          <div className="flex flex-wrap gap-1 border-t border-dark-100 pt-1.5" role="tablist">
+          <div className="flex flex-wrap lg:flex-col gap-1 border-t border-dark-100 pt-1.5" role="tablist">
             {tabs.map((tab, idx) => {
               const Icon = tab.icon;
               const isActive = activeTab === tab.id;
@@ -393,7 +422,7 @@ export function AlgorithmModuleView({
                     handleTabChange(tab.id as any);
                   }}
                   title={isLocked ? `Locked: Complete Stage ${idx} first` : tab.label}
-                  className={`flex items-center gap-1 px-2.5 py-1 rounded-md font-semibold text-[11px] transition-all cursor-pointer ${
+                  className={`flex items-center gap-2 px-3 py-2 lg:w-full lg:justify-start rounded-lg font-semibold text-sm transition-all cursor-pointer ${
                     isActive
                       ? 'bg-primary-600 text-white shadow-xs'
                       : isLocked
@@ -407,77 +436,42 @@ export function AlgorithmModuleView({
               );
             })}
           </div>
-        </div>
+          <button
+            onClick={() => setShowCertificate(true)}
+            className="w-full self-start mt-auto flex items-center gap-2.5 px-3 py-2 rounded-xl border border-amber-200 bg-amber-50/70 hover:bg-amber-100 text-left text-[11px] font-bold text-amber-900 transition-colors cursor-pointer lg:absolute lg:bottom-4 lg:left-4 lg:right-4 lg:mt-0 lg:w-auto"
+            title="Preview Certificate of Mastery"
+          >
+            <Award className="w-3.5 h-3.5 text-amber-600" />
+            <span className="min-w-0 truncate">{isModuleFullyComplete ? 'Official Certificate' : 'Certificate of Mastery'}</span>
+            <ExternalLink className="w-2.5 h-2.5 text-amber-700" />
+          </button>
+        </aside>
       ) : (
-        <div className="bg-white rounded-2xl border border-dark-200 p-4 sm:p-5 shadow-xs relative overflow-hidden space-y-3">
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <aside className="bg-white rounded-2xl border border-dark-200 p-4 shadow-xs relative overflow-hidden space-y-4 flex flex-col lg:w-[17.5%] lg:h-full lg:shrink-0 lg:sticky lg:top-4">
+          <div className="flex flex-col gap-3">
             {/* Left Column: Badges, Title & Subtitle */}
-            <div className="space-y-1.5 max-w-2xl">
-              <div className="flex flex-wrap items-center gap-1.5">
-                <span className="px-2.5 py-0.5 rounded-full text-[11px] font-semibold bg-primary-50 text-primary-700 border border-primary-100">
+            <div className="space-y-2 max-w-none">
+              <div>
+                <h1 className="text-lg font-bold text-dark-900 tracking-tight leading-tight">{title}</h1>
+                <p className="text-xs text-dark-600 leading-relaxed">{subtitle}</p>
+              </div>
+              <div className="flex flex-wrap items-center gap-1.5 min-w-0">
+                <span className="shrink-0 px-2.5 py-0.5 rounded-full text-[11px] font-semibold bg-primary-50 text-primary-700 border border-primary-100">
                   {category}
                 </span>
-                <span className="px-2 py-0.5 rounded-full text-[11px] font-semibold bg-dark-100 text-dark-800">
+                <span className="shrink-0 px-2 py-0.5 rounded-full text-[11px] font-semibold bg-dark-100 text-dark-800">
                   {qubitCount} Qubits
                 </span>
-                <span className="px-2.5 py-0.5 rounded-full text-[11px] font-semibold bg-emerald-50 text-emerald-700 border border-emerald-100 flex items-center gap-1">
+                <span className="w-full px-2.5 py-1 rounded-lg text-[11px] font-semibold bg-emerald-50 text-emerald-700 border border-emerald-100 flex items-center gap-1 whitespace-normal leading-snug">
                   <MathRenderer text={speedup} />
                 </span>
-                <span className="px-2 py-0.5 rounded-full text-[11px] font-semibold bg-indigo-50 text-indigo-700 border border-indigo-100">
-                  6 Learning Stages
-                </span>
-              </div>
-              <div>
-                <h1 className="text-lg sm:text-xl font-bold text-dark-900 tracking-tight">{title}</h1>
-                <p className="text-xs text-dark-600 leading-normal">{subtitle}</p>
               </div>
             </div>
 
-            {/* Right Column: Unified Single Certificate Trigger */}
-            <button
-              onClick={() => setShowCertificate(true)}
-              className="group/cert cursor-pointer flex items-center gap-3 px-3.5 py-2.5 rounded-xl border border-amber-200/90 dark:border-amber-700/60 bg-gradient-to-r from-amber-50/80 via-white to-orange-50/40 dark:from-dark-900 dark:via-dark-850 dark:to-dark-900 hover:border-amber-400 dark:hover:border-amber-500 hover:shadow-xs transition-all text-left shrink-0 self-start sm:self-auto"
-              title={isModuleFullyComplete ? 'View Official Certificate' : 'Preview Quantum Credential'}
-            >
-              <div
-                className={`w-9 h-9 rounded-xl flex items-center justify-center shrink-0 shadow-2xs ${
-                  isModuleFullyComplete
-                    ? 'bg-gradient-to-br from-emerald-500 to-teal-600 text-white'
-                    : 'bg-gradient-to-br from-amber-400 to-amber-600 text-white'
-                }`}
-              >
-                <Award className="w-5 h-5 text-white" />
-              </div>
-
-              <div className="min-w-0 pr-1 leading-tight">
-                <div className="flex items-center gap-2">
-                  <span className="text-xs font-bold text-dark-900 dark:text-dark-100 group-hover/cert:text-amber-700 dark:group-hover/cert:text-amber-400 transition-colors">
-                    {isModuleFullyComplete ? 'Official Certificate' : 'Certificate of Mastery'}
-                  </span>
-                  <span
-                    className={`px-1.5 py-0.5 rounded text-[9px] font-bold uppercase tracking-wider ${
-                      isModuleFullyComplete
-                        ? 'bg-emerald-100 dark:bg-emerald-900/60 text-emerald-800 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-700'
-                        : 'bg-amber-100 dark:bg-amber-900/60 text-amber-900 dark:text-amber-300 border border-amber-200 dark:border-amber-700'
-                    }`}
-                  >
-                    {isModuleFullyComplete ? 'Claimed' : 'Stage 6 Req.'}
-                  </span>
-                </div>
-                <div className="text-[10px] text-dark-500 dark:text-dark-400 flex items-center gap-1 mt-1">
-                  <span suppressHydrationWarning>
-                    {isModuleFullyComplete
-                      ? 'View & download verified credential'
-                      : `${(isClientMounted && studentName) ? studentName : 'Alex Mercer'} · Click to preview`}
-                  </span>
-                  <ExternalLink className="w-2.5 h-2.5 text-dark-400 dark:text-dark-500 group-hover/cert:text-amber-600 dark:group-hover/cert:text-amber-400" />
-                </div>
-              </div>
-            </button>
           </div>
 
           {/* Tab Navigation with Sequential 1-by-1 Lock */}
-          <div className="flex flex-wrap gap-1.5 border-t border-dark-100 pt-3" role="tablist">
+          <div className="flex flex-wrap lg:flex-col gap-1.5 border-t border-dark-100 pt-3" role="tablist">
             {tabs.map((tab, idx) => {
               const Icon = tab.icon;
               const isActive = activeTab === tab.id;
@@ -495,7 +489,7 @@ export function AlgorithmModuleView({
                     handleTabChange(tab.id as any);
                   }}
                   title={isLocked ? `Locked: Complete Stage ${idx} first` : tab.label}
-                  className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg font-semibold text-xs transition-all ${
+                  className={`flex items-center gap-2 px-3 py-2 lg:w-full lg:justify-start rounded-lg font-semibold text-sm transition-all ${
                     isActive
                       ? 'bg-primary-600 text-white shadow-xs'
                       : isLocked
@@ -513,14 +507,52 @@ export function AlgorithmModuleView({
               );
             })}
           </div>
-        </div>
+          <button
+            onClick={() => setShowCertificate(true)}
+            className="group/cert cursor-pointer w-full self-start mt-auto flex items-start gap-2 px-2.5 py-2.5 rounded-xl border border-amber-200/90 dark:border-amber-700/60 bg-gradient-to-r from-amber-50/80 via-white to-orange-50/40 dark:from-dark-900 dark:via-white dark:to-orange-50/40 hover:border-amber-400 dark:hover:border-amber-500 hover:shadow-xs transition-all text-left lg:absolute lg:bottom-4 lg:left-4 lg:right-4 lg:mt-0 lg:w-auto"
+            title={isModuleFullyComplete ? 'View Official Certificate' : 'Preview Quantum Credential'}
+          >
+            <div
+              className={`w-9 h-9 rounded-xl flex items-center justify-center shrink-0 shadow-2xs ${
+                isModuleFullyComplete
+                  ? 'bg-gradient-to-br from-emerald-500 to-teal-600 text-white'
+                  : 'bg-gradient-to-br from-amber-400 to-amber-600 text-white'
+              }`}
+            >
+              <Award className="w-5 h-5 text-white" />
+            </div>
+            <div className="min-w-0 flex-1 leading-tight">
+              <div className="flex flex-col items-start gap-1">
+                <span className="text-xs font-bold text-dark-900 dark:text-dark-100 group-hover/cert:text-amber-700 dark:group-hover/cert:text-amber-400 transition-colors break-words">
+                  {isModuleFullyComplete ? 'Official Certificate' : 'Certificate of Mastery'}
+                </span>
+                <span className={`px-1.5 py-0.5 rounded text-[9px] font-bold uppercase tracking-wider whitespace-nowrap ${
+                  isModuleFullyComplete
+                    ? 'bg-emerald-100 dark:bg-emerald-900/60 text-emerald-800 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-700'
+                    : 'bg-amber-100 dark:bg-amber-900/60 text-amber-900 dark:text-amber-300 border border-amber-200 dark:border-amber-700'
+                }`}>
+                  {isModuleFullyComplete ? 'Claimed' : 'Stage 6 Req.'}
+                </span>
+              </div>
+              <div className="text-[10px] text-dark-500 dark:text-dark-400 flex items-center gap-1 mt-1">
+                <span suppressHydrationWarning>
+                  {isModuleFullyComplete
+                    ? 'View & download verified credential'
+                    : `${(isClientMounted && studentName) ? studentName : 'Alex Mercer'} · Click to preview`}
+                </span>
+                <ExternalLink className="w-2.5 h-2.5 text-dark-400 dark:text-dark-500 group-hover/cert:text-amber-600 dark:group-hover/cert:text-amber-400" />
+              </div>
+            </div>
+          </button>
+        </aside>
       )}
 
       {/* Active Stage Content with bottom-to-top slideUp animation */}
-      <div key={activeTab} className="animate-slideUp">
+      <main className="min-w-0 flex-1 flex flex-col mt-3.5 lg:mt-0 lg:h-full">
+      <div key={activeTab} className="flex flex-col flex-1 animate-slideUp">
         {/* Stage 1: Intuition */}
         {activeTab === 'intuition' && (
-        <div className="bg-white rounded-2xl border border-dark-200 p-5 sm:p-6 shadow-xs space-y-4 animate-fadeIn">
+        <div className="bg-white rounded-2xl border border-dark-200 p-5 sm:p-6 flex flex-col flex-1 space-y-4 animate-fadeIn">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
               <Lightbulb className="w-4 h-4 text-amber-500" />
@@ -535,7 +567,7 @@ export function AlgorithmModuleView({
             <MathRenderer text={explanationMode === 'simple' ? intuitionSimple : intuitionTechnical} />
           </div>
 
-          <div className="flex justify-end">
+          <div className="flex justify-end mt-auto">
             <button
               onClick={() => {
                 if (userId) {
@@ -555,7 +587,7 @@ export function AlgorithmModuleView({
 
       {/* Stage 2: Mathematical Walkthrough */}
       {activeTab === 'math' && (
-        <div className="bg-white rounded-2xl border border-dark-200 p-5 sm:p-6 shadow-xs space-y-4 animate-fadeIn">
+        <div className="bg-white rounded-2xl border border-dark-200 p-5 sm:p-6 flex flex-col flex-1 space-y-4 animate-fadeIn">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
               <FileCode className="w-4 h-4 text-primary-600" />
@@ -563,11 +595,11 @@ export function AlgorithmModuleView({
             </div>
           </div>
 
-          <div className="space-y-4">
-            {mathWalkthrough.map((step, idx) => (
-              <div key={idx} className="math-step-card space-y-3 p-4 sm:p-5 rounded-2xl bg-white border border-dark-200 shadow-xs">
+          <div className="space-y-4 overflow-visible">
+            {(showAllMathSteps ? mathWalkthrough : mathWalkthrough.slice(currentMathStep, currentMathStep + 1)).map((step, idx) => (
+              <div key={showAllMathSteps ? idx : currentMathStep} className="math-step-card space-y-3 p-4 sm:p-5 rounded-2xl bg-white border border-dark-200 shadow-xs">
                 <div className="flex items-center gap-2.5">
-                  <div className="math-step-badge">{idx + 1}</div>
+                  <div className="math-step-badge">{showAllMathSteps ? idx + 1 : currentMathStep + 1}</div>
                   <span className="font-bold text-sm sm:text-base text-dark-900">{step.stepName}</span>
                 </div>
 
@@ -592,7 +624,7 @@ export function AlgorithmModuleView({
                 {step.stepGates && step.stepGates.length > 0 && (
                   <div className="p-3 rounded-xl bg-dark-900 text-white space-y-1.5 text-xs font-mono">
                     <div className="flex items-center justify-between text-[11px] text-dark-400 font-sans">
-                      <span>Circuit State at Step {idx + 1}:</span>
+                      <span>Circuit State at Step {showAllMathSteps ? idx + 1 : currentMathStep + 1}:</span>
                       <span>{step.stepGates.length} operation(s) applied</span>
                     </div>
                     <div className="flex items-center gap-2 overflow-x-auto py-0.5">
@@ -623,16 +655,54 @@ export function AlgorithmModuleView({
             ))}
           </div>
 
-          <div className="flex justify-between pt-2">
-            <button
-              onClick={() => setActiveTab('intuition')}
-              className="flex items-center gap-2 px-3.5 py-2 rounded-xl border border-dark-200 text-dark-700 font-semibold text-xs hover:bg-dark-50 transition-colors"
-            >
-              <ChevronLeft className="w-4 h-4" />
-              <span>Back: Intuition</span>
-            </button>
-            <button
-              onClick={() => {
+          <div className="flex justify-between items-end gap-3 pt-2">
+            <div className="flex items-center gap-2">
+              <button
+                onClick={() => {
+                  if (currentMathStep > 0) {
+                    setCurrentMathStep((step) => step - 1);
+                    scrollPageToTop();
+                  } else {
+                    setActiveTab('intuition');
+                    scrollPageToTop();
+                  }
+                }}
+                className="flex items-center gap-2 px-3.5 py-2 rounded-xl border border-dark-200 text-dark-700 font-semibold text-xs hover:bg-dark-50 transition-colors"
+              >
+                <ChevronLeft className="w-4 h-4" />
+                <span>{currentMathStep > 0 ? 'Previous Step' : 'Back: Intuition'}</span>
+              </button>
+            </div>
+            <div className="flex items-center gap-2">
+              <button
+                type="button"
+                onClick={() => {
+                  const switchingToOneStep = showAllMathSteps;
+                  setShowAllMathSteps((showAll) => !showAll);
+                  if (switchingToOneStep) {
+                    scrollPageToTop();
+                    window.requestAnimationFrame(scrollPageToTop);
+                  }
+                }}
+                className="px-3 py-2 rounded-xl border border-primary-200 bg-primary-50 text-primary-700 hover:bg-primary-100 font-semibold text-xs transition-colors"
+              >
+                {showAllMathSteps ? 'One step at a time' : 'Show all steps'}
+              </button>
+              <button
+                onClick={() => {
+                if (showAllMathSteps) {
+                  if (userId) {
+                    apiReportProgress(userId, moduleSlug, 'in_progress', { stageReached: 3 });
+                  }
+                  unlockStage(2);
+                  setActiveTab('circuit');
+                  return;
+                }
+                if (currentMathStep < mathWalkthrough.length - 1) {
+                  setCurrentMathStep((step) => step + 1);
+                  scrollPageToTop();
+                  return;
+                }
                 if (userId) {
                   apiReportProgress(userId, moduleSlug, 'in_progress', { stageReached: 3 });
                 }
@@ -640,10 +710,17 @@ export function AlgorithmModuleView({
                 setActiveTab('circuit');
               }}
               className="flex items-center gap-2 px-5 py-2 rounded-xl bg-primary-600 hover:bg-primary-700 text-white font-semibold text-xs shadow-xs transition-colors cursor-pointer"
-            >
-              <span>Next: Interactive Circuit & Simulation</span>
-              <ChevronRight className="w-4 h-4" />
-            </button>
+                >
+                  <span>
+                    {showAllMathSteps
+                      ? 'Next: Interactive Circuit & Simulation'
+                      : currentMathStep < mathWalkthrough.length - 1
+                      ? `Next: Step ${currentMathStep + 2}`
+                      : 'Next: Interactive Circuit & Simulation'}
+                  </span>
+                  <ChevronRight className="w-4 h-4" />
+                </button>
+            </div>
           </div>
         </div>
       )}      {/* Stage 3: Interactive Circuit Simulation (High-Density Cockpit) */}
@@ -1013,7 +1090,7 @@ export function AlgorithmModuleView({
           {/* Bottom Navigation Toolbar */}
           <div className="flex items-center justify-between pt-1">
             <button
-              onClick={() => handleTabChange('math')}
+              onClick={() => handleTabChange('math', false)}
               className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-dark-200 text-dark-700 font-semibold text-xs hover:bg-dark-50 transition-colors cursor-pointer"
             >
               <ChevronLeft className="w-3.5 h-3.5" />
@@ -1076,6 +1153,8 @@ export function AlgorithmModuleView({
           moduleTitle={title}
         />
       )}
+      </div>
+      </main>
       </div>
 
       {/* Quantum Algorithm Certificate Modal */}

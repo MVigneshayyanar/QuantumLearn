@@ -246,11 +246,13 @@ export default function RootLayout({
               Skip to main content
             </a>
 
-            {/* Accessible Settings & Language Top Bar */}
-            <AccessibilityBar />
+            <div className="group/nav-shell">
+              {/* Accessible Settings & Language Top Bar */}
+              <AccessibilityBar />
 
-            {/* Navigation Bar */}
-            <Navbar />
+              {/* Navigation Bar */}
+              <Navbar />
+            </div>
 
             {/* Main Content Area */}
             <main id="main-content" className="flex-1 w-full">
@@ -280,4 +282,3 @@ export default function RootLayout({
     </html>
   );
 }
-

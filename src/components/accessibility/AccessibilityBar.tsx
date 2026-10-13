@@ -9,6 +9,7 @@ import { ThemeToggle } from '@/components/theme/ThemeToggle';
 
 export function AccessibilityBar() {
   const pathname = usePathname();
+  const isHomePage = pathname === '/';
   const {
     explanationMode,
     setExplanationMode,
@@ -25,12 +26,13 @@ export function AccessibilityBar() {
   if (pathname.startsWith('/practice/') && pathname !== '/practice') {
     return null;
   }
-
   return (
     <div
       role="region"
       aria-label="Accessibility and Learning Preferences"
-      className="bg-dark-50 dark:bg-dark-900 border-b border-dark-200 dark:border-dark-800 text-xs text-dark-700 dark:text-dark-300 py-1.5 relative z-40"
+      className={isHomePage
+        ? 'bg-dark-50 dark:bg-dark-900 border-b border-dark-200 dark:border-dark-800 text-xs text-dark-700 dark:text-dark-300 py-1.5 relative z-40'
+        : 'max-h-0 overflow-hidden opacity-0 pointer-events-none py-0 transition-[max-height,opacity] duration-200 group-hover/nav-shell:max-h-20 group-hover/nav-shell:opacity-100 group-hover/nav-shell:pointer-events-auto group-focus-within/nav-shell:max-h-20 group-focus-within/nav-shell:opacity-100 group-focus-within/nav-shell:pointer-events-auto bg-dark-50 dark:bg-dark-900 border-b border-dark-200 dark:border-dark-800 text-xs text-dark-700 dark:text-dark-300 relative z-40'}
     >
       <div className="w-full mx-auto px-8 flex flex-wrap items-center justify-between gap-3">
         {/* Left: Explanation Mode Toggle (Core to school vs researcher) */}
