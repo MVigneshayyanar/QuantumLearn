@@ -18,12 +18,11 @@ import {
   Zap,
   Sparkles,
   Info,
-  ChevronRight,
   ChevronLeft,
-  Columns,
+  ChevronRight,
   Server
 } from 'lucide-react';
-import { QuantumCodeEditor } from './QuantumCodeEditor';
+import { QuantumCircuitCodePanel } from '@/components/circuit/QuantumCircuitCodePanel';
 import { ResponsiveContainer, BarChart, Bar, XAxis, YAxis, Tooltip, Cell } from 'recharts';
 import {
   AVAILABLE_GATE_LIST,
@@ -68,7 +67,7 @@ export function CircuitBuilder() {
   const [stepScrubber, setStepScrubber] = useState<number>(0);
   const [dragOverSlot, setDragOverSlot] = useState<{ qubit: number; step: number } | null>(null);
   const [isDraggingActive, setIsDraggingActive] = useState<boolean>(false);
-  const [viewMode, setViewMode] = useState<'visual' | 'split' | 'code'>('visual');
+  const [rightPanelMode, setRightPanelMode] = useState<'vectors' | 'code'>('vectors');
   const [activeBackend, setActiveBackend] = useState<'qiskit' | 'cirq' | 'pennylane' | 'qbraid'>('qiskit');
   const gridContainerRef = useRef<HTMLDivElement>(null);
 
@@ -350,173 +349,305 @@ export function CircuitBuilder() {
         )}
       </div>
 
-      {/* Unified Side-by-Side Stage: Interactive Circuit Wire Grid + Live 3D Bloch Spheres */}
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 items-start">
-        {/* Main Interactive Circuit Wire Grid */}
-        <div className="lg:col-span-6 bg-white rounded-2xl border border-dark-200 p-5 shadow-xs space-y-4">
-          <div className="flex items-center justify-between">
-            <h3 className="font-bold text-sm text-dark-900">Quantum Circuit Board</h3>
-            <span className="text-xs text-dark-500 font-mono">
-              {numQubits} Qubit{numQubits > 1 ? 's' : ''} · {MAX_STEPS} Steps
-            </span>
-          </div>
+      {/* Unified Cockpit Grid: Circuit Board + (Probs & Statevector) on Left, Live 3D Bloch Spheres on Right */}
+      <div className="grid min-h-0 flex-1 grid-cols-1 gap-3 lg:grid-cols-12 lg:grid-rows-[auto_minmax(0,1fr)] lg:items-stretch">
+        {/* Left Column (cols 1-7): Circuit Board + Bottom Split Row */}
+        <div className="lg:col-span-7 lg:row-span-2 grid min-w-0 grid-rows-[auto_minmax(0,1fr)] gap-3">
+          {/* Main Interactive Circuit Wire Grid Card */}
+          <div className="bg-white rounded-xl border border-dark-200 p-3 sm:p-4 shadow-xs space-y-2 min-h-[220px]">
+            <div className="flex flex-wrap items-center justify-between gap-1.5">
+              <div className="flex items-center gap-2">
+                <Sparkles className="w-3.5 h-3.5 text-primary-600" />
+                <h3 className="font-bold text-sm text-dark-900">Quantum Circuit Board</h3>
+              </div>
+              <span className="text-xs text-dark-500 font-mono">
+                {numQubits} Qubit{numQubits > 1 ? 's' : ''} · {MAX_STEPS} Steps
+              </span>
+            </div>
 
-          <div className="overflow-x-auto pb-1">
-            <div className="min-w-[420px] space-y-4">
-              {Array.from({ length: numQubits }, (_, qIdx) => (
-                <div key={qIdx} className="flex items-center gap-3">
-                  {/* Qubit Label */}
-                  <div className="w-16 shrink-0 flex items-center gap-1.5 notranslate" translate="no">
-                    <span className="font-mono font-bold text-xs text-dark-800">q[{qIdx}]</span>
-                    <span className="px-1.5 py-0.5 rounded bg-dark-100 font-mono text-[10px] text-dark-600">|0⟩</span>
-                  </div>
-
-                  {/* Wire slots */}
-                  <div className="flex-1 flex items-center gap-2 circuit-wire pr-2">
-                    {Array.from({ length: MAX_STEPS }, (_, sIdx) => {
-                      const placed = gates.find((g) => g.step === sIdx && g.qubits.includes(qIdx));
-                      const isSelected = selectedSlot?.qubit === qIdx && selectedSlot?.step === sIdx;
-                      const isDragOver = dragOverSlot?.qubit === qIdx && dragOverSlot?.step === sIdx;
-                      const isControl = placed && (placed.type === 'cx' || placed.type === 'cz') && placed.qubits[0] === qIdx;
-                      const isTarget = placed && (placed.type === 'cx' || placed.type === 'cz') && placed.qubits[1] === qIdx;
-
-                      return (
-                        <div
-                          key={sIdx}
-                          onDragOver={(e) => {
-                            e.preventDefault();
-                            e.dataTransfer.dropEffect = 'copy';
-                          }}
-                          onDragEnter={(e) => {
-                            e.preventDefault();
-                            setDragOverSlot({ qubit: qIdx, step: sIdx });
-                          }}
-                          onDragLeave={(e) => {
-                            e.preventDefault();
-                            if (dragOverSlot?.qubit === qIdx && dragOverSlot?.step === sIdx) {
-                              setDragOverSlot(null);
-                            }
-                          }}
-                          onDrop={(e) => handleSlotDrop(e, qIdx, sIdx)}
-                          onClick={() => {
-                            setSelectedSlot({ qubit: qIdx, step: sIdx });
-                            placeSelectedGateOnSlot(qIdx, sIdx);
-                          }}
-                          onContextMenu={(e) => {
-                            e.preventDefault();
-                            removeGateAt(qIdx, sIdx);
-                          }}
-                          className={`relative z-10 w-9 h-9 sm:w-10 sm:h-10 rounded-lg flex items-center justify-center cursor-pointer transition-all border ${
-                            isDragOver
-                              ? 'ring-3 ring-blue-500 ring-offset-1 border-blue-600 bg-blue-100 scale-105 shadow-md'
-                              : isSelected
-                              ? 'ring-2 ring-blue-600 ring-offset-1 border-blue-600 bg-blue-50/80 shadow-xs'
-                              : placed
-                              ? 'border-dark-300 bg-white shadow-2xs'
-                              : isDraggingActive
-                              ? 'border-dashed border-blue-400 bg-blue-50/30 animate-pulse'
-                              : 'border-dashed border-dark-200 hover:border-blue-400 bg-white/90 hover:bg-blue-50/30'
-                          }`}
-                          title={
-                            placed
-                              ? `Step ${sIdx}: ${placed.type.toUpperCase()} on Q${placed.qubits.join(', Q')}. Drag to move, or right-click to remove.`
-                              : `Step ${sIdx} (Empty). Drag a gate here or click to place ${selectedGateType.toUpperCase()}`
-                          }
-                        >
-                          {/* Vertical connector line for multi-qubit gates (CX, CZ, SWAP) */}
-                          {placed && placed.qubits.length > 1 && Math.min(...placed.qubits) === qIdx && (
-                            <div
-                              className="absolute left-1/2 -translate-x-1/2 w-0.5 bg-blue-600 pointer-events-none z-0"
-                              style={{
-                                top: '50%',
-                                height: `${(Math.max(...placed.qubits) - Math.min(...placed.qubits)) * 56}px`
-                              }}
-                            />
-                          )}
-
-                          {placed ? (
-                            <div
-                              draggable={true}
-                              onDragStart={(e) => {
-                                e.stopPropagation();
-                                e.dataTransfer.setData('text/plain', placed.type);
-                                e.dataTransfer.setData('application/quantum-gate', placed.type);
-                                e.dataTransfer.setData(
-                                  'application/quantum-move',
-                                  JSON.stringify({ qubit: qIdx, step: sIdx, gateId: placed.id, type: placed.type })
-                                );
-                                e.dataTransfer.effectAllowed = 'move';
-                                setIsDraggingActive(true);
-                              }}
-                              onDragEnd={() => {
-                                setIsDraggingActive(false);
-                                setDragOverSlot(null);
-                              }}
-                              className="w-full h-full flex items-center justify-center cursor-grab active:cursor-grabbing select-none"
-                            >
-                              {placed.type === 'cx' ? (
-                                isControl ? (
-                                  <ControlDotIcon size={14} />
-                                ) : isTarget ? (
-                                  <TargetPlusIcon size={26} />
-                                ) : (
-                                  <QuantumGateSymbol type={placed.type} size="sm" />
-                                )
-                              ) : placed.type === 'cz' ? (
-                                isControl ? (
-                                  <ControlDotIcon size={14} />
-                                ) : isTarget ? (
-                                  <QuantumGateSymbol type="z" size="sm" />
-                                ) : (
-                                  <QuantumGateSymbol type={placed.type} size="sm" />
-                                )
-                              ) : placed.type === 'swap' ? (
-                                <SwapXIcon size={24} />
-                              ) : (
-                                <QuantumGateSymbol type={placed.type} size="sm" />
-                              )}
-                            </div>
-                          ) : isDragOver ? (
-                            <span className="text-[9px] font-mono font-bold text-primary-700">DROP</span>
-                          ) : (
-                            <span className="text-[9px] font-mono text-dark-400 opacity-60">S{sIdx}</span>
-                          )}
-                        </div>
-                      );
-                    })}
-                  </div>
+            <div className="w-full overflow-x-auto pb-0.5">
+              <div className={`w-full min-w-[340px] space-y-2 ${numQubits <= 1 ? 'py-4' : numQubits === 2 ? 'py-2.5' : 'py-1.5'}`}>
+                {/* Step Columns Timeline Header */}
+                <div className="flex items-center gap-2 pl-16">
+                  {Array.from({ length: MAX_STEPS }, (_, sIdx) => {
+                    const isPassed = sIdx < stepScrubber;
+                    const isCurrent = sIdx === stepScrubber;
+                    return (
+                      <button
+                        key={sIdx}
+                        onClick={() => setStepScrubber(sIdx)}
+                        className={`w-9 py-0.5 rounded text-[10px] font-mono font-bold transition-all text-center cursor-pointer ${
+                          isCurrent
+                            ? 'bg-primary-600 text-white shadow-xs ring-2 ring-primary-400/40 scale-105'
+                            : isPassed
+                            ? 'bg-emerald-50 text-emerald-800 border border-emerald-200'
+                            : 'bg-dark-50 text-dark-500 hover:bg-dark-100'
+                        }`}
+                        title={`Jump to Step ${sIdx}`}
+                      >
+                        S{sIdx}
+                      </button>
+                    );
+                  })}
                 </div>
-              ))}
+
+                {/* Qubit Wires */}
+                {Array.from({ length: numQubits }, (_, qIdx) => (
+                  <div key={qIdx} className={`flex items-center gap-2 ${numQubits <= 1 ? 'my-3.5' : numQubits === 2 ? 'my-2' : 'my-1'}`}>
+                    {/* Qubit Label */}
+                    <div className="w-14 shrink-0 flex items-center gap-1.5 notranslate" translate="no">
+                      <span className="font-mono font-bold text-xs text-dark-800">q[{qIdx}]</span>
+                      <span className="px-1.5 py-0.5 rounded bg-dark-100 font-mono text-[10px] text-dark-600">|0⟩</span>
+                    </div>
+
+                    {/* Wire slots */}
+                    <div className="flex-1 flex items-center gap-2 circuit-wire relative pr-1">
+                      {Array.from({ length: MAX_STEPS }, (_, sIdx) => {
+                        const placed = gates.find((g) => g.step === sIdx && g.qubits.includes(qIdx));
+                        const isSelected = selectedSlot?.qubit === qIdx && selectedSlot?.step === sIdx;
+                        const isDragOver = dragOverSlot?.qubit === qIdx && dragOverSlot?.step === sIdx;
+                        const isControl = placed && (placed.type === 'cx' || placed.type === 'cz') && placed.qubits[0] === qIdx;
+                        const isTarget = placed && (placed.type === 'cx' || placed.type === 'cz') && placed.qubits[1] === qIdx;
+
+                        return (
+                          <div
+                            key={sIdx}
+                            onDragOver={(e) => {
+                              e.preventDefault();
+                              e.dataTransfer.dropEffect = 'copy';
+                            }}
+                            onDragEnter={(e) => {
+                              e.preventDefault();
+                              setDragOverSlot({ qubit: qIdx, step: sIdx });
+                            }}
+                            onDragLeave={(e) => {
+                              e.preventDefault();
+                              if (dragOverSlot?.qubit === qIdx && dragOverSlot?.step === sIdx) {
+                                setDragOverSlot(null);
+                              }
+                            }}
+                            onDrop={(e) => handleSlotDrop(e, qIdx, sIdx)}
+                            onClick={() => {
+                              setSelectedSlot({ qubit: qIdx, step: sIdx });
+                              placeSelectedGateOnSlot(qIdx, sIdx);
+                            }}
+                            onContextMenu={(e) => {
+                              e.preventDefault();
+                              removeGateAt(qIdx, sIdx);
+                            }}
+                            className={`relative z-10 w-9 h-9 rounded-lg flex items-center justify-center cursor-pointer transition-all border ${
+                              isDragOver
+                                ? 'ring-2 ring-primary-500 border-primary-600 bg-primary-100 scale-105 shadow-xs'
+                                : isSelected
+                                ? 'ring-2 ring-primary-600 border-primary-600 bg-primary-50'
+                                : placed
+                                ? 'border-dark-300 bg-white shadow-2xs'
+                                : isDraggingActive
+                                ? 'border-dashed border-primary-400 bg-primary-50/40 animate-pulse'
+                                : 'border-dashed border-dark-200 hover:border-primary-400 bg-white/70 hover:bg-primary-50/30'
+                            }`}
+                            title={
+                              placed
+                                ? `Step ${sIdx}: ${placed.type.toUpperCase()} on Q${placed.qubits.join(', Q')}. Drag to move, or right-click to remove.`
+                                : `Step ${sIdx} (Empty). Drag a gate here or click to place ${selectedGateType.toUpperCase()}`
+                            }
+                          >
+                            {/* Vertical connector line for multi-qubit gates (CX, CZ, SWAP) */}
+                            {placed && placed.qubits.length > 1 && Math.min(...placed.qubits) === qIdx && (
+                              <div
+                                className="absolute left-1/2 -translate-x-1/2 w-0.5 bg-blue-600 pointer-events-none z-0"
+                                style={{
+                                  top: '50%',
+                                  height: `${(Math.max(...placed.qubits) - Math.min(...placed.qubits)) * (numQubits === 2 ? 46 : 42)}px`
+                                }}
+                              />
+                            )}
+
+                            {placed ? (
+                              <div
+                                draggable={true}
+                                onDragStart={(e) => {
+                                  e.stopPropagation();
+                                  e.dataTransfer.setData('text/plain', placed.type);
+                                  e.dataTransfer.setData('application/quantum-gate', placed.type);
+                                  e.dataTransfer.setData(
+                                    'application/quantum-move',
+                                    JSON.stringify({ qubit: qIdx, step: sIdx, gateId: placed.id, type: placed.type })
+                                  );
+                                  e.dataTransfer.effectAllowed = 'move';
+                                  setIsDraggingActive(true);
+                                }}
+                                onDragEnd={() => {
+                                  setIsDraggingActive(false);
+                                  setDragOverSlot(null);
+                                }}
+                                className="w-full h-full flex items-center justify-center cursor-grab active:cursor-grabbing select-none"
+                              >
+                                {placed.type === 'cx' ? (
+                                  isControl ? (
+                                    <ControlDotIcon size={12} />
+                                  ) : isTarget ? (
+                                    <TargetPlusIcon size={22} />
+                                  ) : (
+                                    <QuantumGateSymbol type={placed.type} size="sm" />
+                                  )
+                                ) : placed.type === 'cz' ? (
+                                  isControl ? (
+                                    <ControlDotIcon size={12} />
+                                  ) : isTarget ? (
+                                    <QuantumGateSymbol type="z" size="sm" />
+                                  ) : (
+                                    <QuantumGateSymbol type={placed.type} size="sm" />
+                                  )
+                                ) : placed.type === 'swap' ? (
+                                  <SwapXIcon size={20} />
+                                ) : (
+                                  <QuantumGateSymbol type={placed.type} size="sm" />
+                                )}
+                              </div>
+                            ) : isDragOver ? (
+                              <span className="text-[8px] font-mono font-bold text-primary-700">DROP</span>
+                            ) : (
+                              <span className="text-[9px] font-mono text-dark-300">·</span>
+                            )}
+                          </div>
+                        );
+                      })}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            <div className="pt-2 border-t border-dark-100 flex items-center justify-between text-[11px] text-dark-500">
+              <span>💡 Click to place gate · Right-click/Del to remove</span>
+              <span>Backend: <strong className="text-dark-800">{activeBackend.toUpperCase()}</strong></span>
             </div>
           </div>
 
-          <div className="pt-2 border-t border-dark-100 flex items-center justify-between text-[11px] text-dark-500">
-            <span>💡 Click to place gate · Right-click/Del to remove</span>
-            <span>Backend: <strong className="text-dark-800">Qiskit Aer (Local)</strong></span>
+          {/* Bottom Split Row: Measurement Probabilities + Quantum Statevector */}
+          <div className="grid min-h-0 grid-cols-1 sm:grid-cols-2 gap-2 items-stretch">
+            {/* Measurement Probabilities Histogram */}
+            <div className="bg-white rounded-xl border border-dark-200 p-2.5 sm:p-3 shadow-xs space-y-1 flex min-h-0 flex-col h-full">
+              <div className="flex items-center justify-between">
+                <h3 className="font-bold text-[11px] text-dark-900">Measurement Probabilities</h3>
+                <span className="text-[9px] text-dark-500 font-mono">{shots} shots</span>
+              </div>
+              <div className="relative mx-auto mt-1 flex-1 w-full max-w-[280px] aspect-square min-h-[180px] max-h-[280px]">
+                <ResponsiveContainer width="100%" height="100%">
+                  <BarChart data={histogramData} margin={{ top: 8, right: 10, left: -18, bottom: 0 }}>
+                    <XAxis dataKey="state" tick={{ fontSize: 10 }} />
+                    <YAxis tick={{ fontSize: 9 }} domain={[0, 100]} unit="%" />
+                    <Tooltip
+                      formatter={(val: any) => [`${val}% (${Math.round((Number(val) / 100) * shots)} shots)`, 'Probability']}
+                      contentStyle={{ backgroundColor: '#18181b', color: '#fff', borderRadius: '6px', fontSize: '10px', padding: '4px 8px' }}
+                    />
+                    <Bar dataKey="prob" fill="#4f46e5" radius={[3, 3, 0, 0]}>
+                      {histogramData.map((entry, index) => (
+                        <Cell
+                          key={`cell-${index}`}
+                          fill={entry.prob > 50 ? '#4f46e5' : '#818cf8'}
+                        />
+                      ))}
+                    </Bar>
+                  </BarChart>
+                </ResponsiveContainer>
+              </div>
+            </div>
+
+            {/* Quantum Statevector Readout */}
+            <div className="bg-white rounded-xl border border-dark-200 p-2.5 sm:p-3 shadow-xs gap-2 flex min-h-0 flex-col h-full">
+              <div className="flex items-center justify-between">
+                <h4 className="font-bold text-[11px] text-dark-900">Quantum Statevector |ψ⟩</h4>
+                <span className="text-[9px] font-mono text-dark-500">{numQubits} Qubits ({Math.pow(2, numQubits)} states)</span>
+              </div>
+              {currentAmplitudes && currentAmplitudes.length > 0 ? (
+                <div className="grid grid-cols-2 auto-rows-fr gap-1.5 text-xs font-mono flex-1">
+                  {currentAmplitudes.map((amp, idx) => {
+                    const basisStr = idx.toString(2).padStart(numQubits, '0');
+                    const re = amp.re ?? 0;
+                    const im = amp.im ?? 0;
+                    const magSq = (re * re + im * im) * 100;
+                    return (
+                      <div key={idx} className="p-1.5 bg-dark-50 rounded-lg border border-dark-200 text-center flex flex-col items-center justify-center">
+                        <span className="font-bold text-primary-700 block text-lg">|{basisStr}⟩</span>
+                        <span className="text-sm text-dark-700 block mt-1">
+                          {re.toFixed(2)}{im >= 0 ? '+' : ''}{im.toFixed(2)}i
+                        </span>
+                        <span className="text-sm font-sans font-semibold text-dark-500 block mt-0.5">
+                          {magSq.toFixed(1)}%
+                        </span>
+                      </div>
+                    );
+                  })}
+                </div>
+              ) : (
+                <p className="text-[11px] text-dark-500">Run simulation to view statevector.</p>
+              )}
+            </div>
           </div>
         </div>
 
-        {/* Live 3D Bloch Spheres */}
-        <div className="lg:col-span-6 bg-white rounded-2xl border border-dark-200 p-4 sm:p-5 shadow-xs space-y-3">
-          <div className="flex items-center justify-between px-1">
-            <h3 className="font-bold text-xs sm:text-sm text-dark-900">Live 3D Bloch Spheres</h3>
-            <span className="text-[10px] font-mono text-dark-500">
-              {numQubits} Qubit Vector{numQubits > 1 ? 's' : ''}
-            </span>
+        {/* Right Column: Live 3D Bloch Spheres / Code */}
+        <div className="lg:col-span-5 lg:row-span-2 self-stretch min-w-0 bg-white rounded-xl border border-dark-200 p-3 sm:p-4 shadow-xs space-y-3 flex flex-col">
+          <div className="flex items-center justify-between gap-2 px-0.5">
+            <h3 className="font-bold text-sm text-dark-900">Live 3D Bloch Spheres</h3>
+            <div className="flex items-center bg-dark-100 p-1 rounded-xl border border-dark-200 shrink-0 shadow-2xs">
+              <button
+                onClick={() => setRightPanelMode('vectors')}
+                className={`px-3 py-1 rounded-lg font-bold text-[11px] transition-all cursor-pointer ${
+                  rightPanelMode === 'vectors'
+                    ? 'bg-primary-600 text-white shadow-sm'
+                    : 'text-dark-700 hover:bg-white hover:text-dark-900'
+                }`}
+              >
+                {numQubits > 1 ? `${numQubits} Qubit Vectors` : 'Qubit Vector'}
+              </button>
+              <button
+                onClick={() => setRightPanelMode('code')}
+                className={`px-3 py-1 rounded-lg font-bold text-[11px] transition-all cursor-pointer ${
+                  rightPanelMode === 'code'
+                    ? 'bg-primary-600 text-white shadow-sm'
+                    : 'text-dark-700 hover:bg-white hover:text-dark-900'
+                }`}
+              >
+                Code
+              </button>
+            </div>
           </div>
 
-          <div className={`grid grid-cols-1 ${numQubits === 1 ? 'grid-cols-1' : numQubits === 2 ? 'sm:grid-cols-2' : 'sm:grid-cols-2 xl:grid-cols-3'} gap-2.5`}>
-            {Array.from({ length: numQubits }, (_, qIdx) => (
-              <div key={qIdx} className="w-full">
-                <BlochSphere3D
-                  qubitIndex={qIdx}
-                  bloch={currentBlochVectors[qIdx] || null}
-                  warning={simResult?.warnings?.find((w) => w.includes(`qubit ${qIdx}`))}
-                  size={numQubits > 2 ? 150 : 180}
-                />
+          {rightPanelMode === 'vectors' ? (
+            <div className="flex flex-1 min-h-0 flex-col gap-1.5">
+              <span className="block text-[10px] font-mono text-dark-500">
+                {numQubits} Qubit Vector{numQubits > 1 ? 's' : ''}
+              </span>
+              <div className={`grid flex-1 grid-cols-1 ${numQubits > 1 ? 'grid-cols-2' : ''} gap-2`}>
+                {Array.from({ length: numQubits }, (_, qIdx) => (
+                  <div key={qIdx} className="w-full h-full">
+                    <BlochSphere3D
+                      qubitIndex={qIdx}
+                      bloch={currentBlochVectors[qIdx] || null}
+                      warning={simResult?.warnings?.find((w) => w.includes(`qubit ${qIdx}`))}
+                      size={160}
+                      compact={true}
+                    />
+                  </div>
+                ))}
               </div>
-            ))}
-          </div>
+            </div>
+          ) : (
+            <div className="min-h-0 flex-1">
+              <QuantumCircuitCodePanel
+                numQubits={numQubits}
+                gates={gates}
+                title="Circuit Code"
+                compact={false}
+                className="h-full min-h-0"
+                editable={true}
+                onCircuitCodeChange={(newNum, newGates) => loadPreset(newNum, newGates)}
+              />
+            </div>
+          )}
         </div>
       </div>
     </>
@@ -618,43 +749,6 @@ export function CircuitBuilder() {
             )}
           </div>
 
-          {/* View Mode Toggle: Visual | Split | Code */}
-          <div className="inline-flex rounded-xl border border-dark-200 p-0.5 bg-dark-100">
-            <button
-              onClick={() => setViewMode('visual')}
-              className={`flex items-center gap-1 px-2.5 py-1 rounded-lg text-xs font-semibold transition-all ${
-                viewMode === 'visual'
-                  ? 'bg-white text-dark-900 shadow-xs'
-                  : 'text-dark-600 hover:text-dark-900'
-              }`}
-            >
-              <Sliders className="w-3.5 h-3.5 text-primary-600" />
-              <span>Visual</span>
-            </button>
-            <button
-              onClick={() => setViewMode('split')}
-              className={`flex items-center gap-1 px-2.5 py-1 rounded-lg text-xs font-semibold transition-all ${
-                viewMode === 'split'
-                  ? 'bg-white text-dark-900 shadow-xs'
-                  : 'text-dark-600 hover:text-dark-900'
-              }`}
-            >
-              <Columns className="w-3.5 h-3.5 text-indigo-600" />
-              <span>Split</span>
-            </button>
-            <button
-              onClick={() => setViewMode('code')}
-              className={`flex items-center gap-1 px-2.5 py-1 rounded-lg text-xs font-semibold transition-all ${
-                viewMode === 'code'
-                  ? 'bg-white text-dark-900 shadow-xs'
-                  : 'text-dark-600 hover:text-dark-900'
-              }`}
-            >
-              <Code className="w-3.5 h-3.5 text-emerald-600" />
-              <span>Code</span>
-            </button>
-          </div>
-
           {/* Action Buttons: Run, Clear, Export */}
           <div className="flex items-center gap-2">
             <div className="flex items-center gap-1 bg-dark-50 border border-dark-200 rounded-lg px-2 py-1 text-xs">
@@ -700,35 +794,8 @@ export function CircuitBuilder() {
         </div>
       </div>
 
-      {/* Workspace: Visual Canvas, Monaco Code Editor, or Live Split View */}
-      {viewMode === 'code' && (
-        <QuantumCodeEditor
-          numQubits={numQubits}
-          gates={gates}
-          onCircuitParsed={(newNum, newGates) => loadPreset(newNum, newGates)}
-          onRunSimulation={() => runSimulation()}
-          isLoading={isLoading}
-        />
-      )}
-
-      {viewMode === 'visual' && renderVisualWorkspace()}
-
-      {viewMode === 'split' && (
-        <div className="grid grid-cols-1 xl:grid-cols-12 gap-6 items-start">
-          <div className="xl:col-span-7">
-            {renderVisualWorkspace()}
-          </div>
-          <div className="xl:col-span-5 sticky top-6">
-            <QuantumCodeEditor
-              numQubits={numQubits}
-              gates={gates}
-              onCircuitParsed={(newNum, newGates) => loadPreset(newNum, newGates)}
-              onRunSimulation={() => runSimulation()}
-              isLoading={isLoading}
-            />
-          </div>
-        </div>
-      )}
+      {/* Main Unified Workspace */}
+      {renderVisualWorkspace()}
 
       {/* Step Scrubber & Playback */}
       {simResult?.step_by_step && simResult.step_by_step.length > 1 && (
@@ -788,75 +855,7 @@ export function CircuitBuilder() {
         </div>
       )}
 
-      {/* State Vector Amplitudes & Measurement Histogram */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        {/* State Vector Breakdown */}
-        <div className="bg-white rounded-2xl border border-dark-200 p-5 shadow-xs space-y-4">
-          <div className="flex items-center justify-between">
-            <h3 className="font-bold text-sm text-dark-900">
-              Quantum State Vector <span className="notranslate" translate="no">|ψ⟩</span>
-            </h3>
-            <span className="font-mono text-xs text-primary-700 bg-primary-50 px-2 py-0.5 rounded notranslate" translate="no">
-              Dimension 2^{numQubits} = {1 << numQubits}
-            </span>
-          </div>
 
-          <div className="space-y-2">
-            {currentAmplitudes.map((amp, idx) => {
-              const bitstr = idx.toString(2).padStart(numQubits, '0');
-              const prob = (currentProbs[bitstr] || 0) * 100;
-              return (
-                <div key={bitstr} className="p-3 rounded-xl bg-dark-50 border border-dark-100 flex items-center justify-between">
-                  <div className="flex items-center gap-3">
-                    <span className="font-mono font-bold text-sm text-primary-700 bg-white px-2 py-1 rounded border border-dark-200 shadow-2xs notranslate" translate="no">
-                      |{bitstr}⟩
-                    </span>
-                    <div className="text-xs">
-                      <span className="text-dark-500">Amplitude: </span>
-                      <span className="font-mono font-bold text-dark-800 notranslate" translate="no">
-                        {amp.re >= 0 ? '+' : ''}{amp.re} {amp.im >= 0 ? '+' : ''}{amp.im}i
-                      </span>
-                    </div>
-                  </div>
-                  <div className="text-right notranslate" translate="no">
-                    <span className="text-xs font-mono font-bold text-dark-900 block">{prob.toFixed(1)}%</span>
-                    <span className="text-[10px] text-dark-500">probability</span>
-                  </div>
-                </div>
-              );
-            })}
-          </div>
-        </div>
-
-        {/* Measurement Probability Histogram */}
-        <div className="bg-white rounded-2xl border border-dark-200 p-5 shadow-xs space-y-4">
-          <div className="flex items-center justify-between">
-            <h3 className="font-bold text-sm text-dark-900">Measurement Histogram ({shots} shots)</h3>
-            <span className="text-xs text-dark-500">Computational Basis Z</span>
-          </div>
-
-          <div className="h-56 w-full">
-            <ResponsiveContainer width="100%" height="100%">
-              <BarChart data={histogramData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
-                <XAxis dataKey="state" tick={{ fontSize: 12, fill: '#374151' }} />
-                <YAxis tick={{ fontSize: 11, fill: '#6B7280' }} />
-                <Tooltip
-                  formatter={(value: any, name: any, item: any) => [
-                    `${value} counts (${item.payload.prob.toFixed(1)}%)`,
-                    'Measurements'
-                  ]}
-                  contentStyle={{ borderRadius: '8px', border: '1px solid #E5E7EB' }}
-                />
-                <Bar dataKey="value" radius={[6, 6, 0, 0]}>
-                  {histogramData.map((entry, index) => (
-                    <Cell key={`cell-${index}`} fill={entry.prob > 0 ? '#4F46E5' : '#D1D5DB'} />
-                  ))}
-                </Bar>
-              </BarChart>
-            </ResponsiveContainer>
-          </div>
-        </div>
-      </div>
 
       {/* Export Code Modal */}
       {exportModalOpen && (

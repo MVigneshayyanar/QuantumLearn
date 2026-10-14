@@ -25,13 +25,14 @@ import {
   Info,
   Wand2,
   Code2,
-  BarChart2,
-  Columns,
-  Cpu
+  Cpu,
+  ChevronLeft,
+  ChevronRight
 } from 'lucide-react';
 import { ResponsiveContainer, BarChart, Bar, XAxis, YAxis, Tooltip, Cell } from 'recharts';
 import { MathRenderer } from '@/components/math/MathRenderer';
 import { QuantumCircuitCodePanel } from '@/components/circuit/QuantumCircuitCodePanel';
+import { BlochSphere3D } from '@/components/bloch-sphere/BlochSphere3D';
 import {
   QuantumGateSymbol,
   GATE_CONFIGS,
@@ -194,8 +195,7 @@ export function BuildItTab({ moduleSlug, onProceedToQuiz }: BuildItTabProps) {
   const [isLoadingAi, setIsLoadingAi] = useState(false);
   const [showHints, setShowHints] = useState(false);
   const [activeHintIdx, setActiveHintIdx] = useState(0);
-  const [activeLowerTab, setActiveLowerTab] = useState<'probabilities' | 'code'>('probabilities');
-  const [buildViewMode, setBuildViewMode] = useState<'split' | 'gates' | 'code'>('split');
+  const [rightPanelMode, setRightPanelMode] = useState<'vectors' | 'code'>('vectors');
 
   // Request dynamic Socratic coaching from Schrödinger AI
   const requestAiSocraticHint = async () => {
@@ -400,9 +400,11 @@ Return 3 SHORT lines (max 50 words total):
 
   // Live simulation for preview
   const liveSim = simulateLocalCircuit(numQubits, gates, 1024);
+  const liveBlochs = liveSim?.bloch_vectors || [];
+  const liveAmps = liveSim?.statevector || [];
   const histogramData = Object.entries(liveSim.probabilities).map(([state, prob]) => ({
     state: `|${state}⟩`,
-    prob: Math.round(prob * 100)
+    prob: Number((prob * 100).toFixed(1))
   }));
 
   return (
@@ -426,46 +428,6 @@ Return 3 SHORT lines (max 50 words total):
         </div>
 
         <div className="flex items-center gap-2 shrink-0">
-          {/* View mode switcher */}
-          <div className="flex items-center bg-dark-100 p-0.5 rounded-lg border border-dark-200">
-            <button
-              onClick={() => setBuildViewMode('split')}
-              className={`flex items-center gap-1 px-2 py-0.5 rounded text-[10px] font-bold transition-all cursor-pointer ${
-                buildViewMode === 'split'
-                  ? 'bg-white text-primary-700 shadow-2xs'
-                  : 'text-dark-600 hover:text-dark-900'
-              }`}
-              title="Side-by-side visual circuit and live editable Python code"
-            >
-              <Columns className="w-2.5 h-2.5" />
-              <span>Split</span>
-            </button>
-            <button
-              onClick={() => setBuildViewMode('gates')}
-              className={`flex items-center gap-1 px-2 py-0.5 rounded text-[10px] font-bold transition-all cursor-pointer ${
-                buildViewMode === 'gates'
-                  ? 'bg-white text-primary-700 shadow-2xs'
-                  : 'text-dark-600 hover:text-dark-900'
-              }`}
-              title="Visual circuit wires"
-            >
-              <Cpu className="w-2.5 h-2.5" />
-              <span>Gates</span>
-            </button>
-            <button
-              onClick={() => setBuildViewMode('code')}
-              className={`flex items-center gap-1 px-2 py-0.5 rounded text-[10px] font-bold transition-all cursor-pointer ${
-                buildViewMode === 'code'
-                  ? 'bg-white text-primary-700 shadow-2xs'
-                  : 'text-dark-600 hover:text-dark-900'
-              }`}
-              title="Python code"
-            >
-              <Code2 className="w-2.5 h-2.5" />
-              <span>Code</span>
-            </button>
-          </div>
-
           <button
             onClick={handleResetScaffold}
             className="flex items-center gap-1 text-[11px] text-dark-500 hover:text-dark-800 font-medium transition-colors cursor-pointer"
@@ -477,18 +439,26 @@ Return 3 SHORT lines (max 50 words total):
         </div>
       </div>
 
-      {/* Cockpit Layout: 2-Column Split */}
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-2.5 items-start">
-        {/* Left Column (cols 1-7): Gate Toolbox + Circuit Wire Grid */}
-        <div className="lg:col-span-7 space-y-2">
-          {/* Gate Toolbox */}
-          {buildViewMode !== 'code' && (
-            <div className="bg-white rounded-xl border border-dark-200 px-3 py-2 shadow-xs">
+      {/* Cockpit Layout: Side-by-Side Unified Grid Matching Circuit Tab */}
+      <div className="grid min-h-0 flex-1 grid-cols-1 gap-3 lg:grid-cols-12 lg:grid-rows-[auto_minmax(0,1fr)] lg:items-stretch">
+        {/* Left Column (cols 1-7): Toolbox + Circuit Board + Probabilities & Statevector */}
+        <div className="lg:col-span-7 lg:row-span-2 grid min-w-0 grid-rows-[auto_minmax(0,1fr)] gap-3">
+          {/* Quantum Circuit Board Card */}
+          <div className="bg-white rounded-xl border border-dark-200 p-3 sm:p-4 shadow-xs space-y-2 min-h-[220px]">
+            <div className="flex flex-wrap items-center justify-between gap-1.5">
+              <div className="flex items-center gap-2">
+                <Cpu className="w-3.5 h-3.5 text-primary-600" />
+                <h3 className="font-bold text-sm text-dark-900">Quantum Circuit Board</h3>
+              </div>
+            </div>
+
+            {/* Gate Toolbox */}
+            <div className="bg-dark-50/70 rounded-xl border border-dark-200 px-3 py-2 shadow-2xs">
               <div className="flex items-center justify-between mb-1.5">
                 <div className="flex items-center gap-1.5">
                   <Wand2 className="w-3.5 h-3.5 text-primary-600" />
                   <span className="font-bold text-xs text-dark-900">Select Gate</span>
-                  <span className="text-[10px] text-dark-400 hidden sm:inline">(drag & drop onto wire slot)</span>
+                  <span className="text-[10px] text-dark-400 hidden sm:inline">(drag & drop onto wire slot or click)</span>
                 </div>
                 {['cx', 'cz', 'swap'].includes(selectedGateType) && (
                   <div className="flex items-center gap-2 text-[10px] font-mono">
@@ -496,7 +466,7 @@ Return 3 SHORT lines (max 50 words total):
                     <select
                       value={controlQubit}
                       onChange={(e) => setControlQubit(Number(e.target.value))}
-                      className="bg-dark-50 border border-dark-200 rounded px-1.5 py-0.5 text-[10px]"
+                      className="bg-white border border-dark-200 rounded px-1.5 py-0.5 text-[10px]"
                     >
                       {Array.from({ length: numQubits }, (_, i) => (
                         <option key={i} value={i}>q[{i}]</option>
@@ -506,7 +476,7 @@ Return 3 SHORT lines (max 50 words total):
                     <select
                       value={targetQubit}
                       onChange={(e) => setTargetQubit(Number(e.target.value))}
-                      className="bg-dark-50 border border-dark-200 rounded px-1.5 py-0.5 text-[10px]"
+                      className="bg-white border border-dark-200 rounded px-1.5 py-0.5 text-[10px]"
                     >
                       {Array.from({ length: numQubits }, (_, i) => (
                         <option key={i} value={i}>q[{i}]</option>
@@ -550,249 +520,322 @@ Return 3 SHORT lines (max 50 words total):
                 })}
               </div>
             </div>
-          )}
 
-          {/* Interactive Circuit Canvas & Live Code Editor (Side-by-Side in Split Mode) */}
-          <div className="flex flex-col md:flex-row gap-2">
-            {/* Visual Circuit Wire Grid */}
-            {buildViewMode !== 'code' && (
-              <div
-                className={`bg-white rounded-xl border border-dark-200 p-2.5 shadow-xs overflow-x-auto ${
-                  buildViewMode === 'split' ? 'w-full md:w-1/2' : 'w-full'
-                }`}
-              >
-                <div className="min-w-[320px] space-y-2">
-                  {Array.from({ length: numQubits }, (_, qIdx) => (
-                    <div key={qIdx} className="flex items-center gap-2">
-                      <div className="w-12 shrink-0 flex items-center gap-1">
-                        <span className="font-mono font-bold text-xs text-dark-800">q[{qIdx}]</span>
-                        <span className="px-1 py-0.5 rounded bg-dark-100 font-mono text-[9px] text-dark-600">|0⟩</span>
-                      </div>
-
-                      <div className="flex-1 flex items-center gap-1 circuit-wire">
-                        {Array.from({ length: MAX_STEPS }, (_, sIdx) => {
-                          const placed = gates.find((g) => g.step === sIdx && g.qubits.includes(qIdx));
-                          const isSelected = selectedSlot?.qubit === qIdx && selectedSlot?.step === sIdx;
-                          const isDragOver = dragOverSlot?.qubit === qIdx && dragOverSlot?.step === sIdx;
-                          const isControl = placed && placed.qubits.length > 1 && placed.qubits[0] === qIdx;
-                          const isTarget = placed && placed.qubits.length > 1 && placed.qubits[1] === qIdx;
-
-                          return (
-                            <div
-                              key={sIdx}
-                              onDragOver={(e) => {
-                                e.preventDefault();
-                                e.dataTransfer.dropEffect = 'copy';
-                              }}
-                              onDragEnter={(e) => {
-                                e.preventDefault();
-                                setDragOverSlot({ qubit: qIdx, step: sIdx });
-                              }}
-                              onDragLeave={(e) => {
-                                e.preventDefault();
-                                if (dragOverSlot?.qubit === qIdx && dragOverSlot?.step === sIdx) {
-                                  setDragOverSlot(null);
-                                }
-                              }}
-                              onDrop={(e) => {
-                                e.preventDefault();
-                                setDragOverSlot(null);
-                                setIsDraggingActive(false);
-
-                                const moveData = e.dataTransfer.getData('application/quantum-move');
-                                if (moveData) {
-                                  try {
-                                    const parsed = JSON.parse(moveData);
-                                    const filtered = gates.filter(
-                                      (g) => g.id !== parsed.gateId && !(g.step === sIdx && g.qubits.includes(qIdx))
-                                    );
-                                    if (['cx', 'cz', 'swap'].includes(parsed.type)) {
-                                      const tgt = qIdx === 0 ? 1 : 0;
-                                      filtered.push({
-                                        id: `b-gate-${Date.now()}-${sIdx}`,
-                                        type: parsed.type,
-                                        qubits: [qIdx, tgt],
-                                        step: sIdx
-                                      });
-                                    } else {
-                                      filtered.push({
-                                        id: `b-gate-${Date.now()}-${sIdx}`,
-                                        type: parsed.type,
-                                        qubits: [qIdx],
-                                        step: sIdx
-                                      });
-                                    }
-                                    setGates(filtered);
-                                    return;
-                                  } catch {}
-                                }
-
-                                const droppedType = (e.dataTransfer.getData('application/quantum-gate') ||
-                                  e.dataTransfer.getData('text/plain') ||
-                                  selectedGateType) as GateType;
-
-                                if (droppedType && GATE_CONFIGS[droppedType]) {
-                                  setSelectedGateType(droppedType);
-                                  placeGateOnSlot(qIdx, sIdx, droppedType);
-                                }
-                              }}
-                              onClick={() => {
-                                setSelectedSlot({ qubit: qIdx, step: sIdx });
-                                addGateOnSlot(qIdx, sIdx);
-                              }}
-                              onContextMenu={(e) => {
-                                e.preventDefault();
-                                removeGateAt(qIdx, sIdx);
-                              }}
-                              className={`relative z-10 w-8 h-8 sm:w-9 sm:h-9 rounded-lg flex items-center justify-center cursor-pointer transition-all border ${
-                                isDragOver
-                                  ? 'ring-2 ring-primary-500 border-primary-600 bg-primary-100 scale-105 shadow-xs'
-                                  : isSelected
-                                  ? 'ring-2 ring-primary-600 border-primary-600 bg-primary-50'
-                                  : placed
-                                  ? 'border-dark-300 bg-white shadow-2xs'
-                                  : isDraggingActive
-                                  ? 'border-dashed border-primary-400 bg-primary-50/40 animate-pulse'
-                                  : 'border-dashed border-dark-200 hover:border-primary-400 bg-white/90 hover:bg-primary-50/30'
-                              }`}
-                              title={
-                                placed
-                                  ? `Step ${sIdx}: ${placed.type.toUpperCase()} on Q${placed.qubits.join(', Q')}. Right-click to remove.`
-                                  : `Step ${sIdx}: Click or drag gate here`
-                              }
-                            >
-                              {/* Vertical line connecting control and target */}
-                              {isControl && placed && (
-                                <div
-                                  className="absolute left-1/2 -translate-x-1/2 w-0.5 bg-blue-600 pointer-events-none z-0"
-                                  style={{
-                                    top: '50%',
-                                    height: `${(placed.qubits[1] - placed.qubits[0]) * 44}px`
-                                  }}
-                                />
-                              )}
-
-                              {placed ? (
-                                <div
-                                  draggable={true}
-                                  onDragStart={(e) => {
-                                    e.stopPropagation();
-                                    e.dataTransfer.setData('text/plain', placed.type);
-                                    e.dataTransfer.setData('application/quantum-gate', placed.type);
-                                    e.dataTransfer.setData(
-                                      'application/quantum-move',
-                                      JSON.stringify({ qubit: qIdx, step: sIdx, gateId: placed.id, type: placed.type })
-                                    );
-                                    e.dataTransfer.effectAllowed = 'move';
-                                    setIsDraggingActive(true);
-                                  }}
-                                  onDragEnd={() => {
-                                    setIsDraggingActive(false);
-                                    setDragOverSlot(null);
-                                  }}
-                                  className="w-full h-full flex items-center justify-center cursor-grab active:cursor-grabbing select-none"
-                                >
-                                  {placed.type === 'cx' ? (
-                                    isControl ? (
-                                      <ControlDotIcon size={11} />
-                                    ) : isTarget ? (
-                                      <TargetPlusIcon size={18} />
-                                    ) : (
-                                      <QuantumGateSymbol type={placed.type} size="sm" />
-                                    )
-                                  ) : placed.type === 'cz' ? (
-                                    isControl ? (
-                                      <ControlDotIcon size={11} />
-                                    ) : isTarget ? (
-                                      <QuantumGateSymbol type="z" size="sm" />
-                                    ) : (
-                                      <QuantumGateSymbol type={placed.type} size="sm" />
-                                    )
-                                  ) : placed.type === 'swap' ? (
-                                    <SwapXIcon size={16} />
-                                  ) : (
-                                    <QuantumGateSymbol type={placed.type} size="sm" />
-                                  )}
-                                </div>
-                              ) : isDragOver ? (
-                                <span className="text-[8px] font-mono font-bold text-primary-700">DROP</span>
-                              ) : (
-                                <span className="text-[8px] font-mono text-dark-400 opacity-60">S{sIdx}</span>
-                              )}
-                            </div>
-                          );
-                        })}
-                      </div>
+            {/* Interactive Circuit Canvas */}
+            <div className="w-full overflow-x-auto pb-0.5">
+              <div className={`w-full min-w-[340px] space-y-2 ${numQubits <= 1 ? 'py-4' : numQubits === 2 ? 'py-2.5' : 'py-1.5'}`}>
+                    {/* Step Columns Timeline Header */}
+                    <div className="flex items-center gap-2 pl-16">
+                      {Array.from({ length: MAX_STEPS }, (_, sIdx) => {
+                        return (
+                          <div
+                            key={sIdx}
+                            className="w-9 py-0.5 rounded text-[10px] font-mono font-bold text-center bg-dark-50 text-dark-600 border border-dark-200/60"
+                          >
+                            S{sIdx}
+                          </div>
+                        );
+                      })}
                     </div>
-                  ))}
-                </div>
 
-                <div className="mt-2 pt-1 border-t border-dark-100 flex items-center justify-between text-[10px] text-dark-500">
-                  <span>💡 Drag/click gate to wire.</span>
-                  <span className="font-mono font-semibold">{gates.length} gates placed</span>
-                </div>
-              </div>
-            )}
+                    {/* Qubit Wires */}
+                    {Array.from({ length: numQubits }, (_, qIdx) => (
+                      <div key={qIdx} className={`flex items-center gap-2 ${numQubits <= 1 ? 'my-3.5' : numQubits === 2 ? 'my-2' : 'my-1'}`}>
+                        <div className="w-14 shrink-0 flex items-center gap-1.5">
+                          <span className="font-mono font-bold text-xs text-dark-800">q[{qIdx}]</span>
+                          <span className="px-1.5 py-0.5 rounded bg-dark-100 font-mono text-[10px] text-dark-600">|0⟩</span>
+                        </div>
 
-            {/* Beside visual wires: Live Bidirectional Code Panel */}
-            {buildViewMode !== 'gates' && (
-              <div
-                className={`bg-white rounded-xl border border-dark-200 p-2 shadow-xs ${
-                  buildViewMode === 'split' ? 'w-full md:w-1/2' : 'w-full'
-                }`}
-              >
-                <div className="flex items-center justify-between mb-1 px-1">
-                  <div className="flex items-center gap-1.5">
-                    <Code2 className="w-3.5 h-3.5 text-primary-600" />
-                    <span className="font-bold text-xs text-dark-900">Live Code Sync</span>
-                    <span className="text-[9px] px-1.5 py-0.5 rounded bg-emerald-50 text-emerald-700 font-mono font-bold border border-emerald-200">
-                      2-WAY LIVE
-                    </span>
-                  </div>
-                  <span className="text-[10px] text-dark-400">Type code to place gates</span>
-                </div>
-                <QuantumCircuitCodePanel
-                  numQubits={numQubits}
-                  gates={gates}
-                  editable={true}
-                  onCircuitCodeChange={(newNum, newGates) => setGates(newGates)}
-                  compact={true}
-                />
+                        <div className="flex-1 flex items-center gap-2 circuit-wire relative pr-1">
+                          {Array.from({ length: MAX_STEPS }, (_, sIdx) => {
+                            const placed = gates.find((g) => g.step === sIdx && g.qubits.includes(qIdx));
+                            const isSelected = selectedSlot?.qubit === qIdx && selectedSlot?.step === sIdx;
+                            const isDragOver = dragOverSlot?.qubit === qIdx && dragOverSlot?.step === sIdx;
+                            const isControl = placed && (placed.type === 'cx' || placed.type === 'cz') && placed.qubits[0] === qIdx;
+                            const isTarget = placed && (placed.type === 'cx' || placed.type === 'cz') && placed.qubits[1] === qIdx;
+
+                            return (
+                              <div
+                                key={sIdx}
+                                onDragOver={(e) => {
+                                  e.preventDefault();
+                                  e.dataTransfer.dropEffect = 'copy';
+                                }}
+                                onDragEnter={(e) => {
+                                  e.preventDefault();
+                                  setDragOverSlot({ qubit: qIdx, step: sIdx });
+                                }}
+                                onDragLeave={(e) => {
+                                  e.preventDefault();
+                                  if (dragOverSlot?.qubit === qIdx && dragOverSlot?.step === sIdx) {
+                                    setDragOverSlot(null);
+                                  }
+                                }}
+                                onDrop={(e) => {
+                                  e.preventDefault();
+                                  setDragOverSlot(null);
+                                  setIsDraggingActive(false);
+
+                                  const moveData = e.dataTransfer.getData('application/quantum-move');
+                                  if (moveData) {
+                                    try {
+                                      const parsed = JSON.parse(moveData);
+                                      const filtered = gates.filter(
+                                        (g) => g.id !== parsed.gateId && !(g.step === sIdx && g.qubits.includes(qIdx))
+                                      );
+                                      if (['cx', 'cz', 'swap'].includes(parsed.type)) {
+                                        const tgt = qIdx === 0 ? 1 : 0;
+                                        filtered.push({
+                                          id: `b-gate-${Date.now()}-${sIdx}`,
+                                          type: parsed.type,
+                                          qubits: [qIdx, tgt],
+                                          step: sIdx
+                                        });
+                                      } else {
+                                        filtered.push({
+                                          id: `b-gate-${Date.now()}-${sIdx}`,
+                                          type: parsed.type,
+                                          qubits: [qIdx],
+                                          step: sIdx
+                                        });
+                                      }
+                                      setGates(filtered);
+                                      return;
+                                    } catch {}
+                                  }
+
+                                  const droppedType = (e.dataTransfer.getData('application/quantum-gate') ||
+                                    e.dataTransfer.getData('text/plain') ||
+                                    selectedGateType) as GateType;
+
+                                  if (droppedType && GATE_CONFIGS[droppedType]) {
+                                    setSelectedGateType(droppedType);
+                                    placeGateOnSlot(qIdx, sIdx, droppedType);
+                                  }
+                                }}
+                                onClick={() => {
+                                  setSelectedSlot({ qubit: qIdx, step: sIdx });
+                                  addGateOnSlot(qIdx, sIdx);
+                                }}
+                                onContextMenu={(e) => {
+                                  e.preventDefault();
+                                  removeGateAt(qIdx, sIdx);
+                                }}
+                                className={`relative z-10 w-9 h-9 rounded-lg flex items-center justify-center cursor-pointer transition-all border ${
+                                  isDragOver
+                                    ? 'ring-2 ring-primary-500 border-primary-600 bg-primary-100 scale-105 shadow-xs'
+                                    : isSelected
+                                    ? 'ring-2 ring-primary-600 border-primary-600 bg-primary-50'
+                                    : placed
+                                    ? 'border-dark-300 bg-white shadow-2xs'
+                                    : isDraggingActive
+                                    ? 'border-dashed border-primary-400 bg-primary-50/40 animate-pulse'
+                                    : 'border-dashed border-dark-200 hover:border-primary-400 bg-white/70 hover:bg-primary-50/30'
+                                }`}
+                                title={
+                                  placed
+                                    ? `Step ${sIdx}: ${placed.type.toUpperCase()} on Q${placed.qubits.join(', Q')}. Right-click to remove.`
+                                    : `Step ${sIdx}: Click or drag gate here`
+                                }
+                              >
+                                {/* Vertical connector line for multi-qubit gates (CX, CZ, SWAP) */}
+                                {placed && placed.qubits.length > 1 && Math.min(...placed.qubits) === qIdx && (
+                                  <div
+                                    className="absolute left-1/2 -translate-x-1/2 w-0.5 bg-blue-600 pointer-events-none z-0"
+                                    style={{
+                                      top: '50%',
+                                      height: `${(Math.max(...placed.qubits) - Math.min(...placed.qubits)) * (numQubits === 2 ? 46 : 42)}px`
+                                    }}
+                                  />
+                                )}
+
+                                {placed ? (
+                                  <div
+                                    draggable={true}
+                                    onDragStart={(e) => {
+                                      e.stopPropagation();
+                                      e.dataTransfer.setData('text/plain', placed.type);
+                                      e.dataTransfer.setData('application/quantum-gate', placed.type);
+                                      e.dataTransfer.setData(
+                                        'application/quantum-move',
+                                        JSON.stringify({ qubit: qIdx, step: sIdx, gateId: placed.id, type: placed.type })
+                                      );
+                                      e.dataTransfer.effectAllowed = 'move';
+                                      setIsDraggingActive(true);
+                                    }}
+                                    onDragEnd={() => {
+                                      setIsDraggingActive(false);
+                                      setDragOverSlot(null);
+                                    }}
+                                    className="w-full h-full flex items-center justify-center cursor-grab active:cursor-grabbing select-none"
+                                  >
+                                    {placed.type === 'cx' ? (
+                                      isControl ? (
+                                        <ControlDotIcon size={12} />
+                                      ) : isTarget ? (
+                                        <TargetPlusIcon size={22} />
+                                      ) : (
+                                        <QuantumGateSymbol type={placed.type} size="sm" />
+                                      )
+                                    ) : placed.type === 'cz' ? (
+                                      isControl ? (
+                                        <ControlDotIcon size={12} />
+                                      ) : isTarget ? (
+                                        <QuantumGateSymbol type="z" size="sm" />
+                                      ) : (
+                                        <QuantumGateSymbol type={placed.type} size="sm" />
+                                      )
+                                    ) : placed.type === 'swap' ? (
+                                      <SwapXIcon size={20} />
+                                    ) : (
+                                      <QuantumGateSymbol type={placed.type} size="sm" />
+                                    )}
+                                  </div>
+                                ) : isDragOver ? (
+                                  <span className="text-[8px] font-mono font-bold text-primary-700">DROP</span>
+                                ) : (
+                                  <span className="text-[9px] font-mono text-dark-300">·</span>
+                                )}
+                              </div>
+                            );
+                          })}
+                        </div>
+                      </div>
+                    ))}
               </div>
-            )}
+
+              <div className="mt-2 pt-1 border-t border-dark-100 flex items-center justify-between text-[10px] text-dark-500">
+                <span>💡 Drag or click gates to wires. Right-click any gate to delete.</span>
+                <span className="font-mono font-semibold">{gates.length} gates placed</span>
+              </div>
+            </div>
           </div>
 
-          {/* Lower Left Card: Live Measurement Probabilities */}
-          <div className="bg-white rounded-xl border border-dark-200 p-2.5 shadow-xs">
-            <div className="flex items-center justify-between mb-1.5">
-              <div className="flex items-center gap-1.5">
-                <BarChart2 className="w-3.5 h-3.5 text-primary-600" />
-                <span className="font-bold text-xs text-dark-900">Live Measurement Probabilities</span>
+          {/* Bottom Split Row: Measurement Probabilities + Quantum Statevector (Identical to Circuit Tab) */}
+          <div className="grid min-h-0 grid-cols-1 sm:grid-cols-2 gap-2 items-stretch">
+            {/* Measurement Probabilities Histogram */}
+            <div className="bg-white rounded-xl border border-dark-200 p-2.5 sm:p-3 shadow-xs space-y-1 flex min-h-0 flex-col h-full">
+              <div className="flex items-center justify-between">
+                <h3 className="font-bold text-[11px] text-dark-900">Measurement Probabilities</h3>
+                <span className="text-[9px] text-dark-500 font-mono">1024 shots</span>
               </div>
-              <span className="text-[10px] font-mono text-dark-500">1024 shots</span>
+              <div className="relative mx-auto mt-1 flex-1 w-full max-w-[280px] aspect-square min-h-[180px] max-h-[280px]">
+                <ResponsiveContainer width="100%" height="100%">
+                  <BarChart data={histogramData} margin={{ top: 8, right: 10, left: -18, bottom: 0 }}>
+                    <XAxis dataKey="state" tick={{ fontSize: 10 }} />
+                    <YAxis tick={{ fontSize: 9 }} domain={[0, 100]} unit="%" />
+                    <Tooltip
+                      formatter={(val: any) => [`${val}% (${Math.round((Number(val) / 100) * 1024)} shots)`, 'Probability']}
+                      contentStyle={{ backgroundColor: '#18181b', color: '#fff', borderRadius: '6px', fontSize: '10px', padding: '4px 8px' }}
+                    />
+                    <Bar dataKey="prob" fill="#4f46e5" radius={[3, 3, 0, 0]}>
+                      {histogramData.map((entry, index) => (
+                        <Cell
+                          key={`cell-${index}`}
+                          fill={entry.prob > 50 ? '#4f46e5' : '#818cf8'}
+                        />
+                      ))}
+                    </Bar>
+                  </BarChart>
+                </ResponsiveContainer>
+              </div>
             </div>
 
-            <div className="h-28 w-full">
-              <ResponsiveContainer width="100%" height="100%">
-                <BarChart data={histogramData} margin={{ top: 4, right: 8, left: -25, bottom: 0 }}>
-                  <XAxis dataKey="state" tick={{ fontSize: 9 }} />
-                  <YAxis tick={{ fontSize: 9 }} domain={[0, 100]} />
-                  <Tooltip formatter={(val: any) => [`${val}%`, 'Probability']} />
-                  <Bar dataKey="prob" fill="#7C3AED" radius={[3, 3, 0, 0]}>
-                    {histogramData.map((entry, idx) => (
-                      <Cell key={idx} fill={entry.prob > 50 ? '#10B981' : '#7C3AED'} />
-                    ))}
-                  </Bar>
-                </BarChart>
-              </ResponsiveContainer>
+            {/* Quantum Statevector Readout */}
+            <div className="bg-white rounded-xl border border-dark-200 p-2.5 sm:p-3 shadow-xs gap-2 flex min-h-0 flex-col h-full">
+              <div className="flex items-center justify-between">
+                <h4 className="font-bold text-[11px] text-dark-900">Quantum Statevector |ψ⟩</h4>
+                <span className="text-[9px] font-mono text-dark-500">{numQubits} Qubits ({Math.pow(2, numQubits)} states)</span>
+              </div>
+              {liveAmps && liveAmps.length > 0 ? (
+                <div className="grid grid-cols-2 auto-rows-fr gap-1.5 text-xs font-mono flex-1">
+                  {liveAmps.map((amp, idx) => {
+                    const basisStr = idx.toString(2).padStart(numQubits, '0');
+                    const re = amp.re ?? 0;
+                    const im = amp.im ?? 0;
+                    const magSq = (re * re + im * im) * 100;
+                    return (
+                      <div key={idx} className="p-1.5 bg-dark-50 rounded-lg border border-dark-200 text-center flex flex-col items-center justify-center">
+                        <span className="font-bold text-primary-700 block text-lg">|{basisStr}⟩</span>
+                        <span className="text-sm text-dark-700 block mt-1">
+                          {re.toFixed(2)}{im >= 0 ? '+' : ''}{im.toFixed(2)}i
+                        </span>
+                        <span className="text-sm font-sans font-semibold text-dark-500 block mt-0.5">
+                          {magSq.toFixed(1)}%
+                        </span>
+                      </div>
+                    );
+                  })}
+                </div>
+              ) : (
+                <p className="text-[11px] text-dark-500">Run simulation to view statevector.</p>
+              )}
             </div>
           </div>
         </div>
 
-        {/* Right Column (cols 8-12): Actions, AI Coaching & Milestones */}
-        <div className="lg:col-span-5 space-y-2">
-          {/* Action Header Card */}
-          <div className="bg-white rounded-xl border border-dark-200 p-3 shadow-xs space-y-2.5">
+        {/* Right Column (cols 8-12): Live 3D Bloch Spheres / Code + Action / AI Coaching Verification Card */}
+        <div className="lg:col-span-5 lg:row-span-2 self-stretch min-w-0 bg-white rounded-xl border border-dark-200 p-3 sm:p-4 shadow-xs space-y-3 flex flex-col">
+          <div className="flex items-center justify-between gap-2 px-0.5">
+            <h3 className="font-bold text-sm text-dark-900">Live 3D Bloch Spheres</h3>
+            <div className="flex items-center bg-dark-100 p-1 rounded-xl border border-dark-200 shrink-0 shadow-2xs">
+              <button
+                onClick={() => setRightPanelMode('vectors')}
+                className={`px-3 py-1 rounded-lg font-bold text-[11px] transition-all cursor-pointer ${
+                  rightPanelMode === 'vectors'
+                    ? 'bg-primary-600 text-white shadow-sm'
+                    : 'text-dark-700 hover:bg-white hover:text-dark-900'
+                }`}
+              >
+                {liveBlochs.length > 1 ? `${liveBlochs.length} Qubit Vectors` : 'Qubit Vector'}
+              </button>
+              <button
+                onClick={() => setRightPanelMode('code')}
+                className={`px-3 py-1 rounded-lg font-bold text-[11px] transition-all cursor-pointer ${
+                  rightPanelMode === 'code'
+                    ? 'bg-primary-600 text-white shadow-sm'
+                    : 'text-dark-700 hover:bg-white hover:text-dark-900'
+                }`}
+              >
+                Code
+              </button>
+            </div>
+          </div>
+
+          {rightPanelMode === 'vectors' ? (
+            <div className="flex flex-1 min-h-0 flex-col gap-1.5">
+              <span className="block text-[10px] font-mono text-dark-500">
+                {liveBlochs.length} Qubit Vector{liveBlochs.length > 1 ? 's' : ''}
+              </span>
+              <div className={`grid flex-1 grid-cols-1 ${liveBlochs.length > 1 ? 'grid-cols-2' : ''} gap-2`}>
+                {liveBlochs.map((bv, idx) => (
+                  <div key={idx} className="w-full h-full">
+                    <BlochSphere3D
+                      bloch={bv}
+                      qubitIndex={bv ? bv.qubit : idx}
+                      size={160}
+                      compact={true}
+                    />
+                  </div>
+                ))}
+              </div>
+            </div>
+          ) : (
+            <div className="min-h-0 flex-1">
+              <QuantumCircuitCodePanel
+                numQubits={numQubits}
+                gates={gates}
+                title="Algorithm Code"
+                compact={false}
+                className="h-full min-h-0"
+                editable={true}
+                onCircuitCodeChange={(newNum, newGates) => setGates(newGates)}
+              />
+            </div>
+          )}
+
+          {/* Action Verification & Schrödinger AI Guidance Bar */}
+          <div className="pt-2 border-t border-dark-100 space-y-2">
             <div className="flex items-center justify-between gap-2">
               <button
                 onClick={() => handleSubmitCircuit()}
@@ -847,128 +890,106 @@ Return 3 SHORT lines (max 50 words total):
                 </div>
               </div>
             )}
-          </div>
 
-          {/* Verified Success State */}
-          {hasPassed && (
-            <div className="p-3 rounded-xl bg-emerald-50 border border-emerald-300 flex items-center justify-between gap-2 animate-fadeIn">
-              <div className="flex items-center gap-2 min-w-0">
-                <div className="w-6 h-6 rounded-md bg-emerald-600 text-white flex items-center justify-center shrink-0 font-bold text-xs">
-                  ✓
-                </div>
-                <div className="truncate">
-                  <h4 className="font-bold text-xs text-emerald-950 truncate">Circuit 100% Verified!</h4>
-                  <p className="text-[10px] text-emerald-800 truncate">
-                    Fidelity: {fidelityResult ? `${(fidelityResult * 100).toFixed(1)}%` : '100%'}
-                  </p>
-                </div>
-              </div>
-
-              <button
-                onClick={onProceedToQuiz}
-                className="flex items-center gap-1 px-3 py-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs shadow-xs transition-colors cursor-pointer shrink-0"
-              >
-                <span>Stage 5 →</span>
-                <ArrowRight className="w-3 h-3" />
-              </button>
-            </div>
-          )}
-
-          {/* Socratic Feedback Coaching (Dynamic Schrödinger AI Response) */}
-          {!hasPassed && (
-            <div className="p-3 rounded-xl bg-gradient-to-br from-amber-50/90 via-white to-orange-50/40 border border-amber-200/90 space-y-2 text-xs shadow-2xs animate-fadeIn max-h-[310px] overflow-y-auto">
-              {/* Header */}
-              <div className="flex items-center justify-between border-b border-amber-200/70 pb-1.5">
-                <div className="flex items-center gap-1.5">
-                  <div className="w-5 h-5 rounded-md bg-amber-500 text-white flex items-center justify-center shadow-2xs">
-                    <Bot className="w-3 h-3" />
+            {/* Verified Success State */}
+            {hasPassed && (
+              <div className="p-3 rounded-xl bg-emerald-50 border border-emerald-300 flex items-center justify-between gap-2 animate-fadeIn">
+                <div className="flex items-center gap-2 min-w-0">
+                  <div className="w-6 h-6 rounded-md bg-emerald-600 text-white flex items-center justify-center shrink-0 font-bold text-xs">
+                    ✓
                   </div>
-                  <h4 className="font-bold text-[11px] text-amber-950">Schrödinger AI Guidance</h4>
+                  <div className="truncate">
+                    <h4 className="font-bold text-xs text-emerald-950 truncate">Circuit 100% Verified!</h4>
+                    <p className="text-[10px] text-emerald-800 truncate">
+                      Fidelity: {fidelityResult ? `${(fidelityResult * 100).toFixed(1)}%` : '100%'}
+                    </p>
+                  </div>
+                </div>
+
+                <button
+                  onClick={onProceedToQuiz}
+                  className="flex items-center gap-1 px-3 py-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs shadow-xs transition-colors cursor-pointer shrink-0"
+                >
+                  <span>Stage 5 →</span>
+                  <ArrowRight className="w-3 h-3" />
+                </button>
+              </div>
+            )}
+
+            {/* Socratic Feedback Coaching (Dynamic Schrödinger AI Response) */}
+            {!hasPassed && (
+              <div className="p-2.5 rounded-xl bg-gradient-to-br from-amber-50/90 via-white to-orange-50/40 border border-amber-200/90 space-y-2 text-xs shadow-2xs animate-fadeIn max-h-[220px] overflow-y-auto">
+                <div className="flex items-center justify-between border-b border-amber-200/70 pb-1">
+                  <div className="flex items-center gap-1.5">
+                    <div className="w-4 h-4 rounded-md bg-amber-500 text-white flex items-center justify-center shadow-2xs">
+                      <Bot className="w-2.5 h-2.5" />
+                    </div>
+                    <h4 className="font-bold text-[11px] text-amber-950">Schrödinger AI Guidance</h4>
+                  </div>
+
+                  {isLoadingAi ? (
+                    <span className="flex items-center gap-1 text-[10px] font-semibold text-amber-800 bg-amber-100 px-1.5 py-0.5 rounded">
+                      <Loader2 className="w-2.5 h-2.5 animate-spin text-amber-600" />
+                      <span>Thinking...</span>
+                    </span>
+                  ) : (
+                    <button
+                      onClick={requestAiSocraticHint}
+                      className="text-[9px] font-bold text-primary-700 hover:text-primary-900 bg-white border border-primary-200 px-1.5 py-0.5 rounded flex items-center gap-1 cursor-pointer transition-colors shadow-2xs"
+                    >
+                      <Sparkles className="w-2.5 h-2.5 text-primary-600" />
+                      <span>Ask AI</span>
+                    </button>
+                  )}
                 </div>
 
                 {isLoadingAi ? (
-                  <span className="flex items-center gap-1 text-[10px] font-semibold text-amber-800 bg-amber-100 px-1.5 py-0.5 rounded">
-                    <Loader2 className="w-2.5 h-2.5 animate-spin text-amber-600" />
-                    <span>Thinking...</span>
-                  </span>
+                  <div className="py-2 flex items-center justify-center gap-2 text-xs text-amber-800 font-medium">
+                    <Loader2 className="w-3.5 h-3.5 animate-spin text-amber-600" />
+                    <span>Analyzing quantum circuit...</span>
+                  </div>
+                ) : aiCoachingMessage ? (
+                  <div className="p-2 rounded-lg bg-white/95 border border-amber-200/80 shadow-2xs text-[11px]">
+                    <FormattedAIFeedback message={aiCoachingMessage} />
+                  </div>
                 ) : (
-                  <button
-                    onClick={requestAiSocraticHint}
-                    className="text-[9px] font-bold text-primary-700 hover:text-primary-900 bg-white border border-primary-200 px-1.5 py-0.5 rounded flex items-center gap-1 cursor-pointer transition-colors shadow-2xs"
-                  >
-                    <Sparkles className="w-2.5 h-2.5 text-primary-600" />
-                    <span>Ask AI</span>
-                  </button>
+                  <div className="space-y-1 text-[11px] leading-snug">
+                    <div className="flex items-baseline gap-1.5">
+                      <span className="font-bold text-emerald-700 shrink-0">✓</span>
+                      <span className="text-emerald-950 font-medium truncate">
+                        {evaluationResult && evaluationResult.completedMilestonesCount > 0
+                          ? evaluationResult.milestones
+                              .filter((m) => m.completed)
+                              .map((m) => m.label)
+                              .join(' · ')
+                          : 'Scaffold loaded'}
+                      </span>
+                    </div>
+
+                    <div className="flex items-baseline gap-1.5">
+                      <span className="font-bold text-amber-900 shrink-0">➜</span>
+                      <span className="font-bold text-dark-900">
+                        {evaluationResult?.nextActionSuggestion || 'Synthesize next quantum transformation'}
+                      </span>
+                    </div>
+
+                    <div className="flex items-baseline gap-1.5">
+                      <span className="font-bold text-indigo-700 shrink-0">💡</span>
+                      <span className="text-indigo-950 font-medium italic">
+                        <MathRenderer
+                          text={
+                            evaluationResult?.currentClue ||
+                            challenge.hints[0] ||
+                            'Analyze which quantum unitary causes the desired state transformation.'
+                          }
+                        />
+                      </span>
+                    </div>
+                  </div>
                 )}
               </div>
-
-              {/* AI Coaching Response Content */}
-              {isLoadingAi ? (
-                <div className="py-3 flex items-center justify-center gap-2 text-xs text-amber-800 font-medium">
-                  <Loader2 className="w-3.5 h-3.5 animate-spin text-amber-600" />
-                  <span>Analyzing quantum circuit...</span>
-                </div>
-              ) : aiCoachingMessage ? (
-                <div className="p-2.5 rounded-lg bg-white/95 border border-amber-200/80 shadow-2xs text-[11px]">
-                  <FormattedAIFeedback message={aiCoachingMessage} />
-                </div>
-              ) : (
-                <div className="space-y-1 text-[11px] leading-snug">
-                  <div className="flex items-baseline gap-1.5">
-                    <span className="font-bold text-emerald-700 shrink-0">✓</span>
-                    <span className="text-emerald-950 font-medium truncate">
-                      {evaluationResult && evaluationResult.completedMilestonesCount > 0
-                        ? evaluationResult.milestones
-                            .filter((m) => m.completed)
-                            .map((m) => m.label)
-                            .join(' · ')
-                        : 'Scaffold loaded'}
-                    </span>
-                  </div>
-
-                  <div className="flex items-baseline gap-1.5">
-                    <span className="font-bold text-amber-900 shrink-0">➜</span>
-                    <span className="font-bold text-dark-900">
-                      {evaluationResult?.nextActionSuggestion || 'Synthesize next quantum transformation'}
-                    </span>
-                  </div>
-
-                  <div className="flex items-baseline gap-1.5">
-                    <span className="font-bold text-indigo-700 shrink-0">💡</span>
-                    <span className="text-indigo-950 font-medium italic">
-                      <MathRenderer
-                        text={
-                          evaluationResult?.currentClue ||
-                          challenge.hints[0] ||
-                          'Analyze which quantum unitary causes the desired state transformation.'
-                        }
-                      />
-                    </span>
-                  </div>
-                </div>
-              )}
-
-              {/* Milestone Tracker Badges */}
-              {evaluationResult && (
-                <div className="pt-1.5 border-t border-amber-200/60 flex flex-wrap items-center gap-1 text-[9px]">
-                  <span className="font-bold text-amber-900 mr-0.5">Milestones:</span>
-                  {evaluationResult.milestones.map((m, idx) => (
-                    <span
-                      key={idx}
-                      className={`px-1.5 py-0.5 rounded font-bold flex items-center gap-0.5 ${
-                        m.completed
-                          ? 'bg-emerald-100 text-emerald-900 border border-emerald-300'
-                          : 'bg-white/80 text-dark-500 border border-dark-200'
-                      }`}
-                    >
-                      <span>{m.completed ? '✓' : '○'}</span>
-                      <span>{m.label}</span>
-                    </span>
-                  ))}
-                </div>
-              )}
-            </div>
-          )}
+            )}
+          </div>
         </div>
       </div>
     </div>

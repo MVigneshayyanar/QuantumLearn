@@ -10,6 +10,7 @@ import { BlochSphere3D } from '@/components/bloch-sphere/BlochSphere3D';
 import { AdaptiveQuizEngine } from '@/components/quiz/AdaptiveQuizEngine';
 import { MathRenderer, MathBlock } from '@/components/math/MathRenderer';
 import { SimulationResult, StepSnapshot, PlacedGate } from '@/lib/types';
+import { simulateLocalCircuit } from '@/lib/quantum-simulator-core';
 import {
   Lightbulb,
   FileCode,
@@ -31,8 +32,7 @@ import {
   Award,
   Lock,
   ExternalLink,
-  Code2,
-  Columns
+  Code2
 } from 'lucide-react';
 import { ResponsiveContainer, BarChart, Bar, XAxis, YAxis, Tooltip, Cell } from 'recharts';
 import { BuildItTab } from './BuildItTab';
@@ -163,6 +163,7 @@ export function AlgorithmModuleView({
   const [activeTab, setActiveTab] = useState<'intuition' | 'math' | 'circuit' | 'build_it' | 'quiz' | 'skill_base'>('intuition');
   const [currentMathStep, setCurrentMathStep] = useState(0);
   const [showAllMathSteps, setShowAllMathSteps] = useState(false);
+  const [rightPanelMode, setRightPanelMode] = useState<'vectors' | 'code'>('vectors');
   const moduleTopRef = useRef<HTMLDivElement>(null);
   const [simResult, setSimResult] = useState<SimulationResult | null>(null);
 
@@ -293,7 +294,6 @@ export function AlgorithmModuleView({
   const [currentStepIdx, setCurrentStepIdx] = useState<number>(0);
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [params, setParams] = useState<Record<string, any>>(defaultParams);
-  const [circuitViewMode, setCircuitViewMode] = useState<'split' | 'visual' | 'code'>('split');
 
   // Sync params when defaultParams changes
   useEffect(() => {
@@ -348,7 +348,33 @@ export function AlgorithmModuleView({
     }
   }, [userId, moduleSlug]);
 
-  const snapshots: StepSnapshot[] = simResult?.step_by_step || [];
+  // One snapshot per circuit column (S1..Sn), plus initial state at index 0.
+  // Computed from the gates drawn on the board so the scrubber always matches the board.
+  const snapshots: StepSnapshot[] = React.useMemo(() => {
+    if (circuitGates.length === 0) return simResult?.step_by_step || [];
+    const sim = simulateLocalCircuit(qubitCount, circuitGates, 1024);
+    const perGate = sim.step_by_step || [];
+    const sorted = [...circuitGates].sort((a, b) => a.step - b.step);
+    const maxStep = Math.max(...sorted.map((g) => g.step));
+    const result: StepSnapshot[] = [perGate[0]];
+    for (let s = 0; s <= maxStep; s++) {
+      const colGates = sorted.filter((g) => g.step === s);
+      const idx = sorted.filter((g) => g.step <= s).length;
+      const snap = perGate[idx];
+      if (!snap) continue;
+      const desc = colGates.length
+        ? colGates.map((g) => `${g.type.toUpperCase()} on q${g.qubits.join(',q')}`).join(', ')
+        : 'No operation';
+      result.push({
+        ...snap,
+        step: s + 1,
+        label: `Step ${s + 1}`,
+        description_simple: desc,
+        description_technical: desc
+      });
+    }
+    return result;
+  }, [circuitGates, qubitCount, simResult]);
   const currentSnapshot = snapshots[currentStepIdx] || null;
 
   const currentBlochs = currentSnapshot ? currentSnapshot.bloch_vectors : (simResult?.bloch_vectors || []);
@@ -363,8 +389,7 @@ export function AlgorithmModuleView({
 
   const totalStepsCount = Math.max(
     1,
-    ...circuitGates.map((g) => g.step + 1),
-    snapshots.length > 0 ? snapshots.length - 1 : 0
+    ...circuitGates.map((g) => g.step + 1)
   );
 
   const tabs = [
@@ -548,8 +573,8 @@ export function AlgorithmModuleView({
       )}
 
       {/* Active Stage Content with bottom-to-top slideUp animation */}
-      <main className="min-w-0 flex-1 flex flex-col mt-3.5 lg:mt-0 lg:h-full">
-      <div key={activeTab} className="flex flex-col flex-1 animate-slideUp">
+      <main className="min-w-0 flex-1 flex min-h-0 flex-col mt-3.5 lg:mt-0 lg:h-full">
+      <div key={activeTab} className="flex min-h-0 flex-1 flex-col animate-slideUp">
         {/* Stage 1: Intuition */}
         {activeTab === 'intuition' && (
         <div className="bg-white rounded-2xl border border-dark-200 p-5 sm:p-6 flex flex-col flex-1 space-y-4 animate-fadeIn">
@@ -711,11 +736,16 @@ export function AlgorithmModuleView({
               }}
               className="flex items-center gap-2 px-5 py-2 rounded-xl bg-primary-600 hover:bg-primary-700 text-white font-semibold text-xs shadow-xs transition-colors cursor-pointer"
                 >
+                  {!showAllMathSteps && (
+                    <span className="font-mono bg-primary-700/60 px-1.5 py-0.5 rounded text-[10px]">
+                      Step {currentMathStep + 1}/{mathWalkthrough.length}
+                    </span>
+                  )}
                   <span>
                     {showAllMathSteps
                       ? 'Next: Interactive Circuit & Simulation'
                       : currentMathStep < mathWalkthrough.length - 1
-                      ? `Next: Step ${currentMathStep + 2}`
+                      ? `Go to Step ${currentMathStep + 2}`
                       : 'Next: Interactive Circuit & Simulation'}
                   </span>
                   <ChevronRight className="w-4 h-4" />
@@ -725,7 +755,7 @@ export function AlgorithmModuleView({
         </div>
       )}      {/* Stage 3: Interactive Circuit Simulation (High-Density Cockpit) */}
       {activeTab === 'circuit' && (
-        <div className="space-y-2 animate-fadeIn">
+        <div className="flex min-h-0 flex-1 flex-col space-y-2 animate-fadeIn">
           {/* Unified Controls Strip: Oracle Selector + Scrubber & Current Step Info */}
           <div className="bg-white rounded-xl border border-dark-200 px-3.5 py-2 shadow-xs space-y-1.5">
             <div className="flex flex-wrap items-center justify-between gap-2 text-xs">
@@ -739,10 +769,6 @@ export function AlgorithmModuleView({
               {/* Step-by-Step Playback Scrubber */}
               {snapshots.length > 0 && (
                 <div className="flex items-center gap-2 ml-auto">
-                  <div className="flex items-center gap-1 text-[11px] font-bold text-dark-800 shrink-0">
-                    <Play className="w-3.5 h-3.5 text-primary-600" />
-                    <span>Step {currentStepIdx + 1}/{snapshots.length}</span>
-                  </div>
                   <div className="flex items-center gap-1">
                     <button
                       disabled={currentStepIdx <= 0}
@@ -792,73 +818,24 @@ export function AlgorithmModuleView({
           </div>
 
           {/* Main Visual Cockpit: Side-by-Side Unified Grid */}
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-2.5 items-stretch">
+          <div className="grid min-h-0 flex-1 grid-cols-1 gap-3 lg:grid-cols-12 lg:grid-rows-[auto_minmax(0,1fr)] lg:items-stretch">
             {/* Left Column: Circuit Board + (Probabilities & Statevector split) */}
-            <div className="lg:col-span-7 flex flex-col gap-2">
+            <div className="lg:col-span-7 lg:row-span-2 grid min-w-0 grid-rows-[auto_minmax(0,1fr)] gap-3">
               {/* Quantum Circuit Board Card */}
-              <div className="bg-white rounded-xl border border-dark-200 p-2.5 sm:p-3 shadow-xs space-y-1.5">
+              <div className="bg-white rounded-xl border border-dark-200 p-3 sm:p-4 shadow-xs space-y-2 min-h-[220px]">
                 <div className="flex flex-wrap items-center justify-between gap-1.5">
                   <div className="flex items-center gap-2">
                     <Cpu className="w-3.5 h-3.5 text-primary-600" />
-                    <h3 className="font-bold text-xs text-dark-900">Quantum Circuit Board</h3>
-                    <span className="text-[9px] text-primary-700 bg-primary-50 border border-primary-200 px-1.5 py-0.2 rounded-full font-semibold">
-                      Step {currentStepIdx} of {snapshots.length > 0 ? snapshots.length - 1 : 0}
-                    </span>
-                  </div>
-                  <div className="flex items-center gap-1.5 text-[9px]">
-                    <div className="flex items-center bg-dark-100 p-0.5 rounded-lg border border-dark-200">
-                      <button
-                        onClick={() => setCircuitViewMode('split')}
-                        className={`flex items-center gap-1 px-2 py-0.5 rounded font-bold transition-all cursor-pointer ${
-                          circuitViewMode === 'split'
-                            ? 'bg-white text-primary-700 shadow-2xs'
-                            : 'text-dark-600 hover:text-dark-900'
-                        }`}
-                        title="Side-by-side visual circuit and Python code"
-                      >
-                        <Columns className="w-2.5 h-2.5" />
-                        <span>Split</span>
-                      </button>
-                      <button
-                        onClick={() => setCircuitViewMode('visual')}
-                        className={`flex items-center gap-1 px-2 py-0.5 rounded font-bold transition-all cursor-pointer ${
-                          circuitViewMode === 'visual'
-                            ? 'bg-white text-primary-700 shadow-2xs'
-                            : 'text-dark-600 hover:text-dark-900'
-                        }`}
-                        title="Visual circuit wires"
-                      >
-                        <Cpu className="w-2.5 h-2.5" />
-                        <span>Wires</span>
-                      </button>
-                      <button
-                        onClick={() => setCircuitViewMode('code')}
-                        className={`flex items-center gap-1 px-2 py-0.5 rounded font-bold transition-all cursor-pointer ${
-                          circuitViewMode === 'code'
-                            ? 'bg-white text-primary-700 shadow-2xs'
-                            : 'text-dark-600 hover:text-dark-900'
-                        }`}
-                        title="Python code"
-                      >
-                        <Code2 className="w-2.5 h-2.5" />
-                        <span>Code</span>
-                      </button>
-                    </div>
-                    <span className="hidden sm:flex items-center gap-1 text-emerald-700 bg-emerald-50 px-1.5 py-0.5 rounded font-medium border border-emerald-200">
-                      <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
-                      Active
-                    </span>
+                    <h3 className="font-bold text-sm text-dark-900">Quantum Circuit Board</h3>
                   </div>
                 </div>
 
-                {/* Visual Circuit Canvas & Python Code Panel */}
+                {/* Visual Circuit Canvas */}
                 <div className="flex flex-col md:flex-row gap-2">
-                  {/* Visual Circuit Canvas */}
-                  {circuitViewMode !== 'code' && (
-                    <div className={`overflow-x-auto pb-0.5 ${circuitViewMode === 'split' ? 'w-full md:w-1/2' : 'w-full'}`}>
-                      <div className="w-full min-w-[320px] space-y-1.5 py-0.5">
+                  <div className="w-full overflow-x-auto pb-0.5">
+                      <div className={`w-full min-w-[340px] space-y-2 ${qubitCount <= 1 ? 'py-4' : qubitCount === 2 ? 'py-2.5' : 'py-1.5'}`}>
                         {/* Step Columns Timeline Header */}
-                        <div className="flex items-center gap-1.5 pl-14">
+                        <div className="flex items-center gap-2 pl-16">
                           {Array.from({ length: totalStepsCount }, (_, sIdx) => {
                             const isPassed = sIdx < currentStepIdx;
                             const isCurrent = sIdx === currentStepIdx - 1;
@@ -866,7 +843,7 @@ export function AlgorithmModuleView({
                               <button
                                 key={sIdx}
                                 onClick={() => setCurrentStepIdx(sIdx + 1)}
-                                className={`w-8 py-0.5 rounded text-[9px] font-mono font-bold transition-all text-center cursor-pointer ${
+                                className={`w-9 py-0.5 rounded text-[10px] font-mono font-bold transition-all text-center cursor-pointer ${
                                   isCurrent
                                     ? 'bg-primary-600 text-white shadow-xs ring-2 ring-primary-400/40 scale-105'
                                     : isPassed
@@ -883,11 +860,11 @@ export function AlgorithmModuleView({
 
                         {/* Qubit Wires */}
                         {Array.from({ length: qubitCount }, (_, qIdx) => (
-                          <div key={qIdx} className="flex items-center gap-1.5">
-                            <div className="w-12 shrink-0 flex items-center gap-1">
-                              <span className="font-mono font-bold text-[11px] text-dark-800">q[{qIdx}]</span>
+                          <div key={qIdx} className={`flex items-center gap-2 ${qubitCount <= 1 ? 'my-3.5' : qubitCount === 2 ? 'my-2' : 'my-1'}`}>
+                            <div className="w-14 shrink-0 flex items-center gap-1.5">
+                              <span className="font-mono font-bold text-xs text-dark-800">q[{qIdx}]</span>
                               <span
-                                className={`px-1 py-0 rounded font-mono text-[9px] transition-colors ${
+                                className={`px-1.5 py-0.5 rounded font-mono text-[10px] transition-colors ${
                                   currentStepIdx === 0
                                     ? 'bg-primary-100 text-primary-900 ring-1 ring-primary-500/30 font-bold'
                                     : 'bg-dark-100 text-dark-600'
@@ -897,7 +874,7 @@ export function AlgorithmModuleView({
                               </span>
                             </div>
 
-                            <div className="flex-1 flex items-center gap-1.5 circuit-wire relative pr-1">
+                            <div className="flex-1 flex items-center gap-2 circuit-wire relative pr-1">
                               {Array.from({ length: totalStepsCount }, (_, sIdx) => {
                                 const placed = circuitGates.find((g) => g.step === sIdx && g.qubits.includes(qIdx));
                                 const isExecuted = sIdx < currentStepIdx;
@@ -909,7 +886,7 @@ export function AlgorithmModuleView({
                                   <div
                                     key={sIdx}
                                     onClick={() => setCurrentStepIdx(sIdx + 1)}
-                                    className={`relative z-10 w-8 h-8 rounded-md flex items-center justify-center cursor-pointer transition-all border ${
+                                    className={`relative z-10 w-9 h-9 rounded-lg flex items-center justify-center cursor-pointer transition-all border ${
                                       isCurrent
                                         ? 'ring-2 ring-blue-500/40 border-blue-600 scale-105 shadow-sm bg-white'
                                         : isExecuted
@@ -930,7 +907,7 @@ export function AlgorithmModuleView({
                                         className="absolute left-1/2 -translate-x-1/2 w-0.5 bg-blue-600 pointer-events-none z-0"
                                         style={{
                                           top: '50%',
-                                          height: `${(Math.max(...placed.qubits) - Math.min(...placed.qubits)) * 40}px`
+                                          height: `${(Math.max(...placed.qubits) - Math.min(...placed.qubits)) * (qubitCount === 2 ? 46 : 42)}px`
                                         }}
                                       />
                                     )}
@@ -939,33 +916,33 @@ export function AlgorithmModuleView({
                                       <div className="relative w-full h-full flex items-center justify-center select-none">
                                         {placed.type === 'cx' ? (
                                           isControl ? (
-                                            <ControlDotIcon size={10} />
+                                            <ControlDotIcon size={12} />
                                           ) : isTarget ? (
-                                            <TargetPlusIcon size={20} />
+                                            <TargetPlusIcon size={22} />
                                           ) : (
                                             <QuantumGateSymbol type={placed.type} size="sm" />
                                           )
                                         ) : placed.type === 'cz' ? (
                                           isControl ? (
-                                            <ControlDotIcon size={10} />
+                                            <ControlDotIcon size={12} />
                                           ) : isTarget ? (
                                             <QuantumGateSymbol type="z" size="sm" />
                                           ) : (
                                             <QuantumGateSymbol type={placed.type} size="sm" />
                                           )
                                         ) : placed.type === 'swap' ? (
-                                          <SwapXIcon size={18} />
+                                          <SwapXIcon size={20} />
                                         ) : (
                                           <QuantumGateSymbol type={placed.type} size="sm" />
                                         )}
                                         {isExecuted && !isCurrent && (
-                                          <span className="absolute -top-1 -right-1 w-3 h-3 bg-emerald-500 text-white rounded-full flex items-center justify-center text-[7px] font-bold shadow-xs z-20">
+                                          <span className="absolute -top-1 -right-1 w-3.5 h-3.5 bg-emerald-500 text-white rounded-full flex items-center justify-center text-[8px] font-bold shadow-xs z-20">
                                             ✓
                                           </span>
                                         )}
                                       </div>
                                     ) : (
-                                      <span className="text-[8px] font-mono text-dark-300">·</span>
+                                      <span className="text-[9px] font-mono text-dark-300">·</span>
                                     )}
                                   </div>
                                 );
@@ -975,43 +952,21 @@ export function AlgorithmModuleView({
                         ))}
                       </div>
                     </div>
-                  )}
 
-                  {/* Beside wires: Live Code Panel */}
-                  {circuitViewMode !== 'visual' && (
-                    <div className={`p-1.5 rounded-lg bg-dark-900 border border-dark-700 ${circuitViewMode === 'split' ? 'w-full md:w-1/2' : 'w-full'}`}>
-                      <div className="flex items-center justify-between mb-1 px-1">
-                        <div className="flex items-center gap-1.5">
-                          <Code2 className="w-3.5 h-3.5 text-primary-400" />
-                          <span className="text-white text-xs font-bold font-mono">Algorithm Code</span>
-                          <span className="text-[9px] px-1.5 py-0.5 rounded bg-dark-800 text-primary-300 font-mono">
-                            LIVE
-                          </span>
-                        </div>
-                        <span className="text-[10px] text-dark-400 font-mono">{circuitGates.length} gates</span>
-                      </div>
-                      <QuantumCircuitCodePanel
-                        numQubits={qubitCount}
-                        gates={circuitGates}
-                        title="Algorithm Implementation"
-                        compact={true}
-                      />
-                    </div>
-                  )}
                 </div>
               </div>
 
               {/* Bottom Split Row: Measurement Probabilities + Quantum Statevector */}
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 flex-1">
+              <div className="grid min-h-0 grid-cols-1 sm:grid-cols-2 gap-2 items-stretch">
                 {/* Measurement Probabilities Histogram */}
-                <div className="bg-white rounded-xl border border-dark-200 p-2.5 sm:p-3 shadow-xs space-y-1 flex flex-col justify-between">
+                <div className="bg-white rounded-xl border border-dark-200 p-2.5 sm:p-3 shadow-xs space-y-1 flex min-h-0 flex-col h-full">
                   <div className="flex items-center justify-between">
                     <h3 className="font-bold text-[11px] text-dark-900">Measurement Probabilities</h3>
                     <span className="text-[9px] text-dark-500 font-mono">1024 shots</span>
                   </div>
-                  <div className="h-28 w-full">
+                  <div className="relative mx-auto mt-1 flex-1 w-full max-w-[280px] aspect-square min-h-[180px] max-h-[280px]">
                     <ResponsiveContainer width="100%" height="100%">
-                      <BarChart data={histogramData} margin={{ top: 5, right: 5, left: -25, bottom: 0 }}>
+                      <BarChart data={histogramData} margin={{ top: 8, right: 10, left: -18, bottom: 0 }}>
                         <XAxis dataKey="state" tick={{ fontSize: 10 }} />
                         <YAxis tick={{ fontSize: 9 }} domain={[0, 100]} unit="%" />
                         <Tooltip
@@ -1032,25 +987,25 @@ export function AlgorithmModuleView({
                 </div>
 
                 {/* Quantum Statevector Readout */}
-                <div className="bg-white rounded-xl border border-dark-200 p-2.5 sm:p-3 shadow-xs space-y-1.5 flex flex-col justify-between">
+                <div className="bg-white rounded-xl border border-dark-200 p-2.5 sm:p-3 shadow-xs gap-2 flex min-h-0 flex-col h-full">
                   <div className="flex items-center justify-between">
                     <h4 className="font-bold text-[11px] text-dark-900">Quantum Statevector |ψ⟩</h4>
                     <span className="text-[9px] font-mono text-dark-500">2 Qubits (4 states)</span>
                   </div>
                   {currentAmps && currentAmps.length > 0 ? (
-                    <div className="grid grid-cols-2 gap-1.5 text-xs font-mono">
+                    <div className="grid grid-cols-2 auto-rows-fr gap-1.5 text-xs font-mono flex-1">
                       {currentAmps.map((amp, idx) => {
                         const basisStr = idx.toString(2).padStart(qubitCount, '0');
                         const re = amp.re ?? 0;
                         const im = amp.im ?? 0;
                         const magSq = (re * re + im * im) * 100;
                         return (
-                          <div key={idx} className="p-1.5 bg-dark-50 rounded-lg border border-dark-200 text-center">
-                            <span className="font-bold text-primary-700 block text-[11px]">|{basisStr}⟩</span>
-                            <span className="text-[9px] text-dark-600 block">
+                          <div key={idx} className="p-1.5 bg-dark-50 rounded-lg border border-dark-200 text-center flex flex-col items-center justify-center">
+                            <span className="font-bold text-primary-700 block text-lg">|{basisStr}⟩</span>
+                            <span className="text-sm text-dark-700 block mt-1">
                               {re.toFixed(2)}{im >= 0 ? '+' : ''}{im.toFixed(2)}i
                             </span>
-                            <span className="text-[9px] font-sans text-dark-400 block mt-0.2">
+                            <span className="text-sm font-sans font-semibold text-dark-500 block mt-0.5">
                               {magSq.toFixed(1)}%
                             </span>
                           </div>
@@ -1065,30 +1020,68 @@ export function AlgorithmModuleView({
             </div>
 
             {/* Right Column: Live 3D Bloch Spheres */}
-            <div className="lg:col-span-5 bg-white rounded-xl border border-dark-200 p-2.5 sm:p-3 shadow-xs space-y-1.5 flex flex-col justify-between">
-              <div className="flex items-center justify-between px-0.5">
-                <h3 className="font-bold text-xs text-dark-900">Live 3D Bloch Spheres</h3>
-                <span className="text-[10px] font-mono text-dark-500">
-                  {currentBlochs.length} Qubit Vector{currentBlochs.length > 1 ? 's' : ''}
-                </span>
+            <div className="lg:col-span-5 lg:row-span-2 self-stretch min-w-0 bg-white rounded-xl border border-dark-200 p-3 sm:p-4 shadow-xs space-y-3 flex flex-col">
+              <div className="flex items-center justify-between gap-2 px-0.5">
+                <h3 className="font-bold text-sm text-dark-900">Live 3D Bloch Spheres</h3>
+                <div className="flex items-center bg-dark-100 p-1 rounded-xl border border-dark-200 shrink-0 shadow-2xs">
+                  <button
+                    onClick={() => setRightPanelMode('vectors')}
+                    className={`px-3 py-1 rounded-lg font-bold text-[11px] transition-all cursor-pointer ${
+                      rightPanelMode === 'vectors'
+                        ? 'bg-primary-600 text-white shadow-sm'
+                        : 'text-dark-700 hover:bg-white hover:text-dark-900'
+                    }`}
+                  >
+                    {currentBlochs.length > 1 ? '2 Qubit Vectors' : 'Qubit Vector'}
+                  </button>
+                  <button
+                    onClick={() => setRightPanelMode('code')}
+                    className={`px-3 py-1 rounded-lg font-bold text-[11px] transition-all cursor-pointer ${
+                      rightPanelMode === 'code'
+                        ? 'bg-primary-600 text-white shadow-sm'
+                        : 'text-dark-700 hover:bg-white hover:text-dark-900'
+                    }`}
+                  >
+                    Code
+                  </button>
+                </div>
               </div>
-              <div className={`grid grid-cols-1 ${currentBlochs.length > 1 ? 'grid-cols-2' : ''} gap-1.5`}>
-                {currentBlochs.map((bv, idx) => (
-                  <div key={idx} className="w-full">
-                    <BlochSphere3D
-                      bloch={bv}
-                      qubitIndex={bv ? bv.qubit : idx}
-                      size={140}
-                      compact={true}
-                    />
+
+              {rightPanelMode === 'vectors' ? (
+                <div className="flex flex-1 min-h-0 flex-col gap-1.5">
+                  <span className="block text-[10px] font-mono text-dark-500">
+                    {currentBlochs.length} Qubit Vector{currentBlochs.length > 1 ? 's' : ''}
+                  </span>
+                  <div className={`grid flex-1 grid-cols-1 ${currentBlochs.length > 1 ? 'grid-cols-2' : ''} gap-2`}>
+                    {currentBlochs.map((bv, idx) => (
+                      <div key={idx} className="w-full h-full">
+                        <BlochSphere3D
+                          bloch={bv}
+                          qubitIndex={bv ? bv.qubit : idx}
+                          size={160}
+                          compact={true}
+                        />
+                      </div>
+                    ))}
                   </div>
-                ))}
-              </div>
+                </div>
+              ) : (
+                <div className="min-h-0 flex-1">
+                  <QuantumCircuitCodePanel
+                    numQubits={qubitCount}
+                    gates={circuitGates}
+                    title="Algorithm Code"
+                    compact={false}
+                    className="h-full min-h-0"
+                    editable={false}
+                  />
+                </div>
+              )}
             </div>
           </div>
 
           {/* Bottom Navigation Toolbar */}
-          <div className="flex items-center justify-between pt-1">
+          <div className="flex flex-wrap items-center justify-between gap-2 pt-1">
             <button
               onClick={() => handleTabChange('math', false)}
               className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-dark-200 text-dark-700 font-semibold text-xs hover:bg-dark-50 transition-colors cursor-pointer"
@@ -1097,23 +1090,46 @@ export function AlgorithmModuleView({
               <span>Back: Math</span>
             </button>
 
-            <span className="text-[11px] text-dark-500 font-medium hidden md:inline">
-              Deterministic quantum advantage: Single query reveals balanced vs constant oracle with 100% certainty.
-            </span>
+            {/* Bottom Step Controls: Step Back, Step Badge, Step Forward / Next */}
+            <div className="flex items-center gap-2">
+              <button
+                disabled={currentStepIdx <= 0}
+                onClick={() => setCurrentStepIdx((i) => Math.max(0, i - 1))}
+                className="flex items-center gap-1 px-3 py-1.5 rounded-lg border border-dark-200 hover:bg-dark-50 text-dark-700 font-semibold text-xs disabled:opacity-30 disabled:pointer-events-none transition-colors cursor-pointer"
+                title="Previous step"
+              >
+                <ChevronLeft className="w-3.5 h-3.5" />
+                <span>Step Back</span>
+              </button>
 
-            <button
-              onClick={() => {
-                if (userId) {
-                  apiReportProgress(userId, moduleSlug, 'in_progress', { stageReached: 4 });
-                }
-                unlockStage(3);
-                handleTabChange('build_it');
-              }}
-              className="flex items-center gap-1.5 px-4 py-1.5 rounded-lg bg-primary-600 hover:bg-primary-700 text-white font-semibold text-xs shadow-xs transition-colors cursor-pointer"
-            >
-              <span>Next: Build It Hands-on</span>
-              <ChevronRight className="w-3.5 h-3.5" />
-            </button>
+              <span className="px-3 py-1.5 rounded-lg bg-dark-100 text-dark-800 font-mono font-bold text-xs border border-dark-200 shadow-2xs">
+                Step {currentStepIdx}/{snapshots.length > 0 ? snapshots.length - 1 : 0}
+              </span>
+
+              {snapshots.length > 0 && currentStepIdx < snapshots.length - 1 ? (
+                <button
+                  onClick={() => setCurrentStepIdx((i) => Math.min(snapshots.length - 1, i + 1))}
+                  className="flex items-center gap-1 px-3 py-1.5 rounded-lg bg-primary-50 text-primary-700 hover:bg-primary-100 border border-primary-200 font-semibold text-xs transition-colors cursor-pointer"
+                >
+                  <span>Step Forward</span>
+                  <ChevronRight className="w-3.5 h-3.5" />
+                </button>
+              ) : (
+                <button
+                  onClick={() => {
+                    if (userId) {
+                      apiReportProgress(userId, moduleSlug, 'in_progress', { stageReached: 4 });
+                    }
+                    unlockStage(3);
+                    handleTabChange('build_it');
+                  }}
+                  className="flex items-center gap-1.5 px-4 py-1.5 rounded-lg bg-primary-600 hover:bg-primary-700 text-white font-semibold text-xs shadow-xs transition-colors cursor-pointer animate-fadeIn"
+                >
+                  <span>Next: Build It Hands-on</span>
+                  <ChevronRight className="w-3.5 h-3.5" />
+                </button>
+              )}
+            </div>
           </div>
         </div>
       )}

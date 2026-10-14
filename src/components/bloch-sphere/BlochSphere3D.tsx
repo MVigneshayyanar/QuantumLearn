@@ -55,6 +55,7 @@ export function BlochSphere3D({
   const prevMouseRef = useRef({ x: 0, y: 0 });
   const rotationRef = useRef({ x: 0.35, y: -0.6 });
   const [textDescription, setTextDescription] = useState<string>('');
+  const [webglFailed, setWebglFailed] = useState<boolean>(false);
 
   // Refs for 2D projected DOM labels so they rotate smoothly with user camera in 60fps
   const labelRefs = useRef<(HTMLDivElement | null)[]>([]);
@@ -97,14 +98,38 @@ export function BlochSphere3D({
     camera.position.set(0, 0, 4.15);
     cameraRef.current = camera;
 
-    // Renderer
-    const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
-    renderer.setSize(width, height);
-    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
-    rendererRef.current = renderer;
+    // Renderer with WebGL error safety fallback
+    let renderer: THREE.WebGLRenderer;
+    try {
+      let canvas = containerRef.current.querySelector('canvas') as HTMLCanvasElement;
+      if (!canvas) {
+        canvas = document.createElement('canvas');
+        containerRef.current.appendChild(canvas);
+      }
 
-    containerRef.current.innerHTML = '';
-    containerRef.current.appendChild(renderer.domElement);
+      renderer = new THREE.WebGLRenderer({
+        canvas,
+        antialias: true,
+        alpha: true,
+        powerPreference: 'default'
+      });
+      renderer.setSize(width, height);
+      renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
+      rendererRef.current = renderer;
+      if (!renderer.getContext()) throw new Error('No WebGL context');
+      setWebglFailed(false);
+    } catch (e) {
+      console.warn('WebGL context creation failed for Bloch Sphere:', e);
+      setWebglFailed(true);
+      return;
+    }
+
+    // Handle context loss gracefully
+    const handleContextLost = (event: Event) => {
+      event.preventDefault();
+      cancelAnimationFrame(animationFrameId);
+    };
+    renderer.domElement.addEventListener('webglcontextlost', handleContextLost, false);
 
     // Lighting (ambient 1.3, directional 2.0 at [3, 4, 5])
     const ambientLight = new THREE.AmbientLight(0xffffff, 1.3);
@@ -493,7 +518,10 @@ export function BlochSphere3D({
       dom.removeEventListener('touchstart', handleTouchStart);
       window.removeEventListener('touchmove', handleTouchMove);
       window.removeEventListener('touchend', handleTouchEnd);
-      renderer.dispose();
+      dom.removeEventListener('webglcontextlost', handleContextLost);
+      try {
+        renderer.dispose();
+      } catch {}
     };
   }, [bloch, size, interactive, showSweepArcs, activeSweep]);
 
@@ -506,20 +534,20 @@ export function BlochSphere3D({
   const isPhiSweepActive = (showSweepArcs || activeSweep === 'phi' || activeSweep === 'both') && bloch && bloch.is_pure && bloch.phi > 0.02;
 
   return (
-    <div className={`flex flex-col items-center bg-white dark:bg-dark-800/90 rounded-xl border border-dark-200 dark:border-dark-700 shadow-2xs relative w-full isolate ${compact ? 'p-1.5' : 'p-2 sm:p-2.5'}`}>
+    <div className={`flex flex-col items-center bg-white dark:bg-dark-800/90 rounded-xl border border-dark-200 dark:border-dark-700 shadow-2xs relative w-full h-full isolate ${compact ? 'p-1.5' : 'p-2 sm:p-2.5'}`}>
       {/* Header Info */}
-      <div className={`w-full flex items-center justify-between ${compact ? 'mb-0.5' : 'mb-1'}`}>
-        <div className="flex items-center gap-1.5">
-          <span className={`font-bold text-dark-900 dark:text-white ${compact ? 'text-xs' : 'text-sm'}`}>
-            Qubit {qubitIndex} Bloch Sphere
+      <div className={`w-full flex items-center justify-between gap-1.5 ${compact ? 'mb-0.5' : 'mb-1'}`}>
+        <div className="flex items-center gap-1.5 min-w-0 flex-1">
+          <span className={`font-bold text-dark-900 dark:text-white whitespace-nowrap shrink-0 ${compact ? 'text-sm' : 'text-base'}`}>
+            Qubit {qubitIndex}
           </span>
           {isEntangled ? (
-            <span className={`inline-flex items-center gap-1 rounded-full font-semibold bg-amber-100 dark:bg-amber-950/70 text-amber-900 dark:text-amber-300 border border-amber-300 dark:border-amber-700/60 ${compact ? 'text-[9px] px-1.5 py-0' : 'text-xs px-2 py-0.5'}`}>
+            <span className={`inline-flex items-center gap-1 rounded-full font-semibold whitespace-nowrap shrink-0 bg-amber-100 dark:bg-amber-950/70 text-amber-900 dark:text-amber-300 border border-amber-300 dark:border-amber-700/60 ${compact ? 'text-[9px] px-1.5 py-0' : 'text-xs px-2 py-0.5'}`}>
               <AlertTriangle className={compact ? 'w-2.5 h-2.5' : 'w-3 h-3'} />
               Entangled
             </span>
           ) : (
-            <span className={`inline-flex items-center gap-1 rounded-full font-semibold bg-primary-50 dark:bg-primary-950/70 text-primary-700 dark:text-primary-300 border border-primary-200 dark:border-primary-800/60 ${compact ? 'text-[9px] px-1.5 py-0' : 'text-xs px-2 py-0.5'}`}>
+            <span className={`inline-flex items-center gap-1 rounded-full font-semibold whitespace-nowrap shrink-0 bg-primary-50 dark:bg-primary-950/70 text-primary-700 dark:text-primary-300 border border-primary-200 dark:border-primary-800/60 ${compact ? 'text-[9px] px-1.5 py-0' : 'text-xs px-2 py-0.5'}`}>
               <Sparkles className={compact ? 'w-2.5 h-2.5' : 'w-3 h-3'} />
               Pure State
             </span>
@@ -528,23 +556,49 @@ export function BlochSphere3D({
         <button
           onClick={resetView}
           title="Reset 3D camera orientation"
-          className="p-1 rounded text-dark-400 hover:text-dark-700 dark:hover:text-dark-200 hover:bg-dark-100 dark:hover:bg-dark-700 transition-colors cursor-pointer"
+          className="p-1 rounded text-dark-400 hover:text-dark-700 dark:hover:text-dark-200 hover:bg-dark-100 dark:hover:bg-dark-700 transition-colors cursor-pointer shrink-0"
         >
           <RotateCcw className={compact ? 'w-3.5 h-3.5' : 'w-4 h-4'} />
         </button>
       </div>
 
       {/* 3D Canvas Container with Dynamic Screen-Projected 6-Axis Labels */}
-      <div className="relative flex items-center justify-center overflow-visible select-none z-0" style={{ width: size, height: size }}>
+      <div className="relative flex items-center justify-center overflow-visible select-none z-0 my-auto" style={{ width: size, height: size }}>
         <div
           ref={containerRef}
           className="cursor-grab active:cursor-grabbing"
-          style={{ width: size, height: size }}
+          style={{ width: size, height: size, display: webglFailed ? 'none' : 'block' }}
           aria-label={`3D Bloch Sphere for Qubit ${qubitIndex}. Drag to rotate.`}
         />
+        {webglFailed && (() => {
+          const c = size / 2;
+          const r = size * 0.36;
+          const bx = bloch && bloch.is_pure ? bloch.x : 0;
+          const by = bloch && bloch.is_pure ? bloch.y : 0;
+          const bz = bloch && bloch.is_pure ? bloch.z : 0;
+          // Simple oblique projection: x right, z up, y into depth
+          const px = c + r * (bx - by * 0.35);
+          const py = c - r * (bz - by * 0.25);
+          return (
+            <svg width={size} height={size} className="absolute inset-0" aria-label={`Bloch Sphere for Qubit ${qubitIndex}`}>
+              <circle cx={c} cy={c} r={r} fill="rgba(129,140,248,0.12)" stroke="#818cf8" strokeWidth={1.2} />
+              <ellipse cx={c} cy={c} rx={r} ry={r * 0.3} fill="none" stroke="#818cf8" strokeDasharray="3 3" opacity={0.7} />
+              <line x1={c} y1={c - r} x2={c} y2={c + r} stroke="#94a3b8" strokeWidth={1} />
+              <line x1={c - r} y1={c} x2={c + r} y2={c} stroke="#94a3b8" strokeWidth={1} />
+              <text x={c} y={c - r - 4} textAnchor="middle" fontSize={10} fill="#4f46e5">|0⟩</text>
+              <text x={c} y={c + r + 11} textAnchor="middle" fontSize={10} fill="#0284c7">|1⟩</text>
+              {bloch && bloch.is_pure && (
+                <>
+                  <line x1={c} y1={c} x2={px} y2={py} stroke="#4f46e5" strokeWidth={2.5} strokeLinecap="round" />
+                  <circle cx={px} cy={py} r={4} fill="#4f46e5" />
+                </>
+              )}
+            </svg>
+          );
+        })()}
 
         {/* Dynamic 6-Axis Notations outside the sphere — track 3D rotation in real-time */}
-        {AXIS_ANCHORS.map((anchor, idx) => (
+        {!webglFailed && AXIS_ANCHORS.map((anchor, idx) => (
           <div
             key={anchor.id}
             ref={(el) => {
