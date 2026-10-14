@@ -235,6 +235,21 @@ pre {
   animation: fadeIn 0.3s ease-out;
 }
 
+@keyframes codeLineAdded {
+  0%, 100% {
+    background-color: rgb(251 191 36 / 0.14);
+    color: rgb(253 230 138);
+  }
+  45% {
+    background-color: rgb(245 158 11 / 0.42);
+    color: rgb(255 251 235);
+  }
+}
+
+.animate-codeLineAdded {
+  animation: codeLineAdded 1.25s ease-in-out 2;
+}
+
 /* Smooth bottom-to-top slide and fade animation */
 @keyframes slideUpFade {
   0% {
@@ -735,6 +750,5 @@ html.dark #quantum-certificate-printable .bg-amber-100\/70 {
   background-color: rgba(245, 158, 11, 0.2) !important;
   border-color: rgba(245, 158, 11, 0.5) !important;
 }
-
 
 

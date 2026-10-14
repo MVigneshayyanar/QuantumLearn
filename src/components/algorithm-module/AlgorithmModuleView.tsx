@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useMemo } from 'react';
 import { useAccessibility } from '@/lib/accessibility-context';
 import { translations } from '@/lib/i18n';
 import { useStudentContext } from '@/lib/student-context';
@@ -390,6 +390,11 @@ export function AlgorithmModuleView({
   const totalStepsCount = Math.max(
     1,
     ...circuitGates.map((g) => g.step + 1)
+  );
+
+  const visibleStepGates = useMemo(
+    () => circuitGates.filter((gate) => gate.step < currentStepIdx),
+    [circuitGates, currentStepIdx]
   );
 
   const tabs = [
@@ -1069,7 +1074,7 @@ export function AlgorithmModuleView({
                 <div className="min-h-0 flex-1">
                   <QuantumCircuitCodePanel
                     numQubits={qubitCount}
-                    gates={circuitGates}
+                    gates={visibleStepGates}
                     title="Algorithm Code"
                     compact={false}
                     className="h-full min-h-0"

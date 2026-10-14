@@ -14,7 +14,6 @@ import {
   AlertTriangle,
   Target,
   Lightbulb,
-  Play,
   RotateCcw,
   Bot,
   HelpCircle,
@@ -187,7 +186,6 @@ export function BuildItTab({ moduleSlug, onProceedToQuiz }: BuildItTabProps) {
   const [isDraggingActive, setIsDraggingActive] = useState(false);
 
   // Evaluation states
-  const [isSubmitting, setIsSubmitting] = useState(false);
   const [hasPassed, setHasPassed] = useState(false);
   const [fidelityResult, setFidelityResult] = useState<number | null>(null);
   const [evaluationResult, setEvaluationResult] = useState<BuildItEvaluation | null>(null);
@@ -196,6 +194,7 @@ export function BuildItTab({ moduleSlug, onProceedToQuiz }: BuildItTabProps) {
   const [showHints, setShowHints] = useState(false);
   const [activeHintIdx, setActiveHintIdx] = useState(0);
   const [rightPanelMode, setRightPanelMode] = useState<'vectors' | 'code' | 'verify'>('vectors');
+  const [isVerifyEnabled, setIsVerifyEnabled] = useState(false);
 
   // Request dynamic Socratic coaching from Schrödinger AI
   const requestAiSocraticHint = async () => {
@@ -263,6 +262,8 @@ Return 3 SHORT lines (max 50 words total):
     setFidelityResult(null);
     setAiCoachingMessage(null);
     setEvaluationResult(null);
+    setRightPanelMode('vectors');
+    setIsVerifyEnabled(false);
   }, [moduleSlug]);
 
   const numQubits = challenge.numQubits;
@@ -323,7 +324,6 @@ Return 3 SHORT lines (max 50 words total):
       return;
     }
 
-    setIsSubmitting(true);
     setAiCoachingMessage(null);
 
     try {
@@ -382,19 +382,17 @@ Return 3 SHORT lines (max 50 words total):
             }),
           });
           const data = await res.json();
-          setAiCoachingMessage(data.reply || 'Check your gate sequence against the algorithm requirements.');
+          if (data.reply) {
+            setAiCoachingMessage(data.reply);
+          }
         } catch {
-          setAiCoachingMessage(
-            `• ✓ Progress: Current gates placed.\n• ➜ Quantum Concept: ${evaluation.nextActionSuggestion}\n• 💡 Socratic Clue: ${evaluation.currentClue}`
-          );
+          console.error('Failed to get AI coaching for circuit verification.');
         } finally {
           setIsLoadingAi(false);
         }
       }
     } catch (e) {
       console.error('Build It error:', e);
-    } finally {
-      setIsSubmitting(false);
     }
   };
 
@@ -440,11 +438,11 @@ Return 3 SHORT lines (max 50 words total):
       </div>
 
       {/* Cockpit Layout: Side-by-Side Unified Grid Matching Circuit Tab */}
-      <div className="grid min-h-0 flex-1 grid-cols-1 gap-3 lg:grid-cols-12 lg:grid-rows-[auto_minmax(0,1fr)] lg:items-stretch">
+      <div className="grid min-h-0 flex-1 grid-cols-1 gap-3 lg:gap-4 lg:grid-cols-12 lg:grid-rows-[auto_minmax(0,1fr)] lg:items-stretch">
         {/* Left Column (cols 1-7): Toolbox + Circuit Board + Probabilities & Statevector */}
-        <div className="lg:col-span-7 lg:row-span-2 grid min-w-0 grid-rows-[auto_minmax(0,1fr)] gap-3">
+        <div className="lg:col-span-7 lg:row-span-2 grid min-w-0 grid-rows-[auto_minmax(0,1fr)] gap-3 lg:pr-2">
           {/* Quantum Circuit Board Card */}
-          <div className="bg-white rounded-xl border border-dark-200 p-3 sm:p-4 shadow-xs space-y-2 min-h-[220px]">
+          <div className="bg-white rounded-xl border border-dark-200 p-3 sm:p-4 shadow-xs space-y-2 min-h-[320px]">
             <div className="flex flex-wrap items-center justify-between gap-1.5">
               <div className="flex items-center gap-2">
                 <Cpu className="w-3.5 h-3.5 text-primary-600" />
@@ -712,14 +710,14 @@ Return 3 SHORT lines (max 50 words total):
           </div>
 
           {/* Bottom Split Row: Measurement Probabilities + Quantum Statevector (Identical to Circuit Tab) */}
-          <div className="grid min-h-0 grid-cols-1 sm:grid-cols-2 gap-2 items-stretch">
+          <div className="grid min-h-0 grid-cols-1 sm:grid-cols-2 gap-2 items-stretch lg:h-[300px]">
             {/* Measurement Probabilities Histogram */}
             <div className="bg-white rounded-xl border border-dark-200 p-2.5 sm:p-3 shadow-xs space-y-1 flex min-h-0 flex-col h-full">
               <div className="flex items-center justify-between">
                 <h3 className="font-bold text-[11px] text-dark-900">Measurement Probabilities</h3>
                 <span className="text-[9px] text-dark-500 font-mono">1024 shots</span>
               </div>
-              <div className="relative mx-auto mt-1 flex-1 w-full max-w-[280px] aspect-square min-h-[180px] max-h-[280px]">
+              <div className="relative mx-auto mt-1 flex-1 w-full max-w-[280px] aspect-square min-h-0 max-h-[220px]">
                 <ResponsiveContainer width="100%" height="100%">
                   <BarChart data={histogramData} margin={{ top: 8, right: 10, left: -18, bottom: 0 }}>
                     <XAxis dataKey="state" tick={{ fontSize: 10 }} />
@@ -775,10 +773,10 @@ Return 3 SHORT lines (max 50 words total):
         </div>
 
         {/* Right Column (cols 8-12): Live 3D Bloch Spheres / Code + Action / AI Coaching Verification Card */}
-        <div className="lg:col-span-5 lg:row-span-2 self-stretch min-w-0 bg-white rounded-xl border border-dark-200 p-3 sm:p-4 shadow-xs space-y-3 flex flex-col">
+        <div className="lg:col-span-5 lg:row-span-2 self-stretch min-w-0 bg-white rounded-xl border border-dark-200 p-3 sm:p-4 shadow-xs space-y-3 flex flex-col lg:ml-2">
           <div className="flex items-center justify-between gap-2 px-0.5">
             <h3 className="font-bold text-sm text-dark-900">
-              {rightPanelMode === 'verify' ? 'Verify Circuit' : 'Live 3D Bloch Spheres'}
+              {rightPanelMode === 'verify' ? 'Verification' : 'Live 3D Bloch Spheres'}
             </h3>
             <div className="flex items-center bg-dark-100 p-1 rounded-xl border border-dark-200 shrink-0 shadow-2xs">
               <button
@@ -802,11 +800,18 @@ Return 3 SHORT lines (max 50 words total):
                 Code
               </button>
               <button
-                onClick={() => setRightPanelMode('verify')}
+                onClick={() => {
+                  if (isVerifyEnabled) {
+                    setRightPanelMode('verify');
+                  }
+                }}
+                disabled={!isVerifyEnabled}
                 className={`px-3 py-1 rounded-lg font-bold text-[11px] transition-all cursor-pointer ${
                   rightPanelMode === 'verify'
                     ? 'bg-primary-600 text-white shadow-sm'
-                    : 'text-dark-700 hover:bg-white hover:text-dark-900'
+                    : isVerifyEnabled
+                    ? 'text-dark-700 hover:bg-white hover:text-dark-900'
+                    : 'text-dark-400 opacity-50 cursor-not-allowed'
                 }`}
               >
                 Verify
@@ -846,28 +851,26 @@ Return 3 SHORT lines (max 50 words total):
             </div>
           ) : null}
 
+          {!isVerifyEnabled && (
+            <div className="mt-auto border-t border-dark-100 pt-2">
+              <button
+                onClick={() => {
+                  setIsVerifyEnabled(true);
+                  setRightPanelMode('verify');
+                  void handleSubmitCircuit();
+                }}
+                className="w-full flex items-center justify-center gap-1.5 px-3 py-2 rounded-lg bg-primary-600 hover:bg-primary-700 text-white font-bold text-xs shadow-xs transition-colors cursor-pointer"
+              >
+                <ShieldAlert className="w-3.5 h-3.5" />
+                <span>Verify</span>
+              </button>
+            </div>
+          )}
+
           {/* Verification and Schrödinger AI guidance */}
           {rightPanelMode === 'verify' && (
           <div className="flex min-h-0 flex-1 flex-col gap-2 border-t border-dark-100 pt-2">
-            <div className="flex items-center justify-between gap-2">
-              <button
-                onClick={() => handleSubmitCircuit()}
-                disabled={isSubmitting || gates.length === 0}
-                className="flex-1 flex items-center justify-center gap-1.5 px-3 py-2 rounded-lg bg-primary-600 hover:bg-primary-700 disabled:opacity-50 text-white font-bold text-xs shadow-xs transition-all cursor-pointer"
-              >
-                {isSubmitting ? (
-                  <>
-                    <Loader2 className="w-3.5 h-3.5 animate-spin" />
-                    <span>Verifying...</span>
-                  </>
-                ) : (
-                  <>
-                    <Play className="w-3.5 h-3.5 fill-white" />
-                    <span>Verify Circuit</span>
-                  </>
-                )}
-              </button>
-
+            <div className="flex items-center justify-end gap-2">
               <button
                 onClick={requestAiSocraticHint}
                 disabled={isLoadingAi}
@@ -966,39 +969,9 @@ Return 3 SHORT lines (max 50 words total):
                     <FormattedAIFeedback message={aiCoachingMessage} />
                   </div>
                 ) : (
-                  <div className="space-y-1 text-[11px] leading-snug">
-                    <div className="flex items-baseline gap-1.5">
-                      <span className="font-bold text-emerald-700 shrink-0">✓</span>
-                      <span className="text-emerald-950 font-medium truncate">
-                        {evaluationResult && evaluationResult.completedMilestonesCount > 0
-                          ? evaluationResult.milestones
-                              .filter((m) => m.completed)
-                              .map((m) => m.label)
-                              .join(' · ')
-                          : 'Scaffold loaded'}
-                      </span>
-                    </div>
-
-                    <div className="flex items-baseline gap-1.5">
-                      <span className="font-bold text-amber-900 shrink-0">➜</span>
-                      <span className="font-bold text-dark-900">
-                        {evaluationResult?.nextActionSuggestion || 'Synthesize next quantum transformation'}
-                      </span>
-                    </div>
-
-                    <div className="flex items-baseline gap-1.5">
-                      <span className="font-bold text-indigo-700 shrink-0">💡</span>
-                      <span className="text-indigo-950 font-medium italic">
-                        <MathRenderer
-                          text={
-                            evaluationResult?.currentClue ||
-                            challenge.hints[0] ||
-                            'Analyze which quantum unitary causes the desired state transformation.'
-                          }
-                        />
-                      </span>
-                    </div>
-                  </div>
+                  <p className="text-[11px] text-dark-500">
+                    No AI guidance was returned. Use Ask AI to request a fresh analysis.
+                  </p>
                 )}
               </div>
             )}

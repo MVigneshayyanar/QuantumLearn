@@ -10,7 +10,7 @@ import {
   ParseError
 } from '@/lib/circuit-code-parser';
 import { PlacedGate } from '@/lib/types';
-import { Code2, Copy, Check, Terminal, Play, AlertCircle, Edit3, Eye } from 'lucide-react';
+import { Copy, Check, Terminal, AlertCircle } from 'lucide-react';
 
 interface QuantumCircuitCodePanelProps {
   numQubits: number;
@@ -32,22 +32,14 @@ export function QuantumCircuitCodePanel({
   editable = true
 }: QuantumCircuitCodePanelProps) {
   const [dialect, setDialect] = useState<SupportedSyntaxDialect>('qiskit');
-  const [activeSection, setActiveSection] = useState<'live' | SupportedSyntaxDialect>('live');
+  const [activeSection, setActiveSection] = useState<SupportedSyntaxDialect>('qiskit');
   const [copied, setCopied] = useState(false);
   const [editableCode, setEditableCode] = useState<string>('');
   const [parseErrors, setParseErrors] = useState<ParseError[]>([]);
+  const [highlightedLineIndices, setHighlightedLineIndices] = useState<number[]>([]);
   const isInternalUpdateRef = useRef(false);
-
-  const isLiveSection = activeSection === 'live';
-  const activeDialect = isLiveSection ? 'qiskit' : activeSection;
-
-  useEffect(() => {
-    if (activeSection !== 'live') {
-      setDialect(activeSection);
-    } else {
-      setDialect('qiskit');
-    }
-  }, [activeSection]);
+  const previousCodeRef = useRef<string | null>(null);
+  const activeDialect = activeSection;
 
   // Sync from visual gates into editableCode whenever external gates change
   useEffect(() => {
@@ -63,16 +55,34 @@ export function QuantumCircuitCodePanel({
     } else {
       gen = generateQiskitCode(numQubits, gates);
     }
+    const previousLines = previousCodeRef.current?.split('\n') || [];
+    const previousLineCounts = new Map<string, number>();
+    previousLines.forEach((line) => {
+      previousLineCounts.set(line, (previousLineCounts.get(line) || 0) + 1);
+    });
+
+    const nextLineCounts = new Map<string, number>();
+    const newlyAddedLines: number[] = [];
+    gen.split('\n').forEach((line, lineIndex) => {
+      const nextCount = (nextLineCounts.get(line) || 0) + 1;
+      nextLineCounts.set(line, nextCount);
+      if (nextCount > (previousLineCounts.get(line) || 0) && line.trim()) {
+        newlyAddedLines.push(lineIndex);
+      }
+    });
+
     setEditableCode(gen);
+    setHighlightedLineIndices(previousCodeRef.current === null ? [] : newlyAddedLines);
+    previousCodeRef.current = gen;
     setParseErrors([]);
   }, [numQubits, gates, activeDialect]);
 
-  // Handle live user editing
+  // Handle Qiskit user editing
   const handleCodeChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
     const newCode = e.target.value;
     setEditableCode(newCode);
 
-    if (activeSection === 'live' && dialect === 'qiskit' && onCircuitCodeChange) {
+    if (activeSection === 'qiskit' && dialect === 'qiskit' && onCircuitCodeChange) {
       const parsed = parseQiskitCode(newCode, numQubits);
       if (parsed.success && parsed.errors.length === 0) {
         setParseErrors([]);
@@ -97,18 +107,12 @@ export function QuantumCircuitCodePanel({
         <div className="flex items-center gap-1.5 min-w-0">
           <Terminal className="w-3.5 h-3.5 text-primary-400 shrink-0" />
           <span className="font-bold text-[11px] text-gray-200 truncate">{title}</span>
-          {editable && activeSection === 'live' && (
-            <span className="px-1.5 py-0.2 rounded text-[9px] font-bold bg-emerald-950 text-emerald-400 border border-emerald-800/60 hidden sm:inline-flex items-center gap-1">
-              <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
-              Live 2-Way Sync
-            </span>
-          )}
         </div>
 
         <div className="flex items-center gap-1 shrink-0">
           {/* Section Switcher */}
           <div className="flex items-center bg-[#090D16] rounded-lg p-0.5 border border-gray-800">
-            {(['live', 'qiskit', 'cirq', 'pennylane'] as const).map((section) => (
+            {(['qiskit', 'cirq', 'pennylane'] as const).map((section) => (
               <button
                 key={section}
                 onClick={() => setActiveSection(section)}
@@ -118,7 +122,7 @@ export function QuantumCircuitCodePanel({
                     : 'text-gray-400 hover:text-gray-200'
                 }`}
               >
-                {section === 'live' ? 'Live' : section === 'qiskit' ? 'Qiskit' : section === 'cirq' ? 'Cirq' : 'PennyLane'}
+                {section === 'qiskit' ? 'Qiskit' : section === 'cirq' ? 'Cirq' : 'PennyLane'}
               </button>
             ))}
           </div>
@@ -144,9 +148,9 @@ export function QuantumCircuitCodePanel({
         </div>
       </div>
 
-      {/* Code Editor Body: editable in Live mode, read-only in code tabs */}
+      {/* Code Editor Body: Qiskit is editable; other dialects are generated previews */}
       <div className={`relative flex-1 bg-[#090D16] text-white font-mono text-[11px] leading-relaxed ${compact ? 'min-h-[140px] max-h-[220px]' : 'min-h-[240px]'}`}>
-        {editable && isLiveSection ? (
+        {editable && activeSection === 'qiskit' ? (
           <textarea
             value={editableCode}
             onChange={handleCodeChange}
@@ -159,7 +163,18 @@ export function QuantumCircuitCodePanel({
         ) : (
           <div className="p-3 overflow-x-auto overflow-y-auto h-full !bg-[#090D16]">
             <pre className="whitespace-pre !text-emerald-300 font-mono text-[11px] leading-relaxed !bg-transparent">
-              {editableCode}
+              {editableCode.split('\n').map((line, lineIndex) => (
+                <span
+                  key={`${lineIndex}-${line}`}
+                  className={`block rounded-sm transition-colors ${
+                    highlightedLineIndices.includes(lineIndex)
+                      ? 'code-line-added animate-codeLineAdded bg-amber-400/20 text-amber-200'
+                      : ''
+                  }`}
+                >
+                  {line || '\u00a0'}
+                </span>
+              ))}
             </pre>
           </div>
         )}
@@ -178,7 +193,7 @@ export function QuantumCircuitCodePanel({
       {/* Footer Info */}
       <div className="bg-[#111827] border-t border-gray-800 px-3 py-1.5 flex items-center justify-between text-[10px] text-gray-400 shrink-0 font-sans">
         <span>
-          {editable && isLiveSection
+          {editable && activeSection === 'qiskit'
             ? 'Type Qiskit Python code above to update gates on wires automatically'
             : ''}
         </span>
