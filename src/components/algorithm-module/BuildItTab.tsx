@@ -195,7 +195,7 @@ export function BuildItTab({ moduleSlug, onProceedToQuiz }: BuildItTabProps) {
   const [isLoadingAi, setIsLoadingAi] = useState(false);
   const [showHints, setShowHints] = useState(false);
   const [activeHintIdx, setActiveHintIdx] = useState(0);
-  const [rightPanelMode, setRightPanelMode] = useState<'vectors' | 'code'>('vectors');
+  const [rightPanelMode, setRightPanelMode] = useState<'vectors' | 'code' | 'verify'>('vectors');
 
   // Request dynamic Socratic coaching from Schrödinger AI
   const requestAiSocraticHint = async () => {
@@ -486,7 +486,7 @@ Return 3 SHORT lines (max 50 words total):
                 )}
               </div>
 
-              <div className="flex flex-wrap items-center gap-1">
+              <div className="flex items-center gap-1 overflow-x-auto pb-0.5">
                 {AVAILABLE_GATE_LIST.map((gate) => {
                   const isSelected = selectedGateType === gate.type;
                   return (
@@ -505,7 +505,7 @@ Return 3 SHORT lines (max 50 words total):
                         setDragOverSlot(null);
                       }}
                       onClick={() => setSelectedGateType(gate.type)}
-                      className={`flex items-center gap-1 px-2 py-1 rounded-lg border text-[11px] font-semibold cursor-grab active:cursor-grabbing transition-all select-none ${
+                      className={`flex shrink-0 items-center gap-1 px-2 py-1 rounded-lg border text-[11px] font-semibold cursor-grab active:cursor-grabbing transition-all select-none ${
                         isSelected
                           ? 'border-primary-600 ring-2 ring-primary-500/20 bg-primary-50 text-primary-900 shadow-2xs'
                           : 'border-dark-200 hover:border-dark-300 bg-white text-dark-800 hover:bg-dark-50'
@@ -777,7 +777,9 @@ Return 3 SHORT lines (max 50 words total):
         {/* Right Column (cols 8-12): Live 3D Bloch Spheres / Code + Action / AI Coaching Verification Card */}
         <div className="lg:col-span-5 lg:row-span-2 self-stretch min-w-0 bg-white rounded-xl border border-dark-200 p-3 sm:p-4 shadow-xs space-y-3 flex flex-col">
           <div className="flex items-center justify-between gap-2 px-0.5">
-            <h3 className="font-bold text-sm text-dark-900">Live 3D Bloch Spheres</h3>
+            <h3 className="font-bold text-sm text-dark-900">
+              {rightPanelMode === 'verify' ? 'Verify Circuit' : 'Live 3D Bloch Spheres'}
+            </h3>
             <div className="flex items-center bg-dark-100 p-1 rounded-xl border border-dark-200 shrink-0 shadow-2xs">
               <button
                 onClick={() => setRightPanelMode('vectors')}
@@ -798,6 +800,16 @@ Return 3 SHORT lines (max 50 words total):
                 }`}
               >
                 Code
+              </button>
+              <button
+                onClick={() => setRightPanelMode('verify')}
+                className={`px-3 py-1 rounded-lg font-bold text-[11px] transition-all cursor-pointer ${
+                  rightPanelMode === 'verify'
+                    ? 'bg-primary-600 text-white shadow-sm'
+                    : 'text-dark-700 hover:bg-white hover:text-dark-900'
+                }`}
+              >
+                Verify
               </button>
             </div>
           </div>
@@ -820,7 +832,7 @@ Return 3 SHORT lines (max 50 words total):
                 ))}
               </div>
             </div>
-          ) : (
+          ) : rightPanelMode === 'code' ? (
             <div className="min-h-0 flex-1">
               <QuantumCircuitCodePanel
                 numQubits={numQubits}
@@ -832,10 +844,11 @@ Return 3 SHORT lines (max 50 words total):
                 onCircuitCodeChange={(newNum, newGates) => setGates(newGates)}
               />
             </div>
-          )}
+          ) : null}
 
-          {/* Action Verification & Schrödinger AI Guidance Bar */}
-          <div className="pt-2 border-t border-dark-100 space-y-2">
+          {/* Verification and Schrödinger AI guidance */}
+          {rightPanelMode === 'verify' && (
+          <div className="flex min-h-0 flex-1 flex-col gap-2 border-t border-dark-100 pt-2">
             <div className="flex items-center justify-between gap-2">
               <button
                 onClick={() => handleSubmitCircuit()}
@@ -918,7 +931,7 @@ Return 3 SHORT lines (max 50 words total):
 
             {/* Socratic Feedback Coaching (Dynamic Schrödinger AI Response) */}
             {!hasPassed && (
-              <div className="p-2.5 rounded-xl bg-gradient-to-br from-amber-50/90 via-white to-orange-50/40 border border-amber-200/90 space-y-2 text-xs shadow-2xs animate-fadeIn max-h-[220px] overflow-y-auto">
+              <div className="min-h-0 flex-1 overflow-y-auto p-2.5 rounded-xl bg-gradient-to-br from-amber-50/90 via-white to-orange-50/40 border border-amber-200/90 space-y-2 text-xs shadow-2xs animate-fadeIn">
                 <div className="flex items-center justify-between border-b border-amber-200/70 pb-1">
                   <div className="flex items-center gap-1.5">
                     <div className="w-4 h-4 rounded-md bg-amber-500 text-white flex items-center justify-center shadow-2xs">
@@ -990,6 +1003,7 @@ Return 3 SHORT lines (max 50 words total):
               </div>
             )}
           </div>
+          )}
         </div>
       </div>
     </div>
