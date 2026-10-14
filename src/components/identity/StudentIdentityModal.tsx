@@ -216,17 +216,7 @@ export function StudentIdentityModal() {
               <span className="text-[11px] font-semibold text-dark-500 dark:text-dark-400 block text-center">
                 Quick Sign-In Accounts:
               </span>
-              <div className="grid grid-cols-3 gap-1.5">
-                <button
-                  type="button"
-                  onClick={() => {
-                    setEmail('admin@quanbit.com');
-                    setPassword('admin123');
-                  }}
-                  className="py-1.5 px-2 rounded-xl bg-purple-50 dark:bg-purple-950/60 hover:bg-purple-100 dark:hover:bg-purple-900/60 text-purple-700 dark:text-purple-300 font-semibold text-[11px] border border-purple-200 dark:border-purple-800/60 transition-colors text-center cursor-pointer"
-                >
-                  Admin Demo
-                </button>
+              <div className="grid grid-cols-2 gap-2">
                 <button
                   type="button"
                   onClick={() => {
