@@ -45,100 +45,6 @@ const DIFF_COLORS = {
   Hard:   { bg: 'bg-purple-50',    border: 'border-purple-200',  text: 'text-purple-800',    badge: 'bg-purple-100 text-purple-800 border-purple-300' },
 } as const;
 
-function CertificateCard({
-  moduleSlug,
-  moduleTitle,
-  isPremium,
-  isAllSolved = false,
-  onUpgrade,
-  onOpenCertificate,
-}: {
-  moduleSlug: string;
-  moduleTitle: string;
-  isPremium: boolean;
-  isAllSolved?: boolean;
-  onUpgrade: () => void;
-  onOpenCertificate: () => void;
-}) {
-  const date = new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
-  const isUnlocked = isPremium || isAllSolved;
-
-  if (!isUnlocked) {
-    return (
-      <div className="relative rounded-3xl border-2 border-dashed border-amber-300 dark:border-amber-700/60 bg-gradient-to-br from-amber-50 via-white to-orange-50/40 dark:from-dark-900 dark:via-dark-850 dark:to-dark-900 p-6 sm:p-8 text-center space-y-4 overflow-hidden">
-        {/* Blurred certificate preview */}
-        <div className="absolute inset-0 flex items-center justify-center pointer-events-none opacity-10">
-          <Medal className="w-48 h-48 text-amber-500" />
-        </div>
-        <div className="relative z-10 space-y-3">
-          <div className="w-14 h-14 rounded-2xl bg-amber-500 text-white flex items-center justify-center mx-auto shadow-md shadow-amber-500/30">
-            <Award className="w-7 h-7" />
-          </div>
-          <div className="space-y-1">
-            <h4 className="text-base font-black text-dark-900 dark:text-dark-100">Certificate In Progress</h4>
-            <p className="text-xs text-dark-600 dark:text-dark-400 max-w-sm mx-auto leading-relaxed">
-              Complete the assessment questions to claim and download your verified{' '}
-              <em>{moduleTitle}</em> Quantum Algorithm Certificate.
-            </p>
-          </div>
-          <div className="flex flex-wrap items-center justify-center gap-2.5">
-            <button
-              onClick={onOpenCertificate}
-              className="inline-flex items-center gap-2 px-5 py-2.5 rounded-2xl bg-gradient-to-r from-amber-500 via-amber-600 to-amber-700 hover:brightness-110 text-white font-bold text-xs shadow-md shadow-amber-500/25 transition-all cursor-pointer"
-            >
-              <Award className="w-4 h-4 text-white" />
-              <span>Preview Certificate</span>
-            </button>
-          </div>
-        </div>
-      </div>
-    );
-  }
-
-  return (
-    <div className="relative rounded-3xl border-2 border-amber-300 dark:border-amber-700/60 bg-gradient-to-br from-amber-50 via-white to-yellow-50/60 dark:from-dark-900 dark:via-dark-850 dark:to-dark-900 p-6 sm:p-8 text-center space-y-4 overflow-hidden shadow-md shadow-amber-100 dark:shadow-none">
-      {/* Decorative glow */}
-      <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,_rgba(251,191,36,0.15)_0%,_transparent_70%)] pointer-events-none" />
-
-      <div className="relative z-10 space-y-4">
-        <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-amber-400 to-amber-600 text-white flex items-center justify-center mx-auto shadow-lg shadow-amber-400/40">
-          <Award className="w-8 h-8 text-white" />
-        </div>
-
-        <div className="space-y-1">
-          <p className="text-[10px] font-bold uppercase tracking-widest text-amber-700">Official Quantum Credential · Claimed</p>
-          <h3 className="text-xl font-black text-dark-900">QuanBit Quantum Algorithm Mastery</h3>
-          <p className="text-sm font-semibold text-dark-700">{moduleTitle}</p>
-        </div>
-
-        <div className="border-t border-b border-amber-200 py-3 space-y-0.5">
-          <p className="text-xs text-dark-600">
-            This certifies completion of all 6 stages including the Assessment Track.
-          </p>
-          <p className="text-[11px] text-amber-700 font-semibold">{date}</p>
-        </div>
-
-        <div className="flex flex-wrap items-center justify-center gap-3">
-          <button
-            onClick={onOpenCertificate}
-            className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-gradient-to-r from-amber-500 to-amber-600 hover:brightness-110 text-white font-bold text-xs shadow-md shadow-amber-500/25 transition-all cursor-pointer"
-          >
-            <Award className="w-4 h-4 text-white" />
-            <span>View &amp; Print Certificate</span>
-          </button>
-          <button
-            onClick={onOpenCertificate}
-            className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl border border-amber-300 text-amber-800 hover:bg-amber-50 font-semibold text-xs transition-colors cursor-pointer"
-          >
-            <Download className="w-4 h-4" />
-            <span>Download Certificate PDF</span>
-          </button>
-        </div>
-      </div>
-    </div>
-  );
-}
-
 export function SkillBaseStage({ moduleSlug, moduleTitle = 'Quantum Algorithm' }: SkillBaseStageProps) {
   const router = useRouter();
   const { markModuleComplete } = useProgressStore();
@@ -156,7 +62,6 @@ export function SkillBaseStage({ moduleSlug, moduleTitle = 'Quantum Algorithm' }
   const [solvedIds, setSolvedIds] = useState<Set<string>>(new Set());
   const [attemptedIds, setAttemptedIds] = useState<Set<string>>(new Set());
   const [isAllSolved, setIsAllSolved] = useState(false);
-  const [completionReported, setCompletionReported] = useState(false);
 
   const checkSolved = () => {
     try {
@@ -181,20 +86,6 @@ export function SkillBaseStage({ moduleSlug, moduleTitle = 'Quantum Algorithm' }
     return () => clearInterval(interval);
   }, [problems]);
 
-  // Award 100% mastery when all solved
-  useEffect(() => {
-    if (isAllSolved && !completionReported) {
-      setCompletionReported(true);
-      markModuleComplete(moduleSlug, 100);
-      if (userId) {
-        apiReportProgress(userId, moduleSlug, 'completed', { score: 100, stageReached: 6 });
-      }
-      try {
-        confetti({ particleCount: 160, spread: 90, origin: { y: 0.5 }, colors: ['#F59E0B', '#10B981', '#6366F1', '#EC4899'] });
-      } catch {}
-    }
-  }, [isAllSolved, completionReported]);
-
   const solvedCount = problems.filter((p) => solvedIds.has(p.id)).length;
   const progressPct = problems.length > 0 ? Math.round((solvedCount / problems.length) * 100) : 0;
 
@@ -211,8 +102,8 @@ export function SkillBaseStage({ moduleSlug, moduleTitle = 'Quantum Algorithm' }
 
   return (
     <div className="space-y-3 text-xs">
-      {/* ── Header ─────────────────────────────────────────────────────────── */}
-      <div className="bg-gradient-to-br from-indigo-50/80 via-white to-primary-50/60 rounded-xl border border-primary-200/60 px-4 py-2.5 space-y-2 shadow-xs">
+      {/* â”€â”€ Header â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */}
+      <div className="bg-white rounded-xl border border-dark-200 px-4 py-2.5 space-y-2 shadow-xs">
         <div className="flex flex-wrap items-center justify-between gap-2">
           <div className="flex items-center gap-2">
             <div className="w-7 h-7 rounded-lg bg-primary-600 text-white flex items-center justify-center shadow-xs">
@@ -246,33 +137,38 @@ export function SkillBaseStage({ moduleSlug, moduleTitle = 'Quantum Algorithm' }
           <div className="w-full h-3 bg-dark-100 rounded-full overflow-hidden">
             <div
               className={`h-full rounded-full transition-all duration-700 ${
-                isAllSolved ? 'bg-emerald-500' : 'bg-gradient-to-r from-primary-500 to-indigo-500'
+                isAllSolved ? 'bg-emerald-500' : 'bg-primary-600'
               }`}
               style={{ width: `${progressPct}%` }}
             />
           </div>
-          {isAllSolved && (
-            <p className="text-[11px] text-emerald-700 font-bold flex items-center gap-1">
-              <CheckCircle2 className="w-3.5 h-3.5" /> All problems solved! 100% Module Mastery achieved.
-            </p>
-          )}
         </div>
       </div>
 
-      {/* ── 100% Completion Banner ──────────────────────────────────────────── */}
+      {/* â”€â”€ 100% Completion Banner â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */}
       {isAllSolved && (
-        <div className="p-4 rounded-2xl border border-emerald-300 bg-gradient-to-r from-emerald-50 to-teal-50/50 flex items-center gap-3 animate-fadeIn shadow-xs">
-          <div className="w-10 h-10 rounded-xl bg-emerald-500 text-white flex items-center justify-center shrink-0 shadow-xs">
-            <Trophy className="w-5 h-5" />
+        <div className="p-3 rounded-2xl border border-amber-300 bg-amber-50 flex items-center gap-3 animate-fadeIn">
+          <div className="w-9 h-9 rounded-xl bg-amber-500 text-white flex items-center justify-center shrink-0">
+            <Trophy className="w-4 h-4" />
           </div>
-          <div>
-            <h4 className="text-xs font-black text-emerald-900">🎉 100% Algorithm Mastery Achieved!</h4>
-            <p className="text-[11px] text-emerald-700">All 6 stages complete. You've mastered the {moduleTitle} algorithm!</p>
-          </div>
+          <p className="flex-1 text-xs font-bold text-amber-900">You've solved all problems — claim your certificate.</p>
+          <button
+            type="button"
+            onClick={() => {
+              markModuleComplete(moduleSlug, 100);
+              if (userId) {
+                apiReportProgress(userId, moduleSlug, 'completed', { score: 100, stageReached: 6 });
+              }
+              setShowCertModal(true);
+            }}
+            className="px-4 py-2 rounded-xl bg-amber-500 hover:bg-amber-600 text-white text-xs font-bold cursor-pointer"
+          >
+            Claim Certificate
+          </button>
         </div>
       )}
 
-      {/* ── Problem List Table ──────────────────────────────────────────────── */}
+      {/* â”€â”€ Problem List Table â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */}
       <div className="bg-white rounded-2xl border border-dark-200 shadow-xs overflow-hidden">
         <div className="overflow-x-auto">
           <table className="w-full text-xs text-left">
@@ -415,66 +311,6 @@ export function SkillBaseStage({ moduleSlug, moduleTitle = 'Quantum Algorithm' }
           </table>
         </div>
       </div>
-      {/* ── Certificate Section ─────────────────────────────────────────────── */}
-      <div className="space-y-3 pt-2">
-        <div className="flex items-center justify-between">
-          <h3 className="text-xs font-black text-dark-900 uppercase tracking-wide flex items-center gap-2">
-            <Medal className="w-4 h-4 text-amber-500" />
-            {moduleSlug.includes('grover') ? "Grover's Algorithm Certificate" : 'Algorithm Certificate'}
-          </h3>
-          <button
-            onClick={() => setShowCertModal(true)}
-            className="text-xs font-bold text-amber-700 hover:text-amber-900 flex items-center gap-1 cursor-pointer"
-          >
-            <Award className="w-3.5 h-3.5 text-amber-600" />
-            <span>{isAllSolved ? 'View Certificate' : 'Certificate Status'}</span>
-          </button>
-        </div>
-        <CertificateCard
-          moduleSlug={moduleSlug}
-          moduleTitle={moduleTitle}
-          isPremium={isPremium}
-          isAllSolved={isAllSolved}
-          onUpgrade={openSubscriptionModal}
-          onOpenCertificate={() => setShowCertModal(true)}
-        />
-      </div>
-
-      {/* ── Pro upsell (if not solved yet and not premium) ─────────────────── */}
-      {!isAllSolved && !isPremium && (
-        <div className="p-4 rounded-2xl border border-amber-200 dark:border-amber-700/60 bg-gradient-to-r from-amber-50/80 to-orange-50/40 dark:from-dark-900 dark:to-dark-850 flex flex-col sm:flex-row items-center justify-between gap-3">
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-xl bg-amber-500 text-white flex items-center justify-center shrink-0 shadow-xs">
-              <Crown className="w-5 h-5" />
-            </div>
-            <div className="text-left">
-              <h4 className="text-xs font-black text-amber-950 dark:text-amber-200">Earn your Certificate with QuanBit Pro</h4>
-              <p className="text-[11px] text-amber-800 dark:text-amber-300">
-                Complete all 10 practice problems and unlock a downloadable Algorithm Certificate.
-              </p>
-            </div>
-          </div>
-          <button
-            onClick={openSubscriptionModal}
-            className="px-4 py-2.5 rounded-xl bg-amber-600 hover:bg-amber-700 text-white font-bold text-xs shadow-xs shrink-0 transition-all flex items-center gap-1.5 cursor-pointer"
-          >
-            <Zap className="w-3.5 h-3.5 fill-white" />
-            <span>Upgrade to Pro</span>
-          </button>
-        </div>
-      )}
-
-      {/* ── How it works info box ────────────────────────────────────────────── */}
-      <div className="p-4 rounded-2xl bg-dark-50 border border-dark-200 text-xs text-dark-600 space-y-2">
-        <p className="font-bold text-dark-800">How Assessment works:</p>
-        <ul className="space-y-1 list-disc list-inside leading-relaxed">
-          <li>Click any problem card to open the <strong>interactive circuit judge</strong> on the Practice page.</li>
-          <li>Build the quantum circuit, submit it, and get instant accept/wrong-answer feedback.</li>
-          <li>Solved problems are automatically tracked here — no need to refresh manually.</li>
-          <li>Solve all 10 to unlock <strong>100% Algorithm Mastery</strong> and your Certificate.</li>
-        </ul>
-      </div>
-
       {/* Quantum Algorithm Certificate Modal */}
       <QuantumCertificateModal
         isOpen={showCertModal}

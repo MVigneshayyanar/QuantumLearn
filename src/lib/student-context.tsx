@@ -271,44 +271,47 @@ export function StudentProvider({ children }: { children: React.ReactNode }) {
   }, []);
 
   const logout = useCallback(() => {
-    // 1. Clear credentials
-    localStorage.removeItem(LS_STUDENT_ID);
-    localStorage.removeItem(LS_STUDENT_NAME);
-    localStorage.removeItem(LS_STUDENT_EMAIL);
-    localStorage.removeItem(LS_STUDENT_ROLE);
-    localStorage.removeItem(LS_STUDENT_PREMIUM);
-    setIsPremium(false);
-
-    // Clear cookies
-    if (typeof document !== 'undefined') {
-      document.cookie = 'ql_user_id=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT;';
-      document.cookie = 'ql_user_role=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT;';
-    }
-
-    // 2. Clear practice problem progress & history caches
-    localStorage.removeItem('ql_practice_solved');
-    localStorage.removeItem('ql_practice_attempted');
+    // 1. Clear credentials & local preferences
     try {
-      const keysToRemove: string[] = [];
-      for (let i = 0; i < localStorage.length; i++) {
-        const key = localStorage.key(i);
-        if (
-          key &&
-          (key.startsWith('ql_practice_history_') ||
-            key.startsWith('ql_code_') ||
-            key.startsWith('ql_quiz_result_'))
-        ) {
-          keysToRemove.push(key);
-        }
-      }
-      keysToRemove.forEach((k) => localStorage.removeItem(k));
+      localStorage.clear();
     } catch {}
 
-    // 3. Clear Zustand stores
-    useAITutorStore.getState().resetChat();
-    useCircuitStore.getState().clearCircuit();
+    try {
+      sessionStorage.clear();
+    } catch {}
 
-    // 4. Reset React context state and synchronous refs
+    setIsPremium(false);
+
+    // 2. Clear all cookies
+    if (typeof document !== 'undefined') {
+      const cookies = document.cookie.split(';');
+      for (let i = 0; i < cookies.length; i++) {
+        const cookie = cookies[i];
+        const eqPos = cookie.indexOf('=');
+        const name = eqPos > -1 ? cookie.substr(0, eqPos).trim() : cookie.trim();
+        document.cookie = `${name}=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT;`;
+        document.cookie = `${name}=; path=/; domain=${window.location.hostname}; expires=Thu, 01 Jan 1970 00:00:00 GMT;`;
+      }
+    }
+
+    // 3. Clear Browser CacheStorage API (Service Worker & HTTP Caches)
+    if (typeof window !== 'undefined' && 'caches' in window) {
+      try {
+        caches.keys().then((names) => {
+          names.forEach((name) => {
+            caches.delete(name);
+          });
+        });
+      } catch {}
+    }
+
+    // 4. Clear Zustand stores
+    try {
+      useAITutorStore.getState().resetChat();
+      useCircuitStore.getState().clearCircuit();
+    } catch {}
+
+    // 5. Reset React context state and synchronous refs
     userIdRef.current = null;
     pendingActionRef.current = null;
     setUserId(null);
@@ -316,7 +319,7 @@ export function StudentProvider({ children }: { children: React.ReactNode }) {
     setStudentEmail(null);
     setRole(null);
 
-    // 5. If on protected route, redirect to home
+    // 6. Hard reload or redirect to cleanly refresh all client memory
     if (typeof window !== 'undefined') {
       const currentPath = window.location.pathname;
       if (
@@ -325,6 +328,8 @@ export function StudentProvider({ children }: { children: React.ReactNode }) {
         currentPath.startsWith('/admin')
       ) {
         window.location.href = '/';
+      } else {
+        window.location.reload();
       }
     }
   }, []);

@@ -112,92 +112,6 @@ function CertificateVerificationContent() {
   return (
     <div className="min-h-screen bg-gradient-to-b from-dark-50 via-white to-dark-100 py-10 px-4 sm:px-6 lg:px-8">
       <div className="max-w-4xl mx-auto space-y-8">
-        {/* Navigation / Back link */}
-        <div className="flex items-center justify-between">
-          <Link
-            href={`/learn/${algoInfo.slug}`}
-            className="inline-flex items-center gap-2 text-xs font-bold text-dark-600 hover:text-primary-600 transition-colors"
-          >
-            <ArrowLeft className="w-4 h-4" />
-            <span>Return to {algoInfo.title}</span>
-          </Link>
-
-          <span className="text-xs font-mono text-dark-400">
-            QuanBit Public Credential Registry
-          </span>
-        </div>
-
-        {/* Verification Status Header */}
-        <div className="bg-white rounded-3xl border border-emerald-200/80 p-6 sm:p-8 shadow-sm relative overflow-hidden">
-          <div className="absolute top-0 right-0 w-64 h-64 bg-emerald-500/5 rounded-full blur-3xl pointer-events-none" />
-
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-6 relative z-10">
-            <div className="flex items-start sm:items-center gap-4">
-              <div className="w-14 h-14 rounded-2xl bg-emerald-500 text-white flex items-center justify-center shrink-0 shadow-lg shadow-emerald-500/25">
-                <ShieldCheck className="w-8 h-8" />
-              </div>
-              <div className="space-y-1">
-                <div className="flex items-center gap-2">
-                  <span className="px-2 py-0.5 rounded-md text-[11px] font-bold uppercase tracking-wider bg-emerald-100 text-emerald-800 border border-emerald-200 flex items-center gap-1">
-                    <CheckCircle2 className="w-3 h-3" />
-                    Verified Authentic
-                  </span>
-                  <span className="px-2 py-0.5 rounded-md text-[11px] font-mono text-dark-500 bg-dark-100 border border-dark-200">
-                    SHA-256 Validated
-                  </span>
-                </div>
-                <h1 className="text-xl sm:text-2xl font-black text-dark-900 tracking-tight">
-                  Official QuanBit Quantum Credential
-                </h1>
-                <p className="text-xs text-dark-600">
-                  This cryptographic credential has been issued by QuanBit Quantum Institute &amp; Schrödinger AI Lab.
-                </p>
-              </div>
-            </div>
-
-            <div className="flex items-center gap-2 shrink-0">
-              <button
-                onClick={handleCopy}
-                className="flex items-center gap-1.5 px-3.5 py-2 rounded-xl border border-dark-200 hover:bg-dark-50 text-dark-800 text-xs font-semibold transition-colors cursor-pointer"
-              >
-                {copied ? <Check className="w-3.5 h-3.5 text-emerald-600" /> : <Copy className="w-3.5 h-3.5" />}
-                <span>{copied ? 'Link Copied!' : 'Copy Link'}</span>
-              </button>
-              <button
-                onClick={handlePrint}
-                className="flex items-center gap-1.5 px-4 py-2 rounded-xl bg-primary-600 hover:bg-primary-700 text-white text-xs font-bold shadow-xs transition-all cursor-pointer"
-              >
-                <Printer className="w-3.5 h-3.5" />
-                <span>Print / PDF</span>
-              </button>
-            </div>
-          </div>
-
-          {/* Credential Metadata Grid */}
-          <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mt-6 pt-6 border-t border-dark-100 text-xs">
-            <div>
-              <span className="text-[10px] font-bold uppercase text-dark-400 block">Recipient</span>
-              <span className="font-bold text-dark-900 text-sm">{studentName}</span>
-            </div>
-            <div>
-              <span className="text-[10px] font-bold uppercase text-dark-400 block">Curriculum</span>
-              <span className="font-bold text-primary-700 text-sm truncate block" title={algoInfo.title}>
-                {algoInfo.title}
-              </span>
-            </div>
-            <div>
-              <span className="text-[10px] font-bold uppercase text-dark-400 block">Issue Date</span>
-              <span className="font-semibold text-dark-800 text-sm">{issueDate}</span>
-            </div>
-            <div>
-              <span className="text-[10px] font-bold uppercase text-dark-400 block">Credential ID</span>
-              <span className="font-mono font-bold text-dark-900 text-xs truncate block" title={decodedId}>
-                {decodedId}
-              </span>
-            </div>
-          </div>
-        </div>
-
         {/* Certificate Display Card */}
         <div className="flex justify-center">
           <div
@@ -306,29 +220,6 @@ function CertificateVerificationContent() {
               <span>ISSUED BY QUANBIT PLATFORM</span>
             </div>
           </div>
-        </div>
-
-        {/* Footer Actions & Info */}
-        <div className="bg-white rounded-2xl border border-dark-200 p-5 flex flex-col sm:flex-row items-center justify-between gap-4">
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-xl bg-primary-50 text-primary-600 flex items-center justify-center shrink-0">
-              <BookOpen className="w-5 h-5" />
-            </div>
-            <div>
-              <h4 className="text-xs font-bold text-dark-900">Explore this Algorithm Curriculum</h4>
-              <p className="text-[11px] text-dark-500">
-                Interactive Bloch spheres, Dirac math derivations, circuit builder, and Socratic quizzes.
-              </p>
-            </div>
-          </div>
-
-          <Link
-            href={`/learn/${algoInfo.slug}`}
-            className="flex items-center gap-1.5 px-4 py-2 rounded-xl bg-dark-900 hover:bg-dark-800 text-white font-bold text-xs shadow-xs transition-colors shrink-0"
-          >
-            <span>Launch Interactive Module</span>
-            <ExternalLink className="w-3.5 h-3.5" />
-          </Link>
         </div>
       </div>
     </div>

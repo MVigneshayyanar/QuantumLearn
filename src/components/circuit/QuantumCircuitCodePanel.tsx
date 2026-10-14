@@ -149,34 +149,36 @@ export function QuantumCircuitCodePanel({
       </div>
 
       {/* Code Editor Body: Qiskit is editable; other dialects are generated previews */}
-      <div className={`relative flex-1 bg-[#090D16] text-white font-mono text-[11px] leading-relaxed ${compact ? 'min-h-[140px] max-h-[220px]' : 'min-h-[240px]'}`}>
-        {editable && activeSection === 'qiskit' ? (
+      <div className={`relative flex-1 min-h-0 bg-[#090D16] text-white font-mono text-[11px] leading-relaxed overflow-hidden ${compact ? 'min-h-[140px]' : 'min-h-[240px]'}`}>
+        {/* Synchronized Line-Highlighted View for Qiskit, Cirq, and PennyLane */}
+        <div className="absolute inset-0 p-3 overflow-x-auto overflow-y-auto">
+          <pre className="whitespace-pre !text-emerald-300 font-mono text-[11px] leading-relaxed !bg-transparent">
+            {editableCode.split('\n').map((line, lineIndex) => (
+              <span
+                key={`${lineIndex}-${line}`}
+                className={`block rounded-sm transition-colors ${
+                  highlightedLineIndices.includes(lineIndex)
+                    ? 'code-line-added animate-codeLineAdded bg-amber-400/20 text-amber-200'
+                    : ''
+                }`}
+              >
+                {line || '\u00a0'}
+              </span>
+            ))}
+          </pre>
+        </div>
+
+        {/* Editable transparent overlay for Qiskit so user can type freely with synchronized highlights visible underneath */}
+        {editable && activeSection === 'qiskit' && (
           <textarea
             value={editableCode}
             onChange={handleCodeChange}
             spellCheck={false}
             autoCapitalize="off"
             autoCorrect="off"
-            className="w-full h-full p-3 !bg-[#090D16] !text-emerald-300 font-mono text-[11px] leading-relaxed resize-none focus:outline-none focus:ring-1 focus:ring-primary-500/50 selection:bg-primary-900/60"
+            className="absolute inset-0 z-10 w-full h-full p-3 bg-transparent text-transparent caret-emerald-400 font-mono text-[11px] leading-relaxed resize-none focus:outline-none focus:ring-1 focus:ring-primary-500/50 selection:bg-primary-900/60 overflow-x-auto overflow-y-auto"
             placeholder="# Write Qiskit code here, e.g. qc.h(0)"
           />
-        ) : (
-          <div className="p-3 overflow-x-auto overflow-y-auto h-full !bg-[#090D16]">
-            <pre className="whitespace-pre !text-emerald-300 font-mono text-[11px] leading-relaxed !bg-transparent">
-              {editableCode.split('\n').map((line, lineIndex) => (
-                <span
-                  key={`${lineIndex}-${line}`}
-                  className={`block rounded-sm transition-colors ${
-                    highlightedLineIndices.includes(lineIndex)
-                      ? 'code-line-added animate-codeLineAdded bg-amber-400/20 text-amber-200'
-                      : ''
-                  }`}
-                >
-                  {line || '\u00a0'}
-                </span>
-              ))}
-            </pre>
-          </div>
         )}
       </div>
 

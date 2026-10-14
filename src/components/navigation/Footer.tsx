@@ -12,8 +12,8 @@ export function Footer() {
   const { language } = useAccessibility();
   const t = translations[language];
 
-  // Hide footer on practice arena & coding workbench
-  if (pathname.startsWith('/practice')) {
+  // Hide footer on practice arena, coding workbench & algorithm module pages
+  if (pathname.startsWith('/practice') || pathname.startsWith('/learn')) {
     return null;
   }
 
@@ -32,8 +32,20 @@ export function Footer() {
             <p className="text-dark-500 dark:text-dark-400 leading-relaxed">
               Free interactive quantum computing education platform with multi-backend simulation (Qiskit, Cirq, PennyLane), real-time 3D Bloch sphere visualization, and Schrödinger AI tutoring.
             </p>
-            <address className="not-italic text-dark-400 text-[11px] space-y-0.5">
+            <address className="not-italic text-dark-400 text-[11px] space-y-1">
               <p>© {new Date().getFullYear()} QuanBit — quanbit.tech</p>
+              <p className="font-medium text-dark-500 dark:text-dark-300">
+                QuanBit is a Product by{' '}
+                <a
+                  href="https://reversun.com"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="font-bold text-primary-600 dark:text-primary-400 hover:underline inline-flex items-center gap-0.5"
+                >
+                  REVERSUN
+                  <ExternalLink className="w-2.5 h-2.5" />
+                </a>
+              </p>
               <p>Open access quantum education, worldwide.</p>
             </address>
           </div>
@@ -126,10 +138,19 @@ export function Footer() {
         <div className="border-t border-dark-100 dark:border-dark-800 mt-8 pt-6 flex flex-col sm:flex-row items-center justify-between gap-4">
           <p>
             Learn quantum computing free at{' '}
-            <Link href="/" className="text-primary-700 font-semibold hover:underline">
+            <Link href="/" className="text-primary-700 dark:text-primary-400 font-semibold hover:underline">
               quanbit.tech
             </Link>
-            {' '}— Deutsch-Jozsa, Grover&apos;s Search, Quantum Teleportation, Superdense Coding.
+            {' '}— A Product by{' '}
+            <a
+              href="https://reversun.com"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="font-bold text-dark-900 dark:text-white hover:text-primary-600 dark:hover:text-primary-400 transition-colors inline-flex items-center gap-0.5"
+            >
+              REVERSUN
+              <ExternalLink className="w-2.5 h-2.5" />
+            </a>
           </p>
           <p className="flex items-center gap-1 shrink-0">
             Built with <Heart className="w-3.5 h-3.5 text-red-500 fill-red-500 mx-0.5" /> for quantum physics education.

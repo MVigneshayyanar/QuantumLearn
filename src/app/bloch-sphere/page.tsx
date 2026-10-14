@@ -66,53 +66,65 @@ export default function BlochSpherePage() {
   ];
 
   return (
-    <div className="w-full mx-auto px-8 py-3 space-y-3.5 animate-fadeIn">
-      {/* Header */}
-      <div className="bg-white rounded-xl border border-dark-200 py-3.5 px-5 sm:px-6 shadow-xs flex flex-col md:flex-row md:items-center justify-between gap-3">
-        <div>
-          <div className="flex items-center gap-2 mb-1">
-            <span className="px-2.5 py-0.5 rounded-full text-[11px] font-semibold bg-primary-50 text-primary-700 border border-primary-100 flex items-center gap-1.5">
-              <Globe className="w-3 h-3 text-primary-600" />
-              3D Quantum Visualizer
-            </span>
-            <span className="px-2 py-0.5 rounded-md text-[10px] font-mono bg-dark-100 text-dark-700">
-              6-Axis Dynamic Tracking
-            </span>
+    <div className="w-full mx-auto px-4 sm:px-6 lg:px-8 py-3.5 max-w-7xl flex flex-col gap-3.5 animate-fadeIn">
+      {/* Header - Compact Bar */}
+      <div className="bg-white rounded-xl border border-dark-200 py-2.5 px-4 sm:px-5 shadow-xs flex items-center justify-between gap-3 shrink-0">
+        <div className="flex items-center gap-2.5 min-w-0">
+          <div className="w-8 h-8 rounded-lg bg-primary-50 text-primary-600 flex items-center justify-center shrink-0">
+            <Globe className="w-4 h-4 text-primary-600" />
           </div>
-          <h1 className="text-lg sm:text-xl font-bold text-dark-900 tracking-tight">
-            Interactive 3D Bloch Sphere Explorer
-          </h1>
-          <p className="text-xs text-dark-600 mt-0.5 max-w-3xl leading-normal">
-            The Bloch Sphere provides an exact geometrical representation of 2-level quantum state space (qubit). Rotate the 3D camera to track all 6 poles, move the sliders to observe angle sweep arcs, and inspect mixed-state purity.
-          </p>
+          <div className="min-w-0">
+            <h1 className="text-base font-bold text-dark-900 tracking-tight leading-tight truncate">
+              Interactive 3D Bloch Sphere Explorer
+            </h1>
+            <p className="text-xs text-dark-500 truncate hidden sm:block">
+              Geometrical representation of 2-level quantum state space (qubit). Rotate 3D camera to inspect poles & relative phase.
+            </p>
+          </div>
+        </div>
+        <div className="flex items-center gap-2 shrink-0">
+          <span className="hidden md:inline-flex px-2 py-0.5 rounded-md text-[10px] font-mono bg-dark-100 text-dark-700">
+            6-Axis Dynamic Tracking
+          </span>
+          <button
+            onClick={() => setIsEntangledDemo(!isEntangledDemo)}
+            className={`px-3 py-1.5 rounded-lg border text-xs font-bold transition-all cursor-pointer ${
+              isEntangledDemo
+                ? 'bg-amber-600 text-white border-amber-600 shadow-xs'
+                : 'bg-dark-50 border-dark-200 text-dark-700 hover:bg-dark-100'
+            }`}
+          >
+            {isEntangledDemo ? '✓ Entangled State' : 'Entanglement Demo'}
+          </button>
         </div>
       </div>
 
-      {/* Main Interactive Grid */}
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-3.5 items-start">
-        {/* Left: 3D Canvas */}
-        <div className="lg:col-span-6 flex justify-center">
-          <div className="w-full max-w-md">
+      {/* Main Interactive Workspace - Split View fitting naturally */}
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-3.5 items-stretch">
+        {/* Left: 3D Canvas + Vector Info */}
+        <div className="lg:col-span-5 bg-white rounded-2xl border border-dark-200 p-4 flex flex-col justify-between items-center shadow-xs">
+          <div className="w-full flex-1 flex items-center justify-center py-2">
             <BlochSphere3D
               bloch={currentBloch}
               qubitIndex={0}
-              warning={isEntangledDemo ? 'Demonstration: Qubit is entangled in a Bell state — reduced density matrix purity Tr(ρ²) = 0.5 < 1.0, rendering single-qubit Bloch vector undefined.' : undefined}
-              size={360}
+              warning={isEntangledDemo ? 'Entangled Bell state: purity Tr(ρ²) = 0.5 < 1.0, single-qubit Bloch vector undefined.' : undefined}
+              size={330}
               showSweepArcs={showSweepArcsToggle || isSweeping}
               activeSweep={activeSweepAngle}
+              compact={false}
             />
           </div>
         </div>
 
-        {/* Right: Angle Controls & Standard Basis Presets */}
-        <div className="lg:col-span-6 space-y-3.5">
-          {/* Preset Basis States */}
-          <div className="bg-white rounded-2xl border border-dark-200 p-4 sm:p-5 shadow-xs space-y-2.5">
-            <div className="flex items-center justify-between">
-              <h3 className="font-bold text-xs sm:text-sm text-dark-900">Standard Basis Presets (6 Poles)</h3>
-              <span className="text-[11px] text-dark-500 font-medium">Click to snap</span>
+        {/* Right: Presets, Controls & Readouts in compact cards */}
+        <div className="lg:col-span-7 flex flex-col gap-3">
+          {/* Top Row: Presets (6 Poles) */}
+          <div className="bg-white rounded-2xl border border-dark-200 p-3.5 shadow-xs">
+            <div className="flex items-center justify-between mb-2">
+              <h3 className="font-bold text-xs text-dark-900">Standard Basis Presets (6 Poles)</h3>
+              <span className="text-[10px] text-dark-400 font-medium">Click to snap</span>
             </div>
-            <div className="grid grid-cols-2 gap-2">
+            <div className="grid grid-cols-3 sm:grid-cols-6 gap-2">
               {standardStates.map((s, idx) => (
                 <button
                   key={idx}
@@ -122,51 +134,32 @@ export default function BlochSpherePage() {
                     setPhi(s.p);
                     triggerSweep(s.t !== theta ? 'theta' : 'phi');
                   }}
-                  className="p-2.5 rounded-xl border border-dark-200 hover:border-primary-400 hover:bg-primary-50/50 text-left transition-all group"
+                  className="p-2 rounded-xl border border-dark-200 hover:border-primary-400 hover:bg-primary-50/50 text-center transition-all group cursor-pointer"
                 >
-                  <div className="flex items-center justify-between">
-                    <span className="font-mono font-bold text-xs text-dark-900 group-hover:text-primary-700">
-                      <MathRenderer text={s.label} />
-                    </span>
-                    <span className="text-[10px] text-dark-500 font-mono">{s.name}</span>
-                  </div>
-                  <span className="text-[11px] text-primary-800 block truncate mt-1">
-                    <MathRenderer text={s.mathDesc} />
+                  <span className="font-mono font-bold text-xs text-dark-900 group-hover:text-primary-700 block">
+                    <MathRenderer text={s.label} />
                   </span>
+                  <span className="text-[9px] text-dark-500 font-mono block truncate mt-0.5">{s.name.split(' ')[0]}</span>
                 </button>
               ))}
             </div>
-
-            {/* Toggle Entanglement Demo */}
-            <div className="pt-2">
-              <button
-                onClick={() => setIsEntangledDemo(!isEntangledDemo)}
-                className={`w-full p-2.5 rounded-xl border text-xs font-bold transition-all ${
-                  isEntangledDemo
-                    ? 'bg-amber-600 text-white border-amber-600 shadow-xs'
-                    : 'bg-dark-50 border-dark-200 text-dark-800 hover:bg-dark-100'
-                }`}
-              >
-                {isEntangledDemo ? '✓ Entangled Mixed State Active' : 'Toggle Entangled / Mixed State Demo'}
-              </button>
-            </div>
           </div>
 
-          {/* Continuous Angle Sliders */}
+          {/* Middle Row: State Parameters & Probabilities */}
           {!isEntangledDemo && (
-            <div className="bg-white rounded-2xl border border-dark-200 p-4 sm:p-5 shadow-xs space-y-3">
+            <div className="bg-white rounded-2xl border border-dark-200 p-3.5 shadow-xs space-y-2.5">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2">
-                  <h3 className="font-bold text-xs sm:text-sm text-dark-900">State Parameters</h3>
+                  <h3 className="font-bold text-xs text-dark-900">State Parameters</h3>
                   <button
                     onClick={() => setShowSweepArcsToggle(!showSweepArcsToggle)}
-                    className={`px-2 py-0.5 rounded text-[11px] font-semibold border transition-colors ${
+                    className={`px-2 py-0.5 rounded text-[10px] font-semibold border transition-colors cursor-pointer ${
                       showSweepArcsToggle
                         ? 'bg-indigo-600 text-white border-indigo-600'
                         : 'bg-dark-50 text-dark-700 border-dark-200 hover:bg-dark-100'
                     }`}
                   >
-                    {showSweepArcsToggle ? '✓ Angle Arcs Active' : 'Show Angle Arcs'}
+                    {showSweepArcsToggle ? '✓ Arcs' : 'Show Arcs'}
                   </button>
                 </div>
                 <button
@@ -175,78 +168,81 @@ export default function BlochSpherePage() {
                     setPhi(0);
                     triggerSweep('theta');
                   }}
-                  className="text-xs text-dark-500 hover:text-dark-800 flex items-center gap-1"
+                  className="text-[11px] text-dark-500 hover:text-dark-800 flex items-center gap-1 cursor-pointer"
                 >
                   <RotateCcw className="w-3 h-3" />
                   Reset to <MathRenderer text="$|0\rangle$" />
                 </button>
               </div>
 
-              {/* Polar Angle Theta */}
-              <div className="space-y-1">
-                <div className="flex justify-between text-xs">
-                  <span className="font-medium text-dark-700 flex items-center gap-1">
-                    <MathRenderer text="$\theta$" /> (Polar Angle from $+Z$):
-                  </span>
-                  <span className="font-mono font-bold text-primary-700">
-                    {((theta * 180) / Math.PI).toFixed(1)}° ({theta.toFixed(2)} rad)
-                  </span>
+              {/* Angle Sliders */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 text-xs">
+                {/* Polar Angle Theta */}
+                <div className="space-y-1 bg-dark-50/60 p-2.5 rounded-xl border border-dark-100">
+                  <div className="flex justify-between text-xs">
+                    <span className="font-medium text-dark-700 flex items-center gap-1">
+                      <MathRenderer text="$\theta$" /> (Polar):
+                    </span>
+                    <span className="font-mono font-bold text-primary-700">
+                      {((theta * 180) / Math.PI).toFixed(1)}°
+                    </span>
+                  </div>
+                  <input
+                    type="range"
+                    min={0}
+                    max={Math.PI}
+                    step={0.01}
+                    value={theta}
+                    onPointerDown={() => triggerSweep('theta')}
+                    onChange={(e) => {
+                      setTheta(Number(e.target.value));
+                      triggerSweep('theta');
+                    }}
+                    className="w-full accent-primary-600 cursor-pointer h-2"
+                  />
                 </div>
-                <input
-                  type="range"
-                  min={0}
-                  max={Math.PI}
-                  step={0.01}
-                  value={theta}
-                  onPointerDown={() => triggerSweep('theta')}
-                  onChange={(e) => {
-                    setTheta(Number(e.target.value));
-                    triggerSweep('theta');
-                  }}
-                  className="w-full accent-primary-600 cursor-pointer"
-                />
+
+                {/* Azimuthal Angle Phi */}
+                <div className="space-y-1 bg-dark-50/60 p-2.5 rounded-xl border border-dark-100">
+                  <div className="flex justify-between text-xs">
+                    <span className="font-medium text-dark-700 flex items-center gap-1">
+                      <MathRenderer text="$\phi$" /> (Phase):
+                    </span>
+                    <span className="font-mono font-bold text-cyan-700">
+                      {((phi * 180) / Math.PI).toFixed(1)}°
+                    </span>
+                  </div>
+                  <input
+                    type="range"
+                    min={0}
+                    max={2 * Math.PI}
+                    step={0.01}
+                    value={phi}
+                    onPointerDown={() => triggerSweep('phi')}
+                    onChange={(e) => {
+                      setPhi(Number(e.target.value));
+                      triggerSweep('phi');
+                    }}
+                    className="w-full accent-cyan-600 cursor-pointer h-2"
+                  />
+                </div>
               </div>
 
-              {/* Azimuthal Angle Phi */}
-              <div className="space-y-1">
-                <div className="flex justify-between text-xs">
-                  <span className="font-medium text-dark-700 flex items-center gap-1">
-                    <MathRenderer text="$\phi$" /> (Azimuthal Angle in $XY$ plane):
-                  </span>
-                  <span className="font-mono font-bold text-cyan-700">
-                    {((phi * 180) / Math.PI).toFixed(1)}° ({phi.toFixed(2)} rad)
-                  </span>
-                </div>
-                <input
-                  type="range"
-                  min={0}
-                  max={2 * Math.PI}
-                  step={0.01}
-                  value={phi}
-                  onPointerDown={() => triggerSweep('phi')}
-                  onChange={(e) => {
-                    setPhi(Number(e.target.value));
-                    triggerSweep('phi');
-                  }}
-                  className="w-full accent-cyan-600 cursor-pointer"
-                />
-              </div>
-
-              {/* Probability Readout with Proper KaTeX MathML */}
-              <div className="pt-2 border-t border-dark-100 grid grid-cols-2 gap-2.5 text-center">
-                <div className="p-2.5 bg-dark-50 rounded-xl border border-dark-200">
-                  <span className="text-[11px] text-dark-600 block font-medium mb-1">
+              {/* Probabilities Row */}
+              <div className="grid grid-cols-2 gap-2 text-center pt-0.5">
+                <div className="py-1.5 px-3 bg-dark-50 rounded-xl border border-dark-200 flex items-center justify-between">
+                  <span className="text-xs text-dark-600 font-medium">
                     <MathRenderer text="$P(|0\rangle) = \cos^2(\theta/2)$" />
                   </span>
-                  <span className="font-mono font-bold text-sm text-primary-700">
+                  <span className="font-mono font-bold text-xs text-primary-700">
                     {(prob0 * 100).toFixed(1)}%
                   </span>
                 </div>
-                <div className="p-2.5 bg-dark-50 rounded-xl border border-dark-200">
-                  <span className="text-[11px] text-dark-600 block font-medium mb-1">
+                <div className="py-1.5 px-3 bg-dark-50 rounded-xl border border-dark-200 flex items-center justify-between">
+                  <span className="text-xs text-dark-600 font-medium">
                     <MathRenderer text="$P(|1\rangle) = \sin^2(\theta/2)$" />
                   </span>
-                  <span className="font-mono font-bold text-sky-700">
+                  <span className="font-mono font-bold text-xs text-sky-700">
                     {(prob1 * 100).toFixed(1)}%
                   </span>
                 </div>
@@ -254,62 +250,51 @@ export default function BlochSpherePage() {
             </div>
           )}
 
-          {/* Mathematical Parameterization */}
-          <div className="p-4 rounded-2xl bg-dark-50/60 border border-dark-200 text-xs space-y-2 text-dark-700 leading-relaxed">
-            <h4 className="font-bold text-dark-900">Bloch Sphere State Vector Formulation:</h4>
-            <div className="p-2.5 rounded-xl bg-white border border-dark-200 shadow-2xs text-center">
-              <MathRenderer
-                text="$|\psi\rangle = \cos(\theta/2)|0\rangle + e^{i\phi}\sin(\theta/2)|1\rangle$"
-                className="font-bold text-sm text-primary-950"
-              />
-            </div>
-            <p className="text-dark-600">
-              {explanationMode === 'simple'
-                ? 'The north pole is |0⟩, the south pole is |1⟩. Any other point on the globe is a unique quantum superposition of both, with latitude controlling probability and longitude controlling the quantum relative phase!'
-                : 'Unitary single-qubit operations correspond isomorphically to 3D rotations in SO(3) acting on the Bloch vector needle about the rotation axis defined by the gate generator.'}
-            </p>
-          </div>
-
-          {/* Python Qiskit Code for Current Bloch State */}
-          <div className="bg-dark-950 text-dark-100 rounded-2xl border border-dark-800 p-3.5 shadow-xs space-y-2">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-1.5">
-                <Code2 className="w-3.5 h-3.5 text-primary-400" />
-                <span className="font-bold text-xs text-dark-200">Python (Qiskit Statevector Code)</span>
+          {/* Bottom Row: State Formula & Qiskit Code Snippet */}
+          <div className="grid grid-cols-1 sm:grid-cols-12 gap-3 items-stretch">
+            {/* Mathematical Formulation */}
+            <div className="sm:col-span-5 p-3 rounded-2xl bg-white border border-dark-200 text-xs flex flex-col justify-between shadow-xs">
+              <span className="font-bold text-xs text-dark-900 block mb-1">State Formulation</span>
+              <div className="py-2 px-3 rounded-xl bg-dark-50 border border-dark-100 text-center my-auto">
+                <MathRenderer
+                  text="$|\psi\rangle = \cos(\frac{\theta}{2})|0\rangle + e^{i\phi}\sin(\frac{\theta}{2})|1\rangle$"
+                  className="font-bold text-xs text-primary-950"
+                />
               </div>
-              <button
-                onClick={() => {
-                  const pyCode = `# Create exact quantum statevector from Bloch angles
-import numpy as np
-from qiskit.quantum_info import Statevector
-
-theta = ${theta.toFixed(4)}  # ${((theta * 180) / Math.PI).toFixed(1)}°
-phi = ${phi.toFixed(4)}    # ${((phi * 180) / Math.PI).toFixed(1)}°
-
-# Statevector: |ψ⟩ = cos(θ/2)|0⟩ + exp(i*φ)*sin(θ/2)|1⟩
-state = Statevector([
-    np.cos(theta / 2),
-    np.exp(1j * phi) * np.sin(theta / 2)
-])
-print("Statevector:", state)
-print("Bloch Vector [x, y, z]:", [${(Math.sin(theta) * Math.cos(phi)).toFixed(3)}, ${(Math.sin(theta) * Math.sin(phi)).toFixed(3)}, ${Math.cos(theta).toFixed(3)}])
-print("Measurement Probabilities:", state.probabilities_dict())`;
-                  navigator.clipboard.writeText(pyCode);
-                }}
-                className="flex items-center gap-1 px-2 py-0.5 rounded bg-dark-800 hover:bg-dark-700 text-dark-300 hover:text-white text-[10px] font-medium transition-colors cursor-pointer"
-              >
-                <Copy className="w-3 h-3" />
-                <span>Copy Python</span>
-              </button>
+              <p className="text-[11px] text-dark-500 mt-1.5">
+                Latitude controls probability; longitude controls the quantum relative phase.
+              </p>
             </div>
-            <pre className="p-2.5 rounded-xl bg-dark-900 text-dark-200 font-mono text-[11px] overflow-x-auto leading-relaxed">
-{`from qiskit.quantum_info import Statevector
+
+            {/* Python Qiskit Code */}
+            <div className="sm:col-span-7 bg-dark-950 text-dark-100 rounded-2xl border border-dark-800 p-3 shadow-xs flex flex-col justify-between">
+              <div className="flex items-center justify-between mb-1.5">
+                <div className="flex items-center gap-1.5">
+                  <Code2 className="w-3.5 h-3.5 text-primary-400" />
+                  <span className="font-bold text-xs text-dark-200">Qiskit Statevector</span>
+                </div>
+                <button
+                  onClick={() => {
+                    const pyCode = `from qiskit.quantum_info import Statevector
 import numpy as np
 
-# |ψ⟩ = cos(${((theta*180)/Math.PI).toFixed(1)}°/2)|0⟩ + e^{i(${((phi*180)/Math.PI).toFixed(1)}°)}sin(${((theta*180)/Math.PI).toFixed(1)}°/2)|1⟩
-psi = Statevector([np.cos(${theta.toFixed(3)}/2), np.exp(1j*${phi.toFixed(3)}) * np.sin(${theta.toFixed(3)}/2)])
-bloch = [${(Math.sin(theta) * Math.cos(phi)).toFixed(3)}, ${(Math.sin(theta) * Math.sin(phi)).toFixed(3)}, ${Math.cos(theta).toFixed(3)}]`}
-            </pre>
+theta = ${theta.toFixed(4)}
+phi = ${phi.toFixed(4)}
+psi = Statevector([np.cos(theta/2), np.exp(1j*phi)*np.sin(theta/2)])
+print(psi)`;
+                    navigator.clipboard.writeText(pyCode);
+                  }}
+                  className="flex items-center gap-1 px-2 py-0.5 rounded bg-dark-800 hover:bg-dark-700 text-dark-300 hover:text-white text-[10px] font-medium transition-colors cursor-pointer"
+                >
+                  <Copy className="w-3 h-3" />
+                  <span>Copy</span>
+                </button>
+              </div>
+              <pre className="p-2 rounded-xl bg-dark-900 text-dark-200 font-mono text-[11px] overflow-x-auto leading-relaxed">
+{`psi = Statevector([np.cos(${theta.toFixed(2)}/2), np.exp(1j*${phi.toFixed(2)})*np.sin(${theta.toFixed(2)}/2)])
+bloch = [${(Math.sin(theta) * Math.cos(phi)).toFixed(2)}, ${(Math.sin(theta) * Math.sin(phi)).toFixed(2)}, ${Math.cos(theta).toFixed(2)}]`}
+              </pre>
+            </div>
           </div>
         </div>
       </div>

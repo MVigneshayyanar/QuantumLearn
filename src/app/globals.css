@@ -548,6 +548,79 @@ html.dark .border-rose-200 {
   border-color: rgba(244, 63, 94, 0.35) !important;
 }
 
+/* Missing shades: dark text on dark surfaces & light page backgrounds */
+html.dark .bg-\[\#F1F5F9\] {
+  background-color: #0B0F19 !important;
+}
+html.dark .text-indigo-950,
+html.dark .text-indigo-600 {
+  color: #C7D2FE !important;
+}
+html.dark .text-violet-950,
+html.dark .text-violet-600 {
+  color: #DDD6FE !important;
+}
+html.dark .text-purple-950 {
+  color: #E9D5FF !important;
+}
+html.dark .text-blue-950 {
+  color: #BFDBFE !important;
+}
+html.dark .text-rose-900,
+html.dark .text-rose-950 {
+  color: #FDA4AF !important;
+}
+html.dark .text-red-700,
+html.dark .text-red-800,
+html.dark .text-red-900 {
+  color: #FCA5A5 !important;
+}
+html.dark .bg-rose-100 {
+  background-color: rgba(244, 63, 94, 0.28) !important;
+}
+html.dark .border-rose-300 {
+  border-color: rgba(244, 63, 94, 0.4) !important;
+}
+html.dark .bg-sky-50 {
+  background-color: rgba(14, 165, 233, 0.16) !important;
+}
+html.dark .text-sky-700,
+html.dark .text-sky-800,
+html.dark .text-sky-900 {
+  color: #7DD3FC !important;
+}
+html.dark .border-sky-200 {
+  border-color: rgba(14, 165, 233, 0.35) !important;
+}
+
+/* Stronger amber surfaces (buttons / badges) */
+html.dark .bg-amber-200,
+html.dark [class*="bg-amber-200/"] {
+  background-color: rgba(245, 158, 11, 0.38) !important;
+}
+html.dark .bg-amber-300,
+html.dark .hover\:bg-amber-300:hover,
+html.dark .hover\:bg-amber-200:hover {
+  background-color: rgba(245, 158, 11, 0.5) !important;
+}
+html.dark [class*="hover:bg-amber-100/"]:hover {
+  background-color: rgba(245, 158, 11, 0.22) !important;
+}
+html.dark .bg-amber-200 .text-amber-800,
+html.dark [class*="bg-amber-200/"] .text-amber-800 {
+  color: #FDE68A !important;
+}
+
+/* Light gradient stops used on stage headers */
+html.dark [class*="from-indigo-50"] {
+  --tw-gradient-from: #1E1B4B var(--tw-gradient-from-position) !important;
+  --tw-gradient-to: rgba(30, 27, 75, 0) var(--tw-gradient-to-position) !important;
+  --tw-gradient-stops: var(--tw-gradient-from), var(--tw-gradient-to) !important;
+}
+html.dark [class*="to-primary-50"] {
+  --tw-gradient-to: #1E1B4B var(--tw-gradient-to-position) !important;
+}
+
 /* Opacity variants of backgrounds in Dark Mode */
 html.dark [class*="bg-dark-50/"] {
   background-color: rgba(26, 36, 56, 0.8) !important;
@@ -557,6 +630,10 @@ html.dark [class*="bg-dark-100/"] {
 }
 html.dark [class*="bg-white/"] {
   background-color: rgba(17, 24, 39, 0.8) !important;
+}
+html.dark .hover\:bg-white:hover {
+  background-color: #2E3B52 !important;
+  color: #F9FAFB !important;
 }
 html.dark [class*="bg-emerald-50/"] {
   background-color: rgba(6, 78, 59, 0.45) !important;
@@ -749,6 +826,44 @@ html.dark #quantum-certificate-printable .border-amber-100 {
 html.dark #quantum-certificate-printable .bg-amber-100\/70 {
   background-color: rgba(245, 158, 11, 0.2) !important;
   border-color: rgba(245, 158, 11, 0.5) !important;
+}
+
+/* ==========================================================================
+   Print / PDF Download Styles
+   Ensure ONLY the certificate is printed / saved as PDF
+   ========================================================================== */
+@media print {
+  @page {
+    size: landscape;
+    margin: 0;
+  }
+
+  body * {
+    visibility: hidden !important;
+  }
+
+  header, nav, footer, aside, .fixed.inset-0.z-50 {
+    background: transparent !important;
+  }
+
+  #quantum-certificate-printable,
+  #quantum-certificate-printable * {
+    visibility: visible !important;
+  }
+
+  #quantum-certificate-printable {
+    position: fixed !important;
+    left: 50% !important;
+    top: 50% !important;
+    transform: translate(-50%, -50%) !important;
+    width: 90vw !important;
+    max-width: 960px !important;
+    aspect-ratio: 1.414 / 1 !important;
+    margin: 0 auto !important;
+    box-shadow: none !important;
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+  }
 }
 
 

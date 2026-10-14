@@ -111,14 +111,7 @@ export function QuantumCertificateModal({
           </div>
 
           <div className="flex items-center gap-1.5 shrink-0">
-            <button
-              onClick={handlePrint}
-              className="flex items-center gap-1 px-2.5 py-1.5 rounded-lg bg-dark-800 hover:bg-dark-700 text-dark-200 hover:text-white text-[11px] font-semibold transition-colors cursor-pointer"
-              title="Print or Save as PDF"
-            >
-              <Printer className="w-3.5 h-3.5" />
-              <span>Print / PDF</span>
-            </button>
+
             <button
               onClick={onClose}
               aria-label="Close certificate popup"
@@ -172,41 +165,41 @@ export function QuantumCertificateModal({
             </div>
 
             {/* Recipient Body */}
-            <div className="text-center space-y-2 my-3 relative z-10">
-              <p className="text-[10px] text-dark-600 italic font-serif">
+            <div className="text-center space-y-2.5 my-4 sm:my-5 relative z-10 flex-1 flex flex-col justify-center">
+              <p className="text-[11px] sm:text-xs text-dark-600 italic font-serif">
                 This is officially certified to recognize that
               </p>
-              <div className="border-b border-amber-300 pb-1 max-w-xs mx-auto">
-                <h2 className="text-base sm:text-lg font-black text-primary-900 tracking-wide font-serif">
-                  {studentName}
+              <div className="border-b-2 border-amber-300 pb-1.5 max-w-sm mx-auto w-full my-1">
+                <h2 className="text-lg sm:text-xl font-black text-primary-900 tracking-wide font-serif">
+                  {isCompleted ? studentName : 'QUANBIT Learner'}
                 </h2>
               </div>
-              <p className="text-[10px] text-dark-600 max-w-xs mx-auto leading-relaxed">
+              <p className="text-[11px] sm:text-xs text-dark-600 max-w-md mx-auto leading-relaxed">
                 has successfully completed theoretical foundations, circuit construction, and verified mastery for:
               </p>
-              <div className="inline-block px-3 py-1 rounded-lg bg-amber-100/70 border border-amber-300 text-amber-950 font-bold text-xs sm:text-sm font-serif">
+              <div className="inline-block px-4 py-1.5 rounded-xl bg-amber-100/70 border border-amber-300 text-amber-950 font-bold text-xs sm:text-sm font-serif mx-auto shadow-2xs mt-1">
                 {displayTitle}
               </div>
             </div>
 
             {/* Signatures & Gold Seal */}
-            <div className="flex items-end justify-between pt-3 border-t border-amber-200/80 relative z-10 mt-1 text-left">
+            <div className="flex items-end justify-between pt-4 border-t border-amber-200/80 relative z-10 mt-2 text-left">
               {/* Signature 1 */}
-              <div className="space-y-0.5 text-center w-24 sm:w-28">
-                <div className="font-serif italic text-xs text-dark-800 font-bold border-b border-dark-300 pb-0.5">
+              <div className="space-y-1 text-center w-28 sm:w-32">
+                <div className="font-serif italic text-xs sm:text-sm text-dark-800 font-bold border-b border-dark-300 pb-0.5">
                   Schrödinger AI
                 </div>
-                <p className="text-[7px] font-bold uppercase tracking-wider text-dark-700">
+                <p className="text-[8px] font-bold uppercase tracking-wider text-dark-700">
                   Physics Director
                 </p>
               </div>
 
               {/* Center Gold Seal */}
               <div className="flex flex-col items-center justify-center -my-1">
-                <div className="w-12 h-12 rounded-full bg-gradient-to-br from-amber-300 via-amber-500 to-yellow-600 p-0.5 shadow-md shadow-amber-400/30 flex items-center justify-center border-2 border-white">
+                <div className="w-14 h-14 rounded-full bg-gradient-to-br from-amber-300 via-amber-500 to-yellow-600 p-0.5 shadow-md shadow-amber-400/30 flex items-center justify-center border-2 border-white">
                   <div className="w-full h-full rounded-full border border-dashed border-amber-950/40 flex flex-col items-center justify-center text-center p-0.5 text-amber-950">
-                    <ShieldCheck className="w-4 h-4" />
-                    <span className="text-[5px] font-black uppercase tracking-tight leading-none mt-0.5">
+                    <ShieldCheck className="w-5 h-5" />
+                    <span className="text-[6px] font-black uppercase tracking-tight leading-none mt-0.5">
                       {isCompleted ? 'CLAIMED' : '100% MASTERY'}
                     </span>
                   </div>
@@ -214,16 +207,16 @@ export function QuantumCertificateModal({
               </div>
 
               {/* Signature 2 */}
-              <div className="space-y-0.5 text-center w-24 sm:w-28">
-                <div className="font-serif italic text-xs text-dark-800 font-bold border-b border-dark-300 pb-0.5">
+              <div className="space-y-1 text-center w-28 sm:w-32">
+                <div className="font-serif italic text-xs sm:text-sm text-dark-800 font-bold border-b border-dark-300 pb-0.5">
                   QuanBit Faculty
                 </div>
-                <p className="text-[7px] text-dark-500 font-mono">{issueDate}</p>
+                <p className="text-[8px] text-dark-500 font-mono">{issueDate}</p>
               </div>
             </div>
 
             {/* Bottom Cryptographic ID bar */}
-            <div className="mt-2 pt-1.5 border-t border-amber-100 flex items-center justify-between text-[7px] text-dark-500 font-mono">
+            <div className="mt-3 pt-2 border-t border-amber-100 flex items-center justify-between text-[8px] text-dark-500 font-mono">
               <span className="truncate">ID: {credentialId}</span>
               <span className="hidden sm:inline">SHA-256 VALIDATED</span>
               <span>QUANBIT</span>
@@ -231,7 +224,8 @@ export function QuantumCertificateModal({
           </div>
         </div>
 
-        {/* Bottom Actions Bar */}
+        {/* Bottom Actions Bar (only for completed certificates) */}
+        {isCompleted && (
         <div className="p-3 sm:p-3.5 bg-white border-t border-dark-100 space-y-2.5">
           <div className="flex items-center justify-between gap-2 text-xs">
             <div className="flex items-center gap-1.5 text-dark-600 min-w-0">
@@ -282,6 +276,7 @@ export function QuantumCertificateModal({
             </button>
           </div>
         </div>
+        )}
       </div>
     </div>
   );

@@ -158,6 +158,7 @@ export function AlgorithmModuleView({
   paramControls
 }: AlgorithmModuleViewProps) {
   const { explanationMode, language, announce } = useAccessibility();
+  const { userId, studentName } = useStudentContext();
   const t = translations[language];
 
   const [activeTab, setActiveTab] = useState<'intuition' | 'math' | 'circuit' | 'build_it' | 'quiz' | 'skill_base'>('intuition');
@@ -181,7 +182,27 @@ export function AlgorithmModuleView({
         setMaxUnlockedIdx(Math.min(5, Math.max(0, parseInt(stored, 10))));
       }
     } catch {}
-  }, [moduleSlug]);
+
+    // Also sync from student progress summary if user is logged in
+    if (userId) {
+      fetch(`/api/students/${userId}/summary`)
+        .then((res) => (res.ok ? res.json() : null))
+        .then((data) => {
+          if (data?.moduleStages?.[moduleSlug]) {
+            const dbStage = Number(data.moduleStages[moduleSlug]); // 1 to 6
+            const dbUnlockedIdx = Math.min(5, Math.max(0, dbStage - 1));
+            setMaxUnlockedIdx((prev) => {
+              const best = Math.max(prev, dbUnlockedIdx);
+              try {
+                localStorage.setItem(`ql_stage_progress_${moduleSlug}`, best.toString());
+              } catch {}
+              return best;
+            });
+          }
+        })
+        .catch(() => {});
+    }
+  }, [moduleSlug, userId]);
 
   const unlockStage = (stageIdx: number) => {
     setMaxUnlockedIdx((prev) => {
@@ -324,7 +345,6 @@ export function AlgorithmModuleView({
   }, [algorithmBackendId, JSON.stringify(params)]);
 
   // Report module "in_progress" to DB on first access
-  const { userId, studentName } = useStudentContext();
   const [showCertificate, setShowCertificate] = useState(false);
   const hasReportedRef = useRef(false);
 
@@ -407,71 +427,6 @@ export function AlgorithmModuleView({
     <div id="algorithm-module-root" ref={moduleTopRef} className={`w-full mx-auto lg:min-h-[calc(100vh-80px)] ${isCompactCockpitTab ? 'px-3 sm:px-6 lg:pl-8 lg:pr-8 py-1.5' : 'px-3 sm:px-6 lg:pl-8 lg:pr-8 py-3'}`}>
       <div className="lg:flex lg:items-stretch lg:gap-4 lg:h-[87.5vh]">
       {/* Module Header: Compact Cockpit Header on interactive tabs, Full Header on intuition/math */}
-      {isCompactCockpitTab ? (
-        <aside className="bg-white rounded-2xl border border-dark-200 p-4 shadow-xs relative space-y-4 flex flex-col lg:w-[17.5%] lg:h-full lg:shrink-0 lg:sticky lg:top-4">
-          <div className="flex flex-col gap-3">
-            {/* Left: Title & Badges */}
-            <div className="space-y-2">
-              <h1 className="text-base font-bold text-dark-900 tracking-tight leading-tight">{title}</h1>
-              <div className="flex flex-wrap items-center gap-1.5 min-w-0">
-              <span className="shrink-0 px-2 py-0.5 rounded-full text-[11px] font-semibold bg-primary-50 text-primary-700 border border-primary-100">
-                {category}
-              </span>
-              <span className="shrink-0 px-2 py-0.5 rounded-full text-[11px] font-semibold bg-dark-100 text-dark-800">
-                {qubitCount} Qubits
-              </span>
-              <span className="w-full px-2 py-1 rounded-lg text-[11px] font-semibold bg-emerald-50 text-emerald-700 border border-emerald-100 inline-flex items-center gap-1 whitespace-normal leading-snug">
-                <MathRenderer text={speedup} />
-              </span>
-              </div>
-            </div>
-
-          </div>
-
-          {/* Compact Tab Navigation */}
-          <div className="flex flex-wrap lg:flex-col gap-1 border-t border-dark-100 pt-1.5" role="tablist">
-            {tabs.map((tab, idx) => {
-              const Icon = tab.icon;
-              const isActive = activeTab === tab.id;
-              const isLocked = isClientMounted
-                ? idx > maxUnlockedIdx && !isModuleFullyComplete
-                : idx > 0 && !isModuleFullyComplete;
-              return (
-                <button
-                  key={tab.id}
-                  role="tab"
-                  aria-selected={isActive}
-                  disabled={isLocked}
-                  onClick={() => {
-                    if (isLocked) return;
-                    handleTabChange(tab.id as any);
-                  }}
-                  title={isLocked ? `Locked: Complete Stage ${idx} first` : tab.label}
-                  className={`flex items-center gap-2 px-3 py-2 lg:w-full lg:justify-start rounded-lg font-semibold text-sm transition-all cursor-pointer ${
-                    isActive
-                      ? 'bg-primary-600 text-white shadow-xs'
-                      : isLocked
-                      ? 'text-dark-400 bg-dark-50/60 cursor-not-allowed opacity-60'
-                      : 'text-dark-700 hover:text-dark-900 hover:bg-dark-50'
-                  }`}
-                >
-                  {isLocked ? <Lock className="w-3 h-3 text-dark-400" /> : <Icon className="w-3 h-3" />}
-                  <span>{tab.label}</span>
-                </button>
-              );
-            })}
-          </div>
-          <button
-            onClick={() => setShowCertificate(true)}
-            className="w-full self-start mt-auto flex items-center gap-2.5 px-3 py-2 rounded-xl border border-amber-200 bg-amber-50/70 hover:bg-amber-100 text-left text-[11px] font-bold text-amber-900 transition-colors cursor-pointer lg:absolute lg:bottom-4 lg:left-4 lg:right-4 lg:mt-0 lg:w-auto"
-            title="Preview Certificate of Mastery"
-          >
-            <Award className="w-3.5 h-3.5 text-amber-600" />
-            <span className="min-w-0 truncate">{isModuleFullyComplete ? 'Official Certificate' : 'Certificate of Mastery'}</span>
-            <ExternalLink className="w-2.5 h-2.5 text-amber-700" />
-          </button>
-        </aside>
-      ) : (
         <aside className="bg-white rounded-2xl border border-dark-200 p-4 shadow-xs relative overflow-hidden space-y-4 flex flex-col lg:w-[17.5%] lg:h-full lg:shrink-0 lg:sticky lg:top-4">
           <div className="flex flex-col gap-3">
             {/* Left Column: Badges, Title & Subtitle */}
@@ -570,7 +525,6 @@ export function AlgorithmModuleView({
             </div>
           </button>
         </aside>
-      )}
 
       {/* Active Stage Content with bottom-to-top slideUp animation */}
       <main className="min-w-0 flex-1 flex min-h-0 flex-col mt-3.5 lg:mt-0 lg:h-full">
@@ -1024,18 +978,8 @@ export function AlgorithmModuleView({
             {/* Right Column: Live 3D Bloch Spheres */}
             <div className="lg:col-span-5 lg:row-span-2 self-stretch min-h-0 min-w-0 overflow-hidden bg-white rounded-xl border border-dark-200 p-3 sm:p-4 shadow-xs space-y-3 flex flex-col">
               <div className="flex items-center justify-between gap-2 px-0.5">
-                <h3 className="font-bold text-sm text-dark-900">Live 3D Bloch Spheres</h3>
+                <h3 className="font-bold text-sm text-dark-900">Code / Bloch Sphere</h3>
                 <div className="flex items-center bg-dark-100 p-1 rounded-xl border border-dark-200 shrink-0 shadow-2xs">
-                  <button
-                    onClick={() => setRightPanelMode('vectors')}
-                    className={`px-3 py-1 rounded-lg font-bold text-[11px] transition-all cursor-pointer ${
-                      rightPanelMode === 'vectors'
-                        ? 'bg-primary-600 text-white shadow-sm'
-                        : 'text-dark-700 hover:bg-white hover:text-dark-900'
-                    }`}
-                  >
-                    {currentBlochs.length > 1 ? `${currentBlochs.length} Qubit Vectors` : 'Qubit Vector'}
-                  </button>
                   <button
                     onClick={() => setRightPanelMode('code')}
                     className={`px-3 py-1 rounded-lg font-bold text-[11px] transition-all cursor-pointer ${
@@ -1045,6 +989,16 @@ export function AlgorithmModuleView({
                     }`}
                   >
                     Code
+                  </button>
+                  <button
+                    onClick={() => setRightPanelMode('vectors')}
+                    className={`px-3 py-1 rounded-lg font-bold text-[11px] transition-all cursor-pointer ${
+                      rightPanelMode === 'vectors'
+                        ? 'bg-primary-600 text-white shadow-sm'
+                        : 'text-dark-700 hover:bg-white hover:text-dark-900'
+                    }`}
+                  >
+                    {currentBlochs.length > 1 ? `${currentBlochs.length} Qubit Vectors` : 'Bloch Sphere'}
                   </button>
                 </div>
               </div>
@@ -1111,7 +1065,7 @@ export function AlgorithmModuleView({
               {snapshots.length > 0 && currentStepIdx < snapshots.length - 1 ? (
                 <button
                   onClick={() => setCurrentStepIdx((i) => Math.min(snapshots.length - 1, i + 1))}
-                  className="flex items-center gap-1 px-3 py-1.5 rounded-lg bg-primary-50 text-primary-700 hover:bg-primary-100 border border-primary-200 font-semibold text-xs transition-colors cursor-pointer"
+                  className="flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg bg-primary-600 hover:bg-primary-700 text-white font-bold text-xs shadow-sm hover:shadow-primary-500/25 transition-all cursor-pointer ring-2 ring-primary-500/30"
                 >
                   <span>Step Forward</span>
                   <ChevronRight className="w-3.5 h-3.5" />

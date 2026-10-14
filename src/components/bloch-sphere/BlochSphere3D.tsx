@@ -3,7 +3,7 @@
 import React, { useEffect, useRef, useState } from 'react';
 import * as THREE from 'three';
 import { BlochVector } from '@/lib/types';
-import { AlertTriangle, RotateCcw, Sparkles } from 'lucide-react';
+import { AlertTriangle, RotateCcw } from 'lucide-react';
 import { MathRenderer } from '@/components/math/MathRenderer';
 
 interface BlochSphere3DProps {
@@ -548,7 +548,6 @@ export function BlochSphere3D({
             </span>
           ) : (
             <span className={`inline-flex items-center gap-1 rounded-full font-semibold whitespace-nowrap shrink-0 bg-primary-50 dark:bg-primary-950/70 text-primary-700 dark:text-primary-300 border border-primary-200 dark:border-primary-800/60 ${compact ? 'text-[9px] px-1.5 py-0' : 'text-xs px-2 py-0.5'}`}>
-              <Sparkles className={compact ? 'w-2.5 h-2.5' : 'w-3 h-3'} />
               Pure State
             </span>
           )}

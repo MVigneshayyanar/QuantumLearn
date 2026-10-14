@@ -786,19 +786,9 @@ Return 3 SHORT lines (max 50 words total):
         <div className="lg:row-span-2 self-stretch min-w-0 bg-white rounded-xl border border-dark-200 p-3 sm:p-4 shadow-xs space-y-3 flex flex-col">
           <div className="flex items-center justify-between gap-2 px-0.5">
             <h3 className="font-bold text-sm text-dark-900">
-              {rightPanelMode === 'verify' ? 'Verification' : 'Live 3D Bloch Spheres'}
+              {rightPanelMode === 'verify' ? 'Verification' : 'Code / Bloch Sphere'}
             </h3>
             <div className="flex items-center bg-dark-100 p-1 rounded-xl border border-dark-200 shrink-0 shadow-2xs">
-              <button
-                onClick={() => setRightPanelMode('vectors')}
-                className={`px-3 py-1 rounded-lg font-bold text-[11px] transition-all cursor-pointer ${
-                  rightPanelMode === 'vectors'
-                    ? 'bg-primary-600 text-white shadow-sm'
-                    : 'text-dark-700 hover:bg-white hover:text-dark-900'
-                }`}
-              >
-                {liveBlochs.length > 1 ? `${liveBlochs.length} Qubit Vectors` : 'Qubit Vector'}
-              </button>
               <button
                 onClick={() => setRightPanelMode('code')}
                 className={`px-3 py-1 rounded-lg font-bold text-[11px] transition-all cursor-pointer ${
@@ -808,6 +798,16 @@ Return 3 SHORT lines (max 50 words total):
                 }`}
               >
                 Code
+              </button>
+              <button
+                onClick={() => setRightPanelMode('vectors')}
+                className={`px-3 py-1 rounded-lg font-bold text-[11px] transition-all cursor-pointer ${
+                  rightPanelMode === 'vectors'
+                    ? 'bg-primary-600 text-white shadow-sm'
+                    : 'text-dark-700 hover:bg-white hover:text-dark-900'
+                }`}
+              >
+                {liveBlochs.length > 1 ? `${liveBlochs.length} Qubit Vectors` : 'Bloch Sphere'}
               </button>
               <button
                 onClick={() => {

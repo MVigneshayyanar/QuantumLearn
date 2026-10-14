@@ -481,7 +481,7 @@ Could you teach me the core quantum principles behind these mistakes in simple t
               }`}
             >
               <Sparkles className={`w-4 h-4 ${passed ? 'text-amber-300' : 'text-dark-400'}`} />
-              <span>{passed ? 'Next Module: Skill Base &amp; Practice' : 'Next Module (Reach 100% to unlock)'}</span>
+              <span>{passed ? 'Next Module: Skill Base & Practice' : 'Next Module (Reach 100% to unlock)'}</span>
               <ArrowRight className="w-4 h-4" />
             </button>
           )}

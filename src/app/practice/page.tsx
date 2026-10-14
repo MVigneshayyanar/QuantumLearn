@@ -121,156 +121,111 @@ export default function PracticeListPage() {
 
   return (
     <div className="w-full mx-auto px-8 py-3 space-y-3.5 animate-fadeIn">
-      {/* Hero Header */}
-      <div className="bg-white rounded-2xl border border-dark-200 p-5 sm:p-6 shadow-xs relative overflow-hidden">
-        <div className="flex flex-wrap items-center justify-between gap-4">
-          <div className="space-y-1.5 max-w-2xl">
-            <div className="flex items-center gap-2">
-              <span className="px-2.5 py-0.5 rounded-full text-xs font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200 flex items-center gap-1.5">
-                <ShieldCheck className="w-3.5 h-3.5 text-emerald-600" />
-                Strict Judge Arena — Zero AI Hints
-              </span>
-              <span className="px-2 py-0.5 rounded-full text-[11px] font-mono bg-dark-100 text-dark-700">
-                LeetCode Style
-              </span>
-            </div>
-            <h1 className="text-xl sm:text-2xl font-bold text-dark-900 tracking-tight">
-              Quantum Circuit Practice Problems
-            </h1>
-            <p className="text-xs sm:text-sm text-dark-600 leading-normal">
-              Solve circuit construction challenges under strict automated verification. Filter problems by specific quantum algorithm, foundational topics, or difficulty levels.
-            </p>
-          </div>
+      {/* Compact Header */}
+      <div className="bg-white rounded-2xl border border-dark-200 px-4 py-3 sm:px-5 sm:py-3.5 shadow-xs flex flex-wrap items-center justify-between gap-3">
+        <div className="space-y-0.5">
+          <h1 className="text-base sm:text-lg font-bold text-dark-900 tracking-tight">
+            Practice Problems
+          </h1>
+          <p className="text-xs text-dark-500">
+            Build and test quantum circuits against strict test cases.
+          </p>
+        </div>
 
-          {/* Quick Stats Card */}
-          <div className="bg-dark-900 text-white rounded-xl p-4 min-w-[180px] border border-dark-800 shadow-sm space-y-1.5">
-            <div className="flex items-center justify-between text-xs text-dark-400">
-              <span>Solved Progress</span>
-              <Trophy className="w-4 h-4 text-amber-400" />
-            </div>
-            <div className="text-xl font-bold text-white">
-              {solvedCount} <span className="text-xs font-normal text-dark-400">/ {totalCount}</span>
-            </div>
-            <div className="w-full bg-dark-800 rounded-full h-1.5 overflow-hidden">
-              <div
-                className="bg-emerald-500 h-full rounded-full transition-all duration-500"
-                style={{ width: `${(solvedCount / totalCount) * 100}%` }}
-              />
-            </div>
+        {/* Compact Solved Progress */}
+        <div className="flex items-center gap-3 bg-dark-50 px-3 py-1.5 rounded-xl border border-dark-200">
+          <Trophy className="w-4 h-4 text-amber-500 shrink-0" />
+          <div className="text-xs font-semibold text-dark-800">
+            Solved: <span className="font-bold text-dark-900">{solvedCount}</span> <span className="text-dark-400">/ {totalCount}</span>
+          </div>
+          <div className="w-20 bg-dark-200 rounded-full h-1.5 overflow-hidden">
+            <div
+              className="bg-emerald-500 h-full rounded-full transition-all duration-500"
+              style={{ width: `${(solvedCount / totalCount) * 100}%` }}
+            />
           </div>
         </div>
       </div>
 
-      {/* Algorithm Filter Pills Bar */}
-      <div className="bg-white rounded-2xl border border-dark-200 p-2.5 sm:p-3 shadow-xs space-y-2">
-        <div className="flex items-center justify-between px-1">
-          <span className="text-xs font-bold text-dark-800 uppercase tracking-wider flex items-center gap-1.5">
-            <Filter className="w-3.5 h-3.5 text-primary-600" />
-            Filter By Quantum Algorithm
-          </span>
-          <span className="text-[11px] text-dark-500 font-medium">
-            Showing {filteredProblems.length} of {totalCount} problems
-          </span>
-        </div>
+      {/* Compact Filters Bar with Algorithm Dropdown */}
+      <div className="bg-white rounded-2xl border border-dark-200 p-2.5 sm:p-3 shadow-xs flex flex-wrap items-center justify-between gap-2.5">
+        <div className="flex flex-wrap items-center gap-2.5 flex-1 min-w-0">
+          {/* Search Input - Expands to fill available space */}
+          <div className="relative flex-1 min-w-[200px]">
+            <Search className="w-3.5 h-3.5 text-dark-400 absolute left-2.5 top-1/2 -translate-y-1/2" />
+            <input
+              type="text"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              placeholder="Search problems..."
+              className="w-full pl-8 pr-3 py-1.5 rounded-xl bg-dark-50 border border-dark-200 text-xs text-dark-900 placeholder:text-dark-400 focus:outline-none focus:border-primary-500"
+            />
+          </div>
 
-        <div className="flex items-center gap-1.5 overflow-x-auto pb-1 scrollbar-none">
-          {ALGORITHM_OPTIONS.map((algo) => {
-            const isSelected = selectedAlgorithm === algo.slug;
-            const count = getAlgoCount(algo.slug);
-            const Icon = getAlgoIcon(algo.slug);
+          {/* Algorithm Dropdown */}
+          <div className="flex items-center gap-1.5 text-xs text-dark-600">
+            <span className="text-dark-500 font-medium">Algorithm:</span>
+            <select
+              value={selectedAlgorithm}
+              onChange={(e) => setSelectedAlgorithm(e.target.value as AlgorithmSlug | 'all')}
+              className="bg-dark-50 border border-dark-200 rounded-xl px-2.5 py-1.5 text-xs font-medium text-dark-900 focus:outline-none cursor-pointer"
+            >
+              {ALGORITHM_OPTIONS.map((algo) => (
+                <option key={algo.slug} value={algo.slug}>
+                  {algo.label}
+                </option>
+              ))}
+            </select>
+          </div>
 
-            return (
+          {/* Category Dropdown */}
+          <div className="flex items-center gap-1.5 text-xs text-dark-600">
+            <span className="text-dark-500 font-medium">Topic:</span>
+            <select
+              value={selectedCategory}
+              onChange={(e) => setSelectedCategory(e.target.value)}
+              className="bg-dark-50 border border-dark-200 rounded-xl px-2.5 py-1.5 text-xs font-medium text-dark-900 focus:outline-none cursor-pointer"
+            >
+              {categories.map((c) => (
+                <option key={c} value={c}>
+                  {c === 'All' ? 'All Topics' : c}
+                </option>
+              ))}
+            </select>
+          </div>
+
+          {/* Difficulty & Premium Filter */}
+          <div className="flex items-center gap-0.5 bg-dark-100 p-0.5 rounded-xl border border-dark-200 text-xs">
+            {['All', 'Easy', 'Medium', 'Hard', 'Premium'].map((diff) => (
               <button
-                key={algo.slug}
-                type="button"
-                onClick={() => setSelectedAlgorithm(algo.slug)}
-                title={algo.description}
-                className={`flex items-center gap-2 px-3 py-1.5 rounded-xl text-xs font-semibold whitespace-nowrap transition-all ${
-                  isSelected
-                    ? 'bg-dark-900 text-white shadow-xs scale-[1.02]'
-                    : 'bg-dark-50 hover:bg-dark-100 text-dark-700 border border-dark-200/60'
+                key={diff}
+                onClick={() => setSelectedDifficulty(diff)}
+                title={diff === 'Premium' ? 'Premium challenges' : `${diff} difficulty`}
+                className={`px-2 py-1 rounded-lg font-semibold transition-all flex items-center gap-1 text-[11px] ${
+                  selectedDifficulty === diff
+                    ? diff === 'Premium'
+                      ? 'bg-gradient-to-r from-amber-500 to-yellow-500 text-white shadow-xs'
+                      : 'bg-white text-dark-900 shadow-xs'
+                    : diff === 'Premium'
+                    ? 'text-amber-700 hover:text-amber-900 font-bold'
+                    : 'text-dark-600 hover:text-dark-900'
                 }`}
               >
-                <Icon className={`w-3.5 h-3.5 ${isSelected ? 'text-primary-400' : 'text-dark-500'}`} />
-                <span>{algo.label}</span>
-                <span
-                  className={`ml-0.5 px-1.5 py-0.5 rounded-full text-[10px] font-bold ${
-                    isSelected
-                      ? 'bg-dark-800 text-white'
-                      : 'bg-white text-dark-600 border border-dark-200/80'
-                  }`}
-                >
-                  {count}
-                </span>
+                {diff === 'Premium' ? (
+                  <Crown className="w-3.5 h-3.5 text-amber-500 fill-amber-400" />
+                ) : (
+                  <span>{diff}</span>
+                )}
               </button>
-            );
-          })}
-        </div>
-      </div>
-
-      {/* Search and Secondary Filters (Difficulty & Category) */}
-      <div className="bg-white rounded-2xl border border-dark-200 p-4 shadow-xs flex flex-wrap items-center justify-between gap-4">
-        {/* Search */}
-        <div className="relative flex-1 min-w-[240px]">
-          <Search className="w-4 h-4 text-dark-400 absolute left-3 top-1/2 -translate-y-1/2" />
-          <input
-            type="text"
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            placeholder="Search problems, topics, algorithms, or gate sets..."
-            className="w-full pl-9 pr-4 py-2 rounded-xl bg-dark-50 border border-dark-200 text-xs text-dark-900 placeholder:text-dark-400 focus:outline-none focus:border-primary-500"
-          />
-        </div>
-
-        {/* Difficulty & Premium Filter */}
-        <div className="flex items-center gap-1 bg-dark-100 p-1 rounded-xl border border-dark-200 text-xs">
-          {['All', 'Easy', 'Medium', 'Hard', 'Premium'].map((diff) => (
-            <button
-              key={diff}
-              onClick={() => setSelectedDifficulty(diff)}
-              className={`px-3 py-1 rounded-lg font-semibold transition-all flex items-center gap-1 ${
-                selectedDifficulty === diff
-                  ? diff === 'Premium'
-                    ? 'bg-gradient-to-r from-amber-500 to-yellow-500 text-white shadow-xs'
-                    : 'bg-white text-dark-900 shadow-xs'
-                  : diff === 'Premium'
-                  ? 'text-amber-700 hover:text-amber-900 font-bold'
-                  : 'text-dark-600 hover:text-dark-900'
-              }`}
-            >
-              {diff === 'Premium' && <Crown className="w-3 h-3 text-amber-500 fill-amber-400" />}
-              <span>{diff}</span>
-            </button>
-          ))}
-        </div>
-
-        {/* Category Dropdown */}
-        <div className="flex items-center gap-1.5 text-xs text-dark-600">
-          <span className="text-dark-500 font-medium">Topic:</span>
-          <select
-            value={selectedCategory}
-            onChange={(e) => setSelectedCategory(e.target.value)}
-            className="bg-dark-50 border border-dark-200 rounded-xl px-2.5 py-1.5 text-xs font-medium text-dark-900 focus:outline-none cursor-pointer"
-          >
-            {categories.map((c) => (
-              <option key={c} value={c}>
-                {c === 'All' ? 'All Topics / Categories' : c}
-              </option>
             ))}
-          </select>
+          </div>
         </div>
 
-        {/* Reset button if filters are active */}
-        {(selectedAlgorithm !== 'all' || selectedCategory !== 'All' || selectedDifficulty !== 'All' || searchQuery) && (
-          <button
-            onClick={resetFilters}
-            className="flex items-center gap-1 text-xs text-primary-600 hover:text-primary-700 font-semibold px-2 py-1 rounded-lg hover:bg-primary-50 transition-colors"
-            title="Reset all active filters"
-          >
-            <RotateCcw className="w-3.5 h-3.5" />
-            <span>Reset</span>
-          </button>
-        )}
+        <div className="flex items-center gap-2 shrink-0">
+          <span className="text-[11px] text-dark-500 font-medium">
+            {filteredProblems.length === totalCount ? `${totalCount} problems` : `${filteredProblems.length} of ${totalCount}`}
+          </span>
+        </div>
       </div>
 
       {/* Problem List Table */}
@@ -351,9 +306,11 @@ export default function PracticeListPage() {
                               <MathRenderer text={prob.title} />
                             </span>
                             {isPremium && (
-                              <span className="inline-flex items-center gap-0.5 text-[8px] font-extrabold text-amber-800 bg-amber-100 border border-amber-300 px-1.5 py-0.5 rounded shrink-0">
-                                <Crown className="w-2.5 h-2.5 text-amber-600 fill-amber-500" />
-                                Premium
+                              <span
+                                title="Premium problem"
+                                className="inline-flex items-center text-[8px] font-extrabold text-amber-800 bg-amber-100 border border-amber-300 p-0.5 px-1 rounded shrink-0"
+                              >
+                                <Crown className="w-3 h-3 text-amber-600 fill-amber-500" />
                               </span>
                             )}
                           </div>

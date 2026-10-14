@@ -543,18 +543,8 @@ export function CircuitBuilder() {
 
         <div className="lg:col-span-5 lg:row-span-2 self-stretch min-w-0 bg-white rounded-xl border border-dark-200 p-2.5 sm:p-3 shadow-xs space-y-2.5 flex flex-col">
           <div className="flex items-center justify-between gap-2 px-0.5">
-            <h3 className="font-bold text-sm text-dark-900">Bloch / Code</h3>
+            <h3 className="font-bold text-sm text-dark-900">Code / Bloch Sphere</h3>
             <div className="flex items-center bg-dark-100 p-1 rounded-xl border border-dark-200 shrink-0 shadow-2xs">
-              <button
-                onClick={() => setRightPanelMode('vectors')}
-                className={`px-3 py-1 rounded-lg font-bold text-[11px] transition-all cursor-pointer ${
-                  rightPanelMode === 'vectors'
-                    ? 'bg-primary-600 text-white shadow-sm'
-                    : 'text-dark-700 hover:bg-white hover:text-dark-900'
-                }`}
-              >
-                {numQubits > 1 ? `${numQubits} Qubit Vectors` : 'Qubit Vector'}
-              </button>
               <button
                 onClick={() => setRightPanelMode('code')}
                 className={`px-3 py-1 rounded-lg font-bold text-[11px] transition-all cursor-pointer ${
@@ -564,6 +554,16 @@ export function CircuitBuilder() {
                 }`}
               >
                 Code
+              </button>
+              <button
+                onClick={() => setRightPanelMode('vectors')}
+                className={`px-3 py-1 rounded-lg font-bold text-[11px] transition-all cursor-pointer ${
+                  rightPanelMode === 'vectors'
+                    ? 'bg-primary-600 text-white shadow-sm'
+                    : 'text-dark-700 hover:bg-white hover:text-dark-900'
+                }`}
+              >
+                {numQubits > 1 ? `${numQubits} Qubit Vectors` : 'Bloch Sphere'}
               </button>
             </div>
           </div>
