@@ -469,13 +469,19 @@ Could you teach me the core quantum principles behind these mistakes in simple t
         {/* Keep the single progression action at the bottom-right. Retrying and
             teaching remain available in the mistake banner above. */}
         <div className="mt-auto flex justify-end pt-2 border-t border-dark-100">
-          {passed && onProceedToSkillBase && (
+          {onProceedToSkillBase && (
             <button
               onClick={onProceedToSkillBase}
-              className="flex items-center gap-1.5 px-4 py-2 rounded-lg bg-primary-600 hover:bg-primary-700 font-bold text-[11px] text-white shadow-xs transition-colors cursor-pointer"
+              disabled={!passed}
+              title={!passed ? 'Reach 100% to unlock the next module' : 'Continue to the next module'}
+              className={`flex items-center gap-1.5 px-4 py-2 rounded-lg font-bold text-[11px] shadow-xs transition-colors ${
+                passed
+                  ? 'bg-primary-600 hover:bg-primary-700 text-white cursor-pointer'
+                  : 'bg-dark-100 text-dark-400 cursor-not-allowed opacity-70'
+              }`}
             >
-              <Sparkles className="w-4 h-4 text-amber-300" />
-              <span>Next Module: Skill Base &amp; Practice</span>
+              <Sparkles className={`w-4 h-4 ${passed ? 'text-amber-300' : 'text-dark-400'}`} />
+              <span>{passed ? 'Next Module: Skill Base &amp; Practice' : 'Next Module (Reach 100% to unlock)'}</span>
               <ArrowRight className="w-4 h-4" />
             </button>
           )}
