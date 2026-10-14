@@ -163,7 +163,7 @@ export function AlgorithmModuleView({
   const [activeTab, setActiveTab] = useState<'intuition' | 'math' | 'circuit' | 'build_it' | 'quiz' | 'skill_base'>('intuition');
   const [currentMathStep, setCurrentMathStep] = useState(0);
   const [showAllMathSteps, setShowAllMathSteps] = useState(false);
-  const [rightPanelMode, setRightPanelMode] = useState<'vectors' | 'code'>('vectors');
+  const [rightPanelMode, setRightPanelMode] = useState<'vectors' | 'code'>('code');
   const moduleTopRef = useRef<HTMLDivElement>(null);
   const [simResult, setSimResult] = useState<SimulationResult | null>(null);
 
@@ -364,9 +364,17 @@ export function AlgorithmModuleView({
   }, [circuitGates, qubitCount, simResult]);
   const currentSnapshot = snapshots[currentStepIdx] || null;
 
-  const currentBlochs = currentSnapshot ? currentSnapshot.bloch_vectors : (simResult?.bloch_vectors || []);
+  const rawCurrentBlochs = currentSnapshot ? currentSnapshot.bloch_vectors : (simResult?.bloch_vectors || []);
+  const currentBlochs = Array.from(
+    { length: qubitCount },
+    (_, index) => rawCurrentBlochs[index] || null
+  );
   const currentProbs = currentSnapshot ? currentSnapshot.probabilities : (simResult?.probabilities || {});
-  const currentAmps = currentSnapshot ? currentSnapshot.statevector : (simResult?.statevector || []);
+  const rawCurrentAmps = currentSnapshot ? currentSnapshot.statevector : (simResult?.statevector || []);
+  const currentAmps = Array.from(
+    { length: 2 ** qubitCount },
+    (_, index) => rawCurrentAmps[index] || { re: 0, im: 0, magnitude: 0, phase: 0 }
+  );
 
   const histogramData = Object.entries(currentProbs).map(([state, prob]) => ({
     state: `|${state}⟩`,
@@ -747,7 +755,7 @@ export function AlgorithmModuleView({
         </div>
       )}      {/* Stage 3: Interactive Circuit Simulation (High-Density Cockpit) */}
       {activeTab === 'circuit' && (
-        <div className="flex min-h-0 flex-1 flex-col space-y-2 animate-fadeIn">
+        <div className="flex min-h-0 flex-1 flex-col space-y-2 overflow-hidden animate-fadeIn">
           {/* Unified Controls Strip: Oracle Selector + Scrubber & Current Step Info */}
           <div className="bg-white rounded-xl border border-dark-200 px-3.5 py-2 shadow-xs space-y-1.5">
             <div className="flex flex-wrap items-center justify-between gap-2 text-xs">
@@ -949,7 +957,7 @@ export function AlgorithmModuleView({
               </div>
 
               {/* Bottom Split Row: Measurement Probabilities + Quantum Statevector */}
-              <div className="grid min-h-0 grid-cols-1 sm:grid-cols-2 gap-2 items-stretch">
+              <div className="grid min-h-0 grid-cols-1 sm:grid-cols-2 gap-2 items-stretch overflow-hidden">
                 {/* Measurement Probabilities Histogram */}
                 <div className="bg-white rounded-xl border border-dark-200 p-2.5 sm:p-3 shadow-xs space-y-1 flex min-h-0 flex-col h-full">
                   <div className="flex items-center justify-between">
@@ -982,10 +990,12 @@ export function AlgorithmModuleView({
                 <div className="bg-white rounded-xl border border-dark-200 p-2.5 sm:p-3 shadow-xs gap-2 flex min-h-0 flex-col h-full">
                   <div className="flex items-center justify-between">
                     <h4 className="font-bold text-[11px] text-dark-900">Quantum Statevector |ψ⟩</h4>
-                    <span className="text-[9px] font-mono text-dark-500">2 Qubits (4 states)</span>
+                    <span className="text-[9px] font-mono text-dark-500">
+                      {qubitCount} Qubits ({2 ** qubitCount} states)
+                    </span>
                   </div>
                   {currentAmps && currentAmps.length > 0 ? (
-                    <div className="grid grid-cols-2 auto-rows-fr gap-1.5 text-xs font-mono flex-1">
+                    <div className="grid min-h-0 grid-cols-2 auto-rows-max gap-1.5 text-xs font-mono flex-1 overflow-y-auto pr-0.5">
                       {currentAmps.map((amp, idx) => {
                         const basisStr = idx.toString(2).padStart(qubitCount, '0');
                         const re = amp.re ?? 0;
@@ -1012,7 +1022,7 @@ export function AlgorithmModuleView({
             </div>
 
             {/* Right Column: Live 3D Bloch Spheres */}
-            <div className="lg:col-span-5 lg:row-span-2 self-stretch min-w-0 bg-white rounded-xl border border-dark-200 p-3 sm:p-4 shadow-xs space-y-3 flex flex-col">
+            <div className="lg:col-span-5 lg:row-span-2 self-stretch min-h-0 min-w-0 overflow-hidden bg-white rounded-xl border border-dark-200 p-3 sm:p-4 shadow-xs space-y-3 flex flex-col">
               <div className="flex items-center justify-between gap-2 px-0.5">
                 <h3 className="font-bold text-sm text-dark-900">Live 3D Bloch Spheres</h3>
                 <div className="flex items-center bg-dark-100 p-1 rounded-xl border border-dark-200 shrink-0 shadow-2xs">
@@ -1024,7 +1034,7 @@ export function AlgorithmModuleView({
                         : 'text-dark-700 hover:bg-white hover:text-dark-900'
                     }`}
                   >
-                    {currentBlochs.length > 1 ? '2 Qubit Vectors' : 'Qubit Vector'}
+                    {currentBlochs.length > 1 ? `${currentBlochs.length} Qubit Vectors` : 'Qubit Vector'}
                   </button>
                   <button
                     onClick={() => setRightPanelMode('code')}
@@ -1044,13 +1054,13 @@ export function AlgorithmModuleView({
                   <span className="block text-[10px] font-mono text-dark-500">
                     {currentBlochs.length} Qubit Vector{currentBlochs.length > 1 ? 's' : ''}
                   </span>
-                  <div className={`grid flex-1 grid-cols-1 ${currentBlochs.length > 1 ? 'grid-cols-2' : ''} gap-2`}>
+                  <div className={`grid min-h-0 flex-1 grid-cols-1 ${currentBlochs.length > 1 ? 'grid-cols-2' : ''} auto-rows-max gap-2 overflow-y-auto pr-0.5`}>
                     {currentBlochs.map((bv, idx) => (
-                      <div key={idx} className="w-full h-full">
+                      <div key={idx} className="w-full min-h-0">
                         <BlochSphere3D
                           bloch={bv}
                           qubitIndex={bv ? bv.qubit : idx}
-                          size={160}
+                          size={currentBlochs.length > 2 ? 140 : 160}
                           compact={true}
                         />
                       </div>

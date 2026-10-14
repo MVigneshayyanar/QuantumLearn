@@ -193,7 +193,7 @@ export function BuildItTab({ moduleSlug, onProceedToQuiz }: BuildItTabProps) {
   const [evaluationResult, setEvaluationResult] = useState<BuildItEvaluation | null>(null);
   const [aiCoachingMessage, setAiCoachingMessage] = useState<string | null>(null);
   const [isLoadingAi, setIsLoadingAi] = useState(false);
-  const [rightPanelMode, setRightPanelMode] = useState<'vectors' | 'code' | 'verify'>('vectors');
+  const [rightPanelMode, setRightPanelMode] = useState<'vectors' | 'code' | 'verify'>('code');
   const [isVerifyEnabled, setIsVerifyEnabled] = useState(false);
 
   // Request dynamic Socratic coaching from Schrödinger AI
@@ -402,8 +402,14 @@ Return 3 SHORT lines (max 50 words total):
 
   // Live simulation for preview
   const liveSim = simulateLocalCircuit(numQubits, gates, 1024);
-  const liveBlochs = liveSim?.bloch_vectors || [];
-  const liveAmps = liveSim?.statevector || [];
+  const liveBlochs = Array.from(
+    { length: numQubits },
+    (_, index) => liveSim?.bloch_vectors?.[index] || null
+  );
+  const liveAmps = Array.from(
+    { length: 2 ** numQubits },
+    (_, index) => liveSim?.statevector?.[index] || { re: 0, im: 0, magnitude: 0, phase: 0 }
+  );
   const histogramData = Object.entries(liveSim.probabilities).map(([state, prob]) => ({
     state: `|${state}⟩`,
     prob: Number((prob * 100).toFixed(1))
@@ -714,7 +720,7 @@ Return 3 SHORT lines (max 50 words total):
           </div>
 
           {/* Bottom Split Row: Measurement Probabilities + Quantum Statevector (Identical to Circuit Tab) */}
-          <div className="grid min-h-0 grid-cols-1 sm:grid-cols-2 gap-2 items-stretch lg:h-[250px]">
+          <div className="grid min-h-0 grid-cols-1 sm:grid-cols-2 gap-2 items-stretch overflow-hidden lg:h-[250px]">
             {/* Measurement Probabilities Histogram */}
             <div className="bg-white rounded-xl border border-dark-200 p-2.5 sm:p-3 shadow-xs space-y-1 flex min-h-0 flex-col h-full">
               <div className="flex items-center justify-between">
@@ -750,7 +756,7 @@ Return 3 SHORT lines (max 50 words total):
                 <span className="text-[9px] font-mono text-dark-500">{numQubits} Qubits ({Math.pow(2, numQubits)} states)</span>
               </div>
               {liveAmps && liveAmps.length > 0 ? (
-                <div className="grid grid-cols-2 auto-rows-fr gap-1 text-xs font-mono flex-1 min-h-0">
+                <div className="grid grid-cols-2 auto-rows-max gap-1 text-xs font-mono flex-1 min-h-0 overflow-y-auto pr-0.5">
                   {liveAmps.map((amp, idx) => {
                     const basisStr = idx.toString(2).padStart(numQubits, '0');
                     const re = amp.re ?? 0;
@@ -828,13 +834,17 @@ Return 3 SHORT lines (max 50 words total):
               <span className="block text-[10px] font-mono text-dark-500">
                 {liveBlochs.length} Qubit Vector{liveBlochs.length > 1 ? 's' : ''}
               </span>
-              <div className={`grid flex-1 grid-cols-1 ${liveBlochs.length > 1 ? 'grid-cols-2' : ''} gap-2`}>
+              <div
+                className={`grid flex-1 min-h-0 grid-cols-1 ${
+                  liveBlochs.length > 1 ? 'sm:grid-cols-2' : ''
+                } gap-2 overflow-y-auto`}
+              >
                 {liveBlochs.map((bv, idx) => (
                   <div key={idx} className="w-full h-full">
                     <BlochSphere3D
                       bloch={bv}
                       qubitIndex={bv ? bv.qubit : idx}
-                      size={160}
+                      size={liveBlochs.length > 2 ? 140 : 160}
                       compact={true}
                     />
                   </div>

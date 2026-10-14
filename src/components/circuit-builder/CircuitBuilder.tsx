@@ -1,26 +1,17 @@
 'use client';
 
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useCircuitStore } from '@/lib/state-store';
 import { useAccessibility } from '@/lib/accessibility-context';
 import { GateType, PlacedGate } from '@/lib/types';
-import { translations } from '@/lib/i18n';
+import { generateQasm } from '@/lib/quantum-simulator-core';
 import { BlochSphere3D } from '@/components/bloch-sphere/BlochSphere3D';
 import {
-  Play,
   RotateCcw,
-  Download,
   Code,
-  Sliders,
-  HelpCircle,
   Copy,
   Check,
-  Zap,
   Sparkles,
-  Info,
-  ChevronLeft,
-  ChevronRight,
-  Server
 } from 'lucide-react';
 import { QuantumCircuitCodePanel } from '@/components/circuit/QuantumCircuitCodePanel';
 import { ResponsiveContainer, BarChart, Bar, XAxis, YAxis, Tooltip, Cell } from 'recharts';
@@ -41,22 +32,17 @@ export function CircuitBuilder() {
     setNumQubits,
     gates,
     shots,
-    setShots,
     addGate,
     removeGateAt,
     clearCircuit,
     loadPreset,
     selectedSlot,
     setSelectedSlot,
-    activeStep,
-    setActiveStep,
     simResult,
-    isLoading,
     runSimulation
   } = useCircuitStore();
 
-  const { language, announce, explanationMode } = useAccessibility();
-  const t = translations[language];
+  const { announce } = useAccessibility();
 
   const [selectedGateType, setSelectedGateType] = useState<GateType>('h');
   const [controlQubit, setControlQubit] = useState<number>(0);
@@ -67,9 +53,7 @@ export function CircuitBuilder() {
   const [stepScrubber, setStepScrubber] = useState<number>(0);
   const [dragOverSlot, setDragOverSlot] = useState<{ qubit: number; step: number } | null>(null);
   const [isDraggingActive, setIsDraggingActive] = useState<boolean>(false);
-  const [rightPanelMode, setRightPanelMode] = useState<'vectors' | 'code'>('vectors');
-  const [activeBackend, setActiveBackend] = useState<'qiskit' | 'cirq' | 'pennylane' | 'qbraid'>('qiskit');
-  const gridContainerRef = useRef<HTMLDivElement>(null);
+  const [rightPanelMode, setRightPanelMode] = useState<'vectors' | 'code'>('code');
 
   // Initialize simulation on mount
   useEffect(() => {
@@ -210,26 +194,20 @@ export function CircuitBuilder() {
     }
   };
 
-  const currentSnapshot = simResult?.step_by_step && simResult.step_by_step[stepScrubber]
-    ? simResult.step_by_step[stepScrubber]
-    : null;
-
-  const currentBlochVectors = currentSnapshot ? currentSnapshot.bloch_vectors : (simResult?.bloch_vectors || []);
-  const currentProbs = currentSnapshot ? currentSnapshot.probabilities : (simResult?.probabilities || {});
-  const currentAmplitudes = currentSnapshot ? currentSnapshot.statevector : (simResult?.statevector || []);
-
-  const histogramData = Object.entries(simResult?.measurement_counts || currentProbs).map(([basis, countOrProb]) => ({
-    state: `|${basis}⟩`,
-    value: typeof countOrProb === 'number' ? countOrProb : 0,
-    prob: (currentProbs[basis] || 0) * 100
+  const currentSnapshot = simResult?.step_by_step?.[stepScrubber] || null;
+  const currentBlochVectors = currentSnapshot?.bloch_vectors || simResult?.bloch_vectors || [];
+  const currentProbabilities = currentSnapshot?.probabilities || simResult?.probabilities || {};
+  const currentAmplitudes = currentSnapshot?.statevector || simResult?.statevector || [];
+  const histogramData = Object.entries(currentProbabilities).map(([state, probability]) => ({
+    state: `|${state}⟩`,
+    prob: Number((probability * 100).toFixed(1))
   }));
 
   const copyQasmCode = () => {
-    if (simResult?.qasm) {
-      navigator.clipboard.writeText(simResult.qasm);
-      setCopiedQasm(true);
-      setTimeout(() => setCopiedQasm(false), 2000);
-    }
+    const qasm = simResult?.qasm || generateQasm(numQubits, gates);
+    navigator.clipboard.writeText(qasm);
+    setCopiedQasm(true);
+    setTimeout(() => setCopiedQasm(false), 2000);
   };
 
   const generatePythonQiskitCode = () => {
@@ -270,17 +248,10 @@ export function CircuitBuilder() {
 
   const renderVisualWorkspace = () => (
     <>
-      {/* Gate Toolbox */}
-      <div className="bg-white rounded-2xl border border-dark-200 p-5 shadow-xs">
-        <div className="flex items-center justify-between mb-3">
-          <div className="flex items-center gap-2">
-            <Sparkles className="w-4 h-4 text-primary-600" />
-            <h3 className="font-bold text-sm text-dark-900">Quantum Gate Toolbox</h3>
-            <span className="text-xs text-dark-500">(Click a gate or press hotkey to place on selected wire)</span>
-          </div>
-          <span className="text-xs text-primary-700 bg-primary-50 px-2.5 py-0.5 rounded-full font-medium">
-            Keyboard Accessible: Arrow keys + Hotkeys
-          </span>
+      <div className="space-y-3">
+        <div className="flex items-center gap-2 text-xs font-semibold text-dark-700">
+          <Sparkles className="w-4 h-4 text-primary-600" />
+          <span>Gates</span>
         </div>
 
         <div className="flex flex-wrap items-center gap-2">
@@ -317,10 +288,9 @@ export function CircuitBuilder() {
           })}
         </div>
 
-        {/* Multi-qubit configuration if CX/CZ/SWAP selected */}
         {['cx', 'cz', 'swap'].includes(selectedGateType) && (
-          <div className="mt-3 p-3 bg-dark-50 rounded-xl border border-dark-200 flex items-center gap-4 text-xs">
-            <span className="font-semibold text-dark-800">2-Qubit Target Assignment:</span>
+          <div className="flex flex-wrap items-center gap-3 rounded-xl border border-dark-200 bg-dark-50 px-3 py-2 text-xs">
+            <span className="font-semibold text-dark-800">2-qubit setup</span>
             <label className="flex items-center gap-1.5 text-dark-700">
               Control:
               <select
@@ -349,16 +319,13 @@ export function CircuitBuilder() {
         )}
       </div>
 
-      {/* Unified Cockpit Grid: Circuit Board + (Probs & Statevector) on Left, Live 3D Bloch Spheres on Right */}
-      <div className="grid min-h-0 flex-1 grid-cols-1 gap-3 lg:grid-cols-12 lg:grid-rows-[auto_minmax(0,1fr)] lg:items-stretch">
-        {/* Left Column (cols 1-7): Circuit Board + Bottom Split Row */}
-        <div className="lg:col-span-7 lg:row-span-2 grid min-w-0 grid-rows-[auto_minmax(0,1fr)] gap-3">
-          {/* Main Interactive Circuit Wire Grid Card */}
-          <div className="bg-white rounded-xl border border-dark-200 p-3 sm:p-4 shadow-xs space-y-2 min-h-[220px]">
+      <div className="grid min-h-0 flex-1 grid-cols-1 gap-2 lg:grid-cols-12 lg:grid-rows-[auto_minmax(0,1fr)] lg:items-stretch">
+        <div className="lg:col-span-7 lg:row-span-2 grid min-w-0 grid-rows-[auto_minmax(0,1fr)] gap-2">
+          <div className="bg-white rounded-xl border border-dark-200 p-3 shadow-xs space-y-2 min-h-[180px]">
             <div className="flex flex-wrap items-center justify-between gap-1.5">
               <div className="flex items-center gap-2">
                 <Sparkles className="w-3.5 h-3.5 text-primary-600" />
-                <h3 className="font-bold text-sm text-dark-900">Quantum Circuit Board</h3>
+                <h3 className="font-bold text-sm text-dark-900">Circuit</h3>
               </div>
               <span className="text-xs text-dark-500 font-mono">
                 {numQubits} Qubit{numQubits > 1 ? 's' : ''} · {MAX_STEPS} Steps
@@ -521,33 +488,28 @@ export function CircuitBuilder() {
 
             <div className="pt-2 border-t border-dark-100 flex items-center justify-between text-[11px] text-dark-500">
               <span>💡 Click to place gate · Right-click/Del to remove</span>
-              <span>Backend: <strong className="text-dark-800">{activeBackend.toUpperCase()}</strong></span>
+              <span>{numQubits} qubits</span>
             </div>
           </div>
 
-          {/* Bottom Split Row: Measurement Probabilities + Quantum Statevector */}
-          <div className="grid min-h-0 grid-cols-1 sm:grid-cols-2 gap-2 items-stretch">
-            {/* Measurement Probabilities Histogram */}
-            <div className="bg-white rounded-xl border border-dark-200 p-2.5 sm:p-3 shadow-xs space-y-1 flex min-h-0 flex-col h-full">
+          <div className="grid min-h-0 grid-cols-1 gap-2 sm:grid-cols-2 lg:h-[250px]">
+            <div className="bg-white rounded-xl border border-dark-200 p-2.5 sm:p-3 shadow-xs space-y-1 flex min-h-0 flex-col">
               <div className="flex items-center justify-between">
                 <h3 className="font-bold text-[11px] text-dark-900">Measurement Probabilities</h3>
                 <span className="text-[9px] text-dark-500 font-mono">{shots} shots</span>
               </div>
-              <div className="relative mx-auto mt-1 flex-1 w-full max-w-[280px] aspect-square min-h-[180px] max-h-[280px]">
+              <div className="relative mx-auto mt-1 min-h-0 w-full max-w-[280px] flex-1">
                 <ResponsiveContainer width="100%" height="100%">
                   <BarChart data={histogramData} margin={{ top: 8, right: 10, left: -18, bottom: 0 }}>
                     <XAxis dataKey="state" tick={{ fontSize: 10 }} />
                     <YAxis tick={{ fontSize: 9 }} domain={[0, 100]} unit="%" />
                     <Tooltip
-                      formatter={(val: any) => [`${val}% (${Math.round((Number(val) / 100) * shots)} shots)`, 'Probability']}
+                      formatter={(value: number) => [`${value}%`, 'Probability']}
                       contentStyle={{ backgroundColor: '#18181b', color: '#fff', borderRadius: '6px', fontSize: '10px', padding: '4px 8px' }}
                     />
                     <Bar dataKey="prob" fill="#4f46e5" radius={[3, 3, 0, 0]}>
                       {histogramData.map((entry, index) => (
-                        <Cell
-                          key={`cell-${index}`}
-                          fill={entry.prob > 50 ? '#4f46e5' : '#818cf8'}
-                        />
+                        <Cell key={`cell-${index}`} fill={entry.prob > 50 ? '#4f46e5' : '#818cf8'} />
                       ))}
                     </Bar>
                   </BarChart>
@@ -555,43 +517,33 @@ export function CircuitBuilder() {
               </div>
             </div>
 
-            {/* Quantum Statevector Readout */}
-            <div className="bg-white rounded-xl border border-dark-200 p-2.5 sm:p-3 shadow-xs gap-2 flex min-h-0 flex-col h-full">
+            <div className="bg-white rounded-xl border border-dark-200 p-2.5 sm:p-3 shadow-xs gap-2 flex min-h-0 flex-col overflow-hidden">
               <div className="flex items-center justify-between">
                 <h4 className="font-bold text-[11px] text-dark-900">Quantum Statevector |ψ⟩</h4>
-                <span className="text-[9px] font-mono text-dark-500">{numQubits} Qubits ({Math.pow(2, numQubits)} states)</span>
+                <span className="text-[9px] font-mono text-dark-500">{numQubits} Qubits ({2 ** numQubits} states)</span>
               </div>
-              {currentAmplitudes && currentAmplitudes.length > 0 ? (
-                <div className="grid grid-cols-2 auto-rows-fr gap-1.5 text-xs font-mono flex-1">
-                  {currentAmplitudes.map((amp, idx) => {
-                    const basisStr = idx.toString(2).padStart(numQubits, '0');
-                    const re = amp.re ?? 0;
-                    const im = amp.im ?? 0;
-                    const magSq = (re * re + im * im) * 100;
-                    return (
-                      <div key={idx} className="p-1.5 bg-dark-50 rounded-lg border border-dark-200 text-center flex flex-col items-center justify-center">
-                        <span className="font-bold text-primary-700 block text-lg">|{basisStr}⟩</span>
-                        <span className="text-sm text-dark-700 block mt-1">
-                          {re.toFixed(2)}{im >= 0 ? '+' : ''}{im.toFixed(2)}i
-                        </span>
-                        <span className="text-sm font-sans font-semibold text-dark-500 block mt-0.5">
-                          {magSq.toFixed(1)}%
-                        </span>
-                      </div>
-                    );
-                  })}
-                </div>
-              ) : (
-                <p className="text-[11px] text-dark-500">Run simulation to view statevector.</p>
-              )}
+              <div className="grid min-h-0 flex-1 grid-cols-2 auto-rows-max gap-1 overflow-y-auto pr-0.5 text-xs font-mono">
+                {currentAmplitudes.slice(0, 2 ** numQubits).map((amp, idx) => {
+                  const basisStr = idx.toString(2).padStart(numQubits, '0');
+                  const re = amp.re ?? 0;
+                  const im = amp.im ?? 0;
+                  const probability = (re * re + im * im) * 100;
+                  return (
+                    <div key={idx} className="min-h-0 rounded-lg border border-dark-200 bg-dark-50 p-1 text-center">
+                      <span className="block text-base font-bold text-primary-700">|{basisStr}⟩</span>
+                      <span className="mt-0.5 block text-xs text-dark-700">{re.toFixed(2)}{im >= 0 ? '+' : ''}{im.toFixed(2)}i</span>
+                      <span className="mt-0.5 block text-xs font-sans font-semibold text-dark-500">{probability.toFixed(1)}%</span>
+                    </div>
+                  );
+                })}
+              </div>
             </div>
           </div>
         </div>
 
-        {/* Right Column: Live 3D Bloch Spheres / Code */}
-        <div className="lg:col-span-5 lg:row-span-2 self-stretch min-w-0 bg-white rounded-xl border border-dark-200 p-3 sm:p-4 shadow-xs space-y-3 flex flex-col">
+        <div className="lg:col-span-5 lg:row-span-2 self-stretch min-w-0 bg-white rounded-xl border border-dark-200 p-2.5 sm:p-3 shadow-xs space-y-2.5 flex flex-col">
           <div className="flex items-center justify-between gap-2 px-0.5">
-            <h3 className="font-bold text-sm text-dark-900">Live 3D Bloch Spheres</h3>
+            <h3 className="font-bold text-sm text-dark-900">Bloch / Code</h3>
             <div className="flex items-center bg-dark-100 p-1 rounded-xl border border-dark-200 shrink-0 shadow-2xs">
               <button
                 onClick={() => setRightPanelMode('vectors')}
@@ -618,9 +570,6 @@ export function CircuitBuilder() {
 
           {rightPanelMode === 'vectors' ? (
             <div className="flex flex-1 min-h-0 flex-col gap-1.5">
-              <span className="block text-[10px] font-mono text-dark-500">
-                {numQubits} Qubit Vector{numQubits > 1 ? 's' : ''}
-              </span>
               <div className={`grid flex-1 grid-cols-1 ${numQubits > 1 ? 'grid-cols-2' : ''} gap-2`}>
                 {Array.from({ length: numQubits }, (_, qIdx) => (
                   <div key={qIdx} className="w-full h-full">
@@ -628,7 +577,7 @@ export function CircuitBuilder() {
                       qubitIndex={qIdx}
                       bloch={currentBlochVectors[qIdx] || null}
                       warning={simResult?.warnings?.find((w) => w.includes(`qubit ${qIdx}`))}
-                      size={160}
+                      size={140}
                       compact={true}
                     />
                   </div>
@@ -640,8 +589,8 @@ export function CircuitBuilder() {
               <QuantumCircuitCodePanel
                 numQubits={numQubits}
                 gates={gates}
-                title="Circuit Code"
-                compact={false}
+                title="Code"
+                compact={true}
                 className="h-full min-h-0"
                 editable={true}
                 onCircuitCodeChange={(newNum, newGates) => loadPreset(newNum, newGates)}
@@ -655,18 +604,24 @@ export function CircuitBuilder() {
 
   return (
     <div
-      className="space-y-6"
+      className="bg-white rounded-3xl border border-dark-200 shadow-xs p-3 sm:p-4 space-y-3"
       tabIndex={0}
       onKeyDown={handleKeyDown}
       role="region"
       aria-label="Quantum Circuit Simulator Workbench"
     >
-      {/* Top Interactive Controls Toolbar */}
-      <div className="bg-white rounded-2xl border border-dark-200 p-4 shadow-xs flex flex-wrap items-center justify-between gap-4">
-        {/* Qubit Selector & Presets */}
-        <div className="flex items-center flex-wrap gap-4">
+      <div className="flex flex-wrap items-center justify-between gap-3 border-b border-dark-100 pb-3">
+        <div className="flex items-center gap-2">
+          <Sparkles className="w-4 h-4 text-primary-600" />
+          <div>
+            <h1 className="text-base sm:text-lg font-semibold text-dark-900">Quantum Circuit Builder</h1>
+            <p className="text-xs text-dark-500">Compact circuit editor and simulator</p>
+          </div>
+        </div>
+
+        <div className="flex items-center flex-wrap gap-3">
           <div className="flex items-center gap-2">
-            <span className="text-xs font-bold text-dark-700 uppercase tracking-wide">Qubits:</span>
+            <span className="text-xs font-semibold text-dark-700 uppercase tracking-wide">Qubits</span>
             <div className="inline-flex rounded-lg border border-dark-200 p-0.5 bg-dark-50">
               {[1, 2, 3].map((n) => (
                 <button
@@ -685,9 +640,8 @@ export function CircuitBuilder() {
             </div>
           </div>
 
-          {/* Quick Presets */}
           <div className="flex items-center gap-1.5 pl-3 border-l border-dark-200">
-            <span className="text-xs font-bold text-dark-700 uppercase tracking-wide">Presets:</span>
+            <span className="text-xs font-semibold text-dark-700 uppercase tracking-wide">Presets</span>
             <button
               onClick={() =>
                 loadPreset(2, [
@@ -723,57 +677,7 @@ export function CircuitBuilder() {
               Superposition
             </button>
           </div>
-        </div>
-
-        {/* Multi-Backend Simulator Selector & Mode Toggles */}
-        <div className="flex items-center flex-wrap gap-3">
-          {/* Multi-Backend Selector */}
-          <div className="flex items-center gap-1.5 bg-dark-50 border border-dark-200 rounded-xl px-2.5 py-1 text-xs">
-            <Server className="w-3.5 h-3.5 text-primary-600 shrink-0" />
-            <span className="text-dark-500 font-bold uppercase text-[10px]">Backend:</span>
-            <select
-              value={activeBackend}
-              onChange={(e) => setActiveBackend(e.target.value as any)}
-              className="bg-white border border-dark-200 rounded-lg px-2 py-0.5 font-medium text-xs text-dark-900 focus:outline-none focus:ring-1 focus:ring-primary-500"
-              aria-label="Simulation Execution Backend"
-            >
-              <option value="qiskit">Qiskit Aer (Local Statevector)</option>
-              <option value="cirq">Cirq Simulator (Matrix Engine)</option>
-              <option value="pennylane">PennyLane default.qubit</option>
-              <option value="qbraid">qBraid Cloud SDK (API Key / Coming Soon)</option>
-            </select>
-            {activeBackend === 'qbraid' && (
-              <span className="px-1.5 py-0.5 rounded bg-amber-100 text-amber-800 text-[10px] font-bold">
-                Cloud Key Req.
-              </span>
-            )}
-          </div>
-
-          {/* Action Buttons: Run, Clear, Export */}
           <div className="flex items-center gap-2">
-            <div className="flex items-center gap-1 bg-dark-50 border border-dark-200 rounded-lg px-2 py-1 text-xs">
-              <span className="text-dark-500 font-medium">Shots:</span>
-              <select
-                value={shots}
-                onChange={(e) => setShots(Number(e.target.value))}
-                aria-label="Measurement Shots Count"
-                className="bg-white border border-dark-200 rounded px-1.5 py-0.5 font-mono text-xs font-medium"
-              >
-                <option value="512">512</option>
-                <option value="1024">1024</option>
-                <option value="4096">4096</option>
-              </select>
-            </div>
-
-            <button
-              onClick={() => runSimulation()}
-              disabled={isLoading}
-              className="flex items-center gap-1.5 px-4 py-2 rounded-lg bg-primary-600 hover:bg-primary-700 disabled:opacity-50 text-white font-semibold text-xs shadow-xs transition-colors"
-            >
-              <Play className={`w-3.5 h-3.5 ${isLoading ? 'animate-spin' : ''}`} />
-              <span>{t.simulator.runSimulation}</span>
-            </button>
-
             <button
               onClick={() => clearCircuit()}
               className="flex items-center gap-1 px-3 py-2 rounded-lg border border-dark-200 hover:bg-dark-50 text-dark-700 font-medium text-xs transition-colors"
@@ -794,70 +698,8 @@ export function CircuitBuilder() {
         </div>
       </div>
 
-      {/* Main Unified Workspace */}
       {renderVisualWorkspace()}
 
-      {/* Step Scrubber & Playback */}
-      {simResult?.step_by_step && simResult.step_by_step.length > 1 && (
-        <div className="bg-white rounded-2xl border border-dark-200 p-5 shadow-xs space-y-3">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-2">
-              <Sliders className="w-4 h-4 text-primary-600" />
-              <h3 className="font-bold text-sm text-dark-900">Step-by-Step State Playback</h3>
-              <span className="text-xs text-dark-500">
-                (Step {stepScrubber} of {simResult.step_by_step.length - 1})
-              </span>
-            </div>
-            <div className="flex items-center gap-1">
-              <button
-                disabled={stepScrubber <= 0}
-                onClick={() => setStepScrubber((s) => Math.max(0, s - 1))}
-                className="p-1 rounded border border-dark-200 disabled:opacity-40 hover:bg-dark-50 transition-colors"
-                title="Previous step"
-              >
-                <ChevronLeft className="w-4 h-4" />
-              </button>
-              <button
-                disabled={stepScrubber >= (simResult?.step_by_step?.length || 1) - 1}
-                onClick={() => setStepScrubber((s) => Math.min((simResult?.step_by_step?.length || 1) - 1, s + 1))}
-                className="p-1 rounded border border-dark-200 disabled:opacity-40 hover:bg-dark-50 transition-colors"
-                title="Next step"
-              >
-                <ChevronRight className="w-4 h-4" />
-              </button>
-            </div>
-          </div>
-
-          <input
-            type="range"
-            min={0}
-            max={(simResult?.step_by_step?.length || 1) - 1}
-            value={stepScrubber}
-            onChange={(e) => setStepScrubber(Number(e.target.value))}
-            className="w-full accent-primary-600 cursor-pointer"
-          />
-
-          {currentSnapshot && (
-            <div className="p-3.5 rounded-xl bg-primary-50/50 border border-primary-100 flex items-start gap-3">
-              <div className="w-7 h-7 rounded-lg bg-primary-600 text-white flex items-center justify-center shrink-0 font-bold text-xs">
-                {currentSnapshot.step}
-              </div>
-              <div>
-                <h4 className="font-bold text-xs text-primary-900">{currentSnapshot.label}</h4>
-                <p className="text-xs text-dark-700 mt-0.5 leading-relaxed">
-                  {explanationMode === 'simple'
-                    ? currentSnapshot.description_simple || currentSnapshot.label
-                    : currentSnapshot.description_technical || currentSnapshot.label}
-                </p>
-              </div>
-            </div>
-          )}
-        </div>
-      )}
-
-
-
-      {/* Export Code Modal */}
       {exportModalOpen && (
         <div
           role="dialog"
@@ -868,7 +710,7 @@ export function CircuitBuilder() {
             <div className="flex items-center justify-between border-b border-dark-200 pb-4">
               <div>
                 <h3 className="font-bold text-lg text-dark-900">Export Quantum Circuit Code</h3>
-                <p className="text-xs text-dark-500">Run your exact circuit in Python Qiskit or OpenQASM 2.0</p>
+                <p className="text-xs text-dark-500">Copy your circuit as Python Qiskit or OpenQASM 2.0</p>
               </div>
               <button
                 onClick={() => setExportModalOpen(false)}
@@ -912,7 +754,7 @@ export function CircuitBuilder() {
                 </button>
               </div>
               <pre className="p-3.5 rounded-xl bg-dark-900 text-dark-100 font-mono text-xs overflow-x-auto notranslate" translate="no">
-                {simResult?.qasm || '// OpenQASM representation'}
+                {simResult?.qasm || generateQasm(numQubits, gates)}
               </pre>
             </div>
           </div>
