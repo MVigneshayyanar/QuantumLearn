@@ -70,7 +70,10 @@ export function QubitPrimerModal() {
             <div>
               <h3 className="font-bold text-primary-900 dark:text-primary-200 text-xs sm:text-sm">{t.primer.step2Title}</h3>
               <p className="text-xs text-dark-700 dark:text-dark-300 mt-0.5 leading-relaxed">{t.primer.step2Desc}</p>
-              <div className="mt-1.5 inline-block px-2.5 py-0.5 rounded bg-white dark:bg-dark-800 border border-primary-200 dark:border-primary-700 font-mono text-[11px] text-primary-800 dark:text-primary-300 font-medium shadow-2xs">
+              <div
+                className="mt-1.5 inline-block px-2.5 py-0.5 rounded bg-white dark:bg-dark-800 border border-primary-200 dark:border-primary-700 font-mono text-[11px] text-primary-800 dark:text-primary-300 font-medium shadow-2xs notranslate"
+                translate="no"
+              >
                 |ψ⟩ = α|0⟩ + β|1⟩ &nbsp; (|α|² + |β|² = 1)
               </div>
             </div>

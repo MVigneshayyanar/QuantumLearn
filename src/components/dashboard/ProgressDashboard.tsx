@@ -146,7 +146,7 @@ export function ProgressDashboard() {
   // Loading state
   if (isLoading) {
     return (
-      <div className="w-full mx-auto px-8 py-8 flex flex-col items-center justify-center min-h-[400px] gap-4">
+      <div className="w-full mx-auto px-4 py-8 flex flex-col items-center justify-center min-h-[400px] gap-4">
         <Loader2 className="w-8 h-8 text-primary-600 animate-spin" />
         <p className="text-sm text-dark-500 font-medium">Loading your progress...</p>
       </div>
@@ -156,7 +156,7 @@ export function ProgressDashboard() {
   // Not identified
   if (!isIdentified) {
     return (
-      <div className="w-full mx-auto px-8 py-8 flex flex-col items-center justify-center min-h-[400px] gap-4">
+      <div className="w-full mx-auto px-4 py-8 flex flex-col items-center justify-center min-h-[400px] gap-4">
         <AlertTriangle className="w-8 h-8 text-amber-500" />
         <p className="text-sm text-dark-600 font-medium">Please identify yourself to view your progress dashboard.</p>
       </div>
@@ -166,7 +166,7 @@ export function ProgressDashboard() {
   // Error state
   if (error) {
     return (
-      <div className="w-full mx-auto px-8 py-8 flex flex-col items-center justify-center min-h-[400px] gap-4">
+      <div className="w-full mx-auto px-4 py-8 flex flex-col items-center justify-center min-h-[400px] gap-4">
         <AlertTriangle className="w-8 h-8 text-red-500" />
         <p className="text-sm text-red-600 font-medium">{error}</p>
         <button
@@ -180,7 +180,7 @@ export function ProgressDashboard() {
   }
 
   return (
-    <div className="w-full mx-auto px-8 py-3 space-y-3.5 animate-fadeIn">
+    <div className="w-full mx-auto px-3 sm:px-6 lg:px-8 py-3 pb-24 md:pb-6 space-y-3.5 animate-fadeIn">
       {/* Dashboard Top Banner */}
       <div className="bg-white rounded-2xl border border-dark-200 p-5 sm:p-6 shadow-xs flex flex-wrap items-center justify-between gap-4">
         <div>

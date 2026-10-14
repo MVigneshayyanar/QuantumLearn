@@ -21,6 +21,26 @@ export default function BlochSpherePage() {
   const [showSweepArcsToggle, setShowSweepArcsToggle] = useState<boolean>(false);
   const sweepTimerRef = useRef<NodeJS.Timeout | null>(null);
 
+  // Dynamic canvas sizing for phone screens (<480px)
+  const [sphereSize, setSphereSize] = useState<number>(320);
+
+  React.useEffect(() => {
+    const updateSize = () => {
+      if (typeof window !== 'undefined') {
+        if (window.innerWidth < 420) {
+          setSphereSize(260);
+        } else if (window.innerWidth < 640) {
+          setSphereSize(290);
+        } else {
+          setSphereSize(330);
+        }
+      }
+    };
+    updateSize();
+    window.addEventListener('resize', updateSize);
+    return () => window.removeEventListener('resize', updateSize);
+  }, []);
+
   // Helper to trigger angle sweep visualization when slider is moved
   const triggerSweep = (angle: 'theta' | 'phi') => {
     setActiveSweepAngle(angle);
@@ -66,15 +86,15 @@ export default function BlochSpherePage() {
   ];
 
   return (
-    <div className="w-full mx-auto px-4 sm:px-6 lg:px-8 py-3.5 max-w-7xl flex flex-col gap-3.5 animate-fadeIn">
+    <div className="w-full mx-auto px-3 sm:px-6 lg:px-8 py-3.5 pb-24 lg:pb-3.5 max-w-7xl flex flex-col gap-3.5 animate-fadeIn">
       {/* Header - Compact Bar */}
-      <div className="bg-white rounded-xl border border-dark-200 py-2.5 px-4 sm:px-5 shadow-xs flex items-center justify-between gap-3 shrink-0">
-        <div className="flex items-center gap-2.5 min-w-0">
+      <div className="bg-white rounded-xl border border-dark-200 py-2.5 px-3.5 sm:px-5 shadow-xs flex items-center justify-between gap-3 shrink-0">
+        <div className="flex items-center gap-2 sm:gap-2.5 min-w-0">
           <div className="w-8 h-8 rounded-lg bg-primary-50 text-primary-600 flex items-center justify-center shrink-0">
             <Globe className="w-4 h-4 text-primary-600" />
           </div>
           <div className="min-w-0">
-            <h1 className="text-base font-bold text-dark-900 tracking-tight leading-tight truncate">
+            <h1 className="text-sm sm:text-base font-bold text-dark-900 tracking-tight leading-tight truncate">
               Interactive 3D Bloch Sphere Explorer
             </h1>
             <p className="text-xs text-dark-500 truncate hidden sm:block">
@@ -88,7 +108,7 @@ export default function BlochSpherePage() {
           </span>
           <button
             onClick={() => setIsEntangledDemo(!isEntangledDemo)}
-            className={`px-3 py-1.5 rounded-lg border text-xs font-bold transition-all cursor-pointer ${
+            className={`px-2.5 sm:px-3 py-1.5 rounded-lg border text-[11px] sm:text-xs font-bold transition-all cursor-pointer ${
               isEntangledDemo
                 ? 'bg-amber-600 text-white border-amber-600 shadow-xs'
                 : 'bg-dark-50 border-dark-200 text-dark-700 hover:bg-dark-100'
@@ -102,13 +122,13 @@ export default function BlochSpherePage() {
       {/* Main Interactive Workspace - Split View fitting naturally */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-3.5 items-stretch">
         {/* Left: 3D Canvas + Vector Info */}
-        <div className="lg:col-span-5 bg-white rounded-2xl border border-dark-200 p-4 flex flex-col justify-between items-center shadow-xs">
+        <div className="lg:col-span-5 bg-white rounded-2xl border border-dark-200 p-3 sm:p-4 flex flex-col justify-between items-center shadow-xs">
           <div className="w-full flex-1 flex items-center justify-center py-2">
             <BlochSphere3D
               bloch={currentBloch}
               qubitIndex={0}
               warning={isEntangledDemo ? 'Entangled Bell state: purity Tr(ρ²) = 0.5 < 1.0, single-qubit Bloch vector undefined.' : undefined}
-              size={330}
+              size={sphereSize}
               showSweepArcs={showSweepArcsToggle || isSweeping}
               activeSweep={activeSweepAngle}
               compact={false}

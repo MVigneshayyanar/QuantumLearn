@@ -299,7 +299,7 @@ export default function InstructorDashboard() {
 
   if (error) {
     return (
-      <div className="w-full mx-auto px-8 py-8 flex flex-col items-center justify-center min-h-[400px] gap-4">
+      <div className="w-full mx-auto px-4 py-8 flex flex-col items-center justify-center min-h-[400px] gap-4">
         <AlertTriangle className="w-8 h-8 text-red-500" />
         <p className="text-sm text-red-600 font-medium">{error}</p>
       </div>
@@ -331,7 +331,7 @@ export default function InstructorDashboard() {
   }) || [];
 
   return (
-    <div className="w-full mx-auto px-8 py-3.5 space-y-3.5 animate-fadeIn">
+    <div className="w-full mx-auto px-3 sm:px-6 lg:px-8 py-3.5 pb-24 md:pb-6 space-y-3.5 animate-fadeIn">
       {/* Header */}
       <div className="bg-white rounded-2xl border border-dark-200 p-5 sm:p-6 shadow-xs">
         <div className="flex flex-wrap items-center justify-between gap-4">

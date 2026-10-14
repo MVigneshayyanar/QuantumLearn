@@ -18,8 +18,8 @@ export function Footer() {
   }
 
   return (
-    <footer className="bg-white dark:bg-dark-900 border-t border-dark-200 dark:border-dark-800 mt-20 text-xs text-dark-600 dark:text-dark-400" role="contentinfo">
-      <div className="w-full mx-auto px-8 py-10">
+    <footer className="bg-white dark:bg-dark-900 border-t border-dark-200 dark:border-dark-800 mt-16 sm:mt-20 text-xs text-dark-600 dark:text-dark-400" role="contentinfo">
+      <div className="w-full mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-10 pb-24 md:pb-10">
         <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
           {/* Brand column */}
           <div className="space-y-3">

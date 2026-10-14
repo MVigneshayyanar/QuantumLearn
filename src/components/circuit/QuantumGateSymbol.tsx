@@ -246,7 +246,7 @@ export function QuantumGateSymbol({ type, size = 'md', className = '' }: Quantum
 
   return (
     <div
-      className={`flex items-center justify-center font-mono font-bold select-none ${config.bgColor} ${config.textColor} ${sizeClasses} ${borderClass} ${className}`}
+      className={`flex items-center justify-center font-mono font-bold select-none notranslate ${config.bgColor} ${config.textColor} ${sizeClasses} ${borderClass} ${className}`}
       translate="no"
     >
       {config.renderSymbol(iconSizes)}

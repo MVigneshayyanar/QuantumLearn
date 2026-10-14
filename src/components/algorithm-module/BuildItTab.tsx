@@ -416,7 +416,7 @@ Return 3 SHORT lines (max 50 words total):
   }));
 
   return (
-    <div className="h-full min-h-0 flex flex-col gap-3 bg-white rounded-2xl border border-dark-200 p-4 sm:p-5 shadow-xs overflow-hidden animate-fadeIn text-xs">
+    <div className="h-full min-h-0 flex flex-col gap-3 bg-white rounded-2xl border border-dark-200 p-3 sm:p-5 shadow-xs overflow-y-auto lg:overflow-hidden animate-fadeIn text-xs">
       {/* Top Banner & Challenge Description: Compact Header (~38px) */}
       <div className="shrink-0 bg-white rounded-xl border border-dark-200 px-3.5 py-1.5 shadow-xs flex flex-wrap items-center justify-between gap-2">
         <div className="flex items-center gap-2 flex-wrap min-w-0">
@@ -450,9 +450,9 @@ Return 3 SHORT lines (max 50 words total):
       {/* Cockpit Layout: Side-by-Side Unified Grid Matching Circuit Tab */}
       <div className="grid min-h-0 flex-1 grid-cols-1 gap-3 lg:gap-2 lg:grid-cols-[1.15fr_0.85fr] lg:grid-rows-[auto_minmax(0,1fr)] lg:items-stretch">
         {/* Left Column (cols 1-7): Toolbox + Circuit Board + Probabilities & Statevector */}
-        <div className="lg:row-span-2 grid min-w-0 min-h-0 grid-rows-[auto_minmax(0,250px)] gap-3 lg:pr-0">
+        <div className="lg:row-span-2 flex flex-col lg:grid min-w-0 min-h-0 lg:grid-rows-[auto_minmax(0,250px)] gap-3 lg:pr-0">
           {/* Quantum Circuit Board Card */}
-          <div className="bg-white rounded-xl border border-dark-200 p-3 sm:p-4 shadow-xs space-y-2 min-h-0 overflow-hidden">
+          <div className="bg-white rounded-xl border border-dark-200 p-3 sm:p-4 shadow-xs space-y-2 min-h-0 overflow-visible lg:overflow-hidden">
             <div className="flex flex-wrap items-center justify-between gap-1.5">
               <div className="flex items-center gap-2">
                 <Cpu className="w-3.5 h-3.5 text-primary-600" />
@@ -530,7 +530,7 @@ Return 3 SHORT lines (max 50 words total):
             </div>
 
             {/* Interactive Circuit Canvas */}
-            <div className="w-full overflow-x-auto pb-0.5">
+            <div className="w-full overflow-x-auto pb-0.5 notranslate" translate="no">
               <div className={`w-full min-w-[340px] space-y-2 ${numQubits <= 1 ? 'py-4' : numQubits === 2 ? 'py-2.5' : 'py-1.5'}`}>
                     {/* Step Columns Timeline Header */}
                     <div className="flex items-center gap-2 pl-16">

@@ -23,7 +23,7 @@ export default function VerifyIndexPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-dark-50 via-white to-dark-100 py-16 px-4 sm:px-6 lg:px-8">
+    <div className="min-h-screen bg-gradient-to-b from-dark-50 via-white to-dark-100 py-10 sm:py-16 px-3 sm:px-6 lg:px-8 pb-24 md:pb-16">
       <div className="max-w-2xl mx-auto space-y-8 text-center">
         <div className="w-16 h-16 rounded-3xl bg-emerald-500 text-white flex items-center justify-center mx-auto shadow-xl shadow-emerald-500/25">
           <ShieldCheck className="w-9 h-9" />

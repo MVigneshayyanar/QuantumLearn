@@ -87,15 +87,15 @@ export function Navbar() {
   return (
     <>
     <header className="bg-white dark:bg-dark-900/95 dark:border-dark-800 border-b border-dark-200 sticky top-0 z-50 backdrop-blur-md shadow-subtle">
-      <div className="w-full mx-auto px-8">
-        <div className="flex items-center justify-between h-16">
+      <div className="w-full mx-auto px-3 sm:px-6 lg:px-8">
+        <div className="flex items-center justify-between h-14 sm:h-16">
           {/* Brand Logo */}
-          <Link href="/" className="flex items-center gap-2.5 group shrink-0">
-            <div className="w-9 h-9 rounded-xl bg-primary-600 text-white flex items-center justify-center shadow-xs group-hover:scale-105 transition-transform">
-              <Atom className="w-5 h-5 animate-pulse" />
+          <Link href="/" className="flex items-center gap-2 sm:gap-2.5 group shrink-0">
+            <div className="w-8 h-8 sm:w-9 sm:h-9 rounded-xl bg-primary-600 text-white flex items-center justify-center shadow-xs group-hover:scale-105 transition-transform">
+              <Atom className="w-4 h-4 sm:w-5 sm:h-5 animate-pulse" />
             </div>
             <div>
-              <span className="font-bold text-lg text-dark-900 dark:text-white tracking-tight whitespace-nowrap">
+              <span className="font-bold text-base sm:text-lg text-dark-900 dark:text-white tracking-tight whitespace-nowrap">
                 {t.nav.brand}
               </span>
               <span className="hidden sm:inline-block ml-2 text-xs font-semibold px-2.5 py-0.5 rounded-full bg-primary-50 dark:bg-primary-950/70 text-primary-700 dark:text-primary-300 border border-primary-100 dark:border-primary-800/60 whitespace-nowrap shrink-0">
@@ -199,16 +199,16 @@ export function Navbar() {
           </nav>
 
           {/* AI Tutor Drawer Button & Auth Controls */}
-          <div className="flex items-center gap-2 shrink-0">
+          <div className="flex items-center gap-1.5 sm:gap-2 shrink-0">
             <button
               type="button"
               onClick={() => setIsOpen(!isOpen)}
-              className="h-10 px-3 rounded-xl bg-primary-600 hover:bg-primary-700 text-white text-xs font-semibold shadow-xs flex items-center gap-1.5 whitespace-nowrap transition-all hover:shadow-card shrink-0"
+              className="h-9 sm:h-10 px-2.5 sm:px-3 rounded-xl bg-primary-600 hover:bg-primary-700 text-white text-xs font-semibold shadow-xs flex items-center gap-1.5 whitespace-nowrap transition-all hover:shadow-card shrink-0 cursor-pointer"
               aria-label="Toggle Schrödinger AI"
             >
               <Bot className="w-4 h-4 shrink-0" />
-              <span className="hidden xl:inline">{t.nav.aiTutor}</span>
-              <span className="xl:hidden">AI Tutor</span>
+              <span className="hidden sm:inline">{t.nav.aiTutor}</span>
+              <span className="sm:hidden text-[11px] font-bold">AI</span>
             </button>
 
             {/* Profile Dropdown or Sign In */}
@@ -219,7 +219,7 @@ export function Navbar() {
                   onClick={() => setProfileDropdownOpen(!profileDropdownOpen)}
                   aria-expanded={profileDropdownOpen}
                   aria-haspopup="true"
-                  className={`h-10 px-2.5 rounded-xl border flex items-center gap-2 transition-all select-none cursor-pointer ${
+                  className={`h-9 sm:h-10 px-2 sm:px-2.5 rounded-xl border flex items-center gap-1.5 sm:gap-2 transition-all select-none cursor-pointer ${
                     profileDropdownOpen
                       ? 'bg-dark-100 dark:bg-dark-800 border-dark-300 dark:border-dark-600 shadow-xs ring-2 ring-primary-500/20'
                       : 'border-dark-200 dark:border-dark-700 hover:border-dark-300 dark:hover:border-dark-600 hover:bg-dark-50 dark:hover:bg-dark-800 bg-white dark:bg-dark-900'
@@ -227,7 +227,7 @@ export function Navbar() {
                   title="Open user profile menu"
                 >
                   <div
-                    className={`w-7 h-7 rounded-lg text-white font-bold flex items-center justify-center text-xs shadow-2xs shrink-0 ${
+                    className={`w-6 h-6 sm:w-7 sm:h-7 rounded-lg text-white font-bold flex items-center justify-center text-xs shadow-2xs shrink-0 ${
                       isAdmin
                         ? 'bg-purple-600'
                         : isInstructor
@@ -450,7 +450,7 @@ export function Navbar() {
               <div className="flex items-center gap-2 pl-2 border-l border-dark-200 dark:border-dark-700 shrink-0">
                 <button
                   onClick={() => openLoginModal()}
-                  className="h-10 px-3.5 rounded-xl border border-dark-200 dark:border-dark-700 hover:border-dark-300 dark:hover:border-dark-600 hover:bg-dark-50 dark:hover:bg-dark-800 bg-white dark:bg-dark-900 text-dark-700 dark:text-dark-200 text-xs font-semibold flex items-center gap-1.5 whitespace-nowrap transition-colors shrink-0"
+                  className="h-9 sm:h-10 px-2.5 sm:px-3.5 rounded-xl border border-dark-200 dark:border-dark-700 hover:border-dark-300 dark:hover:border-dark-600 hover:bg-dark-50 dark:hover:bg-dark-800 bg-white dark:bg-dark-900 text-dark-700 dark:text-dark-200 text-xs font-semibold flex items-center gap-1.5 whitespace-nowrap transition-colors shrink-0 cursor-pointer"
                   title="Sign in to view your dashboard"
                 >
                   <User className="w-3.5 h-3.5 text-dark-500 dark:text-dark-400" />
@@ -464,11 +464,13 @@ export function Navbar() {
     </header>
 
     {/* Mobile Bottom Navigation */}
-    <nav className="md:hidden fixed bottom-0 left-0 right-0 bg-white dark:bg-dark-900 border-t border-dark-200 dark:border-dark-800 z-50 flex justify-around items-center h-16 pb-safe shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.05)]">
+    <nav className="md:hidden fixed bottom-0 left-0 right-0 bg-white/95 dark:bg-dark-900/95 backdrop-blur-md border-t border-dark-200 dark:border-dark-800 z-50 flex justify-around items-center h-16 pb-safe shadow-[0_-4px_12px_rgba(0,0,0,0.06)]">
       <Link
         href="/"
         className={`flex flex-col items-center justify-center w-full h-full gap-1 transition-colors ${
-          pathname === '/' ? 'text-primary-600 dark:text-primary-400' : 'text-dark-500 dark:text-dark-400 hover:text-dark-700 dark:hover:text-dark-200'
+          pathname === '/'
+            ? 'text-primary-600 dark:text-primary-400 font-bold'
+            : 'text-dark-500 dark:text-dark-400 hover:text-dark-800 dark:hover:text-dark-200'
         }`}
       >
         <Atom className="w-5 h-5" />
@@ -476,65 +478,52 @@ export function Navbar() {
       </Link>
 
       <Link
-        href="/bloch-sphere"
-        className={`flex flex-col items-center justify-center w-full h-full gap-1 transition-colors ${
-          pathname === '/bloch-sphere' ? 'text-primary-600' : 'text-dark-500 hover:text-dark-700'
-        }`}
-      >
-        <Globe className="w-5 h-5" />
-        <span className="text-[10px] font-medium">Bloch Sphere</span>
-      </Link>
-
-      <Link
         href="/learn/deutsch-jozsa"
         className={`flex flex-col items-center justify-center w-full h-full gap-1 transition-colors ${
-          pathname.startsWith('/learn') ? 'text-primary-600' : 'text-dark-500 hover:text-dark-700'
+          pathname.startsWith('/learn')
+            ? 'text-primary-600 dark:text-primary-400 font-bold'
+            : 'text-dark-500 dark:text-dark-400 hover:text-dark-800 dark:hover:text-dark-200'
         }`}
       >
         <BookOpen className="w-5 h-5" />
-        <span className="text-[10px] font-medium">Algorithms</span>
+        <span className="text-[10px] font-medium">Learn</span>
+      </Link>
+
+      <Link
+        href="/bloch-sphere"
+        className={`flex flex-col items-center justify-center w-full h-full gap-1 transition-colors ${
+          pathname === '/bloch-sphere'
+            ? 'text-primary-600 dark:text-primary-400 font-bold'
+            : 'text-dark-500 dark:text-dark-400 hover:text-dark-800 dark:hover:text-dark-200'
+        }`}
+      >
+        <Globe className="w-5 h-5" />
+        <span className="text-[10px] font-medium">Bloch</span>
+      </Link>
+
+      <Link
+        href="/simulator"
+        className={`flex flex-col items-center justify-center w-full h-full gap-1 transition-colors ${
+          pathname === '/simulator'
+            ? 'text-primary-600 dark:text-primary-400 font-bold'
+            : 'text-dark-500 dark:text-dark-400 hover:text-dark-800 dark:hover:text-dark-200'
+        }`}
+      >
+        <Cpu className="w-5 h-5" />
+        <span className="text-[10px] font-medium">Circuit</span>
       </Link>
 
       <Link
         href="/practice"
         className={`flex flex-col items-center justify-center w-full h-full gap-1 transition-colors ${
-          pathname.startsWith('/practice') ? 'text-primary-600' : 'text-dark-500 hover:text-dark-700'
+          pathname.startsWith('/practice')
+            ? 'text-primary-600 dark:text-primary-400 font-bold'
+            : 'text-dark-500 dark:text-dark-400 hover:text-dark-800 dark:hover:text-dark-200'
         }`}
       >
         <Terminal className="w-5 h-5" />
         <span className="text-[10px] font-medium">Practice</span>
       </Link>
-
-      {/* Profile & Dashboard combined */}
-      {userId ? (
-        <Link
-          href={isAdmin ? '/admin' : isInstructor ? '/instructor' : '/dashboard'}
-          className={`flex flex-col items-center justify-center w-full h-full gap-1 transition-colors ${
-            pathname === '/dashboard' || pathname.startsWith('/admin') || pathname.startsWith('/instructor')
-              ? 'text-primary-600'
-              : 'text-dark-500 hover:text-dark-700'
-          }`}
-        >
-          <div
-            className={`w-5 h-5 rounded-full text-white flex items-center justify-center text-[10px] font-bold ${
-              isAdmin ? 'bg-purple-600' : isInstructor ? 'bg-indigo-600' : 'bg-primary-600'
-            }`}
-          >
-            {(studentName || 'U').charAt(0).toUpperCase()}
-          </div>
-          <span className="text-[10px] font-medium">
-            {isAdmin ? 'Admin' : isInstructor ? 'Class' : 'Dashboard'}
-          </span>
-        </Link>
-      ) : (
-        <button
-          onClick={() => openLoginModal()}
-          className="flex flex-col items-center justify-center w-full h-full gap-1 text-dark-500 hover:text-dark-700 transition-colors"
-        >
-          <User className="w-5 h-5" />
-          <span className="text-[10px] font-medium">Sign In</span>
-        </button>
-      )}
     </nav>
     </>
   );

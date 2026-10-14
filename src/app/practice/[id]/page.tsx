@@ -384,10 +384,10 @@ export default function PracticeDetailPage() {
         fontVariantLigatures: fontLigatures ? 'normal' : 'none',
         tabSize: tabSizeSetting === '2 spaces' ? 2 : 4
       }}
-      className="flex flex-col h-screen min-h-[580px] bg-[#F8FAFC] text-dark-900 overflow-hidden select-none"
+      className="flex flex-col min-h-screen lg:h-screen lg:min-h-[580px] bg-[#F8FAFC] text-dark-900 overflow-y-auto lg:overflow-hidden select-none"
     >
       {/* Top Header Bar (LeetCode Style Light Theme) */}
-      <div className="h-12 bg-white border-b border-dark-200 px-4 flex items-center justify-between shrink-0 shadow-2xs">
+      <div className="h-12 bg-white border-b border-dark-200 px-3 sm:px-4 flex items-center justify-between shrink-0 shadow-2xs">
         <div className="flex items-center gap-3">
           <Link
             href={returnTo || '/practice'}
@@ -875,9 +875,9 @@ export default function PracticeDetailPage() {
       )}
 
       {/* Main Split Body (Dynamic Layout & Ratios) */}
-      <div className="flex-1 grid grid-cols-1 lg:grid-cols-12 gap-2 p-2 bg-[#F1F5F9] overflow-hidden">
+      <div className="flex-1 grid grid-cols-1 lg:grid-cols-12 gap-2 p-2 bg-[#F1F5F9] overflow-y-auto lg:overflow-hidden pb-12 lg:pb-2">
         {/* Left Column: Problem Description & Tabs */}
-        <div className={`${leftColSpanClass} flex flex-col bg-white rounded-2xl border border-dark-200 shadow-xs overflow-hidden`}>
+        <div className={`${leftColSpanClass} flex flex-col bg-white rounded-2xl border border-dark-200 shadow-xs min-h-[340px] lg:min-h-0 overflow-visible lg:overflow-hidden`}>
           {/* Left Tabs */}
           <div className="flex items-center bg-dark-50/80 border-b border-dark-200 px-2 h-10 shrink-0 gap-1">
             <button
@@ -1231,7 +1231,7 @@ export default function PracticeDetailPage() {
             <div className="flex-1 overflow-hidden flex flex-col md:flex-row bg-[#FAFAFA]">
               {/* Visual Circuit Canvas (Shown in 'split' or 'visual' mode) */}
               {(practiceViewMode === 'split' || practiceViewMode === 'visual') && (
-                <div className={`${practiceViewMode === 'split' ? 'w-full md:w-1/2 border-b md:border-b-0 md:border-r border-dark-200' : 'w-full'} overflow-auto p-4 flex flex-col justify-center bg-[#FAFAFA]`}>
+                <div className={`${practiceViewMode === 'split' ? 'w-full md:w-1/2 border-b md:border-b-0 md:border-r border-dark-200' : 'w-full'} overflow-auto p-4 flex flex-col justify-center bg-[#FAFAFA] notranslate`} translate="no">
                   <div className="space-y-4 min-w-[460px]">
                     {Array.from({ length: numQubits }, (_, qIdx) => (
                       <div key={qIdx} className="flex items-center gap-3">

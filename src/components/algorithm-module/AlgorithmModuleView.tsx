@@ -424,25 +424,25 @@ export function AlgorithmModuleView({
   const isCompactCockpitTab = ['circuit', 'build_it', 'quiz', 'skill_base'].includes(activeTab);
 
   return (
-    <div id="algorithm-module-root" ref={moduleTopRef} className={`w-full mx-auto lg:min-h-[calc(100vh-80px)] ${isCompactCockpitTab ? 'px-3 sm:px-6 lg:pl-8 lg:pr-8 py-1.5' : 'px-3 sm:px-6 lg:pl-8 lg:pr-8 py-3'}`}>
+    <div id="algorithm-module-root" ref={moduleTopRef} className={`w-full mx-auto lg:min-h-[calc(100vh-80px)] ${isCompactCockpitTab ? 'px-3 sm:px-6 lg:pl-8 lg:pr-8 py-1.5' : 'px-3 sm:px-6 lg:pl-8 lg:pr-8 py-3'} pb-24 lg:pb-3`}>
       <div className="lg:flex lg:items-stretch lg:gap-4 lg:h-[87.5vh]">
       {/* Module Header: Compact Cockpit Header on interactive tabs, Full Header on intuition/math */}
-        <aside className="bg-white rounded-2xl border border-dark-200 p-4 shadow-xs relative overflow-hidden space-y-4 flex flex-col lg:w-[17.5%] lg:h-full lg:shrink-0 lg:sticky lg:top-4">
-          <div className="flex flex-col gap-3">
+        <aside className="bg-white rounded-2xl border border-dark-200 p-3 sm:p-4 shadow-xs relative overflow-hidden space-y-3 sm:space-y-4 flex flex-col lg:w-[17.5%] lg:h-full lg:shrink-0 lg:sticky lg:top-4">
+          <div className="flex flex-col gap-2.5 sm:gap-3">
             {/* Left Column: Badges, Title & Subtitle */}
-            <div className="space-y-2 max-w-none">
+            <div className="space-y-1.5 sm:space-y-2 max-w-none">
               <div>
-                <h1 className="text-lg font-bold text-dark-900 tracking-tight leading-tight">{title}</h1>
-                <p className="text-xs text-dark-600 leading-relaxed">{subtitle}</p>
+                <h1 className="text-base sm:text-lg font-bold text-dark-900 tracking-tight leading-tight">{title}</h1>
+                <p className="text-[11px] sm:text-xs text-dark-600 leading-relaxed">{subtitle}</p>
               </div>
               <div className="flex flex-wrap items-center gap-1.5 min-w-0">
-                <span className="shrink-0 px-2.5 py-0.5 rounded-full text-[11px] font-semibold bg-primary-50 text-primary-700 border border-primary-100">
+                <span className="shrink-0 px-2 sm:px-2.5 py-0.5 rounded-full text-[10px] sm:text-[11px] font-semibold bg-primary-50 text-primary-700 border border-primary-100">
                   {category}
                 </span>
-                <span className="shrink-0 px-2 py-0.5 rounded-full text-[11px] font-semibold bg-dark-100 text-dark-800">
+                <span className="shrink-0 px-2 py-0.5 rounded-full text-[10px] sm:text-[11px] font-semibold bg-dark-100 text-dark-800">
                   {qubitCount} Qubits
                 </span>
-                <span className="w-full px-2.5 py-1 rounded-lg text-[11px] font-semibold bg-emerald-50 text-emerald-700 border border-emerald-100 flex items-center gap-1 whitespace-normal leading-snug">
+                <span className="w-full px-2 sm:px-2.5 py-0.5 sm:py-1 rounded-lg text-[10px] sm:text-[11px] font-semibold bg-emerald-50 text-emerald-700 border border-emerald-100 flex items-center gap-1 whitespace-normal leading-snug">
                   <MathRenderer text={speedup} />
                 </span>
               </div>
@@ -450,8 +450,8 @@ export function AlgorithmModuleView({
 
           </div>
 
-          {/* Tab Navigation with Sequential 1-by-1 Lock */}
-          <div className="flex flex-wrap lg:flex-col gap-1.5 border-t border-dark-100 pt-3" role="tablist">
+          {/* Tab Navigation with Sequential 1-by-1 Lock - Sleek horizontal scroll strip on mobile */}
+          <div className="flex lg:flex-col gap-1.5 border-t border-dark-100 pt-2.5 sm:pt-3 overflow-x-auto no-scrollbar py-1 shrink-0" role="tablist">
             {tabs.map((tab, idx) => {
               const Icon = tab.icon;
               const isActive = activeTab === tab.id;
@@ -469,7 +469,7 @@ export function AlgorithmModuleView({
                     handleTabChange(tab.id as any);
                   }}
                   title={isLocked ? `Locked: Complete Stage ${idx} first` : tab.label}
-                  className={`flex items-center gap-2 px-3 py-2 lg:w-full lg:justify-start rounded-lg font-semibold text-sm transition-all ${
+                  className={`flex items-center gap-1.5 sm:gap-2 px-3 py-1.5 sm:py-2 shrink-0 whitespace-nowrap lg:w-full lg:justify-start rounded-lg font-semibold text-xs sm:text-sm transition-all ${
                     isActive
                       ? 'bg-primary-600 text-white shadow-xs'
                       : isLocked
@@ -478,9 +478,9 @@ export function AlgorithmModuleView({
                   }`}
                 >
                   {isLocked ? (
-                    <Lock className="w-3.5 h-3.5 text-dark-400" />
+                    <Lock className="w-3.5 h-3.5 text-dark-400 shrink-0" />
                   ) : (
-                    <Icon className="w-3.5 h-3.5" />
+                    <Icon className="w-3.5 h-3.5 shrink-0" />
                   )}
                   <span>{tab.label}</span>
                 </button>
@@ -709,7 +709,7 @@ export function AlgorithmModuleView({
         </div>
       )}      {/* Stage 3: Interactive Circuit Simulation (High-Density Cockpit) */}
       {activeTab === 'circuit' && (
-        <div className="flex min-h-0 flex-1 flex-col space-y-2 overflow-hidden animate-fadeIn">
+        <div className="flex min-h-0 flex-1 flex-col space-y-2 overflow-y-auto lg:overflow-hidden animate-fadeIn">
           {/* Unified Controls Strip: Oracle Selector + Scrubber & Current Step Info */}
           <div className="bg-white rounded-xl border border-dark-200 px-3.5 py-2 shadow-xs space-y-1.5">
             <div className="flex flex-wrap items-center justify-between gap-2 text-xs">
@@ -785,8 +785,8 @@ export function AlgorithmModuleView({
                 </div>
 
                 {/* Visual Circuit Canvas */}
-                <div className="flex flex-col md:flex-row gap-2">
-                  <div className="w-full overflow-x-auto pb-0.5">
+                <div className="flex flex-col md:flex-row gap-2 notranslate" translate="no">
+                  <div className="w-full overflow-x-auto pb-0.5 notranslate" translate="no">
                       <div className={`w-full min-w-[340px] space-y-2 ${qubitCount <= 1 ? 'py-4' : qubitCount === 2 ? 'py-2.5' : 'py-1.5'}`}>
                         {/* Step Columns Timeline Header */}
                         <div className="flex items-center gap-2 pl-16">
@@ -941,15 +941,15 @@ export function AlgorithmModuleView({
                 </div>
 
                 {/* Quantum Statevector Readout */}
-                <div className="bg-white rounded-xl border border-dark-200 p-2.5 sm:p-3 shadow-xs gap-2 flex min-h-0 flex-col h-full">
-                  <div className="flex items-center justify-between">
-                    <h4 className="font-bold text-[11px] text-dark-900">Quantum Statevector |ψ⟩</h4>
-                    <span className="text-[9px] font-mono text-dark-500">
+                <div className="bg-white rounded-xl border border-dark-200 p-2.5 sm:p-3 shadow-xs gap-2 flex min-h-0 flex-col h-full notranslate" translate="no">
+                  <div className="flex items-center justify-between notranslate" translate="no">
+                    <h4 className="font-bold text-[11px] text-dark-900 notranslate" translate="no">Quantum Statevector |ψ⟩</h4>
+                    <span className="text-[9px] font-mono text-dark-500 notranslate" translate="no">
                       {qubitCount} Qubits ({2 ** qubitCount} states)
                     </span>
                   </div>
                   {currentAmps && currentAmps.length > 0 ? (
-                    <div className="grid min-h-0 grid-cols-2 auto-rows-max gap-1.5 text-xs font-mono flex-1 overflow-y-auto pr-0.5">
+                    <div className="grid min-h-0 grid-cols-2 auto-rows-max gap-1.5 text-xs font-mono flex-1 overflow-y-auto pr-0.5 notranslate" translate="no">
                       {currentAmps.map((amp, idx) => {
                         const basisStr = idx.toString(2).padStart(qubitCount, '0');
                         const re = amp.re ?? 0;

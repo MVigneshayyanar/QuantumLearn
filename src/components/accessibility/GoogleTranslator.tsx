@@ -1,7 +1,8 @@
 'use client';
 
 import { useEffect, useRef } from 'react';
-import { useAccessibility } from '@/lib/accessibility-context';
+import { usePathname } from 'next/navigation';
+import { useAccessibility, setGoogleTransCookie } from '@/lib/accessibility-context';
 
 declare global {
   interface Window {
@@ -12,6 +13,7 @@ declare global {
 
 export function GoogleTranslator() {
   const { language } = useAccessibility();
+  const pathname = usePathname();
   const scriptLoadedRef = useRef(false);
 
   useEffect(() => {
@@ -23,7 +25,6 @@ export function GoogleTranslator() {
             {
               pageLanguage: 'en',
               autoDisplay: false,
-              includedLanguages: 'en,hi,es,fr,de,zh-CN,ja,ta,te',
               layout: window.google.translate.TranslateElement.InlineLayout?.SIMPLE
             },
             'google_translate_element'
@@ -46,30 +47,26 @@ export function GoogleTranslator() {
     }
   }, []);
 
-  // 3. Reactively trigger translation when platform language changes
+  // 3. Reactively trigger translation when platform language or route changes
   useEffect(() => {
     const applyTranslation = (targetLang: string) => {
       const langCode = targetLang === 'en' ? '' : targetLang;
 
-      // Update HTML attribute
+      // Update HTML attributes
       document.documentElement.lang = targetLang;
       document.documentElement.setAttribute('data-lang', targetLang);
 
-      // Set cookie for Google Translate (without invalid localhost domain)
-      if (!langCode) {
-        document.cookie = 'googtrans=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;';
-        document.cookie = 'googtrans=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/; domain=' + window.location.hostname + ';';
-      } else {
-        document.cookie = `googtrans=/en/${langCode}; path=/;`;
-        document.cookie = `googtrans=/auto/${langCode}; path=/;`;
-      }
+      // Set cookie across localhost and live domain variations
+      setGoogleTransCookie(targetLang as any);
 
-      // Trigger the Google Translate dropdown in the DOM
+      // Trigger the Google Translate select dropdown in the DOM
       const triggerSelect = () => {
         const select = document.querySelector('.goog-te-combo') as HTMLSelectElement | null;
         if (select) {
-          if (select.value !== (langCode || 'en')) {
-            select.value = langCode || 'en';
+          const currentVal = select.value || '';
+          const desiredVal = langCode || '';
+          if (currentVal !== desiredVal) {
+            select.value = desiredVal;
             select.dispatchEvent(new Event('change', { bubbles: true }));
           }
           return true;
@@ -81,30 +78,34 @@ export function GoogleTranslator() {
         let attempts = 0;
         const interval = setInterval(() => {
           attempts++;
-          if (triggerSelect() || attempts > 25) {
+          if (triggerSelect() || attempts > 30) {
             clearInterval(interval);
           }
-        }, 150);
+        }, 120);
       }
     };
 
     applyTranslation(language);
-  }, [language]);
+  }, [language, pathname]);
 
   return (
     <>
+      {/* Container must be present in layout with positive bounds for Google Translate to inject combo */}
       <div
         id="google_translate_element"
         aria-hidden="true"
+        className="notranslate"
+        translate="no"
         style={{
-          position: 'absolute',
-          top: '-9999px',
-          left: '-9999px',
-          width: '1px',
-          height: '1px',
+          position: 'fixed',
+          bottom: '0px',
+          left: '0px',
+          opacity: 0.001,
+          width: '10px',
+          height: '10px',
           overflow: 'hidden',
-          visibility: 'hidden',
-          pointerEvents: 'none'
+          pointerEvents: 'none',
+          zIndex: -9999
         }}
       />
       <style jsx global>{`

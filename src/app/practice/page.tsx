@@ -120,7 +120,7 @@ export default function PracticeListPage() {
   const totalCount = PRACTICE_PROBLEMS.length;
 
   return (
-    <div className="w-full mx-auto px-8 py-3 space-y-3.5 animate-fadeIn">
+    <div className="w-full mx-auto px-3 sm:px-6 lg:px-8 py-3 pb-24 md:pb-6 space-y-3.5 animate-fadeIn">
       {/* Compact Header */}
       <div className="bg-white rounded-2xl border border-dark-200 px-4 py-3 sm:px-5 sm:py-3.5 shadow-xs flex flex-wrap items-center justify-between gap-3">
         <div className="space-y-0.5">
@@ -151,7 +151,7 @@ export default function PracticeListPage() {
       <div className="bg-white rounded-2xl border border-dark-200 p-2.5 sm:p-3 shadow-xs flex flex-wrap items-center justify-between gap-2.5">
         <div className="flex flex-wrap items-center gap-2.5 flex-1 min-w-0">
           {/* Search Input - Expands to fill available space */}
-          <div className="relative flex-1 min-w-[200px]">
+          <div className="relative w-full sm:flex-1 sm:min-w-[180px]">
             <Search className="w-3.5 h-3.5 text-dark-400 absolute left-2.5 top-1/2 -translate-y-1/2" />
             <input
               type="text"

@@ -247,7 +247,7 @@ export function QuantumCertificateModal({
             )}
           </div>
 
-          <div className="flex items-center justify-end gap-2 pt-1 border-t border-dark-50">
+          <div className="flex flex-wrap items-center justify-end gap-2 pt-1 border-t border-dark-50">
             <a
               href={`/verify/${credentialId}`}
               target="_blank"

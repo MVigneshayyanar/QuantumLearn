@@ -238,7 +238,7 @@ export function AITutorDrawer() {
           e.preventDefault();
           handleSend();
         }}
-        className="p-3 border-t border-dark-200 dark:border-dark-800 bg-white dark:bg-dark-900 flex items-center gap-2"
+        className="p-3 pb-safe sm:pb-3 border-t border-dark-200 dark:border-dark-800 bg-white dark:bg-dark-900 flex items-center gap-2"
       >
         <input
           type="text"

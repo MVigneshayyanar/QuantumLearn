@@ -213,7 +213,7 @@ export default function AdminPortalPage() {
   const totalAICalls = students.reduce((acc, s) => acc + s.aiInteractionCount, 0);
 
   return (
-    <div className="w-full mx-auto px-8 py-3.5 space-y-3.5 animate-fadeIn">
+    <div className="w-full mx-auto px-3 sm:px-6 lg:px-8 py-3.5 pb-24 md:pb-6 space-y-3.5 animate-fadeIn">
       {/* Top Banner Header */}
       <div className="bg-white rounded-2xl border border-dark-200 p-5 sm:p-6 shadow-xs flex flex-wrap items-center justify-between gap-4">
         <div>

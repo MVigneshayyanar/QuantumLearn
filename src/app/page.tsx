@@ -91,44 +91,44 @@ export default function HomePage() {
   ];
 
   return (
-    <div className="space-y-12 sm:space-y-16 py-4 sm:py-6 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <div className="space-y-12 sm:space-y-16 py-4 sm:py-6 pb-24 md:pb-6 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
       {/* Hero Section */}
       <section className="w-full pt-2">
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-10 xl:gap-12 items-center">
           {/* Hero Left Content */}
-          <div className="lg:col-span-7 space-y-5 sm:space-y-6">
-            <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-primary-50 border border-primary-200 text-xs font-semibold text-primary-800 dark:bg-primary-950/60 dark:border-primary-800/70 dark:text-primary-300">
-              <Sparkles className="w-3.5 h-3.5 text-primary-600 dark:text-primary-400" />
+          <div className="lg:col-span-7 space-y-4 sm:space-y-6">
+            <div className="inline-flex items-center gap-2 px-3 sm:px-3.5 py-1.5 rounded-full bg-primary-50 border border-primary-200 text-xs font-semibold text-primary-800 dark:bg-primary-950/60 dark:border-primary-800/70 dark:text-primary-300">
+              <Sparkles className="w-3.5 h-3.5 text-primary-600 dark:text-primary-400 shrink-0" />
               <span>{t.hero.badge}</span>
             </div>
 
-            <h1 className="text-3xl sm:text-4xl lg:text-[42px] xl:text-5xl font-extrabold text-dark-900 dark:text-white tracking-tight leading-[1.15]">
+            <h1 className="text-2xl sm:text-4xl lg:text-[42px] xl:text-5xl font-extrabold text-dark-900 dark:text-white tracking-tight leading-[1.15]">
               {t.hero.title}
             </h1>
 
-            <p className="text-base sm:text-lg text-dark-600 dark:text-dark-300 leading-relaxed max-w-2xl">
+            <p className="text-sm sm:text-lg text-dark-600 dark:text-dark-300 leading-relaxed max-w-2xl">
               {t.hero.subtitle}
             </p>
 
             {/* CTA Buttons */}
-            <div className="flex flex-wrap items-center gap-4 pt-2">
+            <div className="flex flex-col sm:flex-row flex-wrap items-stretch sm:items-center gap-3 sm:gap-4 pt-2">
               <Link
                 href="/learn/deutsch-jozsa"
-                className="flex items-center gap-2 px-6 py-3.5 rounded-xl bg-primary-600 hover:bg-primary-700 text-white font-semibold text-sm shadow-card hover:shadow-card-hover transition-all"
+                className="w-full sm:w-auto justify-center flex items-center gap-2 px-6 py-3.5 rounded-xl bg-primary-600 hover:bg-primary-700 text-white font-semibold text-sm shadow-card hover:shadow-card-hover transition-all text-center"
               >
                 <span>{t.hero.startLearning}</span>
                 <ArrowRight className="w-4 h-4" />
               </Link>
               <Link
                 href="/simulator"
-                className="flex items-center gap-2 px-6 py-3.5 rounded-xl bg-white hover:bg-dark-50 border border-dark-200 text-dark-800 font-semibold text-sm shadow-subtle transition-all dark:bg-dark-800 dark:hover:bg-dark-700 dark:border-dark-700 dark:text-dark-200"
+                className="w-full sm:w-auto justify-center flex items-center gap-2 px-6 py-3.5 rounded-xl bg-white hover:bg-dark-50 border border-dark-200 text-dark-800 font-semibold text-sm shadow-subtle transition-all dark:bg-dark-800 dark:hover:bg-dark-700 dark:border-dark-700 dark:text-dark-200 text-center"
               >
                 <Cpu className="w-4 h-4 text-primary-600 dark:text-primary-400" />
                 <span>{t.hero.openBuilder}</span>
               </Link>
               <a
                 href="#what-is-quantum"
-                className="flex items-center gap-2 px-5 py-3.5 rounded-xl bg-indigo-50 hover:bg-indigo-100 border border-indigo-200 text-indigo-900 font-semibold text-sm shadow-subtle transition-all cursor-pointer group dark:bg-indigo-950/60 dark:border-indigo-800 dark:text-indigo-200 dark:hover:bg-indigo-900/60"
+                className="w-full sm:w-auto justify-center flex items-center gap-2 px-5 py-3.5 rounded-xl bg-indigo-50 hover:bg-indigo-100 border border-indigo-200 text-indigo-900 font-semibold text-sm shadow-subtle transition-all cursor-pointer group dark:bg-indigo-950/60 dark:border-indigo-800 dark:text-indigo-200 dark:hover:bg-indigo-900/60 text-center"
               >
                 <Info className="w-4 h-4 text-indigo-600 dark:text-indigo-400" />
                 <span>What is Quantum?</span>
@@ -137,7 +137,7 @@ export default function HomePage() {
             </div>
 
             {/* Quick stats pills */}
-            <div className="grid grid-cols-3 gap-4 pt-6 border-t border-dark-200 dark:border-dark-700 max-w-lg text-xs">
+            <div className="grid grid-cols-3 gap-2 sm:gap-4 pt-4 sm:pt-6 border-t border-dark-200 dark:border-dark-700 max-w-lg text-[11px] sm:text-xs">
               <div>
                 <span className="font-bold text-dark-900 dark:text-white text-sm block">Multi-Simulator</span>
                 <span className="text-dark-500 dark:text-dark-400">Qiskit · Cirq · PennyLane</span>
@@ -177,7 +177,7 @@ export default function HomePage() {
               {/* Quick state selector buttons */}
               <div className="space-y-1.5 pt-2">
                 <span className="text-[11px] text-dark-500 dark:text-dark-400 font-medium block">Test quantum state transformation:</span>
-                <div className="grid grid-cols-4 gap-1.5">
+                <div className="grid grid-cols-4 gap-1.5 notranslate" translate="no">
                   <button
                     onClick={() => setHeroGate('0')}
                     className={`py-1.5 text-xs font-mono font-bold rounded-lg border transition-colors ${

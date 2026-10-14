@@ -254,7 +254,7 @@ export function CircuitBuilder() {
           <span>Gates</span>
         </div>
 
-        <div className="flex flex-wrap items-center gap-2">
+        <div className="flex flex-wrap items-center gap-1.5 sm:gap-2">
           {AVAILABLE_GATE_LIST.map((gate) => {
             const isSelected = selectedGateType === gate.type;
             return (
@@ -273,7 +273,7 @@ export function CircuitBuilder() {
                   setDragOverSlot(null);
                 }}
                 onClick={() => setSelectedGateType(gate.type)}
-                className={`flex items-center gap-2 px-2.5 py-1.5 rounded-xl border text-xs font-semibold cursor-grab active:cursor-grabbing transition-all select-none hover:scale-105 active:scale-95 ${
+                className={`flex items-center gap-1 sm:gap-1.5 px-2 sm:px-2.5 py-1 sm:py-1.5 rounded-xl border text-[11px] sm:text-xs font-semibold cursor-grab active:cursor-grabbing transition-all select-none hover:scale-105 active:scale-95 ${
                   isSelected
                     ? 'border-blue-600 ring-2 ring-blue-500/20 bg-blue-50/70 text-blue-900 shadow-xs'
                     : 'border-dark-200 hover:border-dark-300 bg-white text-dark-800 hover:bg-dark-50'
@@ -282,7 +282,7 @@ export function CircuitBuilder() {
               >
                 <QuantumGateSymbol type={gate.type} size="sm" />
                 <span className="notranslate font-semibold" translate="no">{gate.name}</span>
-                {gate.multi && <span className="text-[10px] text-dark-400 uppercase font-mono notranslate" translate="no">2Q</span>}
+                {gate.multi && <span className="text-[9px] sm:text-[10px] text-dark-400 uppercase font-mono notranslate" translate="no">2Q</span>}
               </button>
             );
           })}
@@ -368,7 +368,7 @@ export function CircuitBuilder() {
                     </div>
 
                     {/* Wire slots */}
-                    <div className="flex-1 flex items-center gap-2 circuit-wire relative pr-1">
+                    <div className="flex-1 flex items-center gap-2 circuit-wire relative pr-1 notranslate" translate="no">
                       {Array.from({ length: MAX_STEPS }, (_, sIdx) => {
                         const placed = gates.find((g) => g.step === sIdx && g.qubits.includes(qIdx));
                         const isSelected = selectedSlot?.qubit === qIdx && selectedSlot?.step === sIdx;
@@ -640,8 +640,8 @@ export function CircuitBuilder() {
             </div>
           </div>
 
-          <div className="flex items-center gap-1.5 pl-3 border-l border-dark-200">
-            <span className="text-xs font-semibold text-dark-700 uppercase tracking-wide">Presets</span>
+          <div className="flex flex-wrap items-center gap-1.5 sm:pl-3 sm:border-l border-dark-200">
+            <span className="text-[11px] sm:text-xs font-semibold text-dark-700 uppercase tracking-wide">Presets</span>
             <button
               onClick={() =>
                 loadPreset(2, [
@@ -649,7 +649,7 @@ export function CircuitBuilder() {
                   { id: 'b2', type: 'cx', qubits: [0, 1], step: 1 }
                 ])
               }
-              className="px-2.5 py-1 text-xs font-medium rounded bg-dark-100 hover:bg-dark-200 text-dark-800 transition-colors"
+              className="px-2 sm:px-2.5 py-1 text-[11px] sm:text-xs font-medium rounded bg-dark-100 hover:bg-dark-200 text-dark-800 transition-colors cursor-pointer"
             >
               Bell State (|Φ+⟩)
             </button>
@@ -661,7 +661,7 @@ export function CircuitBuilder() {
                   { id: 'g3', type: 'cx', qubits: [1, 2], step: 2 }
                 ])
               }
-              className="px-2.5 py-1 text-xs font-medium rounded bg-dark-100 hover:bg-dark-200 text-dark-800 transition-colors"
+              className="px-2 sm:px-2.5 py-1 text-[11px] sm:text-xs font-medium rounded bg-dark-100 hover:bg-dark-200 text-dark-800 transition-colors cursor-pointer"
             >
               GHZ State (3Q)
             </button>
@@ -672,7 +672,7 @@ export function CircuitBuilder() {
                   { id: 's2', type: 'h', qubits: [1], step: 0 }
                 ])
               }
-              className="px-2.5 py-1 text-xs font-medium rounded bg-dark-100 hover:bg-dark-200 text-dark-800 transition-colors"
+              className="px-2 sm:px-2.5 py-1 text-[11px] sm:text-xs font-medium rounded bg-dark-100 hover:bg-dark-200 text-dark-800 transition-colors cursor-pointer"
             >
               Superposition
             </button>

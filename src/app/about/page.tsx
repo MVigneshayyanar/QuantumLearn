@@ -44,9 +44,9 @@ export default function AboutPage() {
   }, []);
 
   return (
-    <div className="w-full mx-auto px-8 py-6 space-y-10 animate-fadeIn max-w-7xl">
+    <div className="w-full mx-auto px-3 sm:px-6 lg:px-8 py-4 sm:py-6 pb-24 md:pb-8 space-y-8 sm:space-y-10 animate-fadeIn max-w-7xl">
       {/* Top Hero Banner: The Origin Story */}
-      <div className="bg-gradient-to-br from-indigo-950 via-primary-900 to-indigo-900 text-white rounded-3xl p-8 sm:p-12 shadow-xl relative overflow-hidden">
+      <div className="bg-gradient-to-br from-indigo-950 via-primary-900 to-indigo-900 text-white rounded-3xl p-5 sm:p-8 md:p-12 shadow-xl relative overflow-hidden">
         {/* Background decorative rings */}
         <div className="absolute top-0 right-0 w-96 h-96 bg-primary-500/10 rounded-full blur-3xl pointer-events-none" />
         <div className="absolute bottom-0 left-1/3 w-80 h-80 bg-indigo-400/10 rounded-full blur-2xl pointer-events-none" />

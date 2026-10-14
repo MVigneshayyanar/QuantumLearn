@@ -149,10 +149,13 @@ export function QuantumCircuitCodePanel({
       </div>
 
       {/* Code Editor Body: Qiskit is editable; other dialects are generated previews */}
-      <div className={`relative flex-1 min-h-0 bg-[#090D16] text-white font-mono text-[11px] leading-relaxed overflow-hidden ${compact ? 'min-h-[140px]' : 'min-h-[240px]'}`}>
+      <div
+        className={`relative flex-1 min-h-0 bg-[#090D16] text-white font-mono text-[11px] leading-relaxed overflow-hidden notranslate ${compact ? 'min-h-[140px]' : 'min-h-[240px]'}`}
+        translate="no"
+      >
         {/* Synchronized Line-Highlighted View for Qiskit, Cirq, and PennyLane */}
-        <div className="absolute inset-0 p-3 overflow-x-auto overflow-y-auto">
-          <pre className="whitespace-pre !text-emerald-300 font-mono text-[11px] leading-relaxed !bg-transparent">
+        <div className="absolute inset-0 p-3 overflow-x-auto overflow-y-auto notranslate" translate="no">
+          <pre className="whitespace-pre !text-emerald-300 font-mono text-[11px] leading-relaxed !bg-transparent notranslate" translate="no">
             {editableCode.split('\n').map((line, lineIndex) => (
               <span
                 key={`${lineIndex}-${line}`}
@@ -176,7 +179,8 @@ export function QuantumCircuitCodePanel({
             spellCheck={false}
             autoCapitalize="off"
             autoCorrect="off"
-            className="absolute inset-0 z-10 w-full h-full p-3 bg-transparent text-transparent caret-emerald-400 font-mono text-[11px] leading-relaxed resize-none focus:outline-none focus:ring-1 focus:ring-primary-500/50 selection:bg-primary-900/60 overflow-x-auto overflow-y-auto"
+            translate="no"
+            className="absolute inset-0 z-10 w-full h-full p-3 bg-transparent text-transparent caret-emerald-400 font-mono text-[11px] leading-relaxed resize-none focus:outline-none focus:ring-1 focus:ring-primary-500/50 selection:bg-primary-900/60 overflow-x-auto overflow-y-auto notranslate"
             placeholder="# Write Qiskit code here, e.g. qc.h(0)"
           />
         )}

@@ -110,13 +110,13 @@ function CertificateVerificationContent() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-dark-50 via-white to-dark-100 py-10 px-4 sm:px-6 lg:px-8">
-      <div className="max-w-4xl mx-auto space-y-8">
+    <div className="min-h-screen bg-gradient-to-b from-dark-50 via-white to-dark-100 py-6 sm:py-10 px-3 sm:px-6 lg:px-8 pb-24 md:pb-10">
+      <div className="max-w-4xl mx-auto space-y-6 sm:space-y-8">
         {/* Certificate Display Card */}
         <div className="flex justify-center">
           <div
             id="quantum-certificate-printable"
-            className="w-full max-w-[760px] aspect-[1.414/1] bg-white rounded-3xl border-8 border-double border-amber-400/90 p-8 sm:p-12 shadow-xl relative overflow-hidden flex flex-col justify-between select-none print:m-0 print:w-full print:shadow-none print:border-8"
+            className="w-full max-w-[760px] min-h-[500px] sm:min-h-0 sm:aspect-[1.414/1] bg-white rounded-2xl sm:rounded-3xl border-4 sm:border-8 border-double border-amber-400/90 p-4 sm:p-12 shadow-xl relative overflow-hidden flex flex-col justify-between select-none print:m-0 print:w-full print:shadow-none print:border-8"
             style={{
               backgroundImage:
                 'radial-gradient(ellipse at center, rgba(254, 243, 199, 0.35) 0%, rgba(255, 255, 255, 1) 75%)',
@@ -214,7 +214,7 @@ function CertificateVerificationContent() {
             </div>
 
             {/* Bottom Cryptographic ID bar */}
-            <div className="mt-3 pt-2 border-t border-amber-100 flex items-center justify-between text-[8px] text-dark-500 font-mono">
+            <div className="mt-3 pt-2 border-t border-amber-100 flex flex-wrap items-center justify-between gap-1 text-[8px] text-dark-500 font-mono">
               <span>CREDENTIAL ID: {decodedId}</span>
               <span>VERIFICATION LEDGER: SHA-256 VALIDATED</span>
               <span>ISSUED BY QUANBIT PLATFORM</span>
