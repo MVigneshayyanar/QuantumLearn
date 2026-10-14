@@ -25,6 +25,7 @@ import {
   Wand2,
   Code2,
   Cpu,
+  Trophy,
   ChevronLeft,
   ChevronRight
 } from 'lucide-react';
@@ -186,13 +187,12 @@ export function BuildItTab({ moduleSlug, onProceedToQuiz }: BuildItTabProps) {
   const [isDraggingActive, setIsDraggingActive] = useState(false);
 
   // Evaluation states
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const [hasPassed, setHasPassed] = useState(false);
   const [fidelityResult, setFidelityResult] = useState<number | null>(null);
   const [evaluationResult, setEvaluationResult] = useState<BuildItEvaluation | null>(null);
   const [aiCoachingMessage, setAiCoachingMessage] = useState<string | null>(null);
   const [isLoadingAi, setIsLoadingAi] = useState(false);
-  const [showHints, setShowHints] = useState(false);
-  const [activeHintIdx, setActiveHintIdx] = useState(0);
   const [rightPanelMode, setRightPanelMode] = useState<'vectors' | 'code' | 'verify'>('vectors');
   const [isVerifyEnabled, setIsVerifyEnabled] = useState(false);
 
@@ -305,6 +305,7 @@ Return 3 SHORT lines (max 50 words total):
     setGates([...challenge.scaffoldGates]);
     setHasPassed(false);
     setFidelityResult(null);
+    setIsSubmitting(false);
     setAiCoachingMessage(null);
     setEvaluationResult(null);
   };
@@ -324,6 +325,7 @@ Return 3 SHORT lines (max 50 words total):
       return;
     }
 
+    setIsSubmitting(true);
     setAiCoachingMessage(null);
 
     try {
@@ -393,6 +395,8 @@ Return 3 SHORT lines (max 50 words total):
       }
     } catch (e) {
       console.error('Build It error:', e);
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -406,9 +410,9 @@ Return 3 SHORT lines (max 50 words total):
   }));
 
   return (
-    <div className="space-y-2 animate-fadeIn text-xs">
+    <div className="h-full min-h-0 flex flex-col gap-3 bg-white rounded-2xl border border-dark-200 p-4 sm:p-5 shadow-xs overflow-hidden animate-fadeIn text-xs">
       {/* Top Banner & Challenge Description: Compact Header (~38px) */}
-      <div className="bg-white rounded-xl border border-dark-200 px-3.5 py-1.5 shadow-xs flex flex-wrap items-center justify-between gap-2">
+      <div className="shrink-0 bg-white rounded-xl border border-dark-200 px-3.5 py-1.5 shadow-xs flex flex-wrap items-center justify-between gap-2">
         <div className="flex items-center gap-2 flex-wrap min-w-0">
           <span className="px-2 py-0.5 rounded-full text-[10px] font-semibold bg-primary-50 text-primary-700 border border-primary-200 flex items-center gap-1 shrink-0">
             <Sparkles className="w-3 h-3 text-primary-600" />
@@ -438,11 +442,11 @@ Return 3 SHORT lines (max 50 words total):
       </div>
 
       {/* Cockpit Layout: Side-by-Side Unified Grid Matching Circuit Tab */}
-      <div className="grid min-h-0 flex-1 grid-cols-1 gap-3 lg:gap-4 lg:grid-cols-12 lg:grid-rows-[auto_minmax(0,1fr)] lg:items-stretch">
+      <div className="grid min-h-0 flex-1 grid-cols-1 gap-3 lg:gap-2 lg:grid-cols-[1.15fr_0.85fr] lg:grid-rows-[auto_minmax(0,1fr)] lg:items-stretch">
         {/* Left Column (cols 1-7): Toolbox + Circuit Board + Probabilities & Statevector */}
-        <div className="lg:col-span-7 lg:row-span-2 grid min-w-0 grid-rows-[auto_minmax(0,1fr)] gap-3 lg:pr-2">
+        <div className="lg:row-span-2 grid min-w-0 min-h-0 grid-rows-[auto_minmax(0,250px)] gap-3 lg:pr-0">
           {/* Quantum Circuit Board Card */}
-          <div className="bg-white rounded-xl border border-dark-200 p-3 sm:p-4 shadow-xs space-y-2 min-h-[320px]">
+          <div className="bg-white rounded-xl border border-dark-200 p-3 sm:p-4 shadow-xs space-y-2 min-h-0 overflow-hidden">
             <div className="flex flex-wrap items-center justify-between gap-1.5">
               <div className="flex items-center gap-2">
                 <Cpu className="w-3.5 h-3.5 text-primary-600" />
@@ -484,7 +488,7 @@ Return 3 SHORT lines (max 50 words total):
                 )}
               </div>
 
-              <div className="flex items-center gap-1 overflow-x-auto pb-0.5">
+              <div className="flex flex-wrap items-center gap-1 pb-0.5">
                 {AVAILABLE_GATE_LIST.map((gate) => {
                   const isSelected = selectedGateType === gate.type;
                   return (
@@ -503,7 +507,7 @@ Return 3 SHORT lines (max 50 words total):
                         setDragOverSlot(null);
                       }}
                       onClick={() => setSelectedGateType(gate.type)}
-                      className={`flex shrink-0 items-center gap-1 px-2 py-1 rounded-lg border text-[11px] font-semibold cursor-grab active:cursor-grabbing transition-all select-none ${
+                      className={`flex items-center gap-1 px-1.5 py-1 rounded-lg border text-[10px] font-semibold cursor-grab active:cursor-grabbing transition-all select-none ${
                         isSelected
                           ? 'border-primary-600 ring-2 ring-primary-500/20 bg-primary-50 text-primary-900 shadow-2xs'
                           : 'border-dark-200 hover:border-dark-300 bg-white text-dark-800 hover:bg-dark-50'
@@ -528,7 +532,7 @@ Return 3 SHORT lines (max 50 words total):
                         return (
                           <div
                             key={sIdx}
-                            className="w-9 py-0.5 rounded text-[10px] font-mono font-bold text-center bg-dark-50 text-dark-600 border border-dark-200/60"
+                            className="w-11 py-1 rounded text-[10px] font-mono font-bold text-center bg-dark-50 text-dark-600 border border-dark-200/60"
                           >
                             S{sIdx}
                           </div>
@@ -538,13 +542,13 @@ Return 3 SHORT lines (max 50 words total):
 
                     {/* Qubit Wires */}
                     {Array.from({ length: numQubits }, (_, qIdx) => (
-                      <div key={qIdx} className={`flex items-center gap-2 ${numQubits <= 1 ? 'my-3.5' : numQubits === 2 ? 'my-2' : 'my-1'}`}>
+                      <div key={qIdx} className={`flex items-center gap-2 ${numQubits <= 1 ? 'my-6' : numQubits === 2 ? 'my-4' : 'my-2.5'}`}>
                         <div className="w-14 shrink-0 flex items-center gap-1.5">
                           <span className="font-mono font-bold text-xs text-dark-800">q[{qIdx}]</span>
                           <span className="px-1.5 py-0.5 rounded bg-dark-100 font-mono text-[10px] text-dark-600">|0⟩</span>
                         </div>
 
-                        <div className="flex-1 flex items-center gap-2 circuit-wire relative pr-1">
+                        <div className="flex-1 flex items-center gap-2 circuit-wire relative pr-1 min-h-12">
                           {Array.from({ length: MAX_STEPS }, (_, sIdx) => {
                             const placed = gates.find((g) => g.step === sIdx && g.qubits.includes(qIdx));
                             const isSelected = selectedSlot?.qubit === qIdx && selectedSlot?.step === sIdx;
@@ -619,7 +623,7 @@ Return 3 SHORT lines (max 50 words total):
                                   e.preventDefault();
                                   removeGateAt(qIdx, sIdx);
                                 }}
-                                className={`relative z-10 w-9 h-9 rounded-lg flex items-center justify-center cursor-pointer transition-all border ${
+                                className={`relative z-10 w-11 h-11 rounded-lg flex items-center justify-center cursor-pointer transition-all border ${
                                   isDragOver
                                     ? 'ring-2 ring-primary-500 border-primary-600 bg-primary-100 scale-105 shadow-xs'
                                     : isSelected
@@ -710,14 +714,14 @@ Return 3 SHORT lines (max 50 words total):
           </div>
 
           {/* Bottom Split Row: Measurement Probabilities + Quantum Statevector (Identical to Circuit Tab) */}
-          <div className="grid min-h-0 grid-cols-1 sm:grid-cols-2 gap-2 items-stretch lg:h-[300px]">
+          <div className="grid min-h-0 grid-cols-1 sm:grid-cols-2 gap-2 items-stretch lg:h-[250px]">
             {/* Measurement Probabilities Histogram */}
             <div className="bg-white rounded-xl border border-dark-200 p-2.5 sm:p-3 shadow-xs space-y-1 flex min-h-0 flex-col h-full">
               <div className="flex items-center justify-between">
                 <h3 className="font-bold text-[11px] text-dark-900">Measurement Probabilities</h3>
                 <span className="text-[9px] text-dark-500 font-mono">1024 shots</span>
               </div>
-              <div className="relative mx-auto mt-1 flex-1 w-full max-w-[280px] aspect-square min-h-0 max-h-[220px]">
+              <div className="relative mx-auto mt-1 flex-1 w-full max-w-[240px] aspect-square min-h-0 max-h-[180px]">
                 <ResponsiveContainer width="100%" height="100%">
                   <BarChart data={histogramData} margin={{ top: 8, right: 10, left: -18, bottom: 0 }}>
                     <XAxis dataKey="state" tick={{ fontSize: 10 }} />
@@ -746,19 +750,19 @@ Return 3 SHORT lines (max 50 words total):
                 <span className="text-[9px] font-mono text-dark-500">{numQubits} Qubits ({Math.pow(2, numQubits)} states)</span>
               </div>
               {liveAmps && liveAmps.length > 0 ? (
-                <div className="grid grid-cols-2 auto-rows-fr gap-1.5 text-xs font-mono flex-1">
+                <div className="grid grid-cols-2 auto-rows-fr gap-1 text-xs font-mono flex-1 min-h-0">
                   {liveAmps.map((amp, idx) => {
                     const basisStr = idx.toString(2).padStart(numQubits, '0');
                     const re = amp.re ?? 0;
                     const im = amp.im ?? 0;
                     const magSq = (re * re + im * im) * 100;
                     return (
-                      <div key={idx} className="p-1.5 bg-dark-50 rounded-lg border border-dark-200 text-center flex flex-col items-center justify-center">
-                        <span className="font-bold text-primary-700 block text-lg">|{basisStr}⟩</span>
-                        <span className="text-sm text-dark-700 block mt-1">
+                      <div key={idx} className="p-1 bg-dark-50 rounded-lg border border-dark-200 text-center flex flex-col items-center justify-center min-h-0">
+                        <span className="font-bold text-primary-700 block text-base">|{basisStr}⟩</span>
+                        <span className="text-xs text-dark-700 block mt-0.5">
                           {re.toFixed(2)}{im >= 0 ? '+' : ''}{im.toFixed(2)}i
                         </span>
-                        <span className="text-sm font-sans font-semibold text-dark-500 block mt-0.5">
+                        <span className="text-xs font-sans font-semibold text-dark-500 block mt-0.5">
                           {magSq.toFixed(1)}%
                         </span>
                       </div>
@@ -773,7 +777,7 @@ Return 3 SHORT lines (max 50 words total):
         </div>
 
         {/* Right Column (cols 8-12): Live 3D Bloch Spheres / Code + Action / AI Coaching Verification Card */}
-        <div className="lg:col-span-5 lg:row-span-2 self-stretch min-w-0 bg-white rounded-xl border border-dark-200 p-3 sm:p-4 shadow-xs space-y-3 flex flex-col lg:ml-2">
+        <div className="lg:row-span-2 self-stretch min-w-0 bg-white rounded-xl border border-dark-200 p-3 sm:p-4 shadow-xs space-y-3 flex flex-col">
           <div className="flex items-center justify-between gap-2 px-0.5">
             <h3 className="font-bold text-sm text-dark-900">
               {rightPanelMode === 'verify' ? 'Verification' : 'Live 3D Bloch Spheres'}
@@ -851,41 +855,9 @@ Return 3 SHORT lines (max 50 words total):
             </div>
           ) : null}
 
-          {!isVerifyEnabled && (
-            <div className="mt-auto border-t border-dark-100 pt-2">
-              <button
-                onClick={() => {
-                  setIsVerifyEnabled(true);
-                  setRightPanelMode('verify');
-                  void handleSubmitCircuit();
-                }}
-                className="w-full flex items-center justify-center gap-1.5 px-3 py-2 rounded-lg bg-primary-600 hover:bg-primary-700 text-white font-bold text-xs shadow-xs transition-colors cursor-pointer"
-              >
-                <ShieldAlert className="w-3.5 h-3.5" />
-                <span>Verify</span>
-              </button>
-            </div>
-          )}
-
           {/* Verification and Schrödinger AI guidance */}
           {rightPanelMode === 'verify' && (
-          <div className="flex min-h-0 flex-1 flex-col gap-2 border-t border-dark-100 pt-2">
-            <div className="flex items-center justify-end gap-2">
-              <button
-                onClick={requestAiSocraticHint}
-                disabled={isLoadingAi}
-                className="flex items-center gap-1 px-2.5 py-2 rounded-lg border border-primary-300 bg-primary-50 hover:bg-primary-100 text-primary-800 font-semibold text-xs transition-colors cursor-pointer disabled:opacity-60"
-                title="Get hint from Schrödinger AI"
-              >
-                {isLoadingAi ? (
-                  <Loader2 className="w-3.5 h-3.5 animate-spin text-primary-600" />
-                ) : (
-                  <Sparkles className="w-3.5 h-3.5 text-primary-600" />
-                )}
-                <span>Hint</span>
-              </button>
-            </div>
-
+          <div className="relative flex min-h-0 flex-1 flex-col gap-2 border-t border-dark-100 pt-2">
             {/* Inline Completion Progress */}
             {evaluationResult && !hasPassed && (
               <div className="flex items-center justify-between gap-2 pt-1 border-t border-dark-100 text-[11px]">
@@ -909,26 +881,40 @@ Return 3 SHORT lines (max 50 words total):
 
             {/* Verified Success State */}
             {hasPassed && (
-              <div className="p-3 rounded-xl bg-emerald-50 border border-emerald-300 flex items-center justify-between gap-2 animate-fadeIn">
-                <div className="flex items-center gap-2 min-w-0">
-                  <div className="w-6 h-6 rounded-md bg-emerald-600 text-white flex items-center justify-center shrink-0 font-bold text-xs">
-                    ✓
+              <div className="flex min-h-0 flex-1 items-center justify-center">
+                <div className="w-full max-w-md flex flex-col items-center gap-3 text-center animate-fadeIn">
+                  <div className="w-12 h-12 rounded-full bg-emerald-100 border border-emerald-300 text-emerald-700 flex items-center justify-center">
+                    <Trophy className="w-6 h-6" />
                   </div>
-                  <div className="truncate">
-                    <h4 className="font-bold text-xs text-emerald-950 truncate">Circuit 100% Verified!</h4>
-                    <p className="text-[10px] text-emerald-800 truncate">
-                      Fidelity: {fidelityResult ? `${(fidelityResult * 100).toFixed(1)}%` : '100%'}
+                  <div>
+                    <h4 className="font-bold text-lg text-emerald-950">Congratulations!</h4>
+                    <p className="mt-1 text-xs text-dark-600">
+                      You successfully built and verified the quantum circuit.
                     </p>
                   </div>
-                </div>
 
-                <button
-                  onClick={onProceedToQuiz}
-                  className="flex items-center gap-1 px-3 py-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs shadow-xs transition-colors cursor-pointer shrink-0"
-                >
-                  <span>Stage 5 →</span>
-                  <ArrowRight className="w-3 h-3" />
-                </button>
+                  <div className="w-full p-4 rounded-xl bg-emerald-50 border border-emerald-300 flex items-center justify-between gap-3">
+                    <div className="flex items-center gap-2 min-w-0 text-left">
+                      <div className="w-8 h-8 rounded-md bg-emerald-600 text-white flex items-center justify-center shrink-0 font-bold text-sm">
+                        ✓
+                      </div>
+                      <div className="truncate">
+                        <h4 className="font-bold text-sm text-emerald-950 truncate">Circuit 100% Verified!</h4>
+                        <p className="text-[11px] text-emerald-800 truncate">
+                          Fidelity: {fidelityResult ? `${(fidelityResult * 100).toFixed(1)}%` : '100%'}
+                        </p>
+                      </div>
+                    </div>
+
+                    <span className="px-2.5 py-1 rounded-full bg-white border border-emerald-200 text-[10px] font-bold text-emerald-700 shrink-0">
+                      Ready for Stage 5
+                    </span>
+                  </div>
+
+                  <p className="text-[11px] text-dark-500">
+                    Continue to the knowledge check to test what you learned.
+                  </p>
+                </div>
               </div>
             )}
 
@@ -943,40 +929,63 @@ Return 3 SHORT lines (max 50 words total):
                     <h4 className="font-bold text-[11px] text-amber-950">Schrödinger AI Guidance</h4>
                   </div>
 
-                  {isLoadingAi ? (
-                    <span className="flex items-center gap-1 text-[10px] font-semibold text-amber-800 bg-amber-100 px-1.5 py-0.5 rounded">
-                      <Loader2 className="w-2.5 h-2.5 animate-spin text-amber-600" />
-                      <span>Thinking...</span>
-                    </span>
-                  ) : (
-                    <button
-                      onClick={requestAiSocraticHint}
-                      className="text-[9px] font-bold text-primary-700 hover:text-primary-900 bg-white border border-primary-200 px-1.5 py-0.5 rounded flex items-center gap-1 cursor-pointer transition-colors shadow-2xs"
-                    >
-                      <Sparkles className="w-2.5 h-2.5 text-primary-600" />
-                      <span>Ask AI</span>
-                    </button>
-                  )}
                 </div>
 
-                {isLoadingAi ? (
-                  <div className="py-2 flex items-center justify-center gap-2 text-xs text-amber-800 font-medium">
-                    <Loader2 className="w-3.5 h-3.5 animate-spin text-amber-600" />
-                    <span>Analyzing quantum circuit...</span>
-                  </div>
-                ) : aiCoachingMessage ? (
+                {aiCoachingMessage ? (
                   <div className="p-2 rounded-lg bg-white/95 border border-amber-200/80 shadow-2xs text-[11px]">
                     <FormattedAIFeedback message={aiCoachingMessage} />
                   </div>
                 ) : (
                   <p className="text-[11px] text-dark-500">
-                    No AI guidance was returned. Use Ask AI to request a fresh analysis.
+                    No AI guidance was returned.
                   </p>
                 )}
               </div>
             )}
+            {(isSubmitting || isLoadingAi) && (
+              <div className="absolute inset-0 z-10 flex items-center justify-center rounded-xl bg-white/75">
+                <div className="flex items-center gap-2 text-xs font-semibold text-primary-800">
+                  <Loader2 className="h-5 w-5 animate-spin text-primary-600" />
+                  <span>Verifying quantum circuit...</span>
+                </div>
+              </div>
+            )}
           </div>
           )}
+
+          <div className="mt-auto border-t border-dark-100 pt-2">
+            {hasPassed ? (
+              <button
+                onClick={onProceedToQuiz}
+                className="w-full flex items-center justify-center gap-1.5 px-3 py-2 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs shadow-xs transition-colors cursor-pointer"
+              >
+                <span>Stage 5</span>
+                <ArrowRight className="w-3.5 h-3.5" />
+              </button>
+            ) : (
+              <button
+                onClick={() => {
+                  setIsVerifyEnabled(true);
+                  setRightPanelMode('verify');
+                  void handleSubmitCircuit();
+                }}
+                disabled={isSubmitting}
+                className="w-full flex items-center justify-center gap-1.5 px-3 py-2 rounded-lg bg-primary-600 hover:bg-primary-700 disabled:opacity-60 text-white font-bold text-xs shadow-xs transition-colors cursor-pointer"
+              >
+                {isSubmitting ? (
+                  <>
+                    <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                    <span>Verifying...</span>
+                  </>
+                ) : (
+                  <>
+                    <ShieldAlert className="w-3.5 h-3.5" />
+                    <span>Verify</span>
+                  </>
+                )}
+              </button>
+            )}
+          </div>
         </div>
       </div>
     </div>

@@ -197,6 +197,12 @@ FIXED_CODE:
           query.includes("Build It") ||
           query.includes("Observed Statevector Fidelity") ||
           query.includes("Circuit Goal:")));
+    const isKnowledgeCheck = !isCircuitDiagnosis && (
+      query.includes('knowledge check') ||
+      query.includes('got this question wrong') ||
+      query.includes('teach me indirectly') ||
+      query.includes('my answer:')
+    );
 
     if (apiKey) {
       try {
@@ -214,7 +220,25 @@ FIXED_CODE:
         };
         const activeLangName = langMap[language] || 'English';
 
-        const socraticSystemInstruction = isCircuitDiagnosis
+        const socraticSystemInstruction = isKnowledgeCheck
+          ? `You are Schrödinger AI, a Socratic quantum tutor helping a student review a missed Knowledge Check question.
+
+ABSOLUTE RULES:
+- Never reveal or confirm the correct answer.
+- Never state the correct option text, number, letter, formula result, or yes/no conclusion.
+- Never repeat or rank the answer choices.
+- Do not say "the answer is", "the correct answer", or equivalent.
+- Teach indirectly: give one intuitive analogy or concept reminder, then ask one focused guiding question.
+- End with one short retry clue that helps the learner reason independently.
+- Keep the response under 90 words and do not solve the question.
+
+Return exactly three short paragraphs:
+1. Concept reminder or analogy.
+2. A Socratic question for the learner.
+3. A retry clue without revealing the answer.
+
+Use the learner's language: ${activeLangName}. Keep quantum notation intact.`
+          : isCircuitDiagnosis
           ? `You are Schrödinger AI, the autonomous Socratic quantum physics tutor on QuanBit.
 The student is constructing a quantum circuit in the interactive "Build It" stage.
 
@@ -246,7 +270,7 @@ QUANBIT PLATFORM CAPABILITIES:
 
         const reply = await callGeminiCascade(genAI, query, {
           systemInstruction: socraticSystemInstruction,
-          maxOutputTokens: isCircuitDiagnosis ? 160 : 1000,
+          maxOutputTokens: isCircuitDiagnosis ? 160 : isKnowledgeCheck ? 180 : 1000,
           temperature: isCircuitDiagnosis ? 0.3 : 0.7,
         });
 

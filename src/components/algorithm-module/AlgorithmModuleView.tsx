@@ -193,10 +193,10 @@ export function AlgorithmModuleView({
     });
   };
 
-  // Scroll smoothly from bottom to top whenever changing to the next stage/module
+  // Keep stage navigation immediate instead of waiting for smooth-scroll animations.
   useEffect(() => {
     if (isClientMounted) {
-      window.scrollTo({ top: 0, behavior: 'smooth' });
+      window.scrollTo({ top: 0, behavior: 'auto' });
     }
   }, [activeTab, isClientMounted]);
 
@@ -228,16 +228,7 @@ export function AlgorithmModuleView({
   const scrollPageToTop = () => {
     if (typeof window === 'undefined') return;
 
-    const resetScroll = () => {
-      window.scrollTo(0, 0);
-      document.documentElement.scrollTop = 0;
-      document.body.scrollTop = 0;
-      document.scrollingElement?.scrollTo(0, 0);
-    };
-
-    resetScroll();
-    window.requestAnimationFrame(resetScroll);
-    window.setTimeout(resetScroll, 50);
+    window.scrollTo({ top: 0, behavior: 'auto' });
   };
 
   // Sync tab with URL search params (?stage=circuit or ?tab=circuit)
@@ -248,14 +239,18 @@ export function AlgorithmModuleView({
       if (stageParam) {
         const targetIdx = STAGE_ORDER.indexOf(stageParam as any);
         if (targetIdx !== -1) {
-          unlockStage(targetIdx);
-          setActiveTab(stageParam as any);
+          if (targetIdx <= maxUnlockedIdx || isModuleFullyComplete) {
+            setActiveTab(stageParam as any);
+          }
         }
       }
     }
   }, []);
 
   const handleTabChange = (tabId: typeof activeTab, resetMathView = true) => {
+    const targetIdx = STAGE_ORDER.indexOf(tabId);
+    if (targetIdx > maxUnlockedIdx && !isModuleFullyComplete) return;
+
     setActiveTab(tabId);
     if (tabId === 'math' && resetMathView) {
       setCurrentMathStep(0);
@@ -267,15 +262,7 @@ export function AlgorithmModuleView({
       url.searchParams.set('tab', tabId);
       window.history.replaceState(null, '', url.toString());
     }
-    scrollPageToTop();
   };
-
-  // Smooth scroll to top when switching stages (except circuit tab so user stays in cockpit)
-  useEffect(() => {
-    if (typeof window !== 'undefined' && activeTab !== 'circuit') {
-      window.scrollTo({ top: 0, behavior: 'smooth' });
-    }
-  }, [activeTab]);
 
   useEffect(() => {
     if (typeof window !== 'undefined' && activeTab === 'math') {
@@ -1155,7 +1142,7 @@ export function AlgorithmModuleView({
 
       {/* Stage 5: Knowledge Check (Adaptive Quiz) */}
       {activeTab === 'quiz' && (
-        <div className="space-y-4 animate-fadeIn">
+        <div className="h-full min-h-0 flex flex-col animate-fadeIn">
           <AdaptiveQuizEngine
             moduleSlug={moduleSlug}
             moduleTitle={title}

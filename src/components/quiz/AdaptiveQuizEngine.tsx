@@ -50,7 +50,7 @@ export function AdaptiveQuizEngine({
 }: AdaptiveQuizEngineProps) {
   const { language, explanationMode } = useAccessibility();
   const { recordMisconception, updateMastery } = useProgressStore();
-  const { askTutor } = useAITutorStore();
+  const { askTutor, setContextPage } = useAITutorStore();
   const { userId, studentName } = useStudentContext();
 
   const allQuestions: QuizQuestion[] = ALGORITHM_QUIZZES[moduleSlug] || [];
@@ -108,12 +108,13 @@ export function AdaptiveQuizEngine({
         : chosenOpt.text
       : 'an incorrect answer';
 
-    const prompt = `I got this question wrong on the ${moduleSlug} Knowledge Check:
+    const prompt = `I got this question wrong on the ${moduleSlug} Knowledge Check.
 Question: "${qText}"
 My Answer: "${chosenText}"
 
-Could you teach me why this is incorrect in simple, intuitive terms, and give me a helpful clue so I can answer it correctly when I retry?`;
+Teach me indirectly using Socratic guidance. Do NOT reveal the correct answer, the correct option text, the correct number, or a yes/no conclusion. Do not repeat the answer choices. Give one short analogy or concept reminder, then ask one guiding question that helps me reason to the answer myself. End with a brief retry hint.`;
 
+    setContextPage('Knowledge Check');
     askTutor(prompt, {
       explanationMode,
       language,
@@ -258,29 +259,29 @@ Could you teach me the core quantum principles behind these mistakes in simple t
 
   // ── Finished screen ────────────────────────────────────────────────────────
   if (isFinished) {
-    const passed = scorePercent >= 67; // ≥ 2/3 correct
+    const passed = scorePercent === 100;
     const incorrectQuestions = selectedQuestions.filter((q) => answers[q.id] === false);
 
     return (
-      <div className="bg-white rounded-3xl border border-dark-200 p-6 sm:p-8 space-y-6 shadow-xs max-w-2xl mx-auto animate-fadeIn relative">
+      <div className="bg-white rounded-2xl border border-dark-200 p-4 sm:p-5 space-y-2.5 shadow-xs w-full h-full min-h-0 flex flex-col animate-fadeIn relative">
         {/* Trophy icon */}
         <div
-          className={`w-16 h-16 rounded-3xl flex items-center justify-center mx-auto shadow-sm ${
+          className={`w-10 h-10 rounded-xl flex items-center justify-center mx-auto shadow-sm ${
             passed ? 'bg-emerald-50 border border-emerald-200 text-emerald-600' : 'bg-amber-50 border border-amber-200 text-amber-600'
           }`}
         >
-          <Trophy className="w-8 h-8" />
+          <Trophy className="w-5 h-5" />
         </div>
 
         {/* Heading */}
-        <div className="text-center space-y-2">
-          <span className="text-xs font-bold uppercase tracking-wider text-amber-800 bg-amber-100 border border-amber-200 px-3 py-0.5 rounded-full">
+        <div className="text-center space-y-1">
+          <span className="text-[10px] font-bold uppercase tracking-wider text-amber-800 bg-amber-100 border border-amber-200 px-2.5 py-0.5 rounded-full">
             Stage 5 of 6 Completed
           </span>
-          <h3 className="text-2xl font-black text-dark-900">
+          <h3 className="text-lg sm:text-xl font-black text-dark-900">
             Knowledge Check {passed ? 'Passed' : 'Done'} · {scorePercent}%
           </h3>
-          <p className="text-xs text-dark-600 max-w-md mx-auto leading-relaxed">
+          <p className="text-[11px] text-dark-600 max-w-lg mx-auto leading-snug">
             You answered <strong>{correctCount} of {TOTAL_QUESTIONS}</strong> questions correctly.
             {scorePercent === 100
               ? ' Outstanding! You achieved 100% Mastery on this algorithm!'
@@ -289,7 +290,7 @@ Could you teach me the core quantum principles behind these mistakes in simple t
         </div>
 
         {/* Per-question result summary */}
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
           {selectedQuestions.map((q, idx) => {
             const correct = answers[q.id];
             const qText = language === 'hi' && q.question_hi ? q.question_hi : q.question;
@@ -304,7 +305,7 @@ Could you teach me the core quantum principles behind these mistakes in simple t
                     setReviewingQuestion(q);
                   }
                 }}
-                className={`p-3.5 rounded-2xl border text-center transition-all ${
+                className={`p-2.5 rounded-xl border text-center transition-all ${
                   correct === undefined
                     ? 'border-dark-200 bg-dark-50'
                     : correct
@@ -325,11 +326,11 @@ Could you teach me the core quantum principles behind these mistakes in simple t
                   )}
                 </div>
 
-                <p className="text-[11px] font-medium text-dark-800 dark:text-dark-100 leading-snug line-clamp-2 min-h-[2.5rem]">
+                <p className="text-[10px] font-medium text-dark-800 dark:text-dark-100 leading-snug line-clamp-2 min-h-[2.4rem]">
                   {qText}
                 </p>
 
-                <div className="mt-2 flex items-center justify-center gap-1.5 flex-wrap">
+                <div className="mt-1 flex items-center justify-center gap-1.5 flex-wrap">
                   <span
                     className={`text-[9px] font-bold px-2 py-0.5 rounded-full ${
                       correct === undefined
@@ -344,7 +345,7 @@ Could you teach me the core quantum principles behind these mistakes in simple t
                 </div>
 
                 {correct === false && (
-                  <div className="mt-2.5 pt-2 border-t border-red-200/80 flex items-center justify-center gap-1.5">
+                  <div className="mt-1.5 pt-1.5 border-t border-red-200/80 flex items-center justify-center gap-1.5">
                     <button
                       type="button"
                       onClick={(e) => {
@@ -378,14 +379,14 @@ Could you teach me the core quantum principles behind these mistakes in simple t
 
         {/* Mistake Help Banner when there are wrong questions */}
         {incorrectQuestions.length > 0 && (
-          <div className="p-3.5 rounded-2xl bg-amber-50 border border-amber-200 flex flex-wrap items-center justify-between gap-3 text-xs animate-fadeIn">
+          <div className="p-2.5 rounded-xl bg-amber-50 border border-amber-200 flex flex-wrap items-center justify-between gap-2 text-xs animate-fadeIn">
             <div className="flex items-center gap-2.5">
-              <div className="w-7 h-7 rounded-xl bg-amber-500 text-white flex items-center justify-center shrink-0">
-                <Bot className="w-4 h-4" />
+              <div className="w-6 h-6 rounded-lg bg-amber-500 text-white flex items-center justify-center shrink-0">
+                <Bot className="w-3.5 h-3.5" />
               </div>
               <div>
                 <h4 className="font-bold text-amber-950 text-xs">Reach 100% Algorithm Mastery</h4>
-                <p className="text-[11px] text-amber-800">
+                <p className="text-[10px] text-amber-800">
                   Schrödinger AI can explain your {incorrectQuestions.length} missed question(s) so you can retry and achieve a perfect score!
                 </p>
               </div>
@@ -411,19 +412,19 @@ Could you teach me the core quantum principles behind these mistakes in simple t
 
         {/* Perfect score banner */}
         {scorePercent === 100 && (
-          <div className="p-3 rounded-2xl bg-emerald-50 border border-emerald-200 flex items-center justify-center gap-2 text-xs text-emerald-900 font-bold animate-fadeIn">
+          <div className="p-2 rounded-xl bg-emerald-50 border border-emerald-200 flex items-center justify-center gap-2 text-[11px] text-emerald-900 font-bold animate-fadeIn">
             <Sparkles className="w-4 h-4 text-emerald-600" />
             <span>🎉 Perfect 100% Score! You have fully mastered this stage!</span>
           </div>
         )}
 
         {/* Score bar */}
-        <div className="space-y-1.5">
+        <div className="space-y-1">
           <div className="flex justify-between text-xs font-semibold text-dark-700">
             <span>Stage 5 Score</span>
             <span className="font-mono">{correctCount}/{TOTAL_QUESTIONS} correct</span>
           </div>
-          <div className="w-full h-3 bg-dark-100 rounded-full overflow-hidden">
+          <div className="w-full h-2 bg-dark-100 rounded-full overflow-hidden">
             <div
               className={`h-full rounded-full transition-all duration-700 ${scorePercent === 100 ? 'bg-emerald-500' : passed ? 'bg-emerald-500' : 'bg-amber-500'}`}
               style={{ width: `${scorePercent}%` }}
@@ -433,22 +434,22 @@ Could you teach me the core quantum principles behind these mistakes in simple t
         </div>
 
         {/* Quantum Certificate Callout Banner */}
-        <div className="p-4 sm:p-5 rounded-2xl bg-gradient-to-r from-amber-500/10 via-yellow-500/15 to-amber-500/15 border-2 border-amber-300 shadow-xs flex flex-col sm:flex-row items-center justify-between gap-4">
-          <div className="flex items-center gap-3.5">
-            <div className="w-12 h-12 rounded-2xl bg-gradient-to-tr from-amber-500 to-yellow-400 text-white flex items-center justify-center shadow-md shadow-amber-500/25 shrink-0">
-              <Award className="w-6 h-6 text-amber-950" />
+        <div className="p-2.5 rounded-xl bg-amber-50 border border-amber-300 shadow-xs flex flex-col sm:flex-row items-center justify-between gap-2">
+          <div className="flex items-center gap-2.5">
+            <div className="w-8 h-8 rounded-lg bg-amber-500 text-white flex items-center justify-center shadow-sm shrink-0">
+              <Award className="w-4 h-4 text-amber-950" />
             </div>
             <div>
               <div className="flex items-center gap-2">
-                <span className="text-[10px] font-extrabold tracking-wider uppercase px-2 py-0.5 rounded-md bg-amber-200 text-amber-900 border border-amber-300">
+                <span className="text-[9px] font-extrabold tracking-wider uppercase px-1.5 py-0.5 rounded-md bg-amber-200 text-amber-900 border border-amber-300">
                   Official Quantum Credential
                 </span>
-                <span className="text-[11px] font-bold text-amber-800">QuanBit Quantum Academy</span>
+                <span className="text-[10px] font-bold text-amber-800">QuanBit Quantum Academy</span>
               </div>
-              <h4 className="text-sm sm:text-base font-black text-dark-900 mt-0.5">
+              <h4 className="text-xs font-black text-dark-900 mt-0.5">
                 {moduleTitle || (moduleSlug.includes('grover') ? "Grover's Algorithm" : 'Quantum Algorithm')} Certification
               </h4>
-              <p className="text-xs text-dark-600">
+              <p className="text-[11px] text-dark-600">
                 Verified certificate of completion signed by Dr. Erwin Schrödinger
               </p>
             </div>
@@ -456,7 +457,7 @@ Could you teach me the core quantum principles behind these mistakes in simple t
 
           <button
             onClick={() => setShowCertModal(true)}
-            className="w-full sm:w-auto px-5 py-2.5 rounded-xl bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 text-white font-black text-xs shadow-md shadow-amber-500/25 flex items-center justify-center gap-2 transition-all cursor-pointer hover:scale-[1.02] shrink-0 ring-2 ring-amber-300/50"
+            className="w-full sm:w-auto px-3 py-1.5 rounded-lg bg-amber-500 hover:bg-amber-600 text-white font-black text-[11px] shadow-sm flex items-center justify-center gap-1.5 transition-colors cursor-pointer shrink-0"
           >
             <Trophy className="w-4 h-4 text-amber-200" />
             <span>
@@ -465,43 +466,19 @@ Could you teach me the core quantum principles behind these mistakes in simple t
           </button>
         </div>
 
-        {/* Actions */}
-        <div className="flex flex-wrap items-center justify-center gap-3 pt-2 border-t border-dark-100">
-          <button
-            onClick={handleRestart}
-            className="flex items-center gap-2 px-4 py-2.5 rounded-xl border border-dark-200 hover:bg-dark-50 font-semibold text-xs text-dark-800 transition-colors cursor-pointer"
-          >
-            <RotateCcw className="w-4 h-4" />
-            <span>Retry Entire Quiz</span>
-          </button>
-
-          {onProceedToSkillBase && (
+        {/* Keep the single progression action at the bottom-right. Retrying and
+            teaching remain available in the mistake banner above. */}
+        <div className="mt-auto flex justify-end pt-2 border-t border-dark-100">
+          {passed && onProceedToSkillBase && (
             <button
               onClick={onProceedToSkillBase}
-              className="flex items-center gap-2 px-6 py-3 rounded-2xl bg-gradient-to-r from-primary-600 via-indigo-600 to-primary-700 hover:brightness-110 font-bold text-xs text-white shadow-md shadow-primary-500/25 transition-all cursor-pointer ring-2 ring-primary-400/40"
+              className="flex items-center gap-1.5 px-4 py-2 rounded-lg bg-primary-600 hover:bg-primary-700 font-bold text-[11px] text-white shadow-xs transition-colors cursor-pointer"
             >
               <Sparkles className="w-4 h-4 text-amber-300" />
-              <span>Stage 6: Skill Base &amp; Practice →</span>
+              <span>Next Module: Skill Base &amp; Practice</span>
               <ArrowRight className="w-4 h-4" />
             </button>
           )}
-
-          <button
-            onClick={() => {
-              if (incorrectQuestions.length > 0) {
-                askAIToCoachAllMistakes();
-              } else {
-                askTutor(
-                  `I just completed the Knowledge Check for the ${moduleSlug} algorithm with 100%! Can you give me an advanced conceptual teaser or question to deepen my understanding?`,
-                  { explanationMode, language }
-                );
-              }
-            }}
-            className="flex items-center gap-2 px-4 py-2.5 rounded-xl border border-primary-200 hover:bg-primary-50 text-primary-700 font-semibold text-xs transition-colors cursor-pointer"
-          >
-            <Bot className="w-4 h-4" />
-            <span>{incorrectQuestions.length > 0 ? 'Ask AI About Mistakes' : 'Ask AI Tutor'}</span>
-          </button>
         </div>
 
         {/* Review & Retry Modal for clicked incorrect question */}
@@ -609,10 +586,11 @@ Could you teach me the core quantum principles behind these mistakes in simple t
   const isCurrentCorrect = selectedOption?.is_correct || false;
 
   return (
-    <div className="bg-white rounded-2xl border border-dark-200 p-4 sm:p-5 shadow-xs space-y-3.5 max-w-2xl mx-auto text-xs">
+    <div className="relative overflow-hidden bg-white rounded-2xl border border-dark-200 shadow-xs text-xs flex flex-col flex-1 h-full">
+      <div className="p-4 sm:p-5 space-y-3 flex-1 min-h-0">
       {/* ── Retrying Banner ───────────────────────────────────────────────── */}
       {isRetryingFromFinish && (
-        <div className="p-2 rounded-xl bg-amber-50 border border-amber-200 flex flex-wrap items-center justify-between gap-2 text-xs text-amber-900 animate-fadeIn">
+        <div className="p-3 rounded-2xl bg-amber-50 border border-amber-200 flex flex-wrap items-center justify-between gap-2 text-xs text-amber-900 animate-fadeIn">
           <div className="flex items-center gap-2 font-semibold">
             <RotateCcw className="w-3.5 h-3.5 text-amber-600 shrink-0" />
             <span>Retrying Mistake: Select the correct answer to raise score to 100%!</span>
@@ -634,23 +612,23 @@ Could you teach me the core quantum principles behind these mistakes in simple t
       {/* ── Header: Quiz title & progress dots with Question Numbers ─────────── */}
       <div className="flex items-center justify-between gap-3 pb-2.5 border-b border-dark-100">
         <div className="flex items-center gap-2">
-          <div className="w-7 h-7 rounded-lg bg-primary-600 text-white flex items-center justify-center font-black text-xs shadow-xs">
+          <div className="w-9 h-9 rounded-xl bg-primary-600 text-white flex items-center justify-center font-black text-xs shadow-xs">
             Q{currentIdx + 1}
           </div>
           <div>
             <div className="flex items-center gap-2">
-              <h3 className="text-xs font-black text-dark-900 leading-none">
+              <h3 className="text-sm sm:text-base font-black text-dark-900 leading-none">
                 Question {currentIdx + 1} of {TOTAL_QUESTIONS}
               </h3>
             </div>
-            <p className="text-[10px] text-dark-500 mt-0.5">
+            <p className="text-[9px] text-dark-500 mt-0.5">
               Stage 5: Knowledge Check · {moduleTitle || 'Quantum Algorithm'}
             </p>
           </div>
         </div>
 
         {/* Question dots with Q1, Q2, Q3, Q4 */}
-        <div className="flex items-center gap-1.5">
+        <div className="flex items-center gap-1.5 rounded-full bg-dark-50 border border-dark-100 px-2 py-1">
           {selectedQuestions.map((q, idx) => (
             <div
               key={q.id}
@@ -674,10 +652,23 @@ Could you teach me the core quantum principles behind these mistakes in simple t
         </div>
       </div>
 
+      <div className="space-y-2">
+        <div className="flex items-center justify-between text-[10px] font-bold uppercase tracking-wider text-dark-500">
+          <span>Your progress</span>
+          <span className="text-primary-700">{currentIdx + 1} / {TOTAL_QUESTIONS}</span>
+        </div>
+        <div className="h-1.5 rounded-full bg-dark-100 overflow-hidden">
+          <div
+            className="h-full rounded-full bg-gradient-to-r from-primary-600 to-violet-500 transition-all duration-500"
+            style={{ width: `${((currentIdx + 1) / TOTAL_QUESTIONS) * 100}%` }}
+          />
+        </div>
+      </div>
+
       {/* ── Difficulty badge + concept tag ──────────────────────────────────── */}
-      <div className="flex items-center gap-2">
+      <div className="flex flex-wrap items-center gap-1.5">
         <span
-          className={`px-2.5 py-0.5 rounded-full text-[11px] font-bold uppercase tracking-wider border ${
+          className={`px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider border ${
             currentQ.difficulty === 'beginner'
               ? 'bg-emerald-50 border-emerald-200 text-emerald-800'
               : currentQ.difficulty === 'intermediate'
@@ -688,28 +679,29 @@ Could you teach me the core quantum principles behind these mistakes in simple t
           {currentQ.difficulty}
         </span>
         {currentQ.concept_tag && (
-          <span className="text-xs font-semibold text-dark-600 bg-dark-50 border border-dark-200 px-2.5 py-0.5 rounded-full">
+          <span className="text-[11px] font-semibold text-dark-600 bg-dark-50 border border-dark-200 px-2 py-0.5 rounded-full">
             {currentQ.concept_tag}
           </span>
         )}
       </div>
 
       {/* ── Question text ─────────────────────────────────────────────────── */}
-      <div>
-        <h3 className="text-sm sm:text-base font-bold text-dark-900 leading-snug">
+      <div className="rounded-xl bg-primary-50/60 border border-primary-100 p-3 sm:p-3.5">
+        <p className="text-[9px] font-bold uppercase tracking-[0.16em] text-primary-700 mb-1">Think like a quantum learner</p>
+        <h3 className="text-sm sm:text-base font-bold text-dark-950 leading-snug">
           {language === 'hi' && currentQ.question_hi ? currentQ.question_hi : currentQ.question}
         </h3>
       </div>
 
       {/* ── Options ──────────────────────────────────────────────────────── */}
-      <div className="space-y-2" role="radiogroup" aria-label="Quiz question options">
-        {currentQ.options.map((opt) => {
+      <div className="space-y-1.5" role="radiogroup" aria-label="Quiz question options">
+        {currentQ.options.map((opt, optionIndex) => {
           const isSelected = selectedOptionId === opt.id;
           const optText = language === 'hi' && opt.text_hi ? opt.text_hi : opt.text;
 
           let optionStyle = 'border-dark-200 bg-white dark:bg-dark-900 text-dark-800 dark:text-dark-100 hover:border-dark-300 hover:bg-dark-50/50';
           if (isSubmitted) {
-            if (opt.is_correct) {
+            if (isCurrentCorrect && opt.is_correct) {
               optionStyle = 'border-emerald-500 bg-emerald-50/70 dark:bg-emerald-950/60 text-emerald-950 dark:text-emerald-100 font-semibold';
             } else if (isSelected && !opt.is_correct) {
               optionStyle = 'border-red-400 bg-red-50/70 dark:bg-red-950/60 text-red-950 dark:text-red-100';
@@ -728,11 +720,16 @@ Could you teach me the core quantum principles behind these mistakes in simple t
               aria-checked={isSelected}
               tabIndex={0}
               onKeyDown={(e) => { if (e.key === ' ' || e.key === 'Enter') handleSelectOption(opt.id); }}
-              className={`p-2.5 sm:p-3 rounded-xl border cursor-pointer transition-all flex items-start gap-2.5 text-xs leading-relaxed ${optionStyle}`}
+              className={`p-2.5 sm:p-3 rounded-xl border cursor-pointer transition-all flex items-start gap-2.5 text-xs sm:text-sm leading-snug hover:shadow-sm ${optionStyle}`}
             >
-              <div className="w-4 h-4 rounded-full border border-dark-300 flex items-center justify-center shrink-0 mt-0.5 bg-white">
+              <span className={`w-6 h-6 rounded-lg flex items-center justify-center shrink-0 font-bold text-[10px] ${
+                isSelected ? 'bg-primary-600 text-white' : 'bg-dark-50 text-dark-500 border border-dark-200'
+              }`}>
+                {String.fromCharCode(65 + optionIndex)}
+              </span>
+              <div className="w-3.5 h-3.5 rounded-full border border-dark-300 flex items-center justify-center shrink-0 mt-0.5 bg-white">
                 {isSubmitted ? (
-                  opt.is_correct ? (
+                  isCurrentCorrect && opt.is_correct ? (
                     <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600" />
                   ) : isSelected ? (
                     <XCircle className="w-3.5 h-3.5 text-red-500" />
@@ -748,32 +745,23 @@ Could you teach me the core quantum principles behind these mistakes in simple t
       </div>
 
       {/* ── Explanation after submit ──────────────────────────────────────── */}
-      {isSubmitted && (
+      {isSubmitted && !isCurrentCorrect && (
         <div
-          className={`p-4 rounded-xl border text-xs leading-relaxed animate-fadeIn space-y-2.5 ${
-            isCurrentCorrect
-              ? 'bg-emerald-50 border-emerald-200 text-emerald-900'
-              : 'bg-amber-50 border-amber-200 text-amber-900'
+          className={`p-3 rounded-xl border text-xs leading-relaxed animate-fadeIn space-y-1.5 ${
+            'bg-amber-50 border-amber-200 text-amber-900'
           }`}
         >
           <div className="flex items-center gap-2 font-bold">
-            {isCurrentCorrect ? (
-              <>
-                <CheckCircle2 className="w-4 h-4 text-emerald-600" />
-                <span>Correct! +{Math.round(100 / TOTAL_QUESTIONS)}% stage score</span>
-              </>
-            ) : (
-              <>
-                <AlertTriangle className="w-4 h-4 text-amber-600" />
-                <span>Incorrect — review the explanation below</span>
-              </>
-            )}
+            <AlertTriangle className="w-4 h-4 text-amber-600" />
+            <span>Incorrect — review the explanation below</span>
           </div>
-          <p>{selectedOption?.explanation}</p>
+          <p>
+            Use the tutor for a guided clue and work through the concept yourself before trying again.
+          </p>
 
           {/* AI Teaching & Retry buttons when incorrect */}
           {!isCurrentCorrect && (
-            <div className="flex flex-wrap items-center gap-2 pt-2 border-t border-amber-200/80 mt-2">
+            <div className="flex flex-wrap items-center gap-2 pt-1.5 border-t border-amber-200/80 mt-1.5">
               <button
                 type="button"
                 onClick={() => askAIToExplainMistake(currentQ, selectedOptionId || undefined)}
@@ -799,13 +787,13 @@ Could you teach me the core quantum principles behind these mistakes in simple t
       )}
 
       {/* ── Footer actions ────────────────────────────────────────────────── */}
-      <div className="flex items-center justify-between pt-2 border-t border-dark-100">
+      <div className="flex flex-wrap items-center justify-between gap-2 pt-2 border-t border-dark-100">
         <div className="flex items-center gap-2">
           {!isSubmitted && (
             <button
               type="button"
               onClick={() => setShowHint(!showHint)}
-              className="text-xs text-dark-500 hover:text-dark-800 flex items-center gap-1 font-medium transition-colors cursor-pointer"
+              className="text-xs text-dark-500 hover:text-primary-700 flex items-center gap-1.5 font-semibold transition-colors cursor-pointer"
             >
               <HelpCircle className="w-3.5 h-3.5 text-amber-500" />
               <span>{showHint ? 'Hide hint' : 'Need a hint?'}</span>
@@ -859,6 +847,7 @@ Could you teach me the core quantum principles behind these mistakes in simple t
               </button>
             </>
           )}
+        </div>
         </div>
       </div>
     </div>
