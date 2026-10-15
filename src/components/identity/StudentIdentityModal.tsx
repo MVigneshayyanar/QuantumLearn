@@ -75,7 +75,7 @@ export function StudentIdentityModal() {
   };
 
   return (
-    <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/75 backdrop-blur-sm animate-fadeIn p-3 sm:p-4 overflow-y-auto">
+    <div className="fixed inset-0 !m-0 !top-0 !left-0 !right-0 !bottom-0 z-[9999] flex items-center justify-center bg-black/75 backdrop-blur-sm animate-fadeIn p-3 sm:p-4 overflow-y-auto">
       <div className="relative bg-white dark:bg-dark-900 rounded-3xl border border-dark-200 dark:border-dark-800 shadow-2xl w-full max-w-md max-h-[92vh] flex flex-col my-auto overflow-hidden">
         {/* Close Button */}
         <button
@@ -225,7 +225,7 @@ export function StudentIdentityModal() {
                   }}
                   className="py-1.5 px-2 rounded-xl bg-indigo-50 dark:bg-indigo-950/60 hover:bg-indigo-100 dark:hover:bg-indigo-900/60 text-indigo-700 dark:text-indigo-300 font-semibold text-[11px] border border-indigo-200 dark:border-indigo-800/60 transition-colors text-center cursor-pointer"
                 >
-                  Instructor Demo
+                  Instructor
                 </button>
                 <button
                   type="button"
@@ -235,7 +235,7 @@ export function StudentIdentityModal() {
                   }}
                   className="py-1.5 px-2 rounded-xl bg-primary-50 dark:bg-primary-950/60 hover:bg-primary-100 dark:hover:bg-primary-900/60 text-primary-700 dark:text-primary-300 font-semibold text-[11px] border border-primary-200 dark:border-primary-800/60 transition-colors text-center cursor-pointer"
                 >
-                  Student Demo
+                  Student
                 </button>
               </div>
             </div>

@@ -27,20 +27,6 @@ export async function POST(req: NextRequest) {
 
     const passwordHash = hashPassword(trimmedPassword);
 
-    // ==========================================
-    // SPECIAL CREDENTIALS CHECK
-    // Admin: admin@quanbit.com / admin@quantabit.com / admin@qlearn.com | Pass: admin123
-    // Instructor: instructor@quanbit.com / instructor@quantabit.com | Pass: quanbit123 / quantabit123 / qlearn123
-    // Student Demo: student@quanbit.com / student@quantabit.com | Pass: student123
-    // ==========================================
-    const isAdminCredentials =
-      (normalizedEmail === 'admin@quanbit.com' || normalizedEmail === 'admin@quantabit.com' || normalizedEmail === 'admin@qlearn.com') && trimmedPassword === 'admin123';
-    const isInstructorCredentials =
-      (normalizedEmail === 'instructor@quanbit.com' || normalizedEmail === 'instructor@quantabit.com' || normalizedEmail === 'instructor@qlearn.com') &&
-      (trimmedPassword === 'quanbit123' || trimmedPassword === 'quantabit123' || trimmedPassword === 'qlearn123');
-    const isStudentCredentials =
-      (normalizedEmail === 'student@quanbit.com' || normalizedEmail === 'student@quantabit.com' || normalizedEmail === 'student@qlearn.com') && trimmedPassword === 'student123';
-
     if (action === 'signup') {
       if (!trimmedName || trimmedName.length < 2) {
         return NextResponse.json({ error: 'Name is required (at least 2 characters).' }, { status: 400 });
@@ -49,36 +35,34 @@ export async function POST(req: NextRequest) {
       const user = await withPrismaRetry(async () => {
         // Check if user already exists
         const existingUser = await prisma.user.findUnique({
-          where: { email: normalizedEmail }
+          where: { email: normalizedEmail },
         });
 
-        if (existingUser && (existingUser as any).passwordHash) {
+        if (existingUser && existingUser.passwordHash) {
           throw new Error('USER_EXISTS');
         }
 
-        const role = isAdminCredentials ? 'ADMIN' : isInstructorCredentials ? 'EDUCATOR' : 'STUDENT';
-
         if (existingUser) {
           // Upgrade existing passwordless user
-          return await (prisma.user as any).update({
+          return await prisma.user.update({
             where: { id: existingUser.id },
             data: {
               name: trimmedName,
               passwordHash,
-              role,
-              lastActiveAt: new Date()
-            }
+              lastActiveAt: new Date(),
+            },
           });
         } else {
-          // Create new account
-          return await (prisma.user as any).create({
+          // Create new user in database
+          return await prisma.user.create({
             data: {
               name: trimmedName,
               email: normalizedEmail,
               passwordHash,
-              role,
-              lastActiveAt: new Date()
-            }
+              role: 'STUDENT',
+              isPremium: false,
+              lastActiveAt: new Date(),
+            },
           });
         }
       });
@@ -89,134 +73,83 @@ export async function POST(req: NextRequest) {
         email: user.email,
         role: user.role,
         isAdmin: user.role === 'ADMIN',
-        isInstructor: user.role === 'EDUCATOR' || user.role === 'ADMIN'
+        isInstructor: user.role === 'EDUCATOR' || user.role === 'ADMIN',
+        isPremium: Boolean(user.isPremium),
       });
 
       res.cookies.set('ql_user_id', user.id, {
         path: '/',
         sameSite: 'lax',
-        maxAge: 60 * 60 * 24 * 7 // 7 days
+        maxAge: 60 * 60 * 24 * 7,
       });
       res.cookies.set('ql_user_role', user.role, {
         path: '/',
         sameSite: 'lax',
-        maxAge: 60 * 60 * 24 * 7
+        maxAge: 60 * 60 * 24 * 7,
+      });
+      res.cookies.set('ql_user_premium', String(Boolean(user.isPremium)), {
+        path: '/',
+        sameSite: 'lax',
+        maxAge: 60 * 60 * 24 * 7,
       });
 
       return res;
     }
 
     if (action === 'signin' || action === 'login') {
-      const finalUser = await withPrismaRetry(async () => {
-        // Find user by email
-        let user = await prisma.user.findUnique({
-          where: { email: normalizedEmail }
+      const user = await withPrismaRetry(async () => {
+        // Find user by email in database
+        const found = await prisma.user.findUnique({
+          where: { email: normalizedEmail },
         });
 
-        // If admin credentials used for the first time, auto-provision
-        if (!user && isAdminCredentials) {
-          user = await (prisma.user as any).create({
-            data: {
-              name: 'System Administrator',
-              email: normalizedEmail,
-              passwordHash,
-              role: 'ADMIN',
-              lastActiveAt: new Date()
-            }
-          });
-        }
-
-        // If instructor credentials used for the first time, auto-provision
-        if (!user && isInstructorCredentials) {
-          user = await (prisma.user as any).create({
-            data: {
-              name: 'Instructor Admin',
-              email: normalizedEmail,
-              passwordHash,
-              role: 'EDUCATOR',
-              lastActiveAt: new Date()
-            }
-          });
-        }
-
-        // If student demo credentials used for the first time, auto-provision
-        if (!user && isStudentCredentials) {
-          user = await (prisma.user as any).create({
-            data: {
-              name: 'Alex Mercer (Student)',
-              email: normalizedEmail,
-              passwordHash,
-              role: 'STUDENT',
-              lastActiveAt: new Date()
-            }
-          });
-        }
-
-        if (!user) {
+        if (!found) {
           throw new Error('USER_NOT_FOUND');
         }
 
-        // Check password
-        const storedHash = (user as any).passwordHash;
-
-        // Verify either matching hash or admin/instructor/student override
-        if (isAdminCredentials) {
-          if (user.role !== 'ADMIN') {
-            user = await prisma.user.update({
-              where: { id: user.id },
-              data: { role: 'ADMIN', passwordHash }
-            });
-          }
-        } else if (isInstructorCredentials) {
-          if (user.role !== 'EDUCATOR' && user.role !== 'ADMIN') {
-            user = await prisma.user.update({
-              where: { id: user.id },
-              data: { role: 'EDUCATOR', passwordHash }
-            });
-          }
-        } else if (isStudentCredentials) {
-          if (user.role !== 'STUDENT') {
-            user = await prisma.user.update({
-              where: { id: user.id },
-              data: { role: 'STUDENT', passwordHash }
-            });
-          }
-        } else if (storedHash && storedHash !== passwordHash) {
+        // Verify password hash against database record
+        if (found.passwordHash && found.passwordHash !== passwordHash) {
           throw new Error('INVALID_PASSWORD');
-        } else if (!storedHash) {
-          // First time setting password for legacy user
-          user = await (prisma.user as any).update({
-            where: { id: user.id },
-            data: { passwordHash, lastActiveAt: new Date() }
-          });
-        } else {
-          await prisma.user.update({
-            where: { id: user.id },
-            data: { lastActiveAt: new Date() }
+        }
+
+        // Set password for legacy account if missing
+        if (!found.passwordHash) {
+          return await prisma.user.update({
+            where: { id: found.id },
+            data: { passwordHash, lastActiveAt: new Date() },
           });
         }
 
-        return user!;
+        return await prisma.user.update({
+          where: { id: found.id },
+          data: { lastActiveAt: new Date() },
+        });
       });
 
       const res = NextResponse.json({
-        userId: finalUser.id,
-        name: finalUser.name,
-        email: finalUser.email,
-        role: finalUser.role,
-        isAdmin: finalUser.role === 'ADMIN',
-        isInstructor: finalUser.role === 'EDUCATOR' || finalUser.role === 'ADMIN'
+        userId: user.id,
+        name: user.name,
+        email: user.email,
+        role: user.role,
+        isAdmin: user.role === 'ADMIN',
+        isInstructor: user.role === 'EDUCATOR' || user.role === 'ADMIN',
+        isPremium: Boolean(user.isPremium),
       });
 
-      res.cookies.set('ql_user_id', finalUser.id, {
+      res.cookies.set('ql_user_id', user.id, {
         path: '/',
         sameSite: 'lax',
-        maxAge: 60 * 60 * 24 * 7
+        maxAge: 60 * 60 * 24 * 7,
       });
-      res.cookies.set('ql_user_role', finalUser.role, {
+      res.cookies.set('ql_user_role', user.role, {
         path: '/',
         sameSite: 'lax',
-        maxAge: 60 * 60 * 24 * 7
+        maxAge: 60 * 60 * 24 * 7,
+      });
+      res.cookies.set('ql_user_premium', String(Boolean(user.isPremium)), {
+        path: '/',
+        sameSite: 'lax',
+        maxAge: 60 * 60 * 24 * 7,
       });
 
       return res;
@@ -232,7 +165,7 @@ export async function POST(req: NextRequest) {
     }
     if (err?.message === 'USER_NOT_FOUND') {
       return NextResponse.json(
-        { error: 'No account found with this email. Please sign up.' },
+        { error: 'No account found with this email. Please check your credentials or sign up.' },
         { status: 404 }
       );
     }

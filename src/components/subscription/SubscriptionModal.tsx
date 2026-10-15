@@ -74,7 +74,7 @@ export function SubscriptionModal() {
   ];
 
   return (
-    <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/75 backdrop-blur-sm animate-fadeIn p-3 sm:p-4 overflow-y-auto">
+    <div className="fixed inset-0 !m-0 !top-0 !left-0 !right-0 !bottom-0 z-[9999] flex items-center justify-center bg-black/75 backdrop-blur-sm animate-fadeIn p-3 sm:p-4 overflow-y-auto">
       <div className="relative bg-white dark:bg-dark-900 rounded-3xl border border-amber-200/90 dark:border-amber-600/40 shadow-2xl w-full max-w-lg max-h-[92vh] flex flex-col my-auto overflow-hidden">
         {/* Glow accent */}
         <div className="absolute -top-12 -left-12 w-40 h-40 bg-amber-400/20 dark:bg-amber-500/10 rounded-full blur-3xl pointer-events-none" />
@@ -181,30 +181,22 @@ export function SubscriptionModal() {
             <>
               <button
                 type="button"
-                onClick={handleSubscribe}
-                disabled={isProcessing}
-                className="w-full py-2.5 sm:py-3 px-4 rounded-2xl bg-gradient-to-r from-amber-500 via-amber-600 to-amber-700 hover:brightness-110 active:scale-[0.99] text-white font-bold text-sm shadow-md shadow-amber-500/25 flex items-center justify-center gap-2 transition-all cursor-pointer"
+                disabled={true}
+                className="w-full py-2.5 sm:py-3 px-4 rounded-2xl bg-amber-500/20 dark:bg-amber-900/30 text-amber-800 dark:text-amber-300 font-bold text-sm border border-amber-300 dark:border-amber-700/60 flex items-center justify-center gap-2 cursor-not-allowed shadow-xs"
               >
-                <Zap className="w-4 h-4 fill-white" />
-                <span>{isProcessing ? 'Activating Pro...' : 'Activate QuanBit Pro (1-Click Demo)'}</span>
+                <Sparkles className="w-4 h-4 text-amber-600 dark:text-amber-400" />
+                <span>QuanBit Pro — Coming Soon</span>
               </button>
-              <p className="text-[10px] text-center text-dark-400 dark:text-dark-500">
-                Instant trial demo activation • Zero credit card required for evaluation
+              <p className="text-[11px] text-center text-dark-500 dark:text-dark-400">
+                Self-serve subscriptions are launching soon. Pre-activated accounts can sign in with authorized credentials.
               </p>
             </>
           ) : (
             <div className="space-y-1.5 text-center">
-              <div className="p-2.5 rounded-xl bg-emerald-50 dark:bg-emerald-950/60 border border-emerald-200 dark:border-emerald-800/80 text-emerald-800 dark:text-emerald-300 text-xs font-semibold flex items-center justify-center gap-2">
+              <div className="p-3 rounded-xl bg-emerald-50 dark:bg-emerald-950/60 border border-emerald-200 dark:border-emerald-800/80 text-emerald-800 dark:text-emerald-300 text-xs font-semibold flex items-center justify-center gap-2">
                 <CheckCircle2 className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />
                 <span>You currently have active QuanBit Pro status!</span>
               </div>
-              <button
-                type="button"
-                onClick={handleDowngrade}
-                className="text-xs text-dark-500 dark:text-dark-400 hover:text-red-600 dark:hover:text-red-400 transition-colors underline cursor-pointer"
-              >
-                Switch back to Free tier (for testing)
-              </button>
             </div>
           )}
         </div>

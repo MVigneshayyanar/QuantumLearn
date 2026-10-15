@@ -16,8 +16,8 @@ export default function robots(): MetadataRoute.Robots {
           '/instructor/',
           '/dashboard',
           '/dashboard/',
-          '/verify',
-          '/verify/',
+          // /verify and /verify/ REMOVED — certificate pages should be indexed;
+          // they are linkable, shareable, and valuable for SEO authority.
         ],
       },
       {
@@ -31,8 +31,6 @@ export default function robots(): MetadataRoute.Robots {
           '/instructor/',
           '/dashboard',
           '/dashboard/',
-          '/verify',
-          '/verify/',
         ],
       },
     ],

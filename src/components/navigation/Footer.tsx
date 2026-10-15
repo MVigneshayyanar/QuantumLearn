@@ -79,36 +79,51 @@ export function Footer() {
 
           {/* Tools and Visualizers */}
           <nav aria-label="Quantum tools and simulators">
-            <h2 className="font-semibold text-dark-900 dark:text-white mb-3 text-xs uppercase tracking-wide">Tools & Simulators</h2>
+            <h2 className="font-semibold text-dark-900 dark:text-white mb-3 text-xs uppercase tracking-wide">Resources & Tools</h2>
             <ul className="space-y-2">
               <li>
                 <Link href="/simulator" className="hover:text-primary-600 dark:hover:text-primary-400 transition-colors">
-                  Online Quantum Circuit Builder & Simulator
+                  Online Quantum Circuit Builder
                 </Link>
               </li>
               <li>
                 <Link href="/bloch-sphere" className="hover:text-primary-600 dark:hover:text-primary-400 transition-colors">
-                  Interactive 3D Bloch Sphere Visualizer
+                  Interactive 3D Bloch Sphere
                 </Link>
               </li>
               <li>
-                <Link href="/practice" className="hover:text-primary-600 dark:hover:text-primary-400 transition-colors">
-                  Quantum Computing Practice Problems
+                <Link href="/blog" className="hover:text-primary-600 dark:hover:text-primary-400 transition-colors">
+                  Pillar Guides &amp; Blog
+                </Link>
+              </li>
+              <li>
+                <Link href="/faq" className="hover:text-primary-600 dark:hover:text-primary-400 transition-colors">
+                  Frequently Asked Questions (FAQ)
+                </Link>
+              </li>
+              <li>
+                <Link href="/contact" className="hover:text-primary-600 dark:hover:text-primary-400 transition-colors">
+                  Contact REVERSUN
+                </Link>
+              </li>
+              <li>
+                <Link href="/verify" className="hover:text-primary-600 dark:hover:text-primary-400 transition-colors">
+                  Verify Certificates
                 </Link>
               </li>
               <li>
                 <Link href="/about" className="hover:text-primary-600 dark:hover:text-primary-400 transition-colors font-medium text-primary-700 dark:text-primary-400">
-                  About QuanBit — Platform & Mission
+                  About QuanBit &amp; REVERSUN
                 </Link>
               </li>
               <li>
                 <a
-                  href="https://github.com/MVigneshayyanar/QuantumLearn"
+                  href="https://reversun.com/contact"
                   target="_blank"
                   rel="noopener noreferrer"
                   className="hover:text-primary-600 dark:hover:text-primary-400 transition-colors inline-flex items-center gap-1"
                 >
-                  GitHub — Open Source <ExternalLink className="w-3 h-3" />
+                  REVERSUN Enquiry Form <ExternalLink className="w-3 h-3" />
                 </a>
               </li>
             </ul>

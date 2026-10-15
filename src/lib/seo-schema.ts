@@ -40,7 +40,7 @@ export const websiteSchema = {
   description:
     'The #1 free interactive quantum computing platform. Master quantum algorithms with real-time 3D Bloch sphere visualization, multi-framework code export (IBM Qiskit, Google Cirq, Xanadu PennyLane, OpenQASM), and Schrödinger AI Socratic tutoring.',
   inLanguage: 'en-US',
-  datePublished: '2024-01-01',
+  datePublished: '2026-10-12',
   dateModified: NOW,
   publisher: {
     '@type': 'EducationalOrganization',
@@ -53,6 +53,16 @@ export const websiteSchema = {
       width: 512,
       height: 512,
     },
+    parentOrganization: {
+      '@type': 'Organization',
+      name: 'REVERSUN',
+      url: 'https://www.reversun.com',
+    },
+  },
+  creator: {
+    '@type': 'Organization',
+    name: 'REVERSUN',
+    url: 'https://www.reversun.com',
   },
   image: {
     '@type': 'ImageObject',
@@ -78,7 +88,7 @@ export const organizationSchema = {
   '@type': 'EducationalOrganization',
   '@id': `${siteUrl}/#organization`,
   name: 'QuanBit',
-  legalName: 'QuanBit Interactive Quantum Computing Academy',
+  legalName: 'QuanBit Interactive Quantum Computing Academy by REVERSUN',
   url: siteUrl,
   logo: {
     '@type': 'ImageObject',
@@ -88,8 +98,14 @@ export const organizationSchema = {
   },
   image: `${siteUrl}/og-image.png`,
   description:
-    'Dedicated to democratizing quantum information science education worldwide through interactive visual 3D simulations, multi-backend quantum transpilation, and AI-driven pedagogical mentoring.',
+    'QuanBit is the flagship quantum computing education product developed by REVERSUN (www.reversun.com). Dedicated to democratizing quantum information science worldwide through interactive visual 3D simulations, multi-backend quantum transpilation, and AI-driven pedagogical mentoring.',
   foundingDate: '2024',
+  parentOrganization: {
+    '@type': 'Organization',
+    '@id': 'https://www.reversun.com/#organization',
+    name: 'REVERSUN',
+    url: 'https://www.reversun.com',
+  },
   knowsAbout: [
     'Quantum Computing',
     'Quantum Algorithms',
@@ -107,12 +123,13 @@ export const organizationSchema = {
     'Quantum Error Correction',
   ],
   sameAs: [
-    'https://github.com/MVigneshayyanar/QuantumLearn',
     'https://twitter.com/quanbit_tech',
+    'https://www.reversun.com',
   ],
   contactPoint: {
     '@type': 'ContactPoint',
     contactType: 'academic and technical support',
+    email: 'info@reversun.com',
     availableLanguage: ['English', 'Hindi', 'Spanish', 'French', 'German', 'Tamil', 'Telugu', 'Japanese', 'Chinese'],
   },
 };
@@ -136,13 +153,9 @@ export const softwareApplicationSchema = {
     price: '0',
     priceCurrency: 'USD',
   },
-  aggregateRating: {
-    '@type': 'AggregateRating',
-    ratingValue: '4.95',
-    ratingCount: '3420',
-    bestRating: '5',
-    worstRating: '1',
-  },
+  // aggregateRating removed: must only be present when real user reviews are
+  // visible on the page (Google schema policy). Add back when a real review
+  // widget (e.g. Trustpilot, G2 embed) is displayed on the site.
   featureList: [
     'Interactive 3D Bloch Sphere qubit visualization with 6-axis spatial tracking',
     'Drag-and-drop quantum circuit builder with sub-16ms execution',
@@ -162,11 +175,22 @@ export const softwareApplicationSchema = {
   ],
   description:
     'Browser-based quantum circuit simulator supporting real-time 3D Bloch sphere rendering, reduced density matrix purity diagnostics, and automatic transpilation to IBM Qiskit, Google Cirq, and Xanadu PennyLane.',
+  creator: {
+    '@type': 'Organization',
+    name: 'REVERSUN',
+    url: 'https://www.reversun.com',
+  },
   author: {
     '@type': 'Organization',
-    name: 'QuanBit',
+    name: 'QuanBit Team',
+    url: siteUrl,
   },
-  datePublished: '2024-01-01',
+  publisher: {
+    '@type': 'Organization',
+    name: 'REVERSUN',
+    url: 'https://www.reversun.com',
+  },
+  datePublished: '2026-10-12',
   dateModified: NOW,
 };
 
@@ -192,7 +216,8 @@ export const courseSchemaList = [
       { '@type': 'Thing', name: 'Dirac Notation' },
       { '@type': 'Thing', name: 'Statevector' },
     ],
-    provider: { '@type': 'EducationalOrganization', name: 'QuanBit', sameAs: siteUrl },
+    provider: { '@type': 'EducationalOrganization', name: 'QuanBit by REVERSUN', sameAs: 'https://www.reversun.com', url: siteUrl },
+    instructor: { '@type': 'Organization', name: 'QuanBit Team', url: siteUrl },
     hasCourseInstance: { '@type': 'CourseInstance', courseMode: 'online', courseWorkload: 'PT1H' },
     educationalCredentialAwarded: 'QuanBit Certificate in Quantum Statevector Mechanics',
   },
@@ -213,7 +238,8 @@ export const courseSchemaList = [
       { '@type': 'Thing', name: 'Amplitude Amplification' },
       { '@type': 'Thing', name: 'Quantum Speedup' },
     ],
-    provider: { '@type': 'EducationalOrganization', name: 'QuanBit', sameAs: siteUrl },
+    provider: { '@type': 'EducationalOrganization', name: 'QuanBit by REVERSUN', sameAs: 'https://www.reversun.com', url: siteUrl },
+    instructor: { '@type': 'Organization', name: 'QuanBit Team', url: siteUrl },
     hasCourseInstance: { '@type': 'CourseInstance', courseMode: 'online', courseWorkload: 'PT2H' },
     educationalCredentialAwarded: "QuanBit Certificate in Grover's Search Algorithm",
   },
@@ -234,7 +260,8 @@ export const courseSchemaList = [
       { '@type': 'Thing', name: 'Phase Kickback' },
       { '@type': 'Thing', name: 'Quantum Oracle' },
     ],
-    provider: { '@type': 'EducationalOrganization', name: 'QuanBit', sameAs: siteUrl },
+    provider: { '@type': 'EducationalOrganization', name: 'QuanBit by REVERSUN', sameAs: 'https://www.reversun.com', url: siteUrl },
+    instructor: { '@type': 'Organization', name: 'QuanBit Team', url: siteUrl },
     hasCourseInstance: { '@type': 'CourseInstance', courseMode: 'online', courseWorkload: 'PT1H30M' },
     educationalCredentialAwarded: 'QuanBit Certificate in Deutsch-Jozsa Algorithm',
   },
@@ -255,7 +282,8 @@ export const courseSchemaList = [
       { '@type': 'Thing', name: 'Quantum Entanglement' },
       { '@type': 'Thing', name: 'No-Cloning Theorem' },
     ],
-    provider: { '@type': 'EducationalOrganization', name: 'QuanBit', sameAs: siteUrl },
+    provider: { '@type': 'EducationalOrganization', name: 'QuanBit by REVERSUN', sameAs: 'https://www.reversun.com', url: siteUrl },
+    instructor: { '@type': 'Organization', name: 'QuanBit Team', url: siteUrl },
     hasCourseInstance: { '@type': 'CourseInstance', courseMode: 'online', courseWorkload: 'PT2H' },
     educationalCredentialAwarded: 'QuanBit Certificate in Quantum Teleportation',
   },
@@ -276,7 +304,8 @@ export const courseSchemaList = [
       { '@type': 'Thing', name: 'Quantum Entanglement' },
       { '@type': 'Thing', name: 'Bell Basis Measurement' },
     ],
-    provider: { '@type': 'EducationalOrganization', name: 'QuanBit', sameAs: siteUrl },
+    provider: { '@type': 'EducationalOrganization', name: 'QuanBit by REVERSUN', sameAs: 'https://www.reversun.com', url: siteUrl },
+    instructor: { '@type': 'Organization', name: 'QuanBit Team', url: siteUrl },
     hasCourseInstance: { '@type': 'CourseInstance', courseMode: 'online', courseWorkload: 'PT1H30M' },
     educationalCredentialAwarded: 'QuanBit Certificate in Superdense Coding',
   },
@@ -382,7 +411,19 @@ export const howToSchema = {
 export const faqSchema = {
   '@context': 'https://schema.org',
   '@type': 'FAQPage',
+  speakable: {
+    '@type': 'SpeakableSpecification',
+    cssSelector: ['.speakable-question', '.speakable-answer'],
+  },
   mainEntity: [
+    {
+      '@type': 'Question',
+      name: 'Who develops and backs QuanBit?',
+      acceptedAnswer: {
+        '@type': 'Answer',
+        text: 'QuanBit is developed, engineered, and maintained by REVERSUN (https://www.reversun.com). REVERSUN builds next-generation visual scientific computing and educational engineering platforms to democratize quantum technology worldwide.',
+      },
+    },
     {
       '@type': 'Question',
       name: 'What is QuanBit and how do I learn quantum computing with it?',
@@ -475,3 +516,80 @@ export function buildBreadcrumbSchema(
     })),
   };
 }
+
+/* ──────────────────────────────────────────────────────────
+   9. Blog Article Schema Factory (SEO & GEO Content)
+────────────────────────────────────────────────────────── */
+export function buildBlogArticleSchema({
+  title,
+  description,
+  url,
+  datePublished,
+  dateModified = NOW,
+  keywords,
+}: {
+  title: string;
+  description: string;
+  url: string;
+  datePublished: string;
+  dateModified?: string;
+  keywords: string[];
+}) {
+  return {
+    '@context': 'https://schema.org',
+    '@type': 'TechArticle',
+    mainEntityOfPage: {
+      '@type': 'WebPage',
+      '@id': url,
+    },
+    headline: title,
+    description,
+    image: `${siteUrl}/og-image.png`,
+    author: {
+      '@type': 'Organization',
+      name: 'QuanBit Team',
+      url: siteUrl,
+    },
+    publisher: {
+      '@type': 'Organization',
+      name: 'REVERSUN',
+      url: 'https://www.reversun.com',
+      logo: {
+        '@type': 'ImageObject',
+        url: `${siteUrl}/logo.png`,
+      },
+    },
+    datePublished,
+    dateModified,
+    inLanguage: 'en-US',
+    keywords: keywords.join(', '),
+    speakable: {
+      '@type': 'SpeakableSpecification',
+      cssSelector: ['h1', '.speakable-summary', '.speakable-answer'],
+    },
+  };
+}
+
+/* ──────────────────────────────────────────────────────────
+   10. ContactPage Schema
+────────────────────────────────────────────────────────── */
+export const contactPageSchema = {
+  '@context': 'https://schema.org',
+  '@type': 'ContactPage',
+  name: 'Contact QuanBit & REVERSUN',
+  url: `${siteUrl}/contact`,
+  description:
+    'Contact the QuanBit team at REVERSUN for academic partnerships, quantum research collaborations, curriculum licensing, or technical inquiries.',
+  mainEntity: {
+    '@type': 'Organization',
+    name: 'REVERSUN',
+    url: 'https://www.reversun.com',
+    contactPoint: {
+      '@type': 'ContactPoint',
+      contactType: 'Customer & Academic Support',
+      email: 'info@reversun.com',
+      url: 'https://reversun.com/contact',
+      availableLanguage: ['English', 'Hindi', 'Spanish', 'French', 'German', 'Tamil', 'Telugu', 'Japanese', 'Chinese'],
+    },
+  },
+};

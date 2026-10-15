@@ -207,7 +207,8 @@ export function StudentProvider({ children }: { children: React.ReactNode }) {
       throw new Error(data.error || 'Failed to sign in.');
     }
 
-    const { userId: returnedId, name, email: returnedEmail, role: returnedRole, isInstructor } = data;
+    const { userId: returnedId, name, email: returnedEmail, role: returnedRole, isInstructor, isPremium: returnedPremium } = data;
+    const isPro = Boolean(returnedPremium || returnedRole === 'ADMIN' || returnedRole === 'EDUCATOR');
 
     // Immediately persist and sync ref before executing any callback
     userIdRef.current = returnedId;
@@ -215,6 +216,14 @@ export function StudentProvider({ children }: { children: React.ReactNode }) {
     localStorage.setItem(LS_STUDENT_NAME, name || returnedEmail);
     localStorage.setItem(LS_STUDENT_EMAIL, returnedEmail);
     localStorage.setItem(LS_STUDENT_ROLE, returnedRole || 'STUDENT');
+
+    if (isPro) {
+      localStorage.setItem(LS_STUDENT_PREMIUM, 'true');
+      setIsPremium(true);
+    } else {
+      localStorage.removeItem(LS_STUDENT_PREMIUM);
+      setIsPremium(false);
+    }
 
     setUserId(returnedId);
     setStudentName(name || returnedEmail.split('@')[0]);
@@ -225,13 +234,14 @@ export function StudentProvider({ children }: { children: React.ReactNode }) {
     if (typeof document !== 'undefined') {
       document.cookie = `ql_user_id=${returnedId}; path=/; max-age=604800; SameSite=Lax`;
       document.cookie = `ql_user_role=${returnedRole || 'STUDENT'}; path=/; max-age=604800; SameSite=Lax`;
+      document.cookie = `ql_user_premium=${String(isPro)}; path=/; max-age=604800; SameSite=Lax`;
     }
 
     syncUserProgressToStore(returnedId);
     executePendingAction(returnedId);
     const isInst = returnedRole === 'EDUCATOR' || returnedRole === 'ADMIN' || Boolean(isInstructor);
     const isAdm = returnedRole === 'ADMIN';
-    return { isInstructor: isInst, isAdmin: isAdm, userId: returnedId };
+    return { isInstructor: isInst, isAdmin: isAdm, userId: returnedId, isPremium: isPro };
   }, []);
 
   const register = useCallback(async (name: string, email: string, password: string) => {
@@ -246,13 +256,19 @@ export function StudentProvider({ children }: { children: React.ReactNode }) {
       throw new Error(data.error || 'Failed to register.');
     }
 
-    const { userId: returnedId, name: returnedName, email: returnedEmail, role: returnedRole } = data;
+    const { userId: returnedId, name: returnedName, email: returnedEmail, role: returnedRole, isPremium: returnedPremium } = data;
+    const isPro = Boolean(returnedPremium || returnedRole === 'ADMIN' || returnedRole === 'EDUCATOR');
 
     userIdRef.current = returnedId;
     localStorage.setItem(LS_STUDENT_ID, returnedId);
     localStorage.setItem(LS_STUDENT_NAME, returnedName || returnedEmail);
     localStorage.setItem(LS_STUDENT_EMAIL, returnedEmail);
     localStorage.setItem(LS_STUDENT_ROLE, returnedRole || 'STUDENT');
+
+    if (isPro) {
+      localStorage.setItem(LS_STUDENT_PREMIUM, 'true');
+      setIsPremium(true);
+    }
 
     setUserId(returnedId);
     setStudentName(returnedName || returnedEmail.split('@')[0]);
@@ -263,6 +279,7 @@ export function StudentProvider({ children }: { children: React.ReactNode }) {
     if (typeof document !== 'undefined') {
       document.cookie = `ql_user_id=${returnedId}; path=/; max-age=604800; SameSite=Lax`;
       document.cookie = `ql_user_role=${returnedRole || 'STUDENT'}; path=/; max-age=604800; SameSite=Lax`;
+      document.cookie = `ql_user_premium=${String(isPro)}; path=/; max-age=604800; SameSite=Lax`;
     }
 
     syncUserProgressToStore(returnedId);

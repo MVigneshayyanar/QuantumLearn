@@ -331,7 +331,8 @@ export default function InstructorDashboard() {
   }) || [];
 
   return (
-    <div className="w-full mx-auto px-3 sm:px-6 lg:px-8 py-3.5 pb-24 md:pb-6 space-y-3.5 animate-fadeIn">
+    <>
+      <div className="w-full mx-auto px-3 sm:px-6 lg:px-8 py-3.5 pb-24 md:pb-6 space-y-3.5 animate-fadeIn">
       {/* Header */}
       <div className="bg-white rounded-2xl border border-dark-200 p-5 sm:p-6 shadow-xs">
         <div className="flex flex-wrap items-center justify-between gap-4">
@@ -736,10 +737,11 @@ export default function InstructorDashboard() {
           )}
         </div>
       )}
+      </div>
 
       {/* STUDENT DEEP-DIVE MODAL */}
       {selectedStudent && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-xs p-4 animate-fadeIn">
+        <div className="fixed inset-0 !m-0 !top-0 !left-0 !right-0 !bottom-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-xs p-4 animate-fadeIn">
           <div className="relative bg-white rounded-2xl border border-dark-200 shadow-2xl w-full max-w-2xl p-5 sm:p-6 space-y-4 max-h-[90vh] overflow-y-auto">
             {/* Modal Header */}
             <div className="flex items-center justify-between gap-4 pb-3 border-b border-dark-100">
@@ -922,7 +924,7 @@ export default function InstructorDashboard() {
 
       {/* MAP / ADD STUDENT MODAL */}
       {showMappingModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-xs p-4 animate-fadeIn">
+        <div className="fixed inset-0 !m-0 !top-0 !left-0 !right-0 !bottom-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-xs p-4 animate-fadeIn">
           <div className="relative bg-white rounded-2xl border border-dark-200 shadow-2xl w-full max-w-xl p-5 sm:p-6 space-y-4 max-h-[85vh] flex flex-col">
             <div className="flex items-center justify-between gap-3 pb-3 border-b border-dark-100">
               <div>
@@ -1077,6 +1079,6 @@ export default function InstructorDashboard() {
           </div>
         </div>
       )}
-    </div>
+    </>
   );
 }

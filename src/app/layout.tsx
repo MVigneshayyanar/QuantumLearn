@@ -52,11 +52,11 @@ export const viewport: Viewport = {
 export const metadata: Metadata = {
   metadataBase: new URL(siteUrl),
   title: {
-    default: 'QuanBit | #1 Interactive Quantum Computing Learning Platform - 3D Bloch Sphere & Circuit Simulator',
+    default: 'QuanBit — Free Interactive Quantum Computing Platform',
     template: '%s | QuanBit',
   },
   description:
-    'Master quantum computing and quantum algorithms with QuanBit. Featuring real-time 3D Bloch spheres, drag-and-drop quantum circuit simulation, instant multi-backend export (IBM Qiskit, Google Cirq, Xanadu PennyLane, OpenQASM), and Schrödinger AI Socratic tutoring. 100% free with verified certificates.',
+    'Learn quantum computing free with QuanBit — 3D Bloch sphere, circuit simulator (Qiskit, Cirq, PennyLane), interactive algorithms, Schrödinger AI tutor & verifiable certificates.',
   keywords: [
     'quantum computing',
     'learn quantum computing',
@@ -126,17 +126,8 @@ export const metadata: Metadata = {
   classification: 'Educational Technology',
   alternates: {
     canonical: '/',
-    languages: {
-      'en-US': '/',
-      'hi-IN': '/?lang=hi',
-      'es-ES': '/?lang=es',
-      'fr-FR': '/?lang=fr',
-      'de-DE': '/?lang=de',
-      'ta-IN': '/?lang=ta',
-      'te-IN': '/?lang=te',
-      'ja-JP': '/?lang=ja',
-      'zh-CN': '/?lang=zh',
-    },
+    // hreflang removed: all locales pointed to same URL — misconfiguration
+    // Re-add when real translated routes (/hi/, /es/, etc.) exist
   },
   openGraph: {
     type: 'website',

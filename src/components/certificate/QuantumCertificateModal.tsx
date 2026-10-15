@@ -80,7 +80,7 @@ export function QuantumCertificateModal({
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-black/70 backdrop-blur-xs overflow-y-auto animate-fadeIn">
+    <div className="fixed inset-0 !m-0 !top-0 !left-0 !right-0 !bottom-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-black/70 backdrop-blur-xs overflow-y-auto animate-fadeIn">
       {/* Small Popup Dialog Container */}
       <div className="bg-white rounded-2xl border border-dark-200 shadow-2xl max-w-lg w-full overflow-hidden my-auto animate-scaleUp">
         {/* Top Control Bar */}

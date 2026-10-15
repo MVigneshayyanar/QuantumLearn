@@ -21,7 +21,12 @@ import {
   HelpCircle,
   Atom,
   Layers,
-  Activity
+  Activity,
+  ExternalLink,
+  Star,
+  Quote,
+  Mail,
+  Building
 } from 'lucide-react';
 import { MathRenderer } from '@/components/math/MathRenderer';
 
@@ -159,6 +164,12 @@ export default function AboutPage() {
                 </div>
               </div>
 
+              {/* AEO Answer-First Definition */}
+              <div className="p-4 rounded-xl bg-primary-50/70 border border-primary-200/80 text-dark-800 text-xs sm:text-sm leading-relaxed speakable-answer">
+                <span className="font-bold text-primary-950">Definition: </span>
+                Quantum mechanics is the foundational branch of physics describing nature at atomic and subatomic scales, where physical properties like energy and angular momentum are quantized into discrete packets (quanta), particles exhibit wave-particle duality, and states evolve unitarily until observation triggers probabilistic measurement collapse.
+              </div>
+
               {explanationMode === 'simple' ? (
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-5 text-xs">
                   <div className="bg-white p-5 rounded-xl border border-dark-200 space-y-2.5">
@@ -242,6 +253,12 @@ export default function AboutPage() {
                       : 'Isomorphism between two-level complex Hilbert space S² and the 3D unit Bloch sphere.'}
                   </p>
                 </div>
+              </div>
+
+              {/* AEO Answer-First Definition */}
+              <div className="p-4 rounded-xl bg-primary-50/70 border border-primary-200/80 text-dark-800 text-xs sm:text-sm leading-relaxed speakable-answer">
+                <span className="font-bold text-primary-950">Definition: </span>
+                A <em>qubit</em> (quantum bit) is the fundamental unit of quantum information. Unlike a classical bit that is constrained to either 0 or 1, a qubit exists as a normalized linear superposition in two-dimensional complex Hilbert space (<MathRenderer text="$|\psi\rangle = \alpha|0\rangle + \beta|1\rangle$" />), geometrically visualized as any point on the surface of the 3D unit Bloch sphere.
               </div>
 
               {explanationMode === 'simple' ? (
@@ -775,7 +792,7 @@ export default function AboutPage() {
               <span>For Educators & Instructors</span>
             </div>
             <ul className="text-xs text-dark-600 space-y-1.5 list-disc pl-4">
-              <li>Sign in as an Instructor (`instructor@quanbit.com`) to access the <strong>Instructor Dashboard</strong>.</li>
+              <li>Sign in to the <strong>Instructor Dashboard</strong> with authorized educator credentials.</li>
               <li>Map students to your class cohort, seed sample test rosters, and diagnose common misconceptions.</li>
               <li>Monitor real-time completion rates across all curriculum modules.</li>
             </ul>
@@ -817,6 +834,84 @@ export default function AboutPage() {
               Runs quantum circuits across IBM Qiskit, Google Cirq, and Xanadu PennyLane, computing exact statevectors, density matrices, and shot distributions.
             </p>
           </div>
+        </div>
+      </section>
+
+      {/* REVERSUN Parent Company & Teams */}
+      <section className="bg-gradient-to-br from-white via-primary-50/30 to-indigo-50/40 rounded-3xl border border-primary-200/80 p-6 sm:p-10 shadow-sm space-y-8">
+        <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 border-b border-primary-100 pb-6">
+          <div className="space-y-2 max-w-2xl">
+            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-primary-100 text-primary-900 text-xs font-bold border border-primary-200">
+              <Building className="w-3.5 h-3.5 text-primary-700" />
+              <span>Developed &amp; Backed by REVERSUN</span>
+            </div>
+            <h2 className="text-2xl sm:text-3xl font-extrabold text-dark-900 tracking-tight">
+              An Open-Access Product by REVERSUN
+            </h2>
+            <p className="text-sm text-dark-600 leading-relaxed">
+              QuanBit is engineered and published by <strong>REVERSUN</strong> (<a href="https://www.reversun.com" target="_blank" rel="noopener noreferrer" className="text-primary-700 font-bold hover:underline inline-flex items-center gap-0.5">www.reversun.com <ExternalLink className="w-3 h-3" /></a>), dedicated to building transformative visual computing platforms, accessible developer tooling, and modern STEM education systems.
+            </p>
+          </div>
+          <a
+            href="https://reversun.com/contact"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="px-6 py-3 rounded-xl bg-dark-900 text-white font-bold text-sm hover:bg-dark-800 transition-all shadow-md flex items-center gap-2 shrink-0 self-start md:self-auto"
+          >
+            <span>Visit REVERSUN &amp; Enquire</span>
+            <ExternalLink className="w-4 h-4 text-primary-400" />
+          </a>
+        </div>
+
+        {/* Engineering Teams */}
+        <div className="space-y-4">
+          <h3 className="text-lg font-bold text-dark-900 flex items-center gap-2">
+            <Users className="w-5 h-5 text-primary-600" />
+            <span>Research &amp; Engineering Teams</span>
+          </h3>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div className="bg-white p-6 rounded-2xl border border-dark-200 shadow-xs space-y-3">
+              <div>
+                <h4 className="font-extrabold text-base text-dark-900">QuanBit Team</h4>
+                <p className="text-xs font-semibold text-primary-700">Quantum Systems &amp; Visual Computing</p>
+              </div>
+              <p className="text-xs text-dark-600 leading-relaxed">
+                Architected QuanBit&apos;s real-time 3D Bloch sphere WebGL engine, endianness-synchronized transpilation across IBM Qiskit and Google Cirq, and SHA-256 verifiable certificate authority.
+              </p>
+            </div>
+
+            <div className="bg-white p-6 rounded-2xl border border-dark-200 shadow-xs space-y-3">
+              <div>
+                <h4 className="font-extrabold text-base text-dark-900">REVERSUN Team</h4>
+                <p className="text-xs font-semibold text-indigo-700">Scientific Systems &amp; Platform Infrastructure</p>
+              </div>
+              <p className="text-xs text-dark-600 leading-relaxed">
+                Specialized in multi-qubit density matrix physics, Socratic prompt engineering for AI tutoring, WCAG AA inclusive accessibility design, and collaborative quantum computing platforms.
+              </p>
+            </div>
+          </div>
+        </div>
+
+        {/* Helpful Resources Navigation */}
+        <div className="pt-4 border-t border-primary-100 flex flex-wrap items-center justify-between gap-4">
+          <div className="flex flex-wrap items-center gap-3 text-xs font-bold">
+            <Link href="/blog" className="px-3.5 py-2 rounded-xl bg-white border border-dark-200 hover:border-primary-500 text-dark-800 transition-colors">
+              Pillar Guides &amp; Blog
+            </Link>
+            <Link href="/faq" className="px-3.5 py-2 rounded-xl bg-white border border-dark-200 hover:border-primary-500 text-dark-800 transition-colors">
+              Frequently Asked Questions
+            </Link>
+            <Link href="/contact" className="px-3.5 py-2 rounded-xl bg-white border border-dark-200 hover:border-primary-500 text-dark-800 transition-colors">
+              Contact REVERSUN
+            </Link>
+            <Link href="/verify" className="px-3.5 py-2 rounded-xl bg-white border border-dark-200 hover:border-primary-500 text-dark-800 transition-colors">
+              Verify Certificates
+            </Link>
+          </div>
+          <span className="text-xs text-dark-500">
+            © {new Date().getFullYear()} REVERSUN. All rights reserved.
+          </span>
         </div>
       </section>
     </div>

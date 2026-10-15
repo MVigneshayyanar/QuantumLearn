@@ -21,7 +21,9 @@ import {
   Info,
   Compass,
   ChevronDown,
-  ChevronUp
+  ChevronUp,
+  Building,
+  ExternalLink
 } from 'lucide-react';
 import { BlochSphere3D } from '@/components/bloch-sphere/BlochSphere3D';
 import { MathRenderer } from '@/components/math/MathRenderer';
@@ -495,6 +497,96 @@ export default function HomePage() {
                 Analyzes quiz mistakes to diagnose physics misconceptions (e.g. classical probability vs superposition) and guides learning.
               </p>
             </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Crawlable Semantic SEO & AEO Knowledge Section */}
+      <section className="bg-white dark:bg-dark-900 rounded-3xl border border-dark-200 dark:border-dark-800 p-6 sm:p-10 shadow-xs space-y-8">
+        <div className="space-y-3 max-w-3xl">
+          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-primary-50 dark:bg-primary-950/60 text-primary-700 dark:text-primary-300 border border-primary-200 dark:border-primary-800 text-xs font-bold">
+            <Atom className="w-3.5 h-3.5 text-primary-600" />
+            <span>Educational Authority &amp; Platform Architecture</span>
+          </div>
+
+          <h2 className="text-2xl sm:text-3xl font-extrabold text-dark-900 dark:text-white tracking-tight">
+            What is Quantum Computing and How Does QuanBit Work?
+          </h2>
+
+          <div className="p-4 rounded-xl bg-primary-50/70 dark:bg-primary-950/40 border border-primary-200/80 dark:border-primary-800 text-dark-800 dark:text-dark-200 text-sm leading-relaxed speakable-answer">
+            <strong>Definition: </strong>
+            Quantum computing is an advanced computational paradigm that leverages the quantum mechanical principles of superposition, entanglement, and interference to solve complex mathematical problems exponentially or quadratically faster than classical computers. Instead of classical bits that represent either 0 or 1, quantum computers process qubits that exist in a continuous state space.
+          </div>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 pt-2">
+          <div className="space-y-3 p-5 rounded-2xl bg-dark-50/50 dark:bg-dark-800/50 border border-dark-200 dark:border-dark-700">
+            <div className="w-9 h-9 rounded-xl bg-primary-100 dark:bg-primary-900/60 text-primary-700 dark:text-primary-300 flex items-center justify-center font-bold">
+              <Globe className="w-5 h-5" />
+            </div>
+            <h3 className="font-bold text-base text-dark-900 dark:text-white">
+              3D Bloch Sphere Visualizer
+            </h3>
+            <p className="text-xs text-dark-600 dark:text-dark-300 leading-relaxed">
+              Explore single-qubit statevectors parameterized by polar angle <MathRenderer text="$\theta$" /> and azimuthal phase <MathRenderer text="$\phi$" />. When qubits become entangled in multi-qubit circuits, QuanBit computes the reduced density matrix purity <MathRenderer text="$\text{Tr}(\rho^2)$" /> in real time, visually collapsing the 3D vector to the origin when purity hits 0.5.
+            </p>
+            <Link href="/bloch-sphere" className="inline-flex items-center gap-1 text-xs font-bold text-primary-600 dark:text-primary-400 hover:underline">
+              <span>Launch 3D Visualizer</span>
+              <ArrowRight className="w-3.5 h-3.5" />
+            </Link>
+          </div>
+
+          <div className="space-y-3 p-5 rounded-2xl bg-dark-50/50 dark:bg-dark-800/50 border border-dark-200 dark:border-dark-700">
+            <div className="w-9 h-9 rounded-xl bg-primary-100 dark:bg-primary-900/60 text-primary-700 dark:text-primary-300 flex items-center justify-center font-bold">
+              <Cpu className="w-5 h-5" />
+            </div>
+            <h3 className="font-bold text-base text-dark-900 dark:text-white">
+              Multi-Backend Code Export
+            </h3>
+            <p className="text-xs text-dark-600 dark:text-dark-300 leading-relaxed">
+              Design quantum circuits via drag-and-drop and generate verified code for IBM Qiskit, Google Cirq, Xanadu PennyLane, and OpenQASM 2.0/3.0. QuanBit automatically normalizes endianness differences between Qiskit (little-endian) and Cirq (big-endian).
+            </p>
+            <Link href="/simulator" className="inline-flex items-center gap-1 text-xs font-bold text-primary-600 dark:text-primary-400 hover:underline">
+              <span>Open Circuit Builder</span>
+              <ArrowRight className="w-3.5 h-3.5" />
+            </Link>
+          </div>
+
+          <div className="space-y-3 p-5 rounded-2xl bg-dark-50/50 dark:bg-dark-800/50 border border-dark-200 dark:border-dark-700">
+            <div className="w-9 h-9 rounded-xl bg-primary-100 dark:bg-primary-900/60 text-primary-700 dark:text-primary-300 flex items-center justify-center font-bold">
+              <BookOpen className="w-5 h-5" />
+            </div>
+            <h3 className="font-bold text-base text-dark-900 dark:text-white">
+              Algorithm Masterclasses
+            </h3>
+            <p className="text-xs text-dark-600 dark:text-dark-300 leading-relaxed">
+              Master Grover&apos;s quantum search (<MathRenderer text="$\mathcal{O}(\sqrt{N})$" /> speedup), Deutsch-Jozsa quantum parallelism, quantum state teleportation, and superdense coding through structured 6-stage interactive pedagogy with verifiable SHA-256 certificates.
+            </p>
+            <Link href="/learn/grover" className="inline-flex items-center gap-1 text-xs font-bold text-primary-600 dark:text-primary-400 hover:underline">
+              <span>Study Grover Algorithm</span>
+              <ArrowRight className="w-3.5 h-3.5" />
+            </Link>
+          </div>
+        </div>
+
+        {/* REVERSUN Brand & Community Banner */}
+        <div className="pt-6 border-t border-dark-100 dark:border-dark-800 flex flex-col sm:flex-row sm:items-center justify-between gap-4 text-xs text-dark-600 dark:text-dark-400">
+          <div className="flex items-center gap-2">
+            <Building className="w-4 h-4 text-primary-600 shrink-0" />
+            <span>
+              QuanBit is developed, maintained, and backed by{' '}
+              <a href="https://www.reversun.com" target="_blank" rel="noopener noreferrer" className="font-bold text-dark-900 dark:text-white hover:text-primary-600 dark:hover:text-primary-400 underline inline-flex items-center gap-0.5">
+                REVERSUN
+                <ExternalLink className="w-3 h-3" />
+              </a>
+            </span>
+          </div>
+
+          <div className="flex flex-wrap items-center gap-4 font-semibold text-primary-600 dark:text-primary-400">
+            <Link href="/blog" className="hover:underline">Blog &amp; Guides</Link>
+            <Link href="/faq" className="hover:underline">FAQ</Link>
+            <Link href="/contact" className="hover:underline">Contact</Link>
+            <Link href="/verify" className="hover:underline">Verify Certificate</Link>
           </div>
         </div>
       </section>
