@@ -1,5 +1,26 @@
 import type { Metadata, Viewport } from 'next';
+import { Nunito, Roboto, Fira_Code } from 'next/font/google';
 import './globals.css';
+
+const nunito = Nunito({
+  subsets: ['latin'],
+  variable: '--font-gfg-sans',
+  display: 'swap',
+});
+
+const roboto = Roboto({
+  subsets: ['latin'],
+  weight: ['400', '500', '700'],
+  variable: '--font-gfg-body',
+  display: 'swap',
+});
+
+const firaCode = Fira_Code({
+  subsets: ['latin'],
+  weight: ['400', '500', '600'],
+  variable: '--font-gfg-mono',
+  display: 'swap',
+});
 import { AccessibilityProvider } from '@/lib/accessibility-context';
 import { AccessibilityBar } from '@/components/accessibility/AccessibilityBar';
 import { Navbar } from '@/components/navigation/Navbar';
@@ -172,7 +193,12 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="en" data-font-size="md" suppressHydrationWarning>
+    <html
+      lang="en"
+      data-font-size="md"
+      suppressHydrationWarning
+      className={`${nunito.variable} ${roboto.variable} ${firaCode.variable}`}
+    >
       <head>
         {/* Prevent Flash of Incorrect Theme (FOIT) on initial load */}
         <script
@@ -235,7 +261,7 @@ export default function RootLayout({
           dangerouslySetInnerHTML={{ __html: JSON.stringify(faqSchema) }}
         />
       </head>
-      <body className="min-h-screen flex flex-col bg-[#FAFAFA] text-[#111827] antialiased pb-16 md:pb-0">
+      <body className="font-sans min-h-screen flex flex-col bg-[#FAFAFA] text-[#111827] antialiased pb-16 md:pb-0">
         <AccessibilityProvider>
           <StudentProvider>
             {/* Skip link for keyboard accessibility WCAG 2.1 AA */}
