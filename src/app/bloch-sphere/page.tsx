@@ -20,6 +20,7 @@ export default function BlochSpherePage() {
   const [activeSweepAngle, setActiveSweepAngle] = useState<'theta' | 'phi' | 'both' | null>(null);
   const [showSweepArcsToggle, setShowSweepArcsToggle] = useState<boolean>(false);
   const sweepTimerRef = useRef<NodeJS.Timeout | null>(null);
+  const [hasCopied, setHasCopied] = useState<boolean>(false);
 
   // Dynamic canvas sizing for phone screens (<480px)
   const [sphereSize, setSphereSize] = useState<number>(320);
@@ -273,25 +274,25 @@ export default function BlochSpherePage() {
           {/* Bottom Row: State Formula & Qiskit Code Snippet */}
           <div className="grid grid-cols-1 sm:grid-cols-12 gap-3 items-stretch">
             {/* Mathematical Formulation */}
-            <div className="sm:col-span-5 p-3 rounded-2xl bg-white border border-dark-200 text-xs flex flex-col justify-between shadow-xs">
-              <span className="font-bold text-xs text-dark-900 block mb-1">State Formulation</span>
-              <div className="py-2 px-3 rounded-xl bg-dark-50 border border-dark-100 text-center my-auto">
+            <div className="sm:col-span-5 p-3 rounded-2xl bg-white dark:bg-dark-900 border border-dark-200 dark:border-dark-800 text-xs flex flex-col justify-between shadow-xs">
+              <span className="font-bold text-xs text-dark-900 dark:text-dark-100 block mb-1">State Formulation</span>
+              <div className="py-2 px-3 rounded-xl bg-dark-50 dark:bg-dark-800/80 border border-dark-100 dark:border-dark-700 text-center my-auto">
                 <MathRenderer
                   text="$|\psi\rangle = \cos(\frac{\theta}{2})|0\rangle + e^{i\phi}\sin(\frac{\theta}{2})|1\rangle$"
-                  className="font-bold text-xs text-primary-950"
+                  className="font-bold text-xs text-primary-900 dark:text-primary-200"
                 />
               </div>
-              <p className="text-[11px] text-dark-500 mt-1.5">
+              <p className="text-[11px] text-dark-500 dark:text-dark-400 mt-1.5">
                 Latitude controls probability; longitude controls the quantum relative phase.
               </p>
             </div>
 
             {/* Python Qiskit Code */}
-            <div className="sm:col-span-7 bg-dark-950 text-dark-100 rounded-2xl border border-dark-800 p-3 shadow-xs flex flex-col justify-between">
+            <div className="sm:col-span-7 bg-white dark:bg-dark-900 rounded-2xl border border-dark-200 dark:border-dark-800 p-3 shadow-xs flex flex-col justify-between">
               <div className="flex items-center justify-between mb-1.5">
                 <div className="flex items-center gap-1.5">
-                  <Code2 className="w-3.5 h-3.5 text-primary-400" />
-                  <span className="font-bold text-xs text-dark-200">Qiskit Statevector</span>
+                  <Code2 className="w-3.5 h-3.5 text-primary-600 dark:text-primary-400" />
+                  <span className="font-bold text-xs text-dark-900 dark:text-dark-100">Qiskit Statevector</span>
                 </div>
                 <button
                   onClick={() => {
@@ -303,14 +304,26 @@ phi = ${phi.toFixed(4)}
 psi = Statevector([np.cos(theta/2), np.exp(1j*phi)*np.sin(theta/2)])
 print(psi)`;
                     navigator.clipboard.writeText(pyCode);
+                    setHasCopied(true);
+                    setTimeout(() => setHasCopied(false), 2000);
                   }}
-                  className="flex items-center gap-1 px-2 py-0.5 rounded bg-dark-800 hover:bg-dark-700 text-dark-300 hover:text-white text-[10px] font-medium transition-colors cursor-pointer"
+                  className="flex items-center gap-1 px-2.5 py-1 rounded-lg bg-dark-100 hover:bg-dark-200 dark:bg-dark-800 dark:hover:bg-dark-700 text-dark-700 hover:text-dark-900 dark:text-dark-300 dark:hover:text-white border border-dark-200 dark:border-dark-700 text-[10px] font-medium transition-colors cursor-pointer"
+                  title="Copy Python snippet"
                 >
-                  <Copy className="w-3 h-3" />
-                  <span>Copy</span>
+                  {hasCopied ? (
+                    <>
+                      <Check className="w-3 h-3 text-emerald-600 dark:text-emerald-400" />
+                      <span className="text-emerald-600 dark:text-emerald-400 font-semibold">Copied!</span>
+                    </>
+                  ) : (
+                    <>
+                      <Copy className="w-3 h-3" />
+                      <span>Copy</span>
+                    </>
+                  )}
                 </button>
               </div>
-              <pre className="p-2 rounded-xl bg-dark-900 text-dark-200 font-mono text-[11px] overflow-x-auto leading-relaxed">
+              <pre className="p-2.5 rounded-xl bg-dark-50 dark:bg-dark-950 text-dark-800 dark:text-dark-200 border border-dark-200/80 dark:border-dark-800/80 font-mono text-[11px] overflow-x-auto leading-relaxed select-all">
 {`psi = Statevector([np.cos(${theta.toFixed(2)}/2), np.exp(1j*${phi.toFixed(2)})*np.sin(${theta.toFixed(2)}/2)])
 bloch = [${(Math.sin(theta) * Math.cos(phi)).toFixed(2)}, ${(Math.sin(theta) * Math.sin(phi)).toFixed(2)}, ${Math.cos(theta).toFixed(2)}]`}
               </pre>
