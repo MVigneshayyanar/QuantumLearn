@@ -88,21 +88,7 @@ body {
 }
 
 
-/* Suppress Google Translate top banner pushing the layout down */
-.goog-te-banner-frame,
-.goog-te-banner-frame.skiptranslate,
-iframe.goog-te-banner-frame,
-.skiptranslate > iframe,
-body > .skiptranslate,
-#goog-gt-tt {
-  display: none !important;
-  visibility: hidden !important;
-  height: 0px !important;
-  width: 0px !important;
-  border: none !important;
-  margin: 0 !important;
-  padding: 0 !important;
-}
+
 
 /* ==========================================================================
    TRANSLATION PROTECTION: NEVER TRANSLATE MATHEMATICAL FORMULAS OR CODE
@@ -343,42 +329,7 @@ pre {
   animation: slideUpFade 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards;
 }
 
-/* ========== Google Translate Hidden Integration Styles ========== */
-.goog-te-banner-frame.skiptranslate,
-.goog-te-banner-frame,
-iframe.goog-te-banner-frame {
-  display: none !important;
-  visibility: hidden !important;
-  height: 0 !important;
-  width: 0 !important;
-  opacity: 0 !important;
-}
 
-body {
-  top: 0px !important;
-  position: static !important;
-}
-
-#google_translate_element,
-.skiptranslate:not(.goog-te-gadget) {
-  display: none !important;
-}
-
-.goog-tooltip,
-.goog-tooltip:hover {
-  display: none !important;
-}
-
-.goog-text-highlight {
-  background-color: transparent !important;
-  border: none !important;
-  box-shadow: none !important;
-}
-
-#goog-gt-tt,
-.goog-te-balloon-frame {
-  display: none !important;
-}
 
 /* ==========================================================================
    Dark Theme System & Component Styling

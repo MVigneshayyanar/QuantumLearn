@@ -107,36 +107,36 @@ export function ProgressDashboard() {
   const STAGE_LABELS = ['Intuition', 'Math', 'Circuit', 'Build It', 'Quiz', 'Skill Base'];
 
   const radarData = [
-    { subject: 'Superposition', value: conceptMastery.superposition, fullMark: 100 },
-    { subject: 'Entanglement', value: conceptMastery.entanglement, fullMark: 100 },
-    { subject: 'Phase Kickback', value: conceptMastery.phaseKickback, fullMark: 100 },
-    { subject: 'Interference', value: conceptMastery.interference, fullMark: 100 },
-    { subject: 'Measurement', value: conceptMastery.measurement, fullMark: 100 },
+    { subject: t.dashboard.superposition || 'Superposition', value: conceptMastery.superposition, fullMark: 100 },
+    { subject: t.dashboard.entanglement || 'Entanglement', value: conceptMastery.entanglement, fullMark: 100 },
+    { subject: t.dashboard.phaseKickback || 'Phase Kickback', value: conceptMastery.phaseKickback, fullMark: 100 },
+    { subject: t.dashboard.interference || 'Interference', value: conceptMastery.interference, fullMark: 100 },
+    { subject: t.dashboard.measurement || 'Measurement', value: conceptMastery.measurement, fullMark: 100 },
   ];
 
   const algorithmModules = [
     {
       slug: 'deutsch-jozsa',
-      title: 'Deutsch-Jozsa Algorithm',
-      category: 'Quantum Parallelism',
+      title: t.algorithms.deutschJozsa.title,
+      category: t.algorithms.deutschJozsa.category,
       href: '/learn/deutsch-jozsa'
     },
     {
       slug: 'grover',
-      title: "Grover's Search Algorithm",
-      category: 'Amplitude Amplification',
+      title: t.algorithms.grover.title,
+      category: t.algorithms.grover.category,
       href: '/learn/grover'
     },
     {
       slug: 'teleportation',
-      title: 'Quantum Teleportation',
-      category: 'Quantum Communication',
+      title: t.algorithms.teleportation.title,
+      category: t.algorithms.teleportation.category,
       href: '/learn/teleportation'
     },
     {
       slug: 'superdense-coding',
-      title: 'Superdense Coding',
-      category: 'Quantum Information',
+      title: t.algorithms.superdenseCoding.title,
+      category: t.algorithms.superdenseCoding.category,
       href: '/learn/superdense-coding'
     }
   ];
@@ -228,7 +228,7 @@ export function ProgressDashboard() {
             <Flame className="w-6 h-6" />
           </div>
           <div>
-            <span className="text-xs text-dark-500 font-medium">Daily Streak</span>
+            <span className="text-xs text-dark-500 font-medium">{t.dashboard.streak || 'Daily Streak'}</span>
             <p className="text-2xl font-bold text-dark-900">{streakDays} Days</p>
           </div>
         </div>
@@ -238,7 +238,7 @@ export function ProgressDashboard() {
             <CheckCircle2 className="w-6 h-6" />
           </div>
           <div>
-            <span className="text-xs text-dark-500 font-medium">Completed Modules</span>
+            <span className="text-xs text-dark-500 font-medium">{t.dashboard.completedModules || 'Completed Modules'}</span>
             <p className="text-2xl font-bold text-dark-900">{completedCount} / 4</p>
           </div>
         </div>
@@ -248,7 +248,7 @@ export function ProgressDashboard() {
             <Trophy className="w-6 h-6" />
           </div>
           <div>
-            <span className="text-xs text-dark-500 font-medium">Quiz Accuracy</span>
+            <span className="text-xs text-dark-500 font-medium">{t.dashboard.quizAccuracy || 'Quiz Accuracy'}</span>
             <p className="text-2xl font-bold text-dark-900">
               {summary?.quizStats?.accuracy || 0}%
             </p>

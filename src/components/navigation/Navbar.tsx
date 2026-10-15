@@ -69,7 +69,7 @@ export function Navbar() {
     { href: '/bloch-sphere', label: t.nav.blochSphere, icon: Globe },
     { href: '/practice', label: t.nav.practice, icon: Terminal },
     { href: '/simulator', label: t.nav.simulator, icon: Cpu },
-    { href: '/about', label: 'About', icon: Info },
+    { href: '/about', label: t.nav.about || 'About', icon: Info },
   ];
 
   const algoLinks = [
@@ -454,7 +454,7 @@ export function Navbar() {
                   title="Sign in to view your dashboard"
                 >
                   <User className="w-3.5 h-3.5 text-dark-500 dark:text-dark-400" />
-                  <span>Sign In</span>
+                  <span>{t.identity.signInButton || 'Sign In'}</span>
                 </button>
               </div>
             )}
@@ -474,7 +474,7 @@ export function Navbar() {
         }`}
       >
         <Atom className="w-5 h-5" />
-        <span className="text-[10px] font-medium">Home</span>
+        <span className="text-[10px] font-medium">{t.nav.home}</span>
       </Link>
 
       <Link
@@ -486,7 +486,7 @@ export function Navbar() {
         }`}
       >
         <BookOpen className="w-5 h-5" />
-        <span className="text-[10px] font-medium">Learn</span>
+        <span className="text-[10px] font-medium">{t.nav.algorithms}</span>
       </Link>
 
       <Link
@@ -498,7 +498,7 @@ export function Navbar() {
         }`}
       >
         <Globe className="w-5 h-5" />
-        <span className="text-[10px] font-medium">Bloch</span>
+        <span className="text-[10px] font-medium">{t.nav.blochSphere}</span>
       </Link>
 
       <Link
@@ -510,7 +510,7 @@ export function Navbar() {
         }`}
       >
         <Cpu className="w-5 h-5" />
-        <span className="text-[10px] font-medium">Circuit</span>
+        <span className="text-[10px] font-medium">{t.nav.simulator}</span>
       </Link>
 
       <Link
@@ -522,7 +522,7 @@ export function Navbar() {
         }`}
       >
         <Terminal className="w-5 h-5" />
-        <span className="text-[10px] font-medium">Practice</span>
+        <span className="text-[10px] font-medium">{t.nav.practice}</span>
       </Link>
     </nav>
     </>

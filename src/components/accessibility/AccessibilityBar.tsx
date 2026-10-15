@@ -26,16 +26,6 @@ export function AccessibilityBar() {
     const newLang = e.target.value as Language;
     if (newLang === language) return;
     setLanguage(newLang);
-
-    const select = document.querySelector('.goog-te-combo') as HTMLSelectElement | null;
-    if (select) {
-      select.value = newLang === 'en' ? '' : newLang;
-      select.dispatchEvent(new Event('change', { bubbles: true }));
-    }
-
-    setTimeout(() => {
-      window.location.reload();
-    }, 120);
   };
 
   // Hide top bar on full-screen practice workbench

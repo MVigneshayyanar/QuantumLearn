@@ -3,6 +3,8 @@
 import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useStudentContext } from '@/lib/student-context';
+import { useAccessibility } from '@/lib/accessibility-context';
+import { translations } from '@/lib/i18n';
 import {
   Atom,
   ArrowRight,
@@ -16,6 +18,8 @@ import {
 export function StudentIdentityModal() {
   const router = useRouter();
   const { showIdentityModal, closeLoginModal, login, register } = useStudentContext();
+  const { language } = useAccessibility();
+  const t = translations[language];
 
   const [mode, setMode] = useState<'signin' | 'signup'>('signin');
   const [name, setName] = useState('');
@@ -95,7 +99,7 @@ export function StudentIdentityModal() {
             </div>
             <div>
               <h2 className="text-xl font-bold text-dark-900 dark:text-white">
-                {mode === 'signin' ? 'Sign In to QuanBit' : 'Create Student Account'}
+                {mode === 'signin' ? (t.identity.signInTitle || 'Sign In to QuanBit') : (t.identity.signUpTitle || 'Create Student Account')}
               </h2>
               <p className="text-xs text-dark-500 dark:text-dark-400 mt-0.5">
                 Sign in to submit your quantum circuits to the judge and track progress.
@@ -117,7 +121,7 @@ export function StudentIdentityModal() {
                   : 'text-dark-600 dark:text-dark-400 hover:text-dark-900 dark:hover:text-white'
               }`}
             >
-              Sign In
+              {t.identity.signInButton || 'Sign In'}
             </button>
             <button
               type="button"
@@ -131,7 +135,7 @@ export function StudentIdentityModal() {
                   : 'text-dark-600 dark:text-dark-400 hover:text-dark-900 dark:hover:text-white'
               }`}
             >
-              Sign Up
+              {t.identity.signUpButton || 'Sign Up'}
             </button>
           </div>
 

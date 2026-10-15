@@ -2,6 +2,8 @@
 
 import React, { useState } from 'react';
 import { useStudentContext } from '@/lib/student-context';
+import { useAccessibility } from '@/lib/accessibility-context';
+import { translations } from '@/lib/i18n';
 import {
   Crown,
   CheckCircle2,
@@ -23,6 +25,8 @@ export function SubscriptionModal() {
     upgradeToPremium,
     downgradeToFree
   } = useStudentContext();
+  const { language } = useAccessibility();
+  const t = translations[language];
 
   const [billingCycle, setBillingCycle] = useState<'monthly' | 'annual'>('annual');
   const [isProcessing, setIsProcessing] = useState(false);
@@ -96,13 +100,13 @@ export function SubscriptionModal() {
           </div>
           <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-amber-100 dark:bg-amber-950/70 text-amber-900 dark:text-amber-300 border border-amber-300 dark:border-amber-700/60 text-[10px] font-bold mb-1">
             <Sparkles className="w-3 h-3 text-amber-600 dark:text-amber-400" />
-            <span>QuanBit Pro Membership</span>
+            <span>{t.subscription.badge || 'QuanBit Pro Membership'}</span>
           </div>
           <h2 className="text-xl sm:text-2xl font-black text-dark-900 dark:text-white tracking-tight leading-tight">
-            Unlock the Full Quantum Experience
+            {t.subscription.title || 'Unlock the Full Quantum Experience'}
           </h2>
           <p className="text-xs text-dark-500 dark:text-dark-400 max-w-sm mx-auto mt-1">
-            Master enterprise quantum algorithms, solve advanced research challenges, and get certified.
+            {t.subscription.subtitle || 'Master enterprise quantum algorithms, solve advanced research challenges, and get certified.'}
           </p>
         </div>
 

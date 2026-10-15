@@ -29,34 +29,6 @@ interface AccessibilityContextType {
 
 const AccessibilityContext = createContext<AccessibilityContextType | undefined>(undefined);
 
-/**
- * Configure googtrans cookies across localhost and live domain variations
- * to ensure Google Translate can read and translate the entire site reliably.
- */
-export function setGoogleTransCookie(targetLang: Language) {
-  if (typeof window === 'undefined') return;
-  const host = window.location.hostname;
-  const isLocalhost = host === 'localhost' || host === '127.0.0.1';
-
-  // 1. Clear previous cookies across domain variations
-  const domains = isLocalhost ? [''] : ['', host, `.${host}`];
-  for (const domain of domains) {
-    const dAttr = domain ? `; domain=${domain}` : '';
-    document.cookie = `googtrans=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/${dAttr}`;
-    document.cookie = `googtrans=; expires=Thu, 01 Jan 1970 00:00:00 UTC${dAttr}`;
-  }
-
-  // 2. Set new cookies if foreign language
-  if (targetLang && targetLang !== 'en') {
-    document.cookie = `googtrans=/en/${targetLang}; path=/;`;
-    document.cookie = `googtrans=/auto/${targetLang}; path=/;`;
-    if (!isLocalhost) {
-      document.cookie = `googtrans=/en/${targetLang}; path=/; domain=${host};`;
-      document.cookie = `googtrans=/auto/${targetLang}; path=/; domain=.${host};`;
-    }
-  }
-}
-
 export function AccessibilityProvider({ children }: { children: ReactNode }) {
   const [fontSize, setFontSizeState] = useState<FontSizeOption>('md');
   const [explanationMode, setExplanationModeState] = useState<ExplanationMode>('simple');
@@ -69,6 +41,10 @@ export function AccessibilityProvider({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     if (typeof window !== 'undefined') {
+      // Clear any legacy Google Translate cookies
+      document.cookie = 'googtrans=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;';
+      document.cookie = 'googtrans=; expires=Thu, 01 Jan 1970 00:00:00 UTC;';
+
       const savedFontSize = localStorage.getItem('ql_font_size') as FontSizeOption;
       if (savedFontSize) setFontSizeState(savedFontSize);
 
@@ -78,10 +54,21 @@ export function AccessibilityProvider({ children }: { children: ReactNode }) {
       const savedMotion = localStorage.getItem('ql_reduced_motion');
       if (savedMotion !== null) setReducedMotionState(savedMotion === 'true');
 
-      const savedLang = localStorage.getItem('ql_language') as Language;
-      if (savedLang) {
-        setLanguageState(savedLang);
-        setGoogleTransCookie(savedLang);
+      const supportedList: Language[] = ['en', 'hi', 'es', 'fr', 'de', 'ta', 'te', 'ja', 'zh-CN'];
+      const urlParams = new URLSearchParams(window.location.search);
+      const urlLang = urlParams.get('lang') || urlParams.get('locale');
+      if (urlLang && supportedList.includes(urlLang as Language)) {
+        setLanguageState(urlLang as Language);
+        localStorage.setItem('ql_language', urlLang);
+        document.cookie = `NEXT_LOCALE=${urlLang}; path=/; max-age=31536000; SameSite=Lax`;
+        document.documentElement.lang = urlLang;
+      } else {
+        const savedLang = localStorage.getItem('ql_language') as Language;
+        if (savedLang && supportedList.includes(savedLang)) {
+          setLanguageState(savedLang);
+          document.cookie = `NEXT_LOCALE=${savedLang}; path=/; max-age=31536000; SameSite=Lax`;
+          document.documentElement.lang = savedLang;
+        }
       }
 
       // Load initial theme from localStorage (defaults directly to light mode)
@@ -157,7 +144,9 @@ export function AccessibilityProvider({ children }: { children: ReactNode }) {
     setLanguageState(lang);
     if (typeof window !== 'undefined') {
       localStorage.setItem('ql_language', lang);
-      setGoogleTransCookie(lang);
+      document.cookie = `NEXT_LOCALE=${lang}; path=/; max-age=31536000; SameSite=Lax`;
+      document.documentElement.lang = lang;
+      document.documentElement.setAttribute('data-lang', lang);
     }
     announce(`Language set to ${lang}`);
   };

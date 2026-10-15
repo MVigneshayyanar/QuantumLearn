@@ -101,12 +101,8 @@ export function AdaptiveQuizEngine({
   const askAIToExplainMistake = (q: QuizQuestion, chosenOptId?: string) => {
     const optId = chosenOptId || selectedOptionIds[q.id];
     const chosenOpt = q.options.find((o) => o.id === optId);
-    const qText = language === 'hi' && q.question_hi ? q.question_hi : q.question;
-    const chosenText = chosenOpt
-      ? language === 'hi' && chosenOpt.text_hi
-        ? chosenOpt.text_hi
-        : chosenOpt.text
-      : 'an incorrect answer';
+    const qText = q.question;
+    const chosenText = chosenOpt ? chosenOpt.text : 'an incorrect answer';
 
     const prompt = `I got this question wrong on the ${moduleSlug} Knowledge Check.
 Question: "${qText}"
@@ -293,7 +289,7 @@ Could you teach me the core quantum principles behind these mistakes in simple t
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
           {selectedQuestions.map((q, idx) => {
             const correct = answers[q.id];
-            const qText = language === 'hi' && q.question_hi ? q.question_hi : q.question;
+            const qText = q.question;
             const chosenOptId = selectedOptionIds[q.id];
             const chosenOpt = q.options.find((o) => o.id === chosenOptId);
 
@@ -511,9 +507,7 @@ Could you teach me the core quantum principles behind these mistakes in simple t
 
               <div className="space-y-3">
                 <p className="font-bold text-sm text-dark-900 leading-snug">
-                  {language === 'hi' && reviewingQuestion.question_hi
-                    ? reviewingQuestion.question_hi
-                    : reviewingQuestion.question}
+                  {reviewingQuestion.question}
                 </p>
 
                 {/* What user answered */}
@@ -695,7 +689,7 @@ Could you teach me the core quantum principles behind these mistakes in simple t
       <div className="rounded-xl bg-primary-50/60 border border-primary-100 p-3 sm:p-3.5">
         <p className="text-[9px] font-bold uppercase tracking-[0.16em] text-primary-700 mb-1">Think like a quantum learner</p>
         <h3 className="text-sm sm:text-base font-bold text-dark-950 leading-snug">
-          {language === 'hi' && currentQ.question_hi ? currentQ.question_hi : currentQ.question}
+          {currentQ.question}
         </h3>
       </div>
 
@@ -703,7 +697,7 @@ Could you teach me the core quantum principles behind these mistakes in simple t
       <div className="space-y-1.5" role="radiogroup" aria-label="Quiz question options">
         {currentQ.options.map((opt, optionIndex) => {
           const isSelected = selectedOptionId === opt.id;
-          const optText = language === 'hi' && opt.text_hi ? opt.text_hi : opt.text;
+          const optText = opt.text;
 
           let optionStyle = 'border-dark-200 bg-white dark:bg-dark-900 text-dark-800 dark:text-dark-100 hover:border-dark-300 hover:bg-dark-50/50';
           if (isSubmitted) {

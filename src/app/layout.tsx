@@ -22,12 +22,12 @@ const firaCode = Fira_Code({
   display: 'swap',
 });
 import { AccessibilityProvider } from '@/lib/accessibility-context';
+import { IntlClientWrapper } from '@/components/i18n/IntlClientWrapper';
 import { AccessibilityBar } from '@/components/accessibility/AccessibilityBar';
 import { Navbar } from '@/components/navigation/Navbar';
 import { Footer } from '@/components/navigation/Footer';
 import { QubitPrimerModal } from '@/components/accessibility/QubitPrimerModal';
 import { AITutorDrawer } from '@/components/ai-tutor/AITutorDrawer';
-import { GoogleTranslator } from '@/components/accessibility/GoogleTranslator';
 import { StudentProvider } from '@/lib/student-context';
 import { StudentIdentityModal } from '@/components/identity/StudentIdentityModal';
 import { SubscriptionModal } from '@/components/subscription/SubscriptionModal';
@@ -254,46 +254,46 @@ export default function RootLayout({
       </head>
       <body className="font-sans min-h-screen flex flex-col bg-[#FAFAFA] text-[#111827] antialiased pb-16 md:pb-0">
         <AccessibilityProvider>
-          <StudentProvider>
-            {/* Skip link for keyboard accessibility WCAG 2.1 AA */}
-            <a
-              href="#main-content"
-              className="sr-only focus:not-sr-only focus:absolute focus:top-2 focus:left-2 focus:z-50 focus:px-4 focus:py-2 focus:bg-primary-600 focus:text-white focus:rounded-lg focus:shadow-md"
-            >
-              Skip to main content
-            </a>
+          <IntlClientWrapper>
+            <StudentProvider>
+              {/* Skip link for keyboard accessibility WCAG 2.1 AA */}
+              <a
+                href="#main-content"
+                className="sr-only focus:not-sr-only focus:absolute focus:top-2 focus:left-2 focus:z-50 focus:px-4 focus:py-2 focus:bg-primary-600 focus:text-white focus:rounded-lg focus:shadow-md"
+              >
+                Skip to main content
+              </a>
 
-            <div className="group/nav-shell">
-              {/* Accessible Settings & Language Top Bar */}
-              <AccessibilityBar />
+              <div className="group/nav-shell">
+                {/* Accessible Settings & Language Top Bar */}
+                <AccessibilityBar />
 
-              {/* Navigation Bar */}
-              <Navbar />
-            </div>
+                {/* Navigation Bar */}
+                <Navbar />
+              </div>
 
-            {/* Main Content Area */}
-            <main id="main-content" className="flex-1 w-full">
-              {children}
-            </main>
+              {/* Main Content Area */}
+              <main id="main-content" className="flex-1 w-full">
+                {children}
+              </main>
 
-            {/* Student Identity Modal — shown on first visit */}
-            <StudentIdentityModal />
+              {/* Student Identity Modal — shown on first visit */}
+              <StudentIdentityModal />
 
-            {/* QuanBit Pro Subscription Modal */}
-            <SubscriptionModal />
+              {/* QuanBit Pro Subscription Modal */}
+              <SubscriptionModal />
 
-            {/* Onboarding Primer Modal */}
-            <QubitPrimerModal />
+              {/* Onboarding Primer Modal */}
+              <QubitPrimerModal />
 
-            {/* Socratic AI Tutor Drawer */}
-            <AITutorDrawer />
+              {/* Socratic AI Tutor Drawer */}
+              <AITutorDrawer />
 
-            {/* Hidden Google Translate Engine */}
-            <GoogleTranslator />
 
-            {/* Footer */}
-            <Footer />
-          </StudentProvider>
+              {/* Footer */}
+              <Footer />
+            </StudentProvider>
+          </IntlClientWrapper>
         </AccessibilityProvider>
       </body>
     </html>

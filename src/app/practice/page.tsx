@@ -30,9 +30,13 @@ import {
 } from 'lucide-react';
 
 import { useStudentContext } from '@/lib/student-context';
+import { useAccessibility } from '@/lib/accessibility-context';
+import { translations } from '@/lib/i18n';
 
 export default function PracticeListPage() {
   const { userId } = useStudentContext();
+  const { language } = useAccessibility();
+  const t = translations[language];
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedDifficulty, setSelectedDifficulty] = useState<string>('All');
   const [selectedCategory, setSelectedCategory] = useState<string>('All');
@@ -125,10 +129,10 @@ export default function PracticeListPage() {
       <div className="bg-white rounded-2xl border border-dark-200 px-4 py-3 sm:px-5 sm:py-3.5 shadow-xs flex flex-wrap items-center justify-between gap-3">
         <div className="space-y-0.5">
           <h1 className="text-base sm:text-lg font-bold text-dark-900 tracking-tight">
-            Practice Problems
+            {t.practice.title || 'Practice Problems'}
           </h1>
           <p className="text-xs text-dark-500">
-            Build and test quantum circuits against strict test cases.
+            {t.practice.subtitle || 'Build and test quantum circuits against strict test cases.'}
           </p>
         </div>
 
@@ -136,7 +140,7 @@ export default function PracticeListPage() {
         <div className="flex items-center gap-3 bg-dark-50 px-3 py-1.5 rounded-xl border border-dark-200">
           <Trophy className="w-4 h-4 text-amber-500 shrink-0" />
           <div className="text-xs font-semibold text-dark-800">
-            Solved: <span className="font-bold text-dark-900">{solvedCount}</span> <span className="text-dark-400">/ {totalCount}</span>
+            {t.practice.completed || 'Solved'}: <span className="font-bold text-dark-900">{solvedCount}</span> <span className="text-dark-400">/ {totalCount}</span>
           </div>
           <div className="w-20 bg-dark-200 rounded-full h-1.5 overflow-hidden">
             <div

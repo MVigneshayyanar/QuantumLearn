@@ -3,12 +3,14 @@
 import React, { useState, useRef } from 'react';
 import { BlochSphere3D } from '@/components/bloch-sphere/BlochSphere3D';
 import { useAccessibility } from '@/lib/accessibility-context';
+import { translations } from '@/lib/i18n';
 import { BlochVector } from '@/lib/types';
 import { Globe, Sparkles, RotateCcw, Code2, Copy, Check, Terminal } from 'lucide-react';
 import { MathRenderer } from '@/components/math/MathRenderer';
 
 export default function BlochSpherePage() {
-  const { explanationMode } = useAccessibility();
+  const { explanationMode, language } = useAccessibility();
+  const t = translations[language];
 
   // Controlled angles
   const [theta, setTheta] = useState<number>(Math.PI / 2); // default |+> (pi/2)

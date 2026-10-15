@@ -30,12 +30,12 @@ export function Footer() {
               <span className="font-bold text-dark-900 dark:text-white text-base">{t.nav.brand}</span>
             </Link>
             <p className="text-dark-500 dark:text-dark-400 leading-relaxed">
-              Free interactive quantum computing education platform with multi-backend simulation (Qiskit, Cirq, PennyLane), real-time 3D Bloch sphere visualization, and Schrödinger AI tutoring.
+              {t.footer.brandDesc}
             </p>
             <address className="not-italic text-dark-400 text-[11px] space-y-1">
               <p>© {new Date().getFullYear()} QuanBit — quanbit.tech</p>
               <p className="font-medium text-dark-500 dark:text-dark-300">
-                QuanBit is a Product by{' '}
+                {t.footer.productBy}{' '}
                 <a
                   href="https://reversun.com"
                   target="_blank"
@@ -46,32 +46,32 @@ export function Footer() {
                   <ExternalLink className="w-2.5 h-2.5" />
                 </a>
               </p>
-              <p>Open access quantum education, worldwide.</p>
+              <p>{t.footer.openAccess}</p>
             </address>
           </div>
 
           {/* Quantum Algorithm Modules */}
           <nav aria-label="Quantum algorithm modules">
-            <h2 className="font-semibold text-dark-900 dark:text-white mb-3 text-xs uppercase tracking-wide">Quantum Algorithm Modules</h2>
+            <h2 className="font-semibold text-dark-900 dark:text-white mb-3 text-xs uppercase tracking-wide">{t.footer.modulesTitle}</h2>
             <ul className="space-y-2">
               <li>
                 <Link href="/learn/deutsch-jozsa" className="hover:text-primary-600 transition-colors">
-                  Deutsch-Jozsa Algorithm — Quantum Parallelism
+                  {t.algorithms.deutschJozsa.title} — {t.algorithms.deutschJozsa.category}
                 </Link>
               </li>
               <li>
                 <Link href="/learn/grover" className="hover:text-primary-600 transition-colors">
-                  Grover&apos;s Quantum Search — O(√N) Speedup
+                  {t.algorithms.grover.title} — {t.algorithms.grover.category}
                 </Link>
               </li>
               <li>
                 <Link href="/learn/teleportation" className="hover:text-primary-600 transition-colors">
-                  Quantum Teleportation — Bell State Protocol
+                  {t.algorithms.teleportation.title} — {t.algorithms.teleportation.category}
                 </Link>
               </li>
               <li>
                 <Link href="/learn/superdense-coding" className="hover:text-primary-600 transition-colors">
-                  Superdense Coding — 2 Bits via 1 Qubit
+                  {t.algorithms.superdenseCoding.title} — {t.algorithms.superdenseCoding.category}
                 </Link>
               </li>
             </ul>
@@ -79,66 +79,51 @@ export function Footer() {
 
           {/* Tools and Visualizers */}
           <nav aria-label="Quantum tools and simulators">
-            <h2 className="font-semibold text-dark-900 dark:text-white mb-3 text-xs uppercase tracking-wide">Resources & Tools</h2>
+            <h2 className="font-semibold text-dark-900 dark:text-white mb-3 text-xs uppercase tracking-wide">{t.footer.resourcesTitle}</h2>
             <ul className="space-y-2">
               <li>
                 <Link href="/simulator" className="hover:text-primary-600 dark:hover:text-primary-400 transition-colors">
-                  Online Quantum Circuit Builder
+                  {t.nav.simulator}
                 </Link>
               </li>
               <li>
                 <Link href="/bloch-sphere" className="hover:text-primary-600 dark:hover:text-primary-400 transition-colors">
-                  Interactive 3D Bloch Sphere
+                  {t.nav.blochSphere}
                 </Link>
               </li>
               <li>
-                <Link href="/blog" className="hover:text-primary-600 dark:hover:text-primary-400 transition-colors">
-                  Pillar Guides &amp; Blog
+                <Link href="/practice" className="hover:text-primary-600 dark:hover:text-primary-400 transition-colors">
+                  {t.nav.practice}
                 </Link>
               </li>
               <li>
                 <Link href="/faq" className="hover:text-primary-600 dark:hover:text-primary-400 transition-colors">
-                  Frequently Asked Questions (FAQ)
+                  {t.nav.faq}
                 </Link>
               </li>
               <li>
                 <Link href="/contact" className="hover:text-primary-600 dark:hover:text-primary-400 transition-colors">
-                  Contact REVERSUN
-                </Link>
-              </li>
-              <li>
-                <Link href="/verify" className="hover:text-primary-600 dark:hover:text-primary-400 transition-colors">
-                  Verify Certificates
+                  {t.nav.contact}
                 </Link>
               </li>
               <li>
                 <Link href="/about" className="hover:text-primary-600 dark:hover:text-primary-400 transition-colors font-medium text-primary-700 dark:text-primary-400">
-                  About QuanBit &amp; REVERSUN
+                  {t.nav.about}
                 </Link>
-              </li>
-              <li>
-                <a
-                  href="https://reversun.com/contact"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="hover:text-primary-600 dark:hover:text-primary-400 transition-colors inline-flex items-center gap-1"
-                >
-                  REVERSUN Enquiry Form <ExternalLink className="w-3 h-3" />
-                </a>
               </li>
             </ul>
           </nav>
 
           {/* Accessibility & Standards */}
           <div>
-            <h2 className="font-semibold text-dark-900 dark:text-white mb-3 text-xs uppercase tracking-wide">Accessibility & Standards</h2>
+            <h2 className="font-semibold text-dark-900 dark:text-white mb-3 text-xs uppercase tracking-wide">{t.footer.a11yTitle}</h2>
             <div className="space-y-3 text-dark-500 dark:text-dark-400">
               <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-primary-50 dark:bg-primary-950/60 text-primary-800 dark:text-primary-300 border border-primary-200 dark:border-primary-800/60 font-semibold text-xs">
                 <ShieldCheck className="w-4 h-4 text-primary-600 dark:text-primary-400 shrink-0" />
-                <span>WCAG 2.1 AA Compliant</span>
+                <span>{t.footer.compliantBadge}</span>
               </div>
               <p className="text-xs leading-relaxed">
-                Dual-mode explanations (intuitive &amp; Dirac notation), full keyboard navigation, screen reader ARIA, dynamic font scaling, and multilingual support.
+                {t.footer.dualModeDesc}
               </p>
               <div className="space-y-1 text-[11px] text-dark-400 dark:text-dark-500">
                 <p>✓ Quantum Simulator — Qiskit, Cirq, PennyLane</p>
@@ -156,7 +141,7 @@ export function Footer() {
             <Link href="/" className="text-primary-700 dark:text-primary-400 font-semibold hover:underline">
               quanbit.tech
             </Link>
-            {' '}— A Product by{' '}
+            {' '}— {t.footer.productBy}{' '}
             <a
               href="https://reversun.com"
               target="_blank"
@@ -168,7 +153,7 @@ export function Footer() {
             </a>
           </p>
           <p className="flex items-center gap-1 shrink-0">
-            Built with <Heart className="w-3.5 h-3.5 text-red-500 fill-red-500 mx-0.5" /> for quantum physics education.
+            {t.footer.builtWith}
           </p>
         </div>
       </div>

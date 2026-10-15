@@ -3,6 +3,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { useAITutorStore } from '@/lib/state-store';
 import { useAccessibility } from '@/lib/accessibility-context';
+import { translations } from '@/lib/i18n';
 import { generateSocraticResponse } from '@/lib/ai-engine';
 import { MathRenderer } from '@/components/math/MathRenderer';
 import {
@@ -32,6 +33,7 @@ export function AITutorDrawer() {
   } = useAITutorStore();
 
   const { explanationMode, language } = useAccessibility();
+  const t = translations[language];
   const [inputVal, setInputVal] = useState('');
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
@@ -123,6 +125,26 @@ export function AITutorDrawer() {
       { label: '📐 Dirac-Mathematik', prompt: 'Können Sie mir die Dirac-Bra-Ket-Notation und unitäre Matrizen dazu erklären?' },
       { label: '🎯 Übungsfrage', prompt: 'Könnten Sie mir eine knifflige konzeptionelle Übungsfrage dazu stellen?' }
     ],
+    ta: [
+      { label: '✨ எளிமையாக விளக்குங்கள்', prompt: 'இந்த கருத்தை எளிதாகப் புரிந்து கொள்ள ஒரு நடைமுறை உதாரணம் தர முடியுமா?' },
+      { label: '📐 டிராக் கணித விளக்கம்', prompt: 'இதற்கான டிராக் பிரா-கெட் குறியீடு மற்றும் அணிகளை விளக்க முடியுமா?' },
+      { label: '🎯 பயிற்சி வினாக்கள்', prompt: 'இந்த தலைப்பில் ஒரு பயிற்சி வினாவை உருவாக்க முடியுமா?' }
+    ],
+    te: [
+      { label: '✨ సులభంగా వివరించండి', prompt: 'ఈ భావనను అర్థం చేసుకోవడానికి ఒక సులభమైన ఉదాహరణ ఇవ్వగలరా?' },
+      { label: '📐 డిరాక్ గణిత వివరణ', prompt: 'దీనికి డిరాక్ బ్రా-కెట్ సంజ్ఞామానం మరియు యూనిటరీ మాత్రికలను వివరించగలరా?' },
+      { label: '🎯 అభ్యాస ప్రశ్న', prompt: 'ఈ అంశంపై ఒక అభ్యాస ప్రశ్నను అందించగలరా?' }
+    ],
+    ja: [
+      { label: '✨ 直感的に解説', prompt: 'この概念を直感的に理解できる身近なたとえを教えてください。' },
+      { label: '📐 ディラック表記の解説', prompt: 'ブラケット記法とユニタリ行列の導出を説明してください。' },
+      { label: '🎯 練習問題を出題', prompt: 'このトピックに関する概念的な練習問題を出してください。' }
+    ],
+    'zh-CN': [
+      { label: '✨ 通俗易懂讲解', prompt: '能否用一个生活中的类比来解释这个量子概念？' },
+      { label: '📐 狄拉克符号与数学推演', prompt: '能否为我推导狄拉克右矢左矢符号与酉矩阵？' },
+      { label: '🎯 出一道练习题', prompt: '能否就该知识点为我出一道深入的概念练习题？' }
+    ],
     en: [
       { label: '✨ Explain intuitively', prompt: 'Could you give me an intuitive everyday analogy to understand the active concept?' },
       { label: '📐 Dirac math walkthrough', prompt: 'Can you walk me through the Dirac bra-ket mathematical notation and unitary matrices for this?' },
@@ -137,6 +159,10 @@ export function AITutorDrawer() {
     es: 'Haga una pregunta o explore un concepto cuántico...',
     fr: 'Posez une question ou explorez un concept quantique...',
     de: 'Stellen Sie eine Frage oder erkunden Sie ein Quantenkonzept...',
+    ta: 'ஒரு கேள்வி கேளுங்கள் அல்லது குவாண்டம் கருத்தை ஆராயுங்கள்...',
+    te: 'ఒక ప్రశ్న అడగండి లేదా క్వాంటం భావనను అన్వేషించండి...',
+    ja: '質問を入力するか、量子概念を探索...',
+    'zh-CN': '输入问题或探索量子概念...',
     en: 'Ask a question or explore a concept...'
   };
 
@@ -159,7 +185,7 @@ export function AITutorDrawer() {
                 {explanationMode.toUpperCase()}
               </span>
             </h3>
-            <p className="text-[11px] text-dark-500 dark:text-dark-400">Guides through inquiry & physics insights</p>
+            <p className="text-[11px] text-dark-500 dark:text-dark-400">{t.aiTutor.subtitle || 'Guides through inquiry & physics insights'}</p>
           </div>
         </div>
 

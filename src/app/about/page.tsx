@@ -3,6 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useAccessibility } from '@/lib/accessibility-context';
+import { translations } from '@/lib/i18n';
 import {
   Compass,
   Sparkles,
@@ -31,7 +32,8 @@ import {
 import { MathRenderer } from '@/components/math/MathRenderer';
 
 export default function AboutPage() {
-  const { explanationMode } = useAccessibility();
+  const { explanationMode, language } = useAccessibility();
+  const t = translations[language];
   const [activeTab, setActiveTab] = useState<
     'what-is-quantum' | 'qubit' | 'superposition' | 'entanglement' | 'computing' | 'comparison'
   >('what-is-quantum');
@@ -59,15 +61,15 @@ export default function AboutPage() {
         <div className="relative z-10 max-w-3xl space-y-4">
           <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/10 text-indigo-200 text-xs font-semibold backdrop-blur-xs border border-white/10">
             <Compass className="w-3.5 h-3.5 text-indigo-300" />
-            <span>The Story & Mission Behind QuanBit</span>
+            <span>{t.about.badge}</span>
           </div>
 
           <h1 className="text-3xl sm:text-4xl lg:text-5xl font-extrabold tracking-tight leading-tight">
-            Why We Created QuanBit: Demystifying Quantum Computing for Everyone
+            {t.about.title}
           </h1>
 
           <p className="text-base sm:text-lg text-indigo-100/90 leading-relaxed">
-            Quantum computing is often taught as an impenetrable fortress of dense linear algebra, complex numbers, and abstract tensor products. We created QuanBit to dismantle that barrier—transforming abstract Hilbert spaces into interactive 3D geometry, hands-on circuit simulation, and personalized Socratic AI tutoring.
+            {t.about.subtitle}
           </p>
 
           <div className="pt-2 flex flex-wrap items-center gap-3">
@@ -76,14 +78,14 @@ export default function AboutPage() {
               className="px-5 py-2.5 rounded-xl bg-white text-primary-900 font-bold text-sm hover:bg-primary-50 transition-all shadow-md flex items-center gap-2"
             >
               <Atom className="w-4 h-4 text-primary-600" />
-              <span>Explore Quantum Masterclass Below</span>
+              <span>{t.about.guideTitle}</span>
             </a>
             <Link
               href="/bloch-sphere"
               className="px-5 py-2.5 rounded-xl bg-white/10 hover:bg-white/20 text-white font-semibold text-sm transition-all border border-white/20 flex items-center gap-2"
             >
               <Globe className="w-4 h-4 text-indigo-300" />
-              <span>Explore 3D Bloch Sphere</span>
+              <span>{t.common.exploreBloch}</span>
             </Link>
           </div>
         </div>
