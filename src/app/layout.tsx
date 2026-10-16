@@ -33,7 +33,8 @@ import { StudentProvider } from '@/lib/student-context';
 import { StudentIdentityModal } from '@/components/identity/StudentIdentityModal';
 import { SubscriptionModal } from '@/components/subscription/SubscriptionModal';
 import { GoogleTranslator } from '@/components/accessibility/GoogleTranslator';
-import { UserPresenceHeartbeat } from '@/components/presence/UserPresenceHeartbeat';
+import { Analytics } from '@vercel/analytics/next';
+import { SpeedInsights } from '@vercel/speed-insights/next';
 import {
   websiteSchema,
   organizationSchema,
@@ -281,9 +282,6 @@ export default function RootLayout({
                 {children}
               </main>
 
-              {/* Real-time Lightweight User Presence & Mode Heartbeat */}
-              <UserPresenceHeartbeat />
-
               {/* Student Identity Modal — shown on first visit */}
               <StudentIdentityModal />
 
@@ -302,6 +300,10 @@ export default function RootLayout({
             </StudentProvider>
           </IntlClientWrapper>
         </AccessibilityProvider>
+
+        {/* Vercel Web Analytics & Core Web Vitals Speed Insights */}
+        <Analytics />
+        <SpeedInsights />
       </body>
     </html>
   );
