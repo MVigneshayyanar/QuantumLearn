@@ -36,7 +36,11 @@ export function AccessibilityBar() {
     <div
       role="region"
       aria-label="Accessibility and Learning Preferences"
-      className="bg-dark-50 dark:bg-dark-900 border-b border-dark-200 dark:border-dark-800 text-xs text-dark-700 dark:text-dark-300 py-1.5 relative z-40"
+      className={`relative z-40 bg-dark-50 dark:bg-dark-900 text-xs text-dark-700 dark:text-dark-300 transition-[max-height,opacity,padding] duration-200 ${
+        isHomePage
+          ? 'py-1.5 border-b border-dark-200 dark:border-dark-800'
+          : 'max-h-0 overflow-hidden opacity-0 pointer-events-none py-0 border-b-0 group-hover/nav-shell:max-h-24 group-hover/nav-shell:opacity-100 group-hover/nav-shell:pointer-events-auto group-hover/nav-shell:py-1.5 group-hover/nav-shell:border-b group-hover/nav-shell:border-dark-200 dark:group-hover/nav-shell:border-dark-800'
+      }`}
     >
       <div className="w-full mx-auto px-3 sm:px-6 lg:px-8 flex flex-wrap items-center justify-between gap-2 sm:gap-3">
         {/* Left: Explanation Mode Toggle (Core to school vs researcher) */}
