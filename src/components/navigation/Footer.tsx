@@ -55,22 +55,22 @@ export function Footer() {
             <h2 className="font-semibold text-dark-900 dark:text-white mb-3 text-xs uppercase tracking-wide">{t.footer.modulesTitle}</h2>
             <ul className="space-y-2">
               <li>
-                <Link href="/learn/deutsch-jozsa" className="hover:text-primary-600 transition-colors">
+                <Link href="/learn/deutsch-jozsa" prefetch={false} className="hover:text-primary-600 transition-colors">
                   {t.algorithms.deutschJozsa.title} — {t.algorithms.deutschJozsa.category}
                 </Link>
               </li>
               <li>
-                <Link href="/learn/grover" className="hover:text-primary-600 transition-colors">
+                <Link href="/learn/grover" prefetch={false} className="hover:text-primary-600 transition-colors">
                   {t.algorithms.grover.title} — {t.algorithms.grover.category}
                 </Link>
               </li>
               <li>
-                <Link href="/learn/teleportation" className="hover:text-primary-600 transition-colors">
+                <Link href="/learn/teleportation" prefetch={false} className="hover:text-primary-600 transition-colors">
                   {t.algorithms.teleportation.title} — {t.algorithms.teleportation.category}
                 </Link>
               </li>
               <li>
-                <Link href="/learn/superdense-coding" className="hover:text-primary-600 transition-colors">
+                <Link href="/learn/superdense-coding" prefetch={false} className="hover:text-primary-600 transition-colors">
                   {t.algorithms.superdenseCoding.title} — {t.algorithms.superdenseCoding.category}
                 </Link>
               </li>
@@ -82,32 +82,32 @@ export function Footer() {
             <h2 className="font-semibold text-dark-900 dark:text-white mb-3 text-xs uppercase tracking-wide">{t.footer.resourcesTitle}</h2>
             <ul className="space-y-2">
               <li>
-                <Link href="/simulator" className="hover:text-primary-600 dark:hover:text-primary-400 transition-colors">
+                <Link href="/simulator" prefetch={false} className="hover:text-primary-600 dark:hover:text-primary-400 transition-colors">
                   {t.nav.simulator}
                 </Link>
               </li>
               <li>
-                <Link href="/bloch-sphere" className="hover:text-primary-600 dark:hover:text-primary-400 transition-colors">
+                <Link href="/bloch-sphere" prefetch={false} className="hover:text-primary-600 dark:hover:text-primary-400 transition-colors">
                   {t.nav.blochSphere}
                 </Link>
               </li>
               <li>
-                <Link href="/practice" className="hover:text-primary-600 dark:hover:text-primary-400 transition-colors">
+                <Link href="/practice" prefetch={false} className="hover:text-primary-600 dark:hover:text-primary-400 transition-colors">
                   {t.nav.practice}
                 </Link>
               </li>
               <li>
-                <Link href="/faq" className="hover:text-primary-600 dark:hover:text-primary-400 transition-colors">
+                <Link href="/faq" prefetch={false} className="hover:text-primary-600 dark:hover:text-primary-400 transition-colors">
                   {t.nav.faq}
                 </Link>
               </li>
               <li>
-                <Link href="/contact" className="hover:text-primary-600 dark:hover:text-primary-400 transition-colors">
+                <Link href="/contact" prefetch={false} className="hover:text-primary-600 dark:hover:text-primary-400 transition-colors">
                   {t.nav.contact}
                 </Link>
               </li>
               <li>
-                <Link href="/about" className="hover:text-primary-600 dark:hover:text-primary-400 transition-colors font-medium text-primary-700 dark:text-primary-400">
+                <Link href="/about" prefetch={false} className="hover:text-primary-600 dark:hover:text-primary-400 transition-colors font-medium text-primary-700 dark:text-primary-400">
                   {t.nav.about}
                 </Link>
               </li>

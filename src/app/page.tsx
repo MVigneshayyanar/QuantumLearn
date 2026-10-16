@@ -531,7 +531,7 @@ export default function HomePage() {
             <p className="text-xs text-dark-600 dark:text-dark-300 leading-relaxed">
               Explore single-qubit statevectors parameterized by polar angle <MathRenderer text="$\theta$" /> and azimuthal phase <MathRenderer text="$\phi$" />. When qubits become entangled in multi-qubit circuits, QuanBit computes the reduced density matrix purity <MathRenderer text="$\text{Tr}(\rho^2)$" /> in real time, visually collapsing the 3D vector to the origin when purity hits 0.5.
             </p>
-            <Link href="/bloch-sphere" className="inline-flex items-center gap-1 text-xs font-bold text-primary-600 dark:text-primary-400 hover:underline">
+            <Link href="/bloch-sphere" prefetch={false} className="inline-flex items-center gap-1 text-xs font-bold text-primary-600 dark:text-primary-400 hover:underline">
               <span>Launch 3D Visualizer</span>
               <ArrowRight className="w-3.5 h-3.5" />
             </Link>
@@ -547,7 +547,7 @@ export default function HomePage() {
             <p className="text-xs text-dark-600 dark:text-dark-300 leading-relaxed">
               Design quantum circuits via drag-and-drop and generate verified code for IBM Qiskit, Google Cirq, Xanadu PennyLane, and OpenQASM 2.0/3.0. QuanBit automatically normalizes endianness differences between Qiskit (little-endian) and Cirq (big-endian).
             </p>
-            <Link href="/simulator" className="inline-flex items-center gap-1 text-xs font-bold text-primary-600 dark:text-primary-400 hover:underline">
+            <Link href="/simulator" prefetch={false} className="inline-flex items-center gap-1 text-xs font-bold text-primary-600 dark:text-primary-400 hover:underline">
               <span>Open Circuit Builder</span>
               <ArrowRight className="w-3.5 h-3.5" />
             </Link>
@@ -563,7 +563,7 @@ export default function HomePage() {
             <p className="text-xs text-dark-600 dark:text-dark-300 leading-relaxed">
               Master Grover&apos;s quantum search (<MathRenderer text="$\mathcal{O}(\sqrt{N})$" /> speedup), Deutsch-Jozsa quantum parallelism, quantum state teleportation, and superdense coding through structured 6-stage interactive pedagogy with verifiable SHA-256 certificates.
             </p>
-            <Link href="/learn/grover" className="inline-flex items-center gap-1 text-xs font-bold text-primary-600 dark:text-primary-400 hover:underline">
+            <Link href="/learn/grover" prefetch={false} className="inline-flex items-center gap-1 text-xs font-bold text-primary-600 dark:text-primary-400 hover:underline">
               <span>Study Grover Algorithm</span>
               <ArrowRight className="w-3.5 h-3.5" />
             </Link>
@@ -584,10 +584,10 @@ export default function HomePage() {
           </div>
 
           <div className="flex flex-wrap items-center gap-4 font-semibold text-primary-600 dark:text-primary-400">
-            <Link href="/blog" className="hover:underline">Blog &amp; Guides</Link>
-            <Link href="/faq" className="hover:underline">FAQ</Link>
-            <Link href="/contact" className="hover:underline">Contact</Link>
-            <Link href="/verify" className="hover:underline">Verify Certificate</Link>
+            <Link href="/blog" prefetch={false} className="hover:underline">Blog &amp; Guides</Link>
+            <Link href="/faq" prefetch={false} className="hover:underline">FAQ</Link>
+            <Link href="/contact" prefetch={false} className="hover:underline">Contact</Link>
+            <Link href="/verify" prefetch={false} className="hover:underline">Verify Certificate</Link>
           </div>
         </div>
       </section>

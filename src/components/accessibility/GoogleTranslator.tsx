@@ -8,6 +8,7 @@ declare global {
   interface Window {
     google?: any;
     googleTranslateElementInit?: () => void;
+    __gtTelemetryIntercepted?: boolean;
   }
 }
 
@@ -17,6 +18,28 @@ export function GoogleTranslator() {
   const scriptLoadedRef = useRef(false);
 
   useEffect(() => {
+    // 0. Intercept and drop unwanted Google Translate telemetry pings to prevent red network errors
+    if (typeof window !== 'undefined' && !window.__gtTelemetryIntercepted) {
+      window.__gtTelemetryIntercepted = true;
+      const originalFetch = window.fetch;
+      window.fetch = async function (...args) {
+        const url = typeof args[0] === 'string' ? args[0] : (args[0] as Request)?.url;
+        if (typeof url === 'string' && url.includes('translate.googleapis.com/element/log')) {
+          return new Response('{}', { status: 200, headers: { 'Content-Type': 'application/json' } });
+        }
+        return originalFetch.apply(this, args);
+      };
+      if (navigator.sendBeacon) {
+        const originalSendBeacon = navigator.sendBeacon.bind(navigator);
+        navigator.sendBeacon = (url, data) => {
+          if (typeof url === 'string' && url.includes('translate.googleapis.com/element/log')) {
+            return true;
+          }
+          return originalSendBeacon(url, data);
+        };
+      }
+    }
+
     // 1. Define global Google Translate initialization callback
     window.googleTranslateElementInit = () => {
       try {
