@@ -64,6 +64,21 @@ export interface PresenceUserRecord {
   firstSeen: number;
 }
 
+export interface PresenceEvent {
+  id: string;
+  timestamp: number;
+  sessionId: string;
+  userId?: string | null;
+  name: string;
+  email?: string | null;
+  role: string;
+  mode: 'simple' | 'technical';
+  page: string;
+  language: string;
+  type: 'joined' | 'mode_switch' | 'navigated' | 'heartbeat';
+  details?: string;
+}
+
 export interface PresenceStats {
   totalActiveNow: number;
   totalRecentUsers: number;
@@ -72,6 +87,7 @@ export interface PresenceStats {
   pageDistribution: Record<string, number>;
   languageDistribution: Record<string, number>;
   users: PresenceUserRecord[];
+  historyLogs?: PresenceEvent[];
 }
 
 function formatTimeAgo(timestamp: number): string {
@@ -95,6 +111,7 @@ export default function AdminPortalPage() {
   const [presenceData, setPresenceData] = useState<PresenceStats | null>(null);
   const [isPresenceLoading, setIsPresenceLoading] = useState(false);
   const [presenceModeFilter, setPresenceModeFilter] = useState<'all' | 'simple' | 'technical'>('all');
+  const [presenceSubTab, setPresenceSubTab] = useState<'active' | 'history'>('history');
 
   const [activeTab, setActiveTab] = useState<'instructors' | 'students' | 'presence'>('presence');
   const [searchQuery, setSearchQuery] = useState('');
@@ -276,6 +293,16 @@ export default function AdminPortalPage() {
       (u.email || '').toLowerCase().includes(searchQuery.toLowerCase()) ||
       u.page.toLowerCase().includes(searchQuery.toLowerCase());
     const matchesMode = presenceModeFilter === 'all' || u.mode === presenceModeFilter;
+    return matchesSearch && matchesMode;
+  });
+
+  const filteredHistoryEvents = (presenceData?.historyLogs || []).filter((e) => {
+    const matchesSearch =
+      e.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      (e.email || '').toLowerCase().includes(searchQuery.toLowerCase()) ||
+      e.page.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      (e.details || '').toLowerCase().includes(searchQuery.toLowerCase());
+    const matchesMode = presenceModeFilter === 'all' || e.mode === presenceModeFilter;
     return matchesSearch && matchesMode;
   });
 
@@ -613,11 +640,36 @@ export default function AdminPortalPage() {
         {/* LIVE PRESENCE & MODE ACTIVITY VIEW */}
         {activeTab === 'presence' && (
           <div className="space-y-4 animate-fadeIn">
-            {/* Mode Filter Pills & Live Status Bar */}
+            {/* View Sub-Tabs: Live Active vs History Logs */}
             <div className="flex flex-wrap items-center justify-between gap-3 p-3 rounded-xl bg-dark-50 border border-dark-200">
               <div className="flex items-center gap-2 flex-wrap">
-                <span className="text-[11px] font-bold text-dark-500 uppercase tracking-wider mr-1">
-                  Filter Mode:
+                <div className="inline-flex rounded-lg border border-dark-200 p-0.5 bg-white mr-2">
+                  <button
+                    onClick={() => setPresenceSubTab('history')}
+                    className={`px-3 py-1 rounded-md text-xs font-bold transition-all flex items-center gap-1.5 ${
+                      presenceSubTab === 'history'
+                        ? 'bg-purple-600 text-white shadow-xs'
+                        : 'text-dark-600 hover:text-dark-900'
+                    }`}
+                  >
+                    <Clock className="w-3.5 h-3.5" />
+                    <span>Chronological History Logs ({presenceData?.historyLogs?.length ?? 0})</span>
+                  </button>
+                  <button
+                    onClick={() => setPresenceSubTab('active')}
+                    className={`px-3 py-1 rounded-md text-xs font-bold transition-all flex items-center gap-1.5 ${
+                      presenceSubTab === 'active'
+                        ? 'bg-emerald-600 text-white shadow-xs'
+                        : 'text-dark-600 hover:text-dark-900'
+                    }`}
+                  >
+                    <Activity className="w-3.5 h-3.5" />
+                    <span>Active Sessions ({presenceData?.totalActiveNow ?? 0})</span>
+                  </button>
+                </div>
+
+                <span className="text-[11px] font-bold text-dark-500 uppercase tracking-wider">
+                  Mode:
                 </span>
                 <button
                   onClick={() => setPresenceModeFilter('all')}
@@ -627,7 +679,7 @@ export default function AdminPortalPage() {
                       : 'bg-white border border-dark-200 text-dark-700 hover:bg-dark-100'
                   }`}
                 >
-                  All ({presenceData?.users.length ?? 0})
+                  All
                 </button>
                 <button
                   onClick={() => setPresenceModeFilter('simple')}
@@ -638,7 +690,7 @@ export default function AdminPortalPage() {
                   }`}
                 >
                   <Sparkles className="w-3 h-3 text-emerald-500" />
-                  <span>Simple Mode ({presenceData?.simpleModeCount ?? 0})</span>
+                  <span>Simple ({presenceData?.simpleModeCount ?? 0})</span>
                 </button>
                 <button
                   onClick={() => setPresenceModeFilter('technical')}
@@ -649,130 +701,250 @@ export default function AdminPortalPage() {
                   }`}
                 >
                   <Cpu className="w-3 h-3 text-indigo-500" />
-                  <span>Technical Mode ({presenceData?.technicalModeCount ?? 0})</span>
+                  <span>Technical ({presenceData?.technicalModeCount ?? 0})</span>
                 </button>
               </div>
 
               <div className="flex items-center gap-2 text-[11px] text-dark-500">
                 <Clock className="w-3.5 h-3.5 text-dark-400" />
-                <span>1-minute heartbeats • Auto-refreshes every 10s</span>
+                <span>Latest on top • Auto-refreshes every 10s</span>
               </div>
             </div>
 
-            {/* Presence Logs Table */}
-            <div className="overflow-x-auto">
-              <table className="w-full text-xs">
-                <thead>
-                  <tr className="border-b border-dark-200 text-dark-500 text-left">
-                    <th className="py-2.5 pr-4 font-semibold">User / Session</th>
-                    <th className="py-2.5 pr-4 font-semibold">Active Learning Mode</th>
-                    <th className="py-2.5 pr-4 font-semibold">Current Page</th>
-                    <th className="py-2.5 pr-4 font-semibold">Language</th>
-                    <th className="py-2.5 pr-4 font-semibold">Last Heartbeat</th>
-                    <th className="py-2.5 text-right font-semibold">Status</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-dark-100">
-                  {filteredPresenceUsers.length === 0 ? (
-                    <tr>
-                      <td colSpan={6} className="py-8 text-center text-dark-400 font-medium">
-                        No active users matching the selected mode or search query.
-                      </td>
+            {/* CHRONOLOGICAL HISTORY LOGS (LATEST ON TOP) */}
+            {presenceSubTab === 'history' && (
+              <div className="overflow-x-auto">
+                <table className="w-full text-xs">
+                  <thead>
+                    <tr className="border-b border-dark-200 text-dark-500 text-left">
+                      <th className="py-2.5 pr-4 font-semibold">Timestamp</th>
+                      <th className="py-2.5 pr-4 font-semibold">User / Session</th>
+                      <th className="py-2.5 pr-4 font-semibold">Learning Mode</th>
+                      <th className="py-2.5 pr-4 font-semibold">Page / Route</th>
+                      <th className="py-2.5 pr-4 font-semibold">Event Type</th>
+                      <th className="py-2.5 text-left font-semibold">Activity Details</th>
                     </tr>
-                  ) : (
-                    filteredPresenceUsers.map((u) => {
-                      const isLive = Date.now() - u.lastSeen <= 120_000;
-                      return (
-                        <tr key={u.sessionId} className="hover:bg-dark-50/50 transition-colors">
-                          <td className="py-3 pr-4">
+                  </thead>
+                  <tbody className="divide-y divide-dark-100">
+                    {filteredHistoryEvents.length === 0 ? (
+                      <tr>
+                        <td colSpan={6} className="py-8 text-center text-dark-400 font-medium">
+                          No history events recorded yet. As students navigate or switch modes, logs will stream here with latest on top.
+                        </td>
+                      </tr>
+                    ) : (
+                      filteredHistoryEvents.map((evt) => (
+                        <tr key={evt.id} className="hover:bg-dark-50/50 transition-colors">
+                          <td className="py-2.5 pr-4 font-mono text-[11px] text-dark-500 whitespace-nowrap">
+                            <div className="font-bold text-dark-800">
+                              {new Date(evt.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' })}
+                            </div>
+                            <div className="text-[10px] text-dark-400">{formatTimeAgo(evt.timestamp)}</div>
+                          </td>
+
+                          <td className="py-2.5 pr-4">
                             <div className="flex items-center gap-2">
                               <div
-                                className={`w-7 h-7 rounded-lg flex items-center justify-center font-bold text-[11px] ${
-                                  u.role === 'ADMIN'
+                                className={`w-6 h-6 rounded-md flex items-center justify-center font-bold text-[10px] ${
+                                  evt.role === 'ADMIN'
                                     ? 'bg-purple-100 text-purple-700'
-                                    : u.role === 'EDUCATOR'
+                                    : evt.role === 'EDUCATOR'
                                     ? 'bg-blue-100 text-blue-700'
-                                    : u.userId
+                                    : evt.userId
                                     ? 'bg-primary-100 text-primary-700'
                                     : 'bg-dark-100 text-dark-600'
                                 }`}
                               >
-                                {u.name.charAt(0).toUpperCase()}
+                                {evt.name.charAt(0).toUpperCase()}
                               </div>
                               <div>
-                                <p className="font-bold text-dark-900 leading-tight flex items-center gap-1.5">
-                                  <span>{u.name}</span>
-                                  <span className="text-[9px] px-1.5 py-0.2 rounded font-mono font-medium bg-dark-100 text-dark-600">
-                                    {u.role}
-                                  </span>
-                                </p>
-                                {u.email ? (
-                                  <p className="text-[11px] text-dark-500 font-mono">{u.email}</p>
+                                <span className="font-bold text-dark-900 block leading-tight">{evt.name}</span>
+                                {evt.email ? (
+                                  <span className="text-[10px] text-dark-500 font-mono block">{evt.email}</span>
                                 ) : (
-                                  <p className="text-[10px] text-dark-400 font-mono">
-                                    Session: {u.sessionId.slice(0, 14)}...
-                                  </p>
+                                  <span className="text-[10px] text-dark-400 font-mono block">
+                                    {evt.sessionId.slice(0, 10)}...
+                                  </span>
                                 )}
                               </div>
                             </div>
                           </td>
 
-                          <td className="py-3 pr-4">
-                            {u.mode === 'technical' ? (
-                              <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-indigo-50 border border-indigo-200 text-indigo-700 font-semibold text-[11px]">
-                                <Cpu className="w-3 h-3 text-indigo-600 shrink-0" />
+                          <td className="py-2.5 pr-4">
+                            {evt.mode === 'technical' ? (
+                              <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-indigo-50 border border-indigo-200 text-indigo-700 font-semibold text-[10px]">
+                                <Cpu className="w-2.5 h-2.5 text-indigo-600" />
                                 <span>Technical Mode</span>
                               </span>
                             ) : (
-                              <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-emerald-50 border border-emerald-200 text-emerald-700 font-semibold text-[11px]">
-                                <Sparkles className="w-3 h-3 text-emerald-600 shrink-0" />
+                              <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-emerald-50 border border-emerald-200 text-emerald-700 font-semibold text-[10px]">
+                                <Sparkles className="w-2.5 h-2.5 text-emerald-600" />
                                 <span>Simple Mode</span>
                               </span>
                             )}
                           </td>
 
-                          <td className="py-3 pr-4">
+                          <td className="py-2.5 pr-4">
                             <Link
-                              href={u.page}
+                              href={evt.page}
                               target="_blank"
                               className="inline-flex items-center gap-1 font-mono text-[11px] text-primary-700 bg-primary-50 hover:bg-primary-100 border border-primary-200 px-2 py-0.5 rounded transition-colors"
                             >
-                              <span>{u.page}</span>
+                              <span>{evt.page}</span>
                               <ExternalLink className="w-2.5 h-2.5 text-primary-600" />
                             </Link>
                           </td>
 
-                          <td className="py-3 pr-4">
-                            <span className="inline-flex items-center gap-1 text-[11px] font-medium text-dark-700 bg-dark-50 border border-dark-200 px-2 py-0.5 rounded">
-                              <Globe className="w-3 h-3 text-dark-500" />
-                              <span className="uppercase">{u.language}</span>
-                            </span>
-                          </td>
-
-                          <td className="py-3 pr-4 text-dark-600 font-mono text-[11px]">
-                            {formatTimeAgo(u.lastSeen)}
-                          </td>
-
-                          <td className="py-3 text-right">
-                            {isLive ? (
-                              <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-emerald-50 text-emerald-800 text-[10px] font-bold border border-emerald-200">
-                                <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
-                                <span>Active</span>
+                          <td className="py-2.5 pr-4">
+                            {evt.type === 'joined' && (
+                              <span className="px-2 py-0.5 rounded bg-blue-50 text-blue-700 border border-blue-200 font-semibold text-[10px]">
+                                Session Joined
                               </span>
-                            ) : (
-                              <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-amber-50 text-amber-800 text-[10px] font-medium border border-amber-200">
-                                <span className="w-1.5 h-1.5 rounded-full bg-amber-400" />
-                                <span>Idle</span>
+                            )}
+                            {evt.type === 'mode_switch' && (
+                              <span className="px-2 py-0.5 rounded bg-purple-50 text-purple-700 border border-purple-200 font-semibold text-[10px]">
+                                Mode Switch
+                              </span>
+                            )}
+                            {evt.type === 'navigated' && (
+                              <span className="px-2 py-0.5 rounded bg-amber-50 text-amber-700 border border-amber-200 font-semibold text-[10px]">
+                                Navigated
+                              </span>
+                            )}
+                            {evt.type === 'heartbeat' && (
+                              <span className="px-2 py-0.5 rounded bg-dark-100 text-dark-600 font-medium text-[10px]">
+                                Heartbeat
                               </span>
                             )}
                           </td>
+
+                          <td className="py-2.5 text-left text-dark-700 font-medium">
+                            <span>{evt.details || 'Active session heartbeat'}</span>
+                          </td>
                         </tr>
-                      );
-                    })
-                  )}
-                </tbody>
-              </table>
-            </div>
+                      ))
+                    )}
+                  </tbody>
+                </table>
+              </div>
+            )}
+
+            {/* REAL-TIME ACTIVE SESSIONS TABLE */}
+            {presenceSubTab === 'active' && (
+              <div className="overflow-x-auto">
+                <table className="w-full text-xs">
+                  <thead>
+                    <tr className="border-b border-dark-200 text-dark-500 text-left">
+                      <th className="py-2.5 pr-4 font-semibold">User / Session</th>
+                      <th className="py-2.5 pr-4 font-semibold">Active Learning Mode</th>
+                      <th className="py-2.5 pr-4 font-semibold">Current Page</th>
+                      <th className="py-2.5 pr-4 font-semibold">Language</th>
+                      <th className="py-2.5 pr-4 font-semibold">Last Heartbeat</th>
+                      <th className="py-2.5 text-right font-semibold">Status</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-dark-100">
+                    {filteredPresenceUsers.length === 0 ? (
+                      <tr>
+                        <td colSpan={6} className="py-8 text-center text-dark-400 font-medium">
+                          No active users matching the selected mode or search query.
+                        </td>
+                      </tr>
+                    ) : (
+                      filteredPresenceUsers.map((u) => {
+                        const isLive = Date.now() - u.lastSeen <= 180_000;
+                        return (
+                          <tr key={u.sessionId} className="hover:bg-dark-50/50 transition-colors">
+                            <td className="py-3 pr-4">
+                              <div className="flex items-center gap-2">
+                                <div
+                                  className={`w-7 h-7 rounded-lg flex items-center justify-center font-bold text-[11px] ${
+                                    u.role === 'ADMIN'
+                                      ? 'bg-purple-100 text-purple-700'
+                                      : u.role === 'EDUCATOR'
+                                      ? 'bg-blue-100 text-blue-700'
+                                      : u.userId
+                                      ? 'bg-primary-100 text-primary-700'
+                                      : 'bg-dark-100 text-dark-600'
+                                  }`}
+                                >
+                                  {u.name.charAt(0).toUpperCase()}
+                                </div>
+                                <div>
+                                  <p className="font-bold text-dark-900 leading-tight flex items-center gap-1.5">
+                                    <span>{u.name}</span>
+                                    <span className="text-[9px] px-1.5 py-0.2 rounded font-mono font-medium bg-dark-100 text-dark-600">
+                                      {u.role}
+                                    </span>
+                                  </p>
+                                  {u.email ? (
+                                    <p className="text-[11px] text-dark-500 font-mono">{u.email}</p>
+                                  ) : (
+                                    <p className="text-[10px] text-dark-400 font-mono">
+                                      Session: {u.sessionId.slice(0, 14)}...
+                                    </p>
+                                  )}
+                                </div>
+                              </div>
+                            </td>
+
+                            <td className="py-3 pr-4">
+                              {u.mode === 'technical' ? (
+                                <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-indigo-50 border border-indigo-200 text-indigo-700 font-semibold text-[11px]">
+                                  <Cpu className="w-3 h-3 text-indigo-600 shrink-0" />
+                                  <span>Technical Mode</span>
+                                </span>
+                              ) : (
+                                <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-emerald-50 border border-emerald-200 text-emerald-700 font-semibold text-[11px]">
+                                  <Sparkles className="w-3 h-3 text-emerald-600 shrink-0" />
+                                  <span>Simple Mode</span>
+                                </span>
+                              )}
+                            </td>
+
+                            <td className="py-3 pr-4">
+                              <Link
+                                href={u.page}
+                                target="_blank"
+                                className="inline-flex items-center gap-1 font-mono text-[11px] text-primary-700 bg-primary-50 hover:bg-primary-100 border border-primary-200 px-2 py-0.5 rounded transition-colors"
+                              >
+                                <span>{u.page}</span>
+                                <ExternalLink className="w-2.5 h-2.5 text-primary-600" />
+                              </Link>
+                            </td>
+
+                            <td className="py-3 pr-4">
+                              <span className="inline-flex items-center gap-1 text-[11px] font-medium text-dark-700 bg-dark-50 border border-dark-200 px-2 py-0.5 rounded">
+                                <Globe className="w-3 h-3 text-dark-500" />
+                                <span className="uppercase">{u.language}</span>
+                              </span>
+                            </td>
+
+                            <td className="py-3 pr-4 text-dark-600 font-mono text-[11px]">
+                              {formatTimeAgo(u.lastSeen)}
+                            </td>
+
+                            <td className="py-3 text-right">
+                              {isLive ? (
+                                <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-emerald-50 text-emerald-800 text-[10px] font-bold border border-emerald-200">
+                                  <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
+                                  <span>Active</span>
+                                </span>
+                              ) : (
+                                <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-amber-50 text-amber-800 text-[10px] font-medium border border-amber-200">
+                                  <span className="w-1.5 h-1.5 rounded-full bg-amber-400" />
+                                  <span>Idle</span>
+                                </span>
+                              )}
+                            </td>
+                          </tr>
+                        );
+                      })
+                    )}
+                  </tbody>
+                </table>
+              </div>
+            )}
           </div>
         )}
       </div>
