@@ -33,6 +33,7 @@ import { StudentProvider } from '@/lib/student-context';
 import { StudentIdentityModal } from '@/components/identity/StudentIdentityModal';
 import { SubscriptionModal } from '@/components/subscription/SubscriptionModal';
 import { GoogleTranslator } from '@/components/accessibility/GoogleTranslator';
+import { UserPresenceHeartbeat } from '@/components/presence/UserPresenceHeartbeat';
 import {
   websiteSchema,
   organizationSchema,
@@ -279,6 +280,9 @@ export default function RootLayout({
               <main id="main-content" className="flex-1 w-full">
                 {children}
               </main>
+
+              {/* Real-time Lightweight User Presence & Mode Heartbeat */}
+              <UserPresenceHeartbeat />
 
               {/* Student Identity Modal — shown on first visit */}
               <StudentIdentityModal />

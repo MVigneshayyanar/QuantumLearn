@@ -19,7 +19,13 @@ import {
   Flame,
   LayoutDashboard,
   ExternalLink,
-  BookOpen
+  BookOpen,
+  Activity,
+  Cpu,
+  Globe,
+  RefreshCw,
+  Clock,
+  Radio
 } from 'lucide-react';
 
 interface InstructorData {
@@ -45,6 +51,38 @@ interface StudentData {
   aiInteractionCount: number;
 }
 
+export interface PresenceUserRecord {
+  sessionId: string;
+  userId?: string | null;
+  name: string;
+  email?: string | null;
+  role: string;
+  mode: 'simple' | 'technical';
+  page: string;
+  language: string;
+  lastSeen: number;
+  firstSeen: number;
+}
+
+export interface PresenceStats {
+  totalActiveNow: number;
+  totalRecentUsers: number;
+  simpleModeCount: number;
+  technicalModeCount: number;
+  pageDistribution: Record<string, number>;
+  languageDistribution: Record<string, number>;
+  users: PresenceUserRecord[];
+}
+
+function formatTimeAgo(timestamp: number): string {
+  const diffSec = Math.max(0, Math.floor((Date.now() - timestamp) / 1000));
+  if (diffSec < 10) return 'Just now';
+  if (diffSec < 60) return `${diffSec}s ago`;
+  const diffMin = Math.floor(diffSec / 60);
+  if (diffMin < 60) return `${diffMin}m ago`;
+  return `${Math.floor(diffMin / 60)}h ago`;
+}
+
 export default function AdminPortalPage() {
   const { isAdmin, isInstructor, openLoginModal, isLoading: isAuthLoading } = useStudentContext();
 
@@ -54,7 +92,11 @@ export default function AdminPortalPage() {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  const [activeTab, setActiveTab] = useState<'instructors' | 'students'>('instructors');
+  const [presenceData, setPresenceData] = useState<PresenceStats | null>(null);
+  const [isPresenceLoading, setIsPresenceLoading] = useState(false);
+  const [presenceModeFilter, setPresenceModeFilter] = useState<'all' | 'simple' | 'technical'>('all');
+
+  const [activeTab, setActiveTab] = useState<'instructors' | 'students' | 'presence'>('presence');
   const [searchQuery, setSearchQuery] = useState('');
 
   // Modals
@@ -88,10 +130,28 @@ export default function AdminPortalPage() {
     }
   };
 
+  const fetchPresence = async () => {
+    setIsPresenceLoading(true);
+    try {
+      const res = await fetch('/api/admin/presence');
+      if (res.ok) {
+        const data = await res.json();
+        setPresenceData(data);
+      }
+    } catch {
+      // presence fetch error
+    } finally {
+      setIsPresenceLoading(false);
+    }
+  };
+
   useEffect(() => {
     if (isAuthLoading) return;
     if (isAdmin) {
       fetchUsers();
+      fetchPresence();
+      const interval = setInterval(fetchPresence, 10000); // Live poll presence every 10 seconds
+      return () => clearInterval(interval);
     } else {
       setIsLoading(false);
     }
@@ -210,6 +270,15 @@ export default function AdminPortalPage() {
       s.email.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
+  const filteredPresenceUsers = (presenceData?.users || []).filter((u) => {
+    const matchesSearch =
+      u.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      (u.email || '').toLowerCase().includes(searchQuery.toLowerCase()) ||
+      u.page.toLowerCase().includes(searchQuery.toLowerCase());
+    const matchesMode = presenceModeFilter === 'all' || u.mode === presenceModeFilter;
+    return matchesSearch && matchesMode;
+  });
+
   const totalAICalls = students.reduce((acc, s) => acc + s.aiInteractionCount, 0);
 
   return (
@@ -259,7 +328,28 @@ export default function AdminPortalPage() {
       </div>
 
       {/* Metrics Row */}
-      <div className="grid grid-cols-1 sm:grid-cols-4 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3.5">
+        <div className="bg-white rounded-2xl border border-dark-200 p-4 shadow-xs flex items-center gap-3">
+          <div className="w-10 h-10 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center shrink-0 relative">
+            <Activity className="w-5 h-5" />
+            {(presenceData?.totalActiveNow ?? 0) > 0 && (
+              <>
+                <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 absolute -top-0.5 -right-0.5 animate-ping" />
+                <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 absolute -top-0.5 -right-0.5" />
+              </>
+            )}
+          </div>
+          <div className="min-w-0">
+            <span className="text-[11px] text-dark-500 font-medium">Online Right Now</span>
+            <div className="flex items-baseline gap-1.5 flex-wrap">
+              <p className="text-xl font-bold text-dark-900">{presenceData?.totalActiveNow ?? 0}</p>
+              <span className="text-[10px] text-dark-500 font-mono">
+                ({presenceData?.simpleModeCount ?? 0} Simple / {presenceData?.technicalModeCount ?? 0} Tech)
+              </span>
+            </div>
+          </div>
+        </div>
+
         <div className="bg-white rounded-2xl border border-dark-200 p-4 shadow-xs flex items-center gap-3">
           <div className="w-10 h-10 rounded-xl bg-purple-50 text-purple-600 flex items-center justify-center shrink-0">
             <GraduationCap className="w-5 h-5" />
@@ -281,7 +371,7 @@ export default function AdminPortalPage() {
         </div>
 
         <div className="bg-white rounded-2xl border border-dark-200 p-4 shadow-xs flex items-center gap-3">
-          <div className="w-10 h-10 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center shrink-0">
+          <div className="w-10 h-10 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center shrink-0">
             <CheckCircle2 className="w-5 h-5" />
           </div>
           <div>
@@ -295,7 +385,7 @@ export default function AdminPortalPage() {
             <Bot className="w-5 h-5" />
           </div>
           <div>
-            <span className="text-[11px] text-dark-500 font-medium">AI Interactions Logged</span>
+            <span className="text-[11px] text-dark-500 font-medium">AI Interactions</span>
             <p className="text-xl font-bold text-dark-900">{totalAICalls}</p>
           </div>
         </div>
@@ -305,7 +395,21 @@ export default function AdminPortalPage() {
       <div className="bg-white rounded-2xl border border-dark-200 p-5 shadow-xs space-y-4">
         {/* Sub-Header / Search / Tabs */}
         <div className="flex flex-wrap items-center justify-between gap-3 pb-3 border-b border-dark-100">
-          <div className="inline-flex rounded-xl border border-dark-200 p-1 bg-dark-50 text-xs font-semibold">
+          <div className="inline-flex rounded-xl border border-dark-200 p-1 bg-dark-50 text-xs font-semibold flex-wrap gap-1">
+            <button
+              onClick={() => setActiveTab('presence')}
+              className={`px-3 py-1.5 rounded-lg transition-colors flex items-center gap-1.5 ${
+                activeTab === 'presence'
+                  ? 'bg-white text-dark-900 shadow-xs'
+                  : 'text-dark-600 hover:text-dark-900'
+              }`}
+            >
+              <Activity className="w-3.5 h-3.5 text-emerald-600" />
+              <span>Live Mode & Activity ({presenceData?.totalActiveNow ?? 0})</span>
+              {(presenceData?.totalActiveNow ?? 0) > 0 && (
+                <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
+              )}
+            </button>
             <button
               onClick={() => setActiveTab('instructors')}
               className={`px-3 py-1.5 rounded-lg transition-colors flex items-center gap-1.5 ${
@@ -330,15 +434,27 @@ export default function AdminPortalPage() {
             </button>
           </div>
 
-          <div className="relative w-full sm:w-64">
-            <Search className="w-3.5 h-3.5 text-dark-400 absolute left-3 top-1/2 -translate-y-1/2" />
-            <input
-              type="text"
-              placeholder={`Search ${activeTab}...`}
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full pl-9 pr-3 py-1.5 rounded-xl border border-dark-200 text-xs text-dark-900 placeholder:text-dark-400 focus:outline-none focus:ring-2 focus:ring-purple-500/20 focus:border-purple-500"
-            />
+          <div className="flex items-center gap-2 w-full sm:w-auto">
+            {activeTab === 'presence' && (
+              <button
+                onClick={fetchPresence}
+                disabled={isPresenceLoading}
+                title="Refresh Live Activity"
+                className="p-2 rounded-xl border border-dark-200 hover:bg-dark-50 text-dark-600 transition-colors"
+              >
+                <RefreshCw className={`w-3.5 h-3.5 ${isPresenceLoading ? 'animate-spin text-primary-600' : ''}`} />
+              </button>
+            )}
+            <div className="relative w-full sm:w-64">
+              <Search className="w-3.5 h-3.5 text-dark-400 absolute left-3 top-1/2 -translate-y-1/2" />
+              <input
+                type="text"
+                placeholder={`Search ${activeTab}...`}
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="w-full pl-9 pr-3 py-1.5 rounded-xl border border-dark-200 text-xs text-dark-900 placeholder:text-dark-400 focus:outline-none focus:ring-2 focus:ring-purple-500/20 focus:border-purple-500"
+              />
+            </div>
           </div>
         </div>
 
@@ -491,6 +607,172 @@ export default function AdminPortalPage() {
                 )}
               </tbody>
             </table>
+          </div>
+        )}
+
+        {/* LIVE PRESENCE & MODE ACTIVITY VIEW */}
+        {activeTab === 'presence' && (
+          <div className="space-y-4 animate-fadeIn">
+            {/* Mode Filter Pills & Live Status Bar */}
+            <div className="flex flex-wrap items-center justify-between gap-3 p-3 rounded-xl bg-dark-50 border border-dark-200">
+              <div className="flex items-center gap-2 flex-wrap">
+                <span className="text-[11px] font-bold text-dark-500 uppercase tracking-wider mr-1">
+                  Filter Mode:
+                </span>
+                <button
+                  onClick={() => setPresenceModeFilter('all')}
+                  className={`px-2.5 py-1 rounded-lg text-xs font-semibold transition-colors ${
+                    presenceModeFilter === 'all'
+                      ? 'bg-dark-900 text-white shadow-xs'
+                      : 'bg-white border border-dark-200 text-dark-700 hover:bg-dark-100'
+                  }`}
+                >
+                  All ({presenceData?.users.length ?? 0})
+                </button>
+                <button
+                  onClick={() => setPresenceModeFilter('simple')}
+                  className={`px-2.5 py-1 rounded-lg text-xs font-semibold transition-colors flex items-center gap-1.5 ${
+                    presenceModeFilter === 'simple'
+                      ? 'bg-emerald-600 text-white shadow-xs'
+                      : 'bg-white border border-dark-200 text-dark-700 hover:bg-dark-100'
+                  }`}
+                >
+                  <Sparkles className="w-3 h-3 text-emerald-500" />
+                  <span>Simple Mode ({presenceData?.simpleModeCount ?? 0})</span>
+                </button>
+                <button
+                  onClick={() => setPresenceModeFilter('technical')}
+                  className={`px-2.5 py-1 rounded-lg text-xs font-semibold transition-colors flex items-center gap-1.5 ${
+                    presenceModeFilter === 'technical'
+                      ? 'bg-indigo-600 text-white shadow-xs'
+                      : 'bg-white border border-dark-200 text-dark-700 hover:bg-dark-100'
+                  }`}
+                >
+                  <Cpu className="w-3 h-3 text-indigo-500" />
+                  <span>Technical Mode ({presenceData?.technicalModeCount ?? 0})</span>
+                </button>
+              </div>
+
+              <div className="flex items-center gap-2 text-[11px] text-dark-500">
+                <Clock className="w-3.5 h-3.5 text-dark-400" />
+                <span>1-minute heartbeats • Auto-refreshes every 10s</span>
+              </div>
+            </div>
+
+            {/* Presence Logs Table */}
+            <div className="overflow-x-auto">
+              <table className="w-full text-xs">
+                <thead>
+                  <tr className="border-b border-dark-200 text-dark-500 text-left">
+                    <th className="py-2.5 pr-4 font-semibold">User / Session</th>
+                    <th className="py-2.5 pr-4 font-semibold">Active Learning Mode</th>
+                    <th className="py-2.5 pr-4 font-semibold">Current Page</th>
+                    <th className="py-2.5 pr-4 font-semibold">Language</th>
+                    <th className="py-2.5 pr-4 font-semibold">Last Heartbeat</th>
+                    <th className="py-2.5 text-right font-semibold">Status</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-dark-100">
+                  {filteredPresenceUsers.length === 0 ? (
+                    <tr>
+                      <td colSpan={6} className="py-8 text-center text-dark-400 font-medium">
+                        No active users matching the selected mode or search query.
+                      </td>
+                    </tr>
+                  ) : (
+                    filteredPresenceUsers.map((u) => {
+                      const isLive = Date.now() - u.lastSeen <= 120_000;
+                      return (
+                        <tr key={u.sessionId} className="hover:bg-dark-50/50 transition-colors">
+                          <td className="py-3 pr-4">
+                            <div className="flex items-center gap-2">
+                              <div
+                                className={`w-7 h-7 rounded-lg flex items-center justify-center font-bold text-[11px] ${
+                                  u.role === 'ADMIN'
+                                    ? 'bg-purple-100 text-purple-700'
+                                    : u.role === 'EDUCATOR'
+                                    ? 'bg-blue-100 text-blue-700'
+                                    : u.userId
+                                    ? 'bg-primary-100 text-primary-700'
+                                    : 'bg-dark-100 text-dark-600'
+                                }`}
+                              >
+                                {u.name.charAt(0).toUpperCase()}
+                              </div>
+                              <div>
+                                <p className="font-bold text-dark-900 leading-tight flex items-center gap-1.5">
+                                  <span>{u.name}</span>
+                                  <span className="text-[9px] px-1.5 py-0.2 rounded font-mono font-medium bg-dark-100 text-dark-600">
+                                    {u.role}
+                                  </span>
+                                </p>
+                                {u.email ? (
+                                  <p className="text-[11px] text-dark-500 font-mono">{u.email}</p>
+                                ) : (
+                                  <p className="text-[10px] text-dark-400 font-mono">
+                                    Session: {u.sessionId.slice(0, 14)}...
+                                  </p>
+                                )}
+                              </div>
+                            </div>
+                          </td>
+
+                          <td className="py-3 pr-4">
+                            {u.mode === 'technical' ? (
+                              <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-indigo-50 border border-indigo-200 text-indigo-700 font-semibold text-[11px]">
+                                <Cpu className="w-3 h-3 text-indigo-600 shrink-0" />
+                                <span>Technical Mode</span>
+                              </span>
+                            ) : (
+                              <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-emerald-50 border border-emerald-200 text-emerald-700 font-semibold text-[11px]">
+                                <Sparkles className="w-3 h-3 text-emerald-600 shrink-0" />
+                                <span>Simple Mode</span>
+                              </span>
+                            )}
+                          </td>
+
+                          <td className="py-3 pr-4">
+                            <Link
+                              href={u.page}
+                              target="_blank"
+                              className="inline-flex items-center gap-1 font-mono text-[11px] text-primary-700 bg-primary-50 hover:bg-primary-100 border border-primary-200 px-2 py-0.5 rounded transition-colors"
+                            >
+                              <span>{u.page}</span>
+                              <ExternalLink className="w-2.5 h-2.5 text-primary-600" />
+                            </Link>
+                          </td>
+
+                          <td className="py-3 pr-4">
+                            <span className="inline-flex items-center gap-1 text-[11px] font-medium text-dark-700 bg-dark-50 border border-dark-200 px-2 py-0.5 rounded">
+                              <Globe className="w-3 h-3 text-dark-500" />
+                              <span className="uppercase">{u.language}</span>
+                            </span>
+                          </td>
+
+                          <td className="py-3 pr-4 text-dark-600 font-mono text-[11px]">
+                            {formatTimeAgo(u.lastSeen)}
+                          </td>
+
+                          <td className="py-3 text-right">
+                            {isLive ? (
+                              <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-emerald-50 text-emerald-800 text-[10px] font-bold border border-emerald-200">
+                                <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
+                                <span>Active</span>
+                              </span>
+                            ) : (
+                              <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-amber-50 text-amber-800 text-[10px] font-medium border border-amber-200">
+                                <span className="w-1.5 h-1.5 rounded-full bg-amber-400" />
+                                <span>Idle</span>
+                              </span>
+                            )}
+                          </td>
+                        </tr>
+                      );
+                    })
+                  )}
+                </tbody>
+              </table>
+            </div>
           </div>
         )}
       </div>
