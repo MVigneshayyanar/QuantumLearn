@@ -33,8 +33,8 @@ if (process.env.NODE_ENV !== 'production') {
 
 // 10 minutes maximum age for keeping a record
 const EVICTION_TTL_MS = 10 * 60 * 1000;
-// 2 minutes for considering a user "Online Right Now"
-const ONLINE_THRESHOLD_MS = 2 * 60 * 1000;
+// 3 minutes for considering a user "Online Right Now" (matches 120s heartbeat interval + jitter)
+const ONLINE_THRESHOLD_MS = 3 * 60 * 1000;
 
 export function recordPresence(data: {
   sessionId: string;

@@ -60,21 +60,33 @@ export function UserPresenceHeartbeat() {
     } catch {}
   };
 
-  // Trigger on initial mount, route change, and explanationMode change
+  // Trigger on initial mount or key context changes, throttled to prevent spamming
   useEffect(() => {
-    sendHeartbeat();
+    // Only send on change if at least 15s elapsed since last ping
+    if (Date.now() - lastPingRef.current > 15 * 1000) {
+      sendHeartbeat();
+    }
   }, [pathname, explanationMode, language, userId]);
 
-  // Periodic 60-second heartbeat while active
+  // Periodic heartbeat with randomized jitter (105s - 135s) to avoid thundering herd on Vercel
   useEffect(() => {
-    const interval = setInterval(() => {
-      sendHeartbeat();
-    }, 60 * 1000); // exactly every 1 minute
+    let timeoutId: NodeJS.Timeout;
+
+    const scheduleNext = () => {
+      // 120s base ± 15s random jitter
+      const nextDelay = 105000 + Math.random() * 30000;
+      timeoutId = setTimeout(() => {
+        sendHeartbeat();
+        scheduleNext();
+      }, nextDelay);
+    };
+
+    scheduleNext();
 
     const handleVisibilityChange = () => {
       if (document.visibilityState === 'visible') {
-        // If it's been more than 30 seconds since the last ping, ping immediately on refocus
-        if (Date.now() - lastPingRef.current > 30 * 1000) {
+        // If it's been more than 60 seconds since the last ping, ping on refocus
+        if (Date.now() - lastPingRef.current > 60 * 1000) {
           sendHeartbeat();
         }
       }
@@ -83,10 +95,10 @@ export function UserPresenceHeartbeat() {
     window.addEventListener('visibilitychange', handleVisibilityChange);
 
     return () => {
-      clearInterval(interval);
+      clearTimeout(timeoutId);
       window.removeEventListener('visibilitychange', handleVisibilityChange);
     };
-  }, [pathname, explanationMode, language, userId]);
+  }, [userId]);
 
   return null; // completely invisible non-rendering component
 }

@@ -24,9 +24,10 @@ export async function POST(req: NextRequest) {
       language: language || 'en',
     });
 
-    // Asynchronously touch lastActiveAt in DB if user is authenticated (fire-and-forget, non-blocking)
+    // Throttle DB write: at 1,000 req/sec, we must not hit Postgres on every heartbeat.
+    // Touch lastActiveAt at most once every 10 minutes or sampled (1 in 10) to protect connection limits.
     const effectiveUserId = userId || req.cookies.get('ql_user_id')?.value;
-    if (effectiveUserId) {
+    if (effectiveUserId && Math.random() < 0.1) {
       prisma.user
         .update({
           where: { id: effectiveUserId },
