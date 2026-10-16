@@ -133,7 +133,7 @@ export default function HomePage() {
                 className="w-full sm:w-auto justify-center flex items-center gap-2 px-5 py-3.5 rounded-xl bg-indigo-50 hover:bg-indigo-100 border border-indigo-200 text-indigo-900 font-semibold text-sm shadow-subtle transition-all cursor-pointer group dark:bg-indigo-950/60 dark:border-indigo-800 dark:text-indigo-200 dark:hover:bg-indigo-900/60 text-center"
               >
                 <Info className="w-4 h-4 text-indigo-600 dark:text-indigo-400" />
-                <span>What is Quantum?</span>
+                <span>{t?.primer?.title?.split(':')[1] || t?.about?.guideTitle || 'What is Quantum?'}</span>
                 <ChevronDown className="w-4 h-4 text-indigo-600 dark:text-indigo-400 group-hover:translate-y-0.5 transition-transform" />
               </a>
             </div>
@@ -358,7 +358,7 @@ export default function HomePage() {
               href="/about#quantum-guide"
               className="px-5 py-2.5 rounded-xl bg-primary-600 hover:bg-primary-700 text-white font-bold text-xs flex items-center gap-2 shadow-sm transition-all shrink-0 self-start sm:self-auto group"
             >
-              <span>Explore Complete Guide in About</span>
+              <span>{t?.about?.guideTitle || 'Explore Complete Guide in About'}</span>
               <ArrowRight className="w-4 h-4 group-hover:translate-x-0.5 transition-transform" />
             </Link>
           </div>
@@ -409,7 +409,7 @@ export default function HomePage() {
                   href={algo.href}
                   className="flex items-center gap-1.5 text-xs font-bold text-primary-600 hover:text-primary-700 dark:text-primary-400 dark:hover:text-primary-300 transition-colors"
                 >
-                  <span>Launch Module</span>
+                  <span>{t?.common?.startLearning || 'Launch Module'}</span>
                   <ArrowRight className="w-4 h-4" />
                 </Link>
               </div>

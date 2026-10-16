@@ -15,7 +15,7 @@ interface AccessibilityContextType {
   reducedMotion: boolean;
   setReducedMotion: (val: boolean) => void;
   language: Language;
-  setLanguage: (lang: Language) => void;
+  setLanguage: (lang: Language, reload?: boolean) => void;
   highContrast: boolean;
   setHighContrast: (val: boolean) => void;
   theme: ThemeMode;
@@ -29,6 +29,34 @@ interface AccessibilityContextType {
 
 const AccessibilityContext = createContext<AccessibilityContextType | undefined>(undefined);
 
+/**
+ * Configure googtrans cookies across localhost and live domain variations
+ * to ensure full-site translation can read and translate the entire site reliably.
+ */
+export function setGoogleTransCookie(targetLang: Language) {
+  if (typeof window === 'undefined') return;
+  const host = window.location.hostname;
+  const isLocalhost = host === 'localhost' || host === '127.0.0.1';
+
+  // 1. Clear previous cookies across domain variations
+  const domains = isLocalhost ? [''] : ['', host, `.${host}`];
+  for (const domain of domains) {
+    const dAttr = domain ? `; domain=${domain}` : '';
+    document.cookie = `googtrans=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/${dAttr}`;
+    document.cookie = `googtrans=; expires=Thu, 01 Jan 1970 00:00:00 UTC${dAttr}`;
+  }
+
+  // 2. Set new cookies if foreign language
+  if (targetLang && targetLang !== 'en') {
+    document.cookie = `googtrans=/en/${targetLang}; path=/; SameSite=Lax;`;
+    document.cookie = `googtrans=/auto/${targetLang}; path=/; SameSite=Lax;`;
+    if (!isLocalhost) {
+      document.cookie = `googtrans=/en/${targetLang}; path=/; domain=${host}; SameSite=Lax;`;
+      document.cookie = `googtrans=/auto/${targetLang}; path=/; domain=.${host}; SameSite=Lax;`;
+    }
+  }
+}
+
 export function AccessibilityProvider({ children }: { children: ReactNode }) {
   const [fontSize, setFontSizeState] = useState<FontSizeOption>('md');
   const [explanationMode, setExplanationModeState] = useState<ExplanationMode>('simple');
@@ -41,10 +69,6 @@ export function AccessibilityProvider({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     if (typeof window !== 'undefined') {
-      // Clear any legacy Google Translate cookies
-      document.cookie = 'googtrans=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;';
-      document.cookie = 'googtrans=; expires=Thu, 01 Jan 1970 00:00:00 UTC;';
-
       const savedFontSize = localStorage.getItem('ql_font_size') as FontSizeOption;
       if (savedFontSize) setFontSizeState(savedFontSize);
 
@@ -62,12 +86,16 @@ export function AccessibilityProvider({ children }: { children: ReactNode }) {
         localStorage.setItem('ql_language', urlLang);
         document.cookie = `NEXT_LOCALE=${urlLang}; path=/; max-age=31536000; SameSite=Lax`;
         document.documentElement.lang = urlLang;
+        document.documentElement.setAttribute('data-lang', urlLang);
+        setGoogleTransCookie(urlLang as Language);
       } else {
         const savedLang = localStorage.getItem('ql_language') as Language;
         if (savedLang && supportedList.includes(savedLang)) {
           setLanguageState(savedLang);
           document.cookie = `NEXT_LOCALE=${savedLang}; path=/; max-age=31536000; SameSite=Lax`;
           document.documentElement.lang = savedLang;
+          document.documentElement.setAttribute('data-lang', savedLang);
+          setGoogleTransCookie(savedLang);
         }
       }
 
@@ -140,13 +168,27 @@ export function AccessibilityProvider({ children }: { children: ReactNode }) {
     announce(`Reduced motion ${val ? 'enabled' : 'disabled'}`);
   };
 
-  const setLanguage = (lang: Language) => {
+  const setLanguage = (lang: Language, reload = false) => {
     setLanguageState(lang);
     if (typeof window !== 'undefined') {
       localStorage.setItem('ql_language', lang);
       document.cookie = `NEXT_LOCALE=${lang}; path=/; max-age=31536000; SameSite=Lax`;
       document.documentElement.lang = lang;
       document.documentElement.setAttribute('data-lang', lang);
+      setGoogleTransCookie(lang);
+      window.dispatchEvent(new CustomEvent('quanbit:language-change', { detail: { language: lang } }));
+      if (reload) {
+        const url = new URL(window.location.href);
+        if (url.searchParams.has('lang')) {
+          url.searchParams.set('lang', lang);
+          window.location.href = url.toString();
+        } else if (url.searchParams.has('locale')) {
+          url.searchParams.set('locale', lang);
+          window.location.href = url.toString();
+        } else {
+          window.location.reload();
+        }
+      }
     }
     announce(`Language set to ${lang}`);
   };

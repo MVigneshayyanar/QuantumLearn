@@ -1,10 +1,11 @@
 import type { Metadata, Viewport } from 'next';
-import { Nunito, Roboto, Fira_Code } from 'next/font/google';
+import { IBM_Plex_Sans, Roboto, Fira_Code } from 'next/font/google';
 import './globals.css';
 
-const nunito = Nunito({
+const ibmPlexSans = IBM_Plex_Sans({
   subsets: ['latin'],
-  variable: '--font-gfg-sans',
+  weight: ['300', '400', '500', '600', '700'],
+  variable: '--font-ibm-plex-sans',
   display: 'swap',
 });
 
@@ -31,6 +32,7 @@ import { AITutorDrawer } from '@/components/ai-tutor/AITutorDrawer';
 import { StudentProvider } from '@/lib/student-context';
 import { StudentIdentityModal } from '@/components/identity/StudentIdentityModal';
 import { SubscriptionModal } from '@/components/subscription/SubscriptionModal';
+import { GoogleTranslator } from '@/components/accessibility/GoogleTranslator';
 import {
   websiteSchema,
   organizationSchema,
@@ -188,7 +190,7 @@ export default function RootLayout({
       lang="en"
       data-font-size="md"
       suppressHydrationWarning
-      className={`${nunito.variable} ${roboto.variable} ${firaCode.variable}`}
+      className={`${ibmPlexSans.variable} ${roboto.variable} ${firaCode.variable}`}
     >
       <head>
         {/* Prevent Flash of Incorrect Theme (FOIT) on initial load */}
@@ -254,6 +256,7 @@ export default function RootLayout({
       </head>
       <body className="font-sans min-h-screen flex flex-col bg-[#FAFAFA] text-[#111827] antialiased pb-16 md:pb-0">
         <AccessibilityProvider>
+          <GoogleTranslator />
           <IntlClientWrapper>
             <StudentProvider>
               {/* Skip link for keyboard accessibility WCAG 2.1 AA */}

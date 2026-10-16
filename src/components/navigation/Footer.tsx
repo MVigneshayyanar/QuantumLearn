@@ -27,7 +27,7 @@ export function Footer() {
               <div className="w-7 h-7 rounded-lg bg-primary-600 text-white flex items-center justify-center">
                 <Atom className="w-4 h-4" />
               </div>
-              <span className="font-bold text-dark-900 dark:text-white text-base">{t.nav.brand}</span>
+              <span className="font-brand font-bold text-dark-900 dark:text-white text-base">{t.nav.brand}</span>
             </Link>
             <p className="text-dark-500 dark:text-dark-400 leading-relaxed">
               {t.footer.brandDesc}

@@ -3,6 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import { useCircuitStore } from '@/lib/state-store';
 import { useAccessibility } from '@/lib/accessibility-context';
+import { translations } from '@/lib/i18n';
 import { GateType, PlacedGate } from '@/lib/types';
 import { generateQasm } from '@/lib/quantum-simulator-core';
 import { BlochSphere3D } from '@/components/bloch-sphere/BlochSphere3D';
@@ -42,7 +43,8 @@ export function CircuitBuilder() {
     runSimulation
   } = useCircuitStore();
 
-  const { announce } = useAccessibility();
+  const { announce, language } = useAccessibility();
+  const t = translations[language];
 
   const [selectedGateType, setSelectedGateType] = useState<GateType>('h');
   const [controlQubit, setControlQubit] = useState<number>(0);
@@ -495,8 +497,8 @@ export function CircuitBuilder() {
           <div className="grid min-h-0 grid-cols-1 gap-2 sm:grid-cols-2 lg:h-[250px]">
             <div className="bg-white rounded-xl border border-dark-200 p-2.5 sm:p-3 shadow-xs space-y-1 flex min-h-0 flex-col">
               <div className="flex items-center justify-between">
-                <h3 className="font-bold text-[11px] text-dark-900">Measurement Probabilities</h3>
-                <span className="text-[9px] text-dark-500 font-mono">{shots} shots</span>
+                <h3 className="font-bold text-[11px] text-dark-900">{t?.simulator?.histogram || 'Measurement Probabilities'}</h3>
+                <span className="text-[9px] text-dark-500 font-mono">{shots} {t?.simulator?.shots || 'shots'}</span>
               </div>
               <div className="relative mx-auto mt-1 min-h-0 w-full max-w-[280px] flex-1">
                 <ResponsiveContainer width="100%" height="100%">
@@ -614,8 +616,8 @@ export function CircuitBuilder() {
         <div className="flex items-center gap-2">
           <Sparkles className="w-4 h-4 text-primary-600" />
           <div>
-            <h1 className="text-base sm:text-lg font-semibold text-dark-900">Quantum Circuit Builder</h1>
-            <p className="text-xs text-dark-500">Compact circuit editor and simulator</p>
+            <h1 className="text-base sm:text-lg font-semibold text-dark-900">{t?.simulator?.title || 'Quantum Circuit Builder'}</h1>
+            <p className="text-xs text-dark-500">{t?.simulator?.subtitle || 'Compact circuit editor and simulator'}</p>
           </div>
         </div>
 
@@ -684,7 +686,7 @@ export function CircuitBuilder() {
               title="Clear all gates from circuit"
             >
               <RotateCcw className="w-3.5 h-3.5" />
-              <span>Clear</span>
+              <span>{t?.simulator?.resetCircuit || 'Clear'}</span>
             </button>
 
             <button
@@ -692,7 +694,7 @@ export function CircuitBuilder() {
               className="flex items-center gap-1 px-3 py-2 rounded-lg border border-dark-200 hover:bg-dark-50 text-dark-700 font-medium text-xs transition-colors"
             >
               <Code className="w-3.5 h-3.5 text-primary-600" />
-              <span>Export</span>
+              <span>{t?.simulator?.exportQasm || 'Export'}</span>
             </button>
           </div>
         </div>

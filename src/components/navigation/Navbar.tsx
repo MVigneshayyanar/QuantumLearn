@@ -95,7 +95,7 @@ export function Navbar() {
               <Atom className="w-4 h-4 sm:w-5 sm:h-5 animate-pulse" />
             </div>
             <div>
-              <span className="font-bold text-base sm:text-lg text-dark-900 dark:text-white tracking-tight whitespace-nowrap">
+              <span className="font-brand font-bold text-base sm:text-lg text-dark-900 dark:text-white tracking-tight whitespace-nowrap">
                 {t.nav.brand}
               </span>
               <span className="hidden sm:inline-block ml-2 text-xs font-semibold px-2.5 py-0.5 rounded-full bg-primary-50 dark:bg-primary-950/70 text-primary-700 dark:text-primary-300 border border-primary-100 dark:border-primary-800/60 whitespace-nowrap shrink-0">
