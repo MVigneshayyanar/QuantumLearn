@@ -167,7 +167,12 @@ export default function AdminPortalPage() {
     if (isAdmin) {
       fetchUsers();
       fetchPresence();
-      const interval = setInterval(fetchPresence, 10000); // Live poll presence every 10 seconds
+      const interval = setInterval(() => {
+        // Only poll if admin browser tab is currently active and focused
+        if (typeof document !== 'undefined' && document.visibilityState === 'visible') {
+          fetchPresence();
+        }
+      }, 10000); // Live poll presence every 10 seconds
       return () => clearInterval(interval);
     } else {
       setIsLoading(false);
