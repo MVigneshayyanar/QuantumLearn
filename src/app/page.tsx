@@ -23,7 +23,8 @@ import {
   ChevronDown,
   ChevronUp,
   Building,
-  ExternalLink
+  ExternalLink,
+  Rocket
 } from 'lucide-react';
 import { BlochSphere3D } from '@/components/bloch-sphere/BlochSphere3D';
 import { MathRenderer } from '@/components/math/MathRenderer';
@@ -444,7 +445,7 @@ export default function HomePage() {
             <div className="pt-4 border-t border-dark-100 dark:border-dark-800 flex items-center justify-between">
               <span className="text-xs text-dark-400 italic">Adding more soon…</span>
               <span className="flex items-center gap-1.5 text-xs font-bold text-amber-600 dark:text-amber-400">
-                <span>🚀</span>
+                <Rocket className="w-3.5 h-3.5" />
                 <span>Stay tuned</span>
               </span>
             </div>

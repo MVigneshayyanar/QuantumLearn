@@ -13,6 +13,7 @@ import {
   Copy,
   Check,
   Sparkles,
+  Lightbulb,
 } from 'lucide-react';
 import { QuantumCircuitCodePanel } from '@/components/circuit/QuantumCircuitCodePanel';
 import { ResponsiveContainer, BarChart, Bar, XAxis, YAxis, Tooltip, Cell } from 'recharts';
@@ -489,7 +490,10 @@ export function CircuitBuilder() {
             </div>
 
             <div className="pt-2 border-t border-dark-100 flex items-center justify-between text-[11px] text-dark-500">
-              <span>💡 Click to place gate · Right-click/Del to remove</span>
+              <span className="flex items-center gap-1.5">
+                <Lightbulb className="w-3.5 h-3.5 text-amber-500 shrink-0" />
+                <span>Click to place gate · Right-click/Del to remove</span>
+              </span>
               <span>{numQubits} qubits</span>
             </div>
           </div>

@@ -70,9 +70,9 @@ function sanitizeSocraticFeedback(text: string): string {
     .replace(/Place\s+(?:a\s+)?(?:CNOT|CX)\s+gates?/gi, 'Apply the controlled-NOT entanglement coupling')
     .replace(/Place\s+(?:a\s+)?(?:CZ|controlled-Z)\s+gates?/gi, 'Apply the controlled phase transformation')
     .replace(/Next Step:\s*(?:Place|Apply)\s+/gi, 'Quantum Concept: ')
-    .replace(/•?\s*Next Step:\s*/gi, '• ➜ Quantum Concept: ')
-    .replace(/•?\s*Step Done:\s*/gi, '• ✓ Progress: ')
-    .replace(/•?\s*Quick Clue:\s*/gi, '• 💡 Socratic Clue: ');
+    .replace(/•?\s*Next Step:\s*/gi, '• Quantum Concept: ')
+    .replace(/•?\s*Step Done:\s*/gi, '• Progress: ')
+    .replace(/•?\s*Quick Clue:\s*/gi, '• Socratic Clue: ');
 }
 
 export const dynamic = 'force-dynamic';
@@ -249,9 +249,9 @@ CRITICAL TEACHING RULES (ABSOLUTE):
 4. SOCRATIC INQUIRY: Formulate a guiding question that helps the student deduce which unitary operation is needed from first principles.
 
 Format STRICTLY as 3 bullet points (under 70 words total):
-• ✓ Progress: <1 concise sentence on physical state achieved so far>
-• ➜ Quantum Concept: <1-2 sentences explaining what physical state change is needed next>
-• 💡 Socratic Clue: <1 targeted question to guide their unitary choice without naming the gate>
+• Progress: <1 concise sentence on physical state achieved so far>
+• Quantum Concept: <1-2 sentences explaining what physical state change is needed next>
+• Socratic Clue: <1 targeted question to guide their unitary choice without naming the gate>
 
 Use LaTeX ($...$) for states like $|0\\rangle$, $|1\\rangle$, $|+\\rangle$, $|-\\rangle$.`
           : `You are Schrödinger AI, an expert Quantum Computing AI Tutor on the QuanBit platform.

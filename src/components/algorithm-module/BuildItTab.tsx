@@ -14,6 +14,7 @@ import {
   AlertTriangle,
   Target,
   Lightbulb,
+  Check,
   RotateCcw,
   Bot,
   HelpCircle,
@@ -68,7 +69,7 @@ function FormattedAIFeedback({ message }: { message: string }) {
     <div className="space-y-2.5">
       {lines.map((rawLine, idx) => {
         // Strip leading bullets/stars/numbers
-        const clean = rawLine.replace(/^[•\-\*\d\.]+\s*/, '').trim();
+        const clean = rawLine.replace(/^[•\-\*\d\.\s]+/, '').trim();
         const lower = clean.toLowerCase();
 
         // 1. Progress / What is done
@@ -76,7 +77,6 @@ function FormattedAIFeedback({ message }: { message: string }) {
           lower.startsWith('progress') ||
           lower.startsWith('**progress') ||
           lower.startsWith('step done') ||
-          lower.startsWith('✓') ||
           lower.startsWith('completed');
 
         // 2. Quantum Concept / Physical mechanism
@@ -84,7 +84,6 @@ function FormattedAIFeedback({ message }: { message: string }) {
           lower.startsWith('quantum concept') ||
           lower.startsWith('**quantum concept') ||
           lower.startsWith('concept') ||
-          lower.startsWith('➜') ||
           lower.startsWith('next step');
 
         // 3. Socratic Inquiry / Clue / Guiding question
@@ -94,21 +93,20 @@ function FormattedAIFeedback({ message }: { message: string }) {
           lower.startsWith('socratic inquiry') ||
           lower.startsWith('**socratic inquiry') ||
           lower.startsWith('quick clue') ||
-          lower.startsWith('💡') ||
           lower.includes('inquiry:');
 
         if (isProgress) {
           const bodyText = cleanFeedbackBody(
             clean,
-            /^(?:✓\s*)?(?:\*\*)?(?:Progress|Step Done|Completed)(?:\*\*)?:?/i
+            /^(?:\*\*)?(?:Progress|Step Done|Completed)(?:\*\*)?:?/i
           );
           return (
             <div
               key={idx}
               className="px-3.5 py-2.5 rounded-xl bg-emerald-50/90 border border-emerald-200/90 flex items-start gap-2.5 shadow-2xs text-xs"
             >
-              <div className="w-5 h-5 rounded-md bg-emerald-600 text-white flex items-center justify-center shrink-0 mt-0.5 text-[10px] font-bold">
-                ✓
+              <div className="w-5 h-5 rounded-md bg-emerald-600 text-white flex items-center justify-center shrink-0 mt-0.5">
+                <Check className="w-3 h-3 text-white stroke-[2.5]" />
               </div>
               <div className="text-emerald-950 leading-relaxed font-sans min-w-0">
                 <span className="font-bold text-emerald-900 mr-1.5">Progress:</span>
@@ -121,15 +119,15 @@ function FormattedAIFeedback({ message }: { message: string }) {
         if (isConcept) {
           const bodyText = cleanFeedbackBody(
             clean,
-            /^(?:➜\s*)?(?:\*\*)?(?:Quantum Concept|Concept|Next Step)(?:\*\*)?:?/i
+            /^(?:\*\*)?(?:Quantum Concept|Concept|Next Step)(?:\*\*)?:?/i
           );
           return (
             <div
               key={idx}
               className="px-3.5 py-2.5 rounded-xl bg-amber-50/90 border border-amber-300 flex items-start gap-2.5 shadow-2xs text-xs"
             >
-              <div className="w-5 h-5 rounded-md bg-amber-600 text-white flex items-center justify-center shrink-0 mt-0.5 text-[10px] font-bold">
-                ➜
+              <div className="w-5 h-5 rounded-md bg-amber-600 text-white flex items-center justify-center shrink-0 mt-0.5">
+                <ArrowRight className="w-3 h-3 text-white stroke-[2.5]" />
               </div>
               <div className="text-amber-950 leading-relaxed font-sans min-w-0">
                 <span className="font-bold text-amber-900 mr-1.5">Quantum Concept:</span>
@@ -142,15 +140,15 @@ function FormattedAIFeedback({ message }: { message: string }) {
         if (isClue) {
           const bodyText = cleanFeedbackBody(
             clean,
-            /^(?:💡\s*)?(?:\*\*)?(?:Socratic Clue|Socratic Inquiry|Quick Clue)(?:\*\*)?:?/i
+            /^(?:\*\*)?(?:Socratic Clue|Socratic Inquiry|Quick Clue)(?:\*\*)?:?/i
           );
           return (
             <div
               key={idx}
               className="px-3.5 py-2.5 rounded-xl bg-indigo-50/90 border border-indigo-200 flex items-start gap-2.5 shadow-2xs text-xs"
             >
-              <div className="w-5 h-5 rounded-md bg-indigo-600 text-white flex items-center justify-center shrink-0 mt-0.5 text-[10px] font-bold">
-                💡
+              <div className="w-5 h-5 rounded-md bg-indigo-600 text-white flex items-center justify-center shrink-0 mt-0.5">
+                <Lightbulb className="w-3 h-3 text-white stroke-[2.5]" />
               </div>
               <div className="text-indigo-950 leading-relaxed font-medium min-w-0">
                 <span className="font-bold text-indigo-900 mr-1.5">Socratic Inquiry:</span>
@@ -223,9 +221,9 @@ Socratic Inquiry: "${evaluation.currentClue}"
 PEDAGOGICAL CONSTRAINT: Socratic coaching only.
 NEVER name any gate (do NOT mention H, X, CNOT, CZ, etc.) or wire index.
 Return 3 SHORT lines (max 50 words total):
-• ✓ Progress: <physical state achieved>
-• ➜ Quantum Concept: <physical transformation needed next>
-• 💡 Socratic Clue: <inquiry question guiding learner to deduce the unitary matrix>`;
+• Progress: <physical state achieved>
+• Quantum Concept: <physical transformation needed next>
+• Socratic Clue: <inquiry question guiding learner to deduce the unitary matrix>`;
 
       const res = await fetch('/api/ai-tutor', {
         method: 'POST',
@@ -365,9 +363,9 @@ Socratic Inquiry: "${evaluation.currentClue}"
 PEDAGOGICAL CONSTRAINT: Socratic coaching only.
 NEVER name any gate (do NOT mention H, X, CNOT, CZ, etc.) or wire index.
 Return 3 SHORT lines (max 50 words total):
-• ✓ Progress: <physical state achieved>
-• ➜ Quantum Concept: <physical transformation needed next>
-• 💡 Socratic Clue: <inquiry question guiding learner to deduce the unitary matrix>`;
+• Progress: <physical state achieved>
+• Quantum Concept: <physical transformation needed next>
+• Socratic Clue: <inquiry question guiding learner to deduce the unitary matrix>`;
 
           const res = await fetch('/api/ai-tutor', {
             method: 'POST',
@@ -713,7 +711,10 @@ Return 3 SHORT lines (max 50 words total):
               </div>
 
               <div className="mt-2 pt-1 border-t border-dark-100 flex items-center justify-between text-[10px] text-dark-500">
-                <span>💡 Drag or click gates to wires. Right-click any gate to delete.</span>
+                <span className="flex items-center gap-1.5">
+                  <Lightbulb className="w-3.5 h-3.5 text-amber-500 shrink-0" />
+                  <span>Drag or click gates to wires. Right-click any gate to delete.</span>
+                </span>
                 <span className="font-mono font-semibold">{gates.length} gates placed</span>
               </div>
             </div>
@@ -906,7 +907,7 @@ Return 3 SHORT lines (max 50 words total):
                   <div className="w-full p-4 rounded-xl bg-emerald-50 border border-emerald-300 flex items-center justify-between gap-3">
                     <div className="flex items-center gap-2 min-w-0 text-left">
                       <div className="w-8 h-8 rounded-md bg-emerald-600 text-white flex items-center justify-center shrink-0 font-bold text-sm">
-                        ✓
+                        <Check className="w-5 h-5 text-white" />
                       </div>
                       <div className="truncate">
                         <h4 className="font-bold text-sm text-emerald-950 truncate">Circuit 100% Verified!</h4>

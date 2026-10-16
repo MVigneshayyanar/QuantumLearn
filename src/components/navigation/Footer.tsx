@@ -5,7 +5,7 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useAccessibility } from '@/lib/accessibility-context';
 import { translations } from '@/lib/i18n';
-import { Atom, ShieldCheck, Heart, ExternalLink } from 'lucide-react';
+import { Atom, ShieldCheck, Heart, ExternalLink, Check } from 'lucide-react';
 
 export function Footer() {
   const pathname = usePathname();
@@ -126,10 +126,10 @@ export function Footer() {
                 {t.footer.dualModeDesc}
               </p>
               <div className="space-y-1 text-[11px] text-dark-400 dark:text-dark-500">
-                <p>✓ Quantum Simulator — Qiskit, Cirq, PennyLane</p>
-                <p>✓ 3D Bloch Sphere — Three.js WebGL</p>
-                <p>✓ Schrödinger AI — Socratic hints</p>
-                <p>✓ OpenQASM 2.0 &amp; 3.0 export</p>
+                <p className="flex items-center gap-1.5"><Check className="w-3.5 h-3.5 text-primary-600 dark:text-primary-400 shrink-0" /> Quantum Simulator — Qiskit, Cirq, PennyLane</p>
+                <p className="flex items-center gap-1.5"><Check className="w-3.5 h-3.5 text-primary-600 dark:text-primary-400 shrink-0" /> 3D Bloch Sphere — Three.js WebGL</p>
+                <p className="flex items-center gap-1.5"><Check className="w-3.5 h-3.5 text-primary-600 dark:text-primary-400 shrink-0" /> Schrödinger AI — Socratic hints</p>
+                <p className="flex items-center gap-1.5"><Check className="w-3.5 h-3.5 text-primary-600 dark:text-primary-400 shrink-0" /> OpenQASM 2.0 &amp; 3.0 export</p>
               </div>
             </div>
           </div>

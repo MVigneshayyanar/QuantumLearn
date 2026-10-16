@@ -753,8 +753,9 @@ export default function InstructorDashboard() {
                   <h2 className="text-base sm:text-lg font-bold text-dark-900 truncate">{selectedStudent.name}</h2>
                   <p className="text-xs text-dark-500 font-mono truncate">{selectedStudent.email}</p>
                   <div className="flex flex-wrap items-center gap-2 mt-0.5">
-                    <span className="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-primary-50 text-primary-700 border border-primary-200">
-                      🔥 {selectedStudent.streakDays} Day Streak
+                    <span className="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-primary-50 text-primary-700 border border-primary-200 inline-flex items-center gap-1">
+                      <Flame className="w-3 h-3 text-amber-500" />
+                      <span>{selectedStudent.streakDays} Day Streak</span>
                     </span>
                     <span className="text-[10px] text-dark-400">
                       Joined {new Date(selectedStudent.createdAt).toLocaleDateString()}

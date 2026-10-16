@@ -122,7 +122,14 @@ export default function BlochSpherePage() {
                 : 'bg-dark-50 border-dark-200 text-dark-700 hover:bg-dark-100'
             }`}
           >
-            {isEntangledDemo ? '✓ Entangled State' : 'Entanglement Demo'}
+            {isEntangledDemo ? (
+              <span className="flex items-center gap-1">
+                <Check className="w-3.5 h-3.5" />
+                <span>Entangled State</span>
+              </span>
+            ) : (
+              'Entanglement Demo'
+            )}
           </button>
         </div>
       </div>
@@ -237,7 +244,14 @@ export default function BlochSpherePage() {
                         : 'bg-dark-50 text-dark-700 border-dark-200 hover:bg-dark-100'
                     }`}
                   >
-                    {showSweepArcsToggle ? '✓ Arcs' : 'Show Arcs'}
+                    {showSweepArcsToggle ? (
+                      <span className="flex items-center gap-1">
+                        <Check className="w-3 h-3" />
+                        <span>Arcs</span>
+                      </span>
+                    ) : (
+                      'Show Arcs'
+                    )}
                   </button>
                 </div>
                 <button

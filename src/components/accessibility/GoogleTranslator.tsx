@@ -2,7 +2,7 @@
 
 import { useEffect, useRef } from 'react';
 import { usePathname } from 'next/navigation';
-import { useAccessibility, setGoogleTransCookie } from '@/lib/accessibility-context';
+import { useAccessibility, setGoogleTransCookie, restoreGoogleTranslateOriginal } from '@/lib/accessibility-context';
 
 declare global {
   interface Window {
@@ -50,34 +50,24 @@ export function GoogleTranslator() {
 
   // 3. Reactively trigger translation when platform language changes
   const applyTranslation = (targetLang: string) => {
-    const langCode = targetLang === 'en' ? '' : targetLang;
-
     // Update HTML attributes
     document.documentElement.lang = targetLang;
     document.documentElement.setAttribute('data-lang', targetLang);
+
+    if (targetLang === 'en') {
+      restoreGoogleTranslateOriginal();
+      return;
+    }
+
+    const langCode = targetLang;
     setGoogleTransCookie(targetLang as any);
 
     // Trigger the Google Translate select dropdown in the DOM
     const triggerSelect = () => {
       const select = document.querySelector('.goog-te-combo') as HTMLSelectElement | null;
       if (select) {
-        if (targetLang === 'en') {
-          if (select.value !== '') {
-            select.value = '';
-            select.dispatchEvent(new Event('change', { bubbles: true }));
-          }
-          // Also try to find restore iframe or button if open
-          try {
-            const iframe = document.querySelector('iframe.goog-te-banner-frame') as HTMLIFrameElement | null;
-            if (iframe && iframe.contentDocument) {
-              const closeBtn = iframe.contentDocument.querySelector('.goog-close-link') as HTMLElement | null;
-              if (closeBtn) closeBtn.click();
-            }
-          } catch (e) {}
-        } else {
-          select.value = langCode;
-          select.dispatchEvent(new Event('change', { bubbles: true }));
-        }
+        select.value = langCode;
+        select.dispatchEvent(new Event('change', { bubbles: true }));
         return true;
       }
       return false;
@@ -98,7 +88,19 @@ export function GoogleTranslator() {
     applyTranslation(language);
   }, [language]);
 
-  // 4. Ensure translation is preserved upon client-side Next.js route navigation
+  // 4. Listen to instant language change event for immediate English restore
+  useEffect(() => {
+    const handleLangEvent = (e: Event) => {
+      const customEvent = e as CustomEvent<{ language: string }>;
+      if (customEvent.detail?.language === 'en') {
+        restoreGoogleTranslateOriginal();
+      }
+    };
+    window.addEventListener('quanbit:language-change', handleLangEvent);
+    return () => window.removeEventListener('quanbit:language-change', handleLangEvent);
+  }, []);
+
+  // 5. Ensure translation is preserved upon client-side Next.js route navigation (foreign languages only)
   useEffect(() => {
     if (language !== 'en') {
       const timer = setTimeout(() => {

@@ -400,9 +400,9 @@ Socratic Inquiry: "${currentClue}"
 PEDAGOGICAL REQUIREMENT: Socratic coaching only.
 NEVER name any gate (do NOT mention H, X, CNOT, CZ, etc.) or wire index.
 Return 3 SHORT lines (max 50 words total):
-• ✓ Progress: <physical state achieved>
-• ➜ Quantum Concept: <physical transformation needed next>
-• 💡 Socratic Clue: <inquiry question guiding learner to deduce the unitary matrix>`;
+• Progress: <physical state achieved>
+• Quantum Concept: <physical transformation needed next>
+• Socratic Clue: <inquiry question guiding learner to deduce the unitary matrix>`;
 
   return {
     isCorrect,

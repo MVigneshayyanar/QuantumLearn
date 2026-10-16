@@ -87,19 +87,19 @@ export function generateSocraticResponse(
   ) {
     if (query.includes('evaluation') || query.includes('evaluations') || query.includes('how many')) {
       return mode === 'simple'
-        ? `Think of this as comparing two search strategies: one checks inputs one at a time, while the quantum method lets interference compare a whole set of possibilities together.\n\nWhat does the algorithm learn from the final interference pattern: an individual function value, or a global property of the function?\n\n💡 Retry clue: focus on whether the algorithm needs to inspect every input separately.`
-        : `Compare the classical need to inspect inputs individually with the quantum use of a global interference pattern.\n\nWhich kind of information is encoded by the final amplitude pattern: one input value, or a property shared by the function as a whole?\n\n💡 Retry clue: reason about the purpose of the oracle query before counting queries.`;
+        ? `Think of this as comparing two search strategies: one checks inputs one at a time, while the quantum method lets interference compare a whole set of possibilities together.\n\nWhat does the algorithm learn from the final interference pattern: an individual function value, or a global property of the function?\n\nRetry clue: focus on whether the algorithm needs to inspect every input separately.`
+        : `Compare the classical need to inspect inputs individually with the quantum use of a global interference pattern.\n\nWhich kind of information is encoded by the final amplitude pattern: one input value, or a property shared by the function as a whole?\n\nRetry clue: reason about the purpose of the oracle query before counting queries.`;
     }
 
     if (query.includes('ancilla') || query.includes('helper') || query.includes('|-⟩') || query.includes('|->')) {
       return mode === 'simple'
-        ? `Here's the secret to the helper qubit! 🔑\n\nWhen the ancilla is in the $|-\\rangle = (|0\\rangle - |1\\rangle)/\\sqrt{2}$ state, applying the CNOT gate doesn't just change the ancilla — it causes a **negative phase $(-1)^{f(x)}$ to kick back** into the input control qubit!\n\nWithout initializing the ancilla into $|-\\rangle$, phase kickback would not occur, and interference couldn't happen.\n\n🎯 *Retry Tip:* Look for the answer describing how the negative sign $(-1)$ is transferred or kicked back to the control qubit!`
+        ? `Here's the secret to the helper qubit!\n\nWhen the ancilla is in the $|-\\rangle = (|0\\rangle - |1\\rangle)/\\sqrt{2}$ state, applying the CNOT gate doesn't just change the ancilla — it causes a **negative phase $(-1)^{f(x)}$ to kick back** into the input control qubit!\n\nWithout initializing the ancilla into $|-\\rangle$, phase kickback would not occur, and interference couldn't happen.\n\n*Retry Tip:* Look for the answer describing how the negative sign $(-1)$ is transferred or kicked back to the control qubit!`
         : `### Phase Kickback Mechanics\n\nThe ancilla qubit is prepared in $|-\\rangle = H|1\\rangle = \\frac{1}{\\sqrt{2}}(|0\\rangle - |1\\rangle)$. Applying the oracle unitary $U_f|x\\rangle|y\\rangle = |x\\rangle|y \\oplus f(x)\\rangle$ yields:\n$$U_f|x\\rangle|-\\rangle = (-1)^{f(x)}|x\\rangle|-\\rangle$$\nBecause $|-\\rangle$ is an eigenstate of the Pauli $X$ gate with eigenvalue $-1$, the function evaluation $f(x)$ kicks back as a global/relative phase $(-1)^{f(x)}$ onto the control register $|x\\rangle$.`;
     }
 
     if (query.includes('interference') || query.includes('hadamard on input') || query.includes('yields |0>')) {
       return mode === 'simple'
-        ? `Let's look at what the final Hadamard gate does! 🌈\n\nAfter phase kickback, the input qubit holds the phase information. The final Hadamard gate creates **quantum interference**:\n- If the function is **constant**, the amplitudes add up constructively at $|0\\rangle$ (100% chance).\n- If the function is **balanced**, the amplitudes cancel out at $|0\\rangle$ and constructively interfere at $|1\\rangle$ (100% chance).\n\n🎯 *Retry Tip:* If you measure $|0\\rangle$, the function is guaranteed to be **constant**; if $|1\\rangle$, it is **balanced**!`
+        ? `Let's look at what the final Hadamard gate does!\n\nAfter phase kickback, the input qubit holds the phase information. The final Hadamard gate creates **quantum interference**:\n- If the function is **constant**, the amplitudes add up constructively at $|0\\rangle$ (100% chance).\n- If the function is **balanced**, the amplitudes cancel out at $|0\\rangle$ and constructively interfere at $|1\\rangle$ (100% chance).\n\n*Retry Tip:* If you measure $|0\\rangle$, the function is guaranteed to be **constant**; if $|1\\rangle$, it is **balanced**!`
         : `### Constructive & Destructive Interference\n\nThe post-oracle state is $\\frac{1}{\\sqrt{2}}\\left[(-1)^{f(0)}|0\\rangle + (-1)^{f(1)}|1\\rangle\\right]$.\nApplying a final Hadamard yields:\n$$H \\left(\\frac{(-1)^{f(0)}|0\\rangle + (-1)^{f(1)}|1\\rangle}{\\sqrt{2}}\\right) = \\frac{(-1)^{f(0)}+(-1)^{f(1)}}{2}|0\\rangle + \\frac{(-1)^{f(0)}-(-1)^{f(1)}}{2}|1\\rangle$$\n- For constant functions ($f(0)=f(1)$), destructive interference zeroes out $|1\\rangle$, yielding $|0\\rangle$ with probability 1.\n- For balanced functions ($f(0) \\neq f(1)$), destructive interference zeroes out $|0\\rangle$, yielding $|1\\rangle$ with probability 1.`;
     }
   }
@@ -108,7 +108,7 @@ export function generateSocraticResponse(
   if (context.activeMisconception && MISCONCEPTION_GUIDES[context.activeMisconception as MisconceptionTag]) {
     const guide = MISCONCEPTION_GUIDES[context.activeMisconception as MisconceptionTag];
     if (mode === 'simple') {
-      return `Let's break down this idea together! 🌟\n\n**${guide.name}**\n\n${guide.hintSimple}\n\n*Think about this:* If you perform an experiment, what do you think would happen to the state immediately after you look at it?`;
+      return `Let's break down this idea together!\n\n**${guide.name}**\n\n${guide.hintSimple}\n\n*Think about this:* If you perform an experiment, what do you think would happen to the state immediately after you look at it?`;
     } else {
       return `### Schrödinger AI Analysis: ${guide.name}\n\n${guide.hintTechnical}\n\n**Guiding Question:** How does this unitary transformation preserve normalization and unitarity across the tensor product space?`;
     }
@@ -306,7 +306,7 @@ export function generateSocraticCircuitFeedback(params: {
 
   // 5. General Fallback with structural diffs
   const diffNotice = params.structuralDiff?.[0] || 'Check the sequence and types of gates placed';
-  return `### 💡 Schrödinger AI Socratic Guidance
+  return `### Schrödinger AI Socratic Guidance
 
 **Reviewing your quantum circuit:**
 ${diffNotice}.

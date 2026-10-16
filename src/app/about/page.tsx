@@ -27,7 +27,10 @@ import {
   Star,
   Quote,
   Mail,
-  Building
+  Building,
+  AlertTriangle,
+  Check,
+  X
 } from 'lucide-react';
 import { MathRenderer } from '@/components/math/MathRenderer';
 
@@ -368,8 +371,9 @@ export default function AboutPage() {
                     <p className="text-dark-600 leading-relaxed">
                       In quantum computing, measuring a qubit forces its delicate cloud of possibilities to collapse into a single definite result (0 or 1).
                     </p>
-                    <div className="p-3 bg-amber-50 rounded-lg border border-amber-200 text-amber-900 font-medium">
-                      ⚠️ Once measured, the quantum phase is destroyed; you now have a normal classical bit.
+                    <div className="p-3 bg-amber-50 rounded-lg border border-amber-200 text-amber-900 font-medium flex items-start gap-2">
+                      <AlertTriangle className="w-4 h-4 text-amber-600 shrink-0 mt-0.5" />
+                      <span>Once measured, the quantum phase is destroyed; you now have a normal classical bit.</span>
                     </div>
                   </div>
                 </div>
@@ -521,11 +525,17 @@ export default function AboutPage() {
                       Quantum computers don&apos;t just test all answers blindly. They use <strong>wave interference</strong>:
                     </p>
                     <div className="p-3 bg-emerald-50 rounded-lg border border-emerald-200 text-emerald-950 space-y-1">
-                      <span className="font-bold block">✓ Right Answers Grow:</span>
+                      <span className="font-bold flex items-center gap-1.5">
+                        <Check className="w-4 h-4 text-emerald-600 shrink-0" />
+                        Right Answers Grow:
+                      </span>
                       <span>Like two ocean waves meeting and making a giant wave, correct answers amplify each other!</span>
                     </div>
                     <div className="p-3 bg-rose-50 rounded-lg border border-rose-200 text-rose-950 space-y-1">
-                      <span className="font-bold block">✗ Wrong Answers Disappear:</span>
+                      <span className="font-bold flex items-center gap-1.5">
+                        <X className="w-4 h-4 text-rose-600 shrink-0" />
+                        Wrong Answers Disappear:
+                      </span>
                       <span>Like noise-canceling headphones, wrong answers cancel each other out!</span>
                     </div>
                   </div>

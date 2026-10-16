@@ -305,13 +305,18 @@ export function Navbar() {
                               : 'bg-primary-100 dark:bg-primary-950/70 text-primary-800 dark:text-primary-300 border border-transparent dark:border-primary-800/60'
                           }`}
                         >
-                          {isAdmin
-                            ? 'System Administrator'
-                            : isInstructor
-                            ? 'Verified Instructor'
-                            : isPremium
-                            ? '👑 Pro Student Learner'
-                            : 'Student Learner'}
+                          {isAdmin ? (
+                            'System Administrator'
+                          ) : isInstructor ? (
+                            'Verified Instructor'
+                          ) : isPremium ? (
+                            <span className="inline-flex items-center gap-1">
+                              <Crown className="w-3 h-3 text-amber-500" />
+                              <span>Pro Student Learner</span>
+                            </span>
+                          ) : (
+                            'Student Learner'
+                          )}
                         </span>
                       </div>
                     </div>
