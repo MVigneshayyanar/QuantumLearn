@@ -10,6 +10,10 @@ const nextConfig = {
         source: "/api/py/:path*",
         destination: "/api/index",
       },
+      {
+        source: "/assets/:path*",
+        destination: "/sirraya_assets/:path*",
+      },
     ];
   },
 
