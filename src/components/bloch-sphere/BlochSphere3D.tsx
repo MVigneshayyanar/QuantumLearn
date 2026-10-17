@@ -706,7 +706,7 @@ export function BlochSphere3D({
               <line x1={c} y1={c - r} x2={c} y2={c + r} stroke="#2563eb" strokeWidth={2} />
               <line x1={c - r} y1={c} x2={c + r} y2={c} stroke="#ef4444" strokeWidth={2} />
               <text x={c} y={c - r - 6} textAnchor="middle" fontSize={11} fontWeight="bold" fill="#2563eb">|0⟩ (+Z)</text>
-              <text x={c} y={c + r + 13} textAnchor="middle" fontSize={11} fontWeight="bold" fill="#0284c7">|1⟩ (-Z)</text>
+              <text x={c} y={c + r + 13} textAnchor="middle" fontSize={11} fontWeight="bold" fill="#4F46E5">|1⟩ (-Z)</text>
               {bloch && bloch.is_pure && (
                 <>
                   <line x1={c} y1={c} x2={px} y2={py} stroke="#6366f1" strokeWidth={3} strokeLinecap="round" />

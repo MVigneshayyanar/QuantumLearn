@@ -44,11 +44,26 @@
         background: #fafafa !important;
         color: #0f172a !important;
         height: 100%;
-        overflow-x: hidden;
+        width: 100%;
+        overflow: hidden !important;
+        overflow-x: hidden !important;
+        overflow-y: hidden !important;
       }
       #root {
-        min-height: 100vh;
+        height: 100%;
+        min-height: 100%;
         background: #fafafa !important;
+        overflow: hidden !important;
+        overflow-x: hidden !important;
+      }
+
+      /* Hide any horizontal scrollbars and ensure box-sizing */
+      * {
+        box-sizing: border-box;
+      }
+      *::-webkit-scrollbar:horizontal {
+        display: none !important;
+        height: 0 !important;
       }
 
       /* Core Design Tokens Overrides */
@@ -62,7 +77,7 @@
         --tx: #0f172a !important;
         --mu: #475569 !important;
         --fa: #64748b !important;
-        --ac: #0284c7 !important;
+        --ac: #4F46E5 !important;
         --ac2: #7c3aed !important;
         background: var(--bg) !important;
         color: var(--tx) !important;
@@ -73,8 +88,12 @@
         background: #ffffff !important;
         border-bottom: 1px solid #e2e8f0 !important;
       }
-      .qa-brand small {
-        color: #64748b !important;
+      /* Hide Brand / Logo / Progress Bar */
+      .qa-brand {
+        display: none !important;
+      }
+      .qa-tabs.main {
+        margin-left: 0 !important;
       }
       .qa-tabs.main button {
         color: #475569 !important;
@@ -84,13 +103,13 @@
         color: #0f172a !important;
       }
       .qa-tabs button.on {
-        color: #0284c7 !important;
-        background: #e0f2fe !important;
+        color: #4F46E5 !important;
+        background: #EEF2FF !important;
       }
       .qa-tabs:not(.main) button.on {
         background: none !important;
-        border-bottom: 2px solid #0284c7 !important;
-        color: #0284c7 !important;
+        border-bottom: 2px solid #4F46E5 !important;
+        color: #4F46E5 !important;
       }
 
       /* Sidebar & Lesson Index */
@@ -109,13 +128,13 @@
         color: #0f172a !important;
       }
       .qa-item.on {
-        background: #e0f2fe !important;
-        color: #0369a1 !important;
+        background: #EEF2FF !important;
+        color: #4F46E5 !important;
         box-shadow: inset 0 0 0 1px #7dd3fc !important;
         font-weight: 600 !important;
       }
       .qa-item.on small {
-        color: #0284c7 !important;
+        color: #4F46E5 !important;
       }
       .qa-dot {
         border-color: #cbd5e1 !important;
@@ -128,16 +147,106 @@
         color: #15803d !important;
       }
 
-      /* Main Reading Surface */
+      /* Quantum Academy Root & Layout Containers - STRICT ZERO SIDE SCROLLING */
+      .qa {
+        height: 100vh !important;
+        max-width: 100vw !important;
+        overflow: hidden !important;
+        overflow-x: hidden !important;
+      }
+      .qa-body {
+        overflow: hidden !important;
+        overflow-x: hidden !important;
+        max-width: 100% !important;
+        flex: 1;
+        min-height: 0;
+      }
+      .qa-side {
+        overflow-y: auto !important;
+        overflow-x: hidden !important;
+        flex: none;
+      }
       .qa-main {
+        flex: 1 !important;
+        overflow-y: auto !important;
+        overflow-x: hidden !important;
+        max-width: 100% !important;
+        width: 100% !important;
+        box-sizing: border-box !important;
+        scroll-behavior: smooth;
         background: #fafafa !important;
         color: #0f172a !important;
+      }
+
+      /* Lesson & Page Containers - Perfectly Centered, Zero Horizontal Overflow */
+      .qa-lesson, .qa-page {
+        max-width: 860px !important;
+        width: 100% !important;
+        margin: 0 auto !important;
+        box-sizing: border-box !important;
+        overflow-x: hidden !important;
+      }
+      .qa-page.wide {
+        max-width: 1100px !important;
+      }
+
+      /* Eliminate Negative Margins on Figures */
+      .qa-fig {
+        margin-left: 0 !important;
+        margin-right: 0 !important;
+        max-width: 100% !important;
+        box-sizing: border-box !important;
+      }
+
+      /* Responsive Prose, Math, Tables & Code */
+      .qa-prose {
+        max-width: 100% !important;
+        overflow-wrap: break-word !important;
+        word-wrap: break-word !important;
+        box-sizing: border-box !important;
+      }
+      .qa-prose table {
+        max-width: 100% !important;
+        width: 100% !important;
+        overflow-x: auto !important;
+        display: block !important;
+        box-sizing: border-box !important;
+      }
+      .qa-prose pre {
+        max-width: 100% !important;
+        overflow-x: auto !important;
+        box-sizing: border-box !important;
+      }
+      .qa-prose .katex-display {
+        max-width: 100% !important;
+        overflow-x: auto !important;
+        overflow-y: hidden !important;
+        box-sizing: border-box !important;
+      }
+      .qa-widget {
+        max-width: 100% !important;
+        box-sizing: border-box !important;
+      }
+
+      /* Clean subtle vertical scrollbars */
+      .qa-main::-webkit-scrollbar, .qa-side::-webkit-scrollbar {
+        width: 8px;
+      }
+      .qa-main::-webkit-scrollbar-track, .qa-side::-webkit-scrollbar-track {
+        background: transparent;
+      }
+      .qa-main::-webkit-scrollbar-thumb, .qa-side::-webkit-scrollbar-thumb {
+        background: #cbd5e1;
+        border-radius: 4px;
+      }
+      .qa-main::-webkit-scrollbar-thumb:hover, .qa-side::-webkit-scrollbar-thumb:hover {
+        background: #94a3b8;
       }
       .qa-lesson h1, .qa-page h1 {
         color: #0f172a !important;
       }
       .qa-kicker {
-        color: #0284c7 !important;
+        color: #4F46E5 !important;
       }
       .qa-lead {
         color: #475569 !important;
@@ -160,7 +269,7 @@
         color: #334155 !important;
       }
       .qa-prose a {
-        color: #0284c7 !important;
+        color: #4F46E5 !important;
       }
       .qa-prose code {
         background: #f1f5f9 !important;
@@ -258,9 +367,9 @@
         border-color: #94a3b8 !important;
       }
       .qa-btn.on {
-        background: #e0f2fe !important;
-        border-color: #0284c7 !important;
-        color: #0369a1 !important;
+        background: #EEF2FF !important;
+        border-color: #4F46E5 !important;
+        color: #4F46E5 !important;
       }
       .qa-select {
         background: #ffffff !important;
@@ -302,8 +411,8 @@
         color: #0f172a !important;
       }
       .qa-qchip.on {
-        background: #e0f2fe !important;
-        border-color: #0284c7 !important;
+        background: #EEF2FF !important;
+        border-color: #4F46E5 !important;
       }
       .qa-qchip span {
         color: #64748b !important;
@@ -327,7 +436,7 @@
       }
       .qa-opt:hover:not(:disabled) {
         background: #f0f9ff !important;
-        border-color: #0284c7 !important;
+        border-color: #4F46E5 !important;
       }
       .qa-quiz {
         background: #ffffff !important;
@@ -380,7 +489,7 @@
       }
       .hw-tab.on {
         background: #f0f9ff !important;
-        border-color: #0284c7 !important;
+        border-color: #4F46E5 !important;
       }
       .hw-sections {
         background: #ffffff !important;
@@ -402,7 +511,7 @@
       .hw-cur {
         background: #f0f9ff !important;
         border-color: #bae6fd !important;
-        color: #0369a1 !important;
+        color: #4F46E5 !important;
       }
       .hw-cur b {
         color: #0f172a !important;
@@ -420,7 +529,7 @@
         color: #334155 !important;
       }
       .hw-step.on {
-        background: #0284c7 !important;
+        background: #4F46E5 !important;
         color: #ffffff !important;
       }
       .hw-step.done {

@@ -210,10 +210,10 @@ export function CharacterizationLabView() {
                   <Line 
                     type="monotone" 
                     dataKey="measured" 
-                    stroke="#0284c7" 
+                    stroke="#4F46E5" 
                     strokeWidth={1} 
                     strokeDasharray="2 2"
-                    dot={{ r: 2.5, fill: '#0284c7' }}
+                    dot={{ r: 2.5, fill: '#4F46E5' }}
                     name="measured"
                   />
                 </LineChart>

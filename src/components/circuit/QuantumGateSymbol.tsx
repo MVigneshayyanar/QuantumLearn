@@ -168,7 +168,7 @@ export const GATE_CONFIGS: Record<GateType, GateVisualConfig> = {
     name: 'Z',
     desc: 'Pauli-Z: Relative phase flip (|1⟩ → -|1⟩)',
     bgColor: 'bg-[#BAE6FD]',
-    textColor: 'text-[#0369A1]',
+    textColor: 'text-[#4F46E5]',
     borderColor: 'border-[#7DD3FC]',
     renderSymbol: () => <span className="font-bold font-sans">Z</span>
   },
@@ -177,7 +177,7 @@ export const GATE_CONFIGS: Record<GateType, GateVisualConfig> = {
     name: 'S',
     desc: 'Phase Gate: +90° rotation around Z axis',
     bgColor: 'bg-[#BAE6FD]',
-    textColor: 'text-[#0369A1]',
+    textColor: 'text-[#4F46E5]',
     borderColor: 'border-[#7DD3FC]',
     renderSymbol: () => <span className="font-bold font-sans">S</span>
   },
@@ -186,7 +186,7 @@ export const GATE_CONFIGS: Record<GateType, GateVisualConfig> = {
     name: 'T',
     desc: 'T Gate: +45° (π/4) phase shift',
     bgColor: 'bg-[#BAE6FD]',
-    textColor: 'text-[#0369A1]',
+    textColor: 'text-[#4F46E5]',
     borderColor: 'border-[#7DD3FC]',
     renderSymbol: () => <span className="font-bold font-sans">T</span>
   },
