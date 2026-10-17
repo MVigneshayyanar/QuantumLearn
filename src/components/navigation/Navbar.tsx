@@ -94,7 +94,7 @@ export function Navbar() {
               <Atom className="w-4 h-4 sm:w-5 sm:h-5 animate-pulse" />
             </div>
             <div>
-              <span className="font-bold text-base sm:text-lg text-dark-900 dark:text-white tracking-tight whitespace-nowrap">
+              <span className="font-brand font-bold text-base sm:text-lg text-dark-900 dark:text-white tracking-tight whitespace-nowrap">
                 {t.nav.brand}
               </span>
               <span className="hidden sm:inline-block ml-2 text-xs font-semibold px-2.5 py-0.5 rounded-full bg-primary-50 dark:bg-primary-950/70 text-primary-700 dark:text-primary-300 border border-primary-100 dark:border-primary-800/60 whitespace-nowrap shrink-0">
@@ -304,13 +304,18 @@ export function Navbar() {
                               : 'bg-primary-100 dark:bg-primary-950/70 text-primary-800 dark:text-primary-300 border border-transparent dark:border-primary-800/60'
                           }`}
                         >
-                          {isAdmin
-                            ? 'System Administrator'
-                            : isInstructor
-                            ? 'Verified Instructor'
-                            : isPremium
-                            ? '👑 Pro Student Learner'
-                            : 'Student Learner'}
+                          {isAdmin ? (
+                            'System Administrator'
+                          ) : isInstructor ? (
+                            'Verified Instructor'
+                          ) : isPremium ? (
+                            <span className="inline-flex items-center gap-1">
+                              <Crown className="w-3 h-3 text-amber-500" />
+                              <span>Pro Student Learner</span>
+                            </span>
+                          ) : (
+                            'Student Learner'
+                          )}
                         </span>
                       </div>
                     </div>

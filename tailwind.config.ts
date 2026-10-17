@@ -48,8 +48,9 @@ const config: Config = {
       },
       fontFamily: {
         sans: [
+          "var(--font-ibm-plex-sans)",
           "var(--font-gfg-sans)",
-          "Nunito",
+          "'IBM Plex Sans'",
           "-apple-system",
           "BlinkMacSystemFont",
           "Segoe UI",
@@ -57,6 +58,13 @@ const config: Config = {
           "Oxygen",
           "Ubuntu",
           "Cantarell",
+          "sans-serif",
+        ],
+        brand: [
+          "var(--font-ibm-plex-sans)",
+          "'IBM Plex Sans'",
+          "-apple-system",
+          "BlinkMacSystemFont",
           "sans-serif",
         ],
         article: [

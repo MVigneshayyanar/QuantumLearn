@@ -23,7 +23,8 @@ import {
   ChevronDown,
   ChevronUp,
   Building,
-  ExternalLink
+  ExternalLink,
+  Rocket
 } from 'lucide-react';
 import { BlochSphere3D } from '@/components/bloch-sphere/BlochSphere3D';
 import { MathRenderer } from '@/components/math/MathRenderer';
@@ -133,7 +134,7 @@ export default function HomePage() {
                 className="w-full sm:w-auto justify-center flex items-center gap-2 px-5 py-3.5 rounded-xl bg-indigo-50 hover:bg-indigo-100 border border-indigo-200 text-indigo-900 font-semibold text-sm shadow-subtle transition-all cursor-pointer group dark:bg-indigo-950/60 dark:border-indigo-800 dark:text-indigo-200 dark:hover:bg-indigo-900/60 text-center"
               >
                 <Info className="w-4 h-4 text-indigo-600 dark:text-indigo-400" />
-                <span>What is Quantum?</span>
+                <span>{t?.primer?.title?.split(':')[1] || t?.about?.guideTitle || 'What is Quantum?'}</span>
                 <ChevronDown className="w-4 h-4 text-indigo-600 dark:text-indigo-400 group-hover:translate-y-0.5 transition-transform" />
               </a>
             </div>
@@ -358,7 +359,7 @@ export default function HomePage() {
               href="/concepts"
               className="px-5 py-2.5 rounded-xl bg-primary-600 hover:bg-primary-700 text-white font-bold text-xs flex items-center gap-2 shadow-sm transition-all shrink-0 self-start sm:self-auto group"
             >
-              <span>Explore Quantum Academy in Concepts</span>
+              <span>Explore Complete Guide in About</span>
               <ArrowRight className="w-4 h-4 group-hover:translate-x-0.5 transition-transform" />
             </Link>
           </div>
@@ -409,7 +410,7 @@ export default function HomePage() {
                   href={algo.href}
                   className="flex items-center gap-1.5 text-xs font-bold text-primary-600 hover:text-primary-700 dark:text-primary-400 dark:hover:text-primary-300 transition-colors"
                 >
-                  <span>Launch Module</span>
+                  <span>{t?.common?.startLearning || 'Launch Module'}</span>
                   <ArrowRight className="w-4 h-4" />
                 </Link>
               </div>
@@ -444,7 +445,7 @@ export default function HomePage() {
             <div className="pt-4 border-t border-dark-100 dark:border-dark-800 flex items-center justify-between">
               <span className="text-xs text-dark-400 italic">Adding more soon…</span>
               <span className="flex items-center gap-1.5 text-xs font-bold text-amber-600 dark:text-amber-400">
-                <span>🚀</span>
+                <Rocket className="w-3.5 h-3.5" />
                 <span>Stay tuned</span>
               </span>
             </div>
@@ -530,7 +531,7 @@ export default function HomePage() {
             <p className="text-xs text-dark-600 dark:text-dark-300 leading-relaxed">
               Explore single-qubit statevectors parameterized by polar angle <MathRenderer text="$\theta$" /> and azimuthal phase <MathRenderer text="$\phi$" />. When qubits become entangled in multi-qubit circuits, QuanBit computes the reduced density matrix purity <MathRenderer text="$\text{Tr}(\rho^2)$" /> in real time, visually collapsing the 3D vector to the origin when purity hits 0.5.
             </p>
-            <Link href="/bloch-sphere" className="inline-flex items-center gap-1 text-xs font-bold text-primary-600 dark:text-primary-400 hover:underline">
+            <Link href="/bloch-sphere" prefetch={false} className="inline-flex items-center gap-1 text-xs font-bold text-primary-600 dark:text-primary-400 hover:underline">
               <span>Launch 3D Visualizer</span>
               <ArrowRight className="w-3.5 h-3.5" />
             </Link>
@@ -546,7 +547,7 @@ export default function HomePage() {
             <p className="text-xs text-dark-600 dark:text-dark-300 leading-relaxed">
               Design quantum circuits via drag-and-drop and generate verified code for IBM Qiskit, Google Cirq, Xanadu PennyLane, and OpenQASM 2.0/3.0. QuanBit automatically normalizes endianness differences between Qiskit (little-endian) and Cirq (big-endian).
             </p>
-            <Link href="/simulator" className="inline-flex items-center gap-1 text-xs font-bold text-primary-600 dark:text-primary-400 hover:underline">
+            <Link href="/simulator" prefetch={false} className="inline-flex items-center gap-1 text-xs font-bold text-primary-600 dark:text-primary-400 hover:underline">
               <span>Open Circuit Builder</span>
               <ArrowRight className="w-3.5 h-3.5" />
             </Link>
@@ -562,7 +563,7 @@ export default function HomePage() {
             <p className="text-xs text-dark-600 dark:text-dark-300 leading-relaxed">
               Master Grover&apos;s quantum search (<MathRenderer text="$\mathcal{O}(\sqrt{N})$" /> speedup), Deutsch-Jozsa quantum parallelism, quantum state teleportation, and superdense coding through structured 6-stage interactive pedagogy with verifiable SHA-256 certificates.
             </p>
-            <Link href="/learn/grover" className="inline-flex items-center gap-1 text-xs font-bold text-primary-600 dark:text-primary-400 hover:underline">
+            <Link href="/learn/grover" prefetch={false} className="inline-flex items-center gap-1 text-xs font-bold text-primary-600 dark:text-primary-400 hover:underline">
               <span>Study Grover Algorithm</span>
               <ArrowRight className="w-3.5 h-3.5" />
             </Link>
@@ -583,10 +584,10 @@ export default function HomePage() {
           </div>
 
           <div className="flex flex-wrap items-center gap-4 font-semibold text-primary-600 dark:text-primary-400">
-            <Link href="/blog" className="hover:underline">Blog &amp; Guides</Link>
-            <Link href="/faq" className="hover:underline">FAQ</Link>
-            <Link href="/contact" className="hover:underline">Contact</Link>
-            <Link href="/verify" className="hover:underline">Verify Certificate</Link>
+            <Link href="/blog" prefetch={false} className="hover:underline">Blog &amp; Guides</Link>
+            <Link href="/faq" prefetch={false} className="hover:underline">FAQ</Link>
+            <Link href="/contact" prefetch={false} className="hover:underline">Contact</Link>
+            <Link href="/verify" prefetch={false} className="hover:underline">Verify Certificate</Link>
           </div>
         </div>
       </section>

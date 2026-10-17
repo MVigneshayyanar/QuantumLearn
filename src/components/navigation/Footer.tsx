@@ -5,7 +5,7 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useAccessibility } from '@/lib/accessibility-context';
 import { translations } from '@/lib/i18n';
-import { Atom, ShieldCheck, Heart, ExternalLink } from 'lucide-react';
+import { Atom, ShieldCheck, Heart, ExternalLink, Check } from 'lucide-react';
 
 export function Footer() {
   const pathname = usePathname();
@@ -27,7 +27,7 @@ export function Footer() {
               <div className="w-7 h-7 rounded-lg bg-primary-600 text-white flex items-center justify-center">
                 <Atom className="w-4 h-4" />
               </div>
-              <span className="font-bold text-dark-900 dark:text-white text-base">{t.nav.brand}</span>
+              <span className="font-brand font-bold text-dark-900 dark:text-white text-base">{t.nav.brand}</span>
             </Link>
             <p className="text-dark-500 dark:text-dark-400 leading-relaxed">
               {t.footer.brandDesc}
@@ -55,22 +55,22 @@ export function Footer() {
             <h2 className="font-semibold text-dark-900 dark:text-white mb-3 text-xs uppercase tracking-wide">{t.footer.modulesTitle}</h2>
             <ul className="space-y-2">
               <li>
-                <Link href="/learn/deutsch-jozsa" className="hover:text-primary-600 transition-colors">
+                <Link href="/learn/deutsch-jozsa" prefetch={false} className="hover:text-primary-600 transition-colors">
                   {t.algorithms.deutschJozsa.title} — {t.algorithms.deutschJozsa.category}
                 </Link>
               </li>
               <li>
-                <Link href="/learn/grover" className="hover:text-primary-600 transition-colors">
+                <Link href="/learn/grover" prefetch={false} className="hover:text-primary-600 transition-colors">
                   {t.algorithms.grover.title} — {t.algorithms.grover.category}
                 </Link>
               </li>
               <li>
-                <Link href="/learn/teleportation" className="hover:text-primary-600 transition-colors">
+                <Link href="/learn/teleportation" prefetch={false} className="hover:text-primary-600 transition-colors">
                   {t.algorithms.teleportation.title} — {t.algorithms.teleportation.category}
                 </Link>
               </li>
               <li>
-                <Link href="/learn/superdense-coding" className="hover:text-primary-600 transition-colors">
+                <Link href="/learn/superdense-coding" prefetch={false} className="hover:text-primary-600 transition-colors">
                   {t.algorithms.superdenseCoding.title} — {t.algorithms.superdenseCoding.category}
                 </Link>
               </li>
@@ -82,33 +82,38 @@ export function Footer() {
             <h2 className="font-semibold text-dark-900 dark:text-white mb-3 text-xs uppercase tracking-wide">{t.footer.resourcesTitle}</h2>
             <ul className="space-y-2">
               <li>
-                <Link href="/simulator" className="hover:text-primary-600 dark:hover:text-primary-400 transition-colors">
+                <Link href="/simulator" prefetch={false} className="hover:text-primary-600 dark:hover:text-primary-400 transition-colors">
                   {t.nav.simulator}
                 </Link>
               </li>
               <li>
-                <Link href="/bloch-sphere" className="hover:text-primary-600 dark:hover:text-primary-400 transition-colors">
+                <Link href="/bloch-sphere" prefetch={false} className="hover:text-primary-600 dark:hover:text-primary-400 transition-colors">
                   {t.nav.blochSphere}
                 </Link>
               </li>
               <li>
-                <Link href="/practice" className="hover:text-primary-600 dark:hover:text-primary-400 transition-colors">
+                <Link href="/practice" prefetch={false} className="hover:text-primary-600 dark:hover:text-primary-400 transition-colors">
                   {t.nav.practice}
                 </Link>
               </li>
               <li>
-                <Link href="/faq" className="hover:text-primary-600 dark:hover:text-primary-400 transition-colors">
+                <Link href="/faq" prefetch={false} className="hover:text-primary-600 dark:hover:text-primary-400 transition-colors">
                   {t.nav.faq}
                 </Link>
               </li>
               <li>
-                <Link href="/contact" className="hover:text-primary-600 dark:hover:text-primary-400 transition-colors">
+                <Link href="/contact" prefetch={false} className="hover:text-primary-600 dark:hover:text-primary-400 transition-colors">
                   {t.nav.contact}
                 </Link>
               </li>
               <li>
+<<<<<<< HEAD
                 <Link href="/concepts" className="hover:text-primary-600 dark:hover:text-primary-400 transition-colors font-medium text-primary-700 dark:text-primary-400">
                   {t.nav.concepts || 'Concepts'}
+=======
+                <Link href="/about" prefetch={false} className="hover:text-primary-600 dark:hover:text-primary-400 transition-colors font-medium text-primary-700 dark:text-primary-400">
+                  {t.nav.about}
+>>>>>>> 59ff7279a36e5ad62fdf6e9153b1677a0867f057
                 </Link>
               </li>
             </ul>
@@ -126,10 +131,10 @@ export function Footer() {
                 {t.footer.dualModeDesc}
               </p>
               <div className="space-y-1 text-[11px] text-dark-400 dark:text-dark-500">
-                <p>✓ Quantum Simulator — Qiskit, Cirq, PennyLane</p>
-                <p>✓ 3D Bloch Sphere — Three.js WebGL</p>
-                <p>✓ Schrödinger AI — Socratic hints</p>
-                <p>✓ OpenQASM 2.0 &amp; 3.0 export</p>
+                <p className="flex items-center gap-1.5"><Check className="w-3.5 h-3.5 text-primary-600 dark:text-primary-400 shrink-0" /> Quantum Simulator — Qiskit, Cirq, PennyLane</p>
+                <p className="flex items-center gap-1.5"><Check className="w-3.5 h-3.5 text-primary-600 dark:text-primary-400 shrink-0" /> 3D Bloch Sphere — Three.js WebGL</p>
+                <p className="flex items-center gap-1.5"><Check className="w-3.5 h-3.5 text-primary-600 dark:text-primary-400 shrink-0" /> Schrödinger AI — Socratic hints</p>
+                <p className="flex items-center gap-1.5"><Check className="w-3.5 h-3.5 text-primary-600 dark:text-primary-400 shrink-0" /> OpenQASM 2.0 &amp; 3.0 export</p>
               </div>
             </div>
           </div>

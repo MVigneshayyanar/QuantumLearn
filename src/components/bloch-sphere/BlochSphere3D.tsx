@@ -15,6 +15,8 @@ interface BlochSphere3DProps {
   showSweepArcs?: boolean;
   activeSweep?: 'theta' | 'phi' | 'both' | null;
   compact?: boolean;
+  selectedPole?: string | null;
+  onSelectPole?: (poleId: string) => void;
 }
 
 // 6 3D axis anchors positioned cleanly outside the unit sphere (R = 1.0, label R = 1.55)
@@ -25,13 +27,14 @@ interface BlochSphere3DProps {
 // -X = Phase (|-) -> (-1.55, 0, 0)
 // +Y = Imaginary (|i>) -> (0, 0, 1.55)
 // -Y = Imaginary (|-i>) -> (0, 0, -1.55)
+// Badges styled with crisp solid borders only and NO blurry shadows/rings
 const AXIS_ANCHORS = [
-  { id: 'z-pos', label: '$|0\\rangle$', axis: '+Z', pos: new THREE.Vector3(0, 1.55, 0), badgeClass: 'text-primary-800 dark:text-primary-300 border-primary-300 dark:border-primary-700/60' },
-  { id: 'z-neg', label: '$|1\\rangle$', axis: '-Z', pos: new THREE.Vector3(0, -1.55, 0), badgeClass: 'text-sky-800 dark:text-sky-300 border-sky-300 dark:border-sky-700/60' },
-  { id: 'x-pos', label: '$|+\\rangle$', axis: '+X', pos: new THREE.Vector3(1.55, 0, 0), badgeClass: 'text-indigo-800 dark:text-indigo-300 border-indigo-300 dark:border-indigo-700/60' },
-  { id: 'x-neg', label: '$|-\\rangle$', axis: '-X', pos: new THREE.Vector3(-1.55, 0, 0), badgeClass: 'text-purple-800 dark:text-purple-300 border-purple-300 dark:border-purple-700/60' },
-  { id: 'y-pos', label: '$|i\\rangle$', axis: '+Y', pos: new THREE.Vector3(0, 0, 1.55), badgeClass: 'text-emerald-800 dark:text-emerald-300 border-emerald-300 dark:border-emerald-700/60' },
-  { id: 'y-neg', label: '$|-i\\rangle$', axis: '-Y', pos: new THREE.Vector3(0, 0, -1.55), badgeClass: 'text-teal-800 dark:text-teal-300 border-teal-300 dark:border-teal-700/60' }
+  { id: 'z-pos', label: '$|0\\rangle$', axis: '+Z', pos: new THREE.Vector3(0, 1.55, 0), badgeClass: 'bg-blue-600 text-white border-2 border-blue-200' },
+  { id: 'z-neg', label: '$|1\\rangle$', axis: '-Z', pos: new THREE.Vector3(0, -1.55, 0), badgeClass: 'bg-sky-600 text-white border-2 border-sky-200' },
+  { id: 'x-pos', label: '$|+\\rangle$', axis: '+X', pos: new THREE.Vector3(1.55, 0, 0), badgeClass: 'bg-rose-600 text-white border-2 border-rose-200' },
+  { id: 'x-neg', label: '$|-\\rangle$', axis: '-X', pos: new THREE.Vector3(-1.55, 0, 0), badgeClass: 'bg-pink-600 text-white border-2 border-pink-200' },
+  { id: 'y-pos', label: '$|i\\rangle$', axis: '+Y', pos: new THREE.Vector3(0, 0, 1.55), badgeClass: 'bg-emerald-600 text-white border-2 border-emerald-200' },
+  { id: 'y-neg', label: '$|-i\\rangle$', axis: '-Y', pos: new THREE.Vector3(0, 0, -1.55), badgeClass: 'bg-teal-600 text-white border-2 border-teal-200' }
 ];
 
 export function BlochSphere3D({
@@ -42,7 +45,9 @@ export function BlochSphere3D({
   interactive = true,
   showSweepArcs = false,
   activeSweep = null,
-  compact = false
+  compact = false,
+  selectedPole = null,
+  onSelectPole
 }: BlochSphere3DProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const rendererRef = useRef<THREE.WebGLRenderer | null>(null);
@@ -175,28 +180,127 @@ export function BlochSphere3D({
       equatorPoints.push(new THREE.Vector3(Math.cos(angle) * sphereRadius, 0, Math.sin(angle) * sphereRadius));
     }
     equatorGeo.setFromPoints(equatorPoints);
-    const ringMat = new THREE.LineBasicMaterial({ color: 0xa5b4fc, linewidth: 1.3, transparent: true, opacity: 0.6 });
+    const ringMat = new THREE.LineBasicMaterial({ color: 0x818cf8, linewidth: 2, transparent: true, opacity: 0.85 });
     const equatorLine = new THREE.Line(equatorGeo, ringMat);
     scene.add(equatorLine);
 
-    // 4. Coordinate axes (slender lines through origin)
+    // 4. Coordinate axes with high-contrast highlighting colors & directional arrow cones
     const axisGroup = new THREE.Group();
-    const axisMat = new THREE.LineBasicMaterial({ color: 0x64748b, linewidth: 1, transparent: true, opacity: 0.75 });
-    const axisLimit = 1.25;
+    const axisLimit = 1.30;
+    const arrowConeRadius = 0.04;
+    const arrowConeHeight = 0.10;
 
-    const addAxisLine = (from: THREE.Vector3, to: THREE.Vector3) => {
+    // Helper to create an axis with distinct color, solid line, and directional cones
+    const createAxis = (dir: THREE.Vector3, colorHex: number) => {
+      // Main axis line
+      const from = dir.clone().multiplyScalar(-axisLimit);
+      const to = dir.clone().multiplyScalar(axisLimit);
       const lineGeo = new THREE.BufferGeometry().setFromPoints([from, to]);
-      axisGroup.add(new THREE.Line(lineGeo, axisMat));
+      const lineMat = new THREE.LineBasicMaterial({
+        color: colorHex,
+        linewidth: 2.5,
+        transparent: false,
+        opacity: 1.0
+      });
+      axisGroup.add(new THREE.Line(lineGeo, lineMat));
+
+      // Positive arrow cone
+      const coneGeo = new THREE.ConeGeometry(arrowConeRadius, arrowConeHeight, 20);
+      const coneMat = new THREE.MeshStandardMaterial({
+        color: colorHex,
+        emissive: colorHex,
+        emissiveIntensity: 0.45,
+        roughness: 0.25
+      });
+      const posCone = new THREE.Mesh(coneGeo, coneMat);
+      posCone.position.copy(dir.clone().multiplyScalar(axisLimit));
+      posCone.quaternion.setFromUnitVectors(new THREE.Vector3(0, 1, 0), dir.clone().normalize());
+      axisGroup.add(posCone);
+
+      // Negative arrow cone
+      const negCone = new THREE.Mesh(coneGeo, coneMat);
+      negCone.position.copy(dir.clone().multiplyScalar(-axisLimit));
+      negCone.quaternion.setFromUnitVectors(new THREE.Vector3(0, 1, 0), dir.clone().multiplyScalar(-1).normalize());
+      axisGroup.add(negCone);
     };
 
-    // Z Axis (vertical in Three.js)
-    addAxisLine(new THREE.Vector3(0, -axisLimit, 0), new THREE.Vector3(0, axisLimit, 0));
-    // X Axis (horizontal in Three.js)
-    addAxisLine(new THREE.Vector3(-axisLimit, 0, 0), new THREE.Vector3(axisLimit, 0, 0));
-    // Y Axis (depth in Three.js)
-    addAxisLine(new THREE.Vector3(0, 0, -axisLimit), new THREE.Vector3(0, 0, axisLimit));
+    // Z-Axis (Vertical: |0> <-> |1>) -> Vibrant Electric Blue (0x2563eb)
+    createAxis(new THREE.Vector3(0, 1, 0), 0x2563eb);
+    // X-Axis (Horizontal: |+> <-> |->) -> Vibrant Coral / Red (0xef4444)
+    createAxis(new THREE.Vector3(1, 0, 0), 0xef4444);
+    // Y-Axis (Depth: |i> <-> |-i>) -> Vibrant Emerald Green (0x10b981)
+    createAxis(new THREE.Vector3(0, 0, 1), 0x10b981);
 
     scene.add(axisGroup);
+
+    // 5. Cardinal Point Markers on the Sphere Surface (R = 1.0)
+    // Highlighting glowing point spheres at the 6 fundamental quantum basis poles
+    const pointGroup = new THREE.Group();
+    const POLE_MARKERS = [
+      { id: 'z-pos', pos: new THREE.Vector3(0, sphereRadius, 0), color: 0x2563eb },       // North |0> (+Z)
+      { id: 'z-neg', pos: new THREE.Vector3(0, -sphereRadius, 0), color: 0x0284c7 },      // South |1> (-Z)
+      { id: 'x-pos', pos: new THREE.Vector3(sphereRadius, 0, 0), color: 0xef4444 },       // |+> (+X)
+      { id: 'x-neg', pos: new THREE.Vector3(-sphereRadius, 0, 0), color: 0xf43f5e },      // |-> (-X)
+      { id: 'y-pos', pos: new THREE.Vector3(0, 0, sphereRadius), color: 0x10b981 },       // |i> (+Y)
+      { id: 'y-neg', pos: new THREE.Vector3(0, 0, -sphereRadius), color: 0x0d9488 },      // |-i> (-Y)
+    ];
+
+    const poleSphereGeo = new THREE.SphereGeometry(0.048, 20, 20);
+    POLE_MARKERS.forEach((pole) => {
+      const isSelected = selectedPole === pole.id;
+      const poleMat = new THREE.MeshStandardMaterial({
+        color: pole.color,
+        emissive: pole.color,
+        emissiveIntensity: isSelected ? 1.0 : 0.65,
+        roughness: 0.2
+      });
+      const poleMesh = new THREE.Mesh(poleSphereGeo, poleMat);
+      poleMesh.position.copy(pole.pos);
+      if (isSelected) {
+        poleMesh.scale.set(1.4, 1.4, 1.4);
+      }
+      pointGroup.add(poleMesh);
+
+      // Outer highlighting ring around the pole point
+      const ringGeo = new THREE.RingGeometry(0.065, 0.082, 24);
+      const ringMat = new THREE.MeshBasicMaterial({
+        color: isSelected ? 0xfbbf24 : pole.color,
+        side: THREE.DoubleSide,
+        transparent: true,
+        opacity: isSelected ? 1.0 : 0.85
+      });
+      const ringMesh = new THREE.Mesh(ringGeo, ringMat);
+      ringMesh.position.copy(pole.pos.clone().multiplyScalar(1.002));
+      ringMesh.lookAt(pole.pos.clone().multiplyScalar(2));
+      pointGroup.add(ringMesh);
+
+      // If selected pole, add high-visibility target ring on sphere surface that persists until unselected
+      if (isSelected) {
+        const targetRingGeo = new THREE.RingGeometry(0.105, 0.135, 32);
+        const targetRingMat = new THREE.MeshBasicMaterial({
+          color: 0xffffff,
+          side: THREE.DoubleSide,
+          transparent: true,
+          opacity: 0.95
+        });
+        const targetRingMesh = new THREE.Mesh(targetRingGeo, targetRingMat);
+        targetRingMesh.position.copy(pole.pos.clone().multiplyScalar(1.004));
+        targetRingMesh.lookAt(pole.pos.clone().multiplyScalar(2));
+        pointGroup.add(targetRingMesh);
+      }
+    });
+
+    // Origin center marker
+    const originGeo = new THREE.SphereGeometry(0.038, 16, 16);
+    const originMat = new THREE.MeshStandardMaterial({
+      color: 0x334155,
+      emissive: 0x1e293b,
+      roughness: 0.4
+    });
+    const originMesh = new THREE.Mesh(originGeo, originMat);
+    pointGroup.add(originMesh);
+
+    scene.add(pointGroup);
 
     // State Vector Needle Group
     const needleGroup = new THREE.Group();
@@ -213,10 +317,10 @@ export function BlochSphere3D({
       const endpoint = new THREE.Vector3(tx, ty, tz);
       const length = endpoint.length();
 
-      // Needle shaft line
+      // Needle shaft line (Vibrant Electric Violet-Indigo)
       const needlePoints = [new THREE.Vector3(0, 0, 0), endpoint];
       const needleGeo = new THREE.BufferGeometry().setFromPoints(needlePoints);
-      const needleMat = new THREE.LineBasicMaterial({ color: 0x4f46e5, linewidth: 3 });
+      const needleMat = new THREE.LineBasicMaterial({ color: 0x6366f1, linewidth: 3.5 });
       const needleLine = new THREE.Line(needleGeo, needleMat);
       needleGroup.add(needleLine);
 
@@ -229,36 +333,53 @@ export function BlochSphere3D({
         const rotation = new THREE.Quaternion().setFromUnitVectors(new THREE.Vector3(0, 1, 0), direction);
 
         const coneGeo = new THREE.ConeGeometry(arrowRadius, arrowHeight, 24);
-        const coneMat = new THREE.MeshStandardMaterial({ color: 0x4f46e5, roughness: 0.3 });
+        const coneMat = new THREE.MeshStandardMaterial({
+          color: 0x6366f1,
+          emissive: 0x4f46e5,
+          emissiveIntensity: 0.45,
+          roughness: 0.25
+        });
         const coneMesh = new THREE.Mesh(coneGeo, coneMat);
         coneMesh.position.copy(arrowPosition);
         coneMesh.quaternion.copy(rotation);
         needleGroup.add(coneMesh);
       }
 
-      // State-vector endpoint sphere
-      const tipGeo = new THREE.SphereGeometry(0.04, 20, 20);
+      // State-vector endpoint sphere — Highlighting glowing Gold/Amber
+      const tipGeo = new THREE.SphereGeometry(0.055, 24, 24);
       const tipMat = new THREE.MeshStandardMaterial({
-        color: 0x4f46e5,
-        emissive: 0x4f46e5,
-        emissiveIntensity: 0.2
+        color: 0xf59e0b,
+        emissive: 0xf59e0b,
+        emissiveIntensity: 0.85,
+        roughness: 0.2
       });
       const tipMesh = new THREE.Mesh(tipGeo, tipMat);
       tipMesh.position.copy(endpoint);
       needleGroup.add(tipMesh);
 
-      // Trajectory projection point on equator plane
+      // Trajectory projection point on equator plane (Bright Cyan dashed drop line)
       const projPoints = [new THREE.Vector3(tx, ty, tz), new THREE.Vector3(tx, 0, tz)];
       const projGeo = new THREE.BufferGeometry().setFromPoints(projPoints);
-      const projMat = new THREE.LineDashedMaterial({ color: 0x94a3b8, dashSize: 0.05, gapSize: 0.05 });
+      const projMat = new THREE.LineDashedMaterial({ color: 0x06b6d4, dashSize: 0.05, gapSize: 0.04 });
       const projLine = new THREE.Line(projGeo, projMat);
       projLine.computeLineDistances();
       needleGroup.add(projLine);
 
+      // Glowing Equator Projection Point Marker (cyan dot on horizontal plane)
+      const eqProjGeo = new THREE.SphereGeometry(0.04, 16, 16);
+      const eqProjMat = new THREE.MeshStandardMaterial({
+        color: 0x06b6d4,
+        emissive: 0x06b6d4,
+        emissiveIntensity: 0.75
+      });
+      const eqProjMesh = new THREE.Mesh(eqProjGeo, eqProjMat);
+      eqProjMesh.position.set(tx, 0, tz);
+      needleGroup.add(eqProjMesh);
+
       // Projection vector from origin to equator projection
       const baseProjPoints = [new THREE.Vector3(0, 0, 0), new THREE.Vector3(tx, 0, tz)];
       const baseProjGeo = new THREE.BufferGeometry().setFromPoints(baseProjPoints);
-      const baseProjMat = new THREE.LineDashedMaterial({ color: 0xc7d2fe, dashSize: 0.04, gapSize: 0.04 });
+      const baseProjMat = new THREE.LineDashedMaterial({ color: 0x38bdf8, dashSize: 0.04, gapSize: 0.04 });
       const baseProjLine = new THREE.Line(baseProjGeo, baseProjMat);
       baseProjLine.computeLineDistances();
       needleGroup.add(baseProjLine);
@@ -413,19 +534,19 @@ export function BlochSphere3D({
           screenY = centerY + dy;
         }
 
-        // 4. When behind the sphere, reduce transparency rather than hiding
+        // 4. When behind the sphere, keep clearly visible with high contrast
         const isBehind = isOccludedBySphere(camSpaceVec);
         if (isBehind) {
-          el.style.transform = `translate3d(${screenX}px, ${screenY}px, 0) translate(-50%, -50%) scale(0.88)`;
-          el.style.opacity = '0.35';
-          el.style.zIndex = '10';
+          el.style.transform = `translate3d(${screenX}px, ${screenY}px, 0) translate(-50%, -50%) scale(0.92)`;
+          el.style.opacity = '0.75';
+          el.style.zIndex = '15';
         } else {
           el.style.transform = `translate3d(${screenX}px, ${screenY}px, 0) translate(-50%, -50%) scale(1)`;
           el.style.opacity = '1.0';
           el.style.zIndex = '30';
         }
         el.style.visibility = 'visible';
-        el.style.pointerEvents = isBehind ? 'none' : 'auto';
+        el.style.pointerEvents = isBehind ? 'none' : (onSelectPole ? 'auto' : 'none');
       });
 
       // Project dynamic theta sweep label
@@ -435,10 +556,10 @@ export function BlochSphere3D({
         tempVec.copy(camSpaceVec).project(camera);
         const screenX = (tempVec.x * 0.5 + 0.5) * width;
         const screenY = (-tempVec.y * 0.5 + 0.5) * height;
-        thetaLabelRef.current.style.transform = `translate3d(${screenX}px, ${screenY}px, 0) translate(-50%, -50%) ${isBehind ? 'scale(0.88)' : 'scale(1)'}`;
-        thetaLabelRef.current.style.opacity = isBehind ? '0.35' : '1.0';
+        thetaLabelRef.current.style.transform = `translate3d(${screenX}px, ${screenY}px, 0) translate(-50%, -50%) ${isBehind ? 'scale(0.92)' : 'scale(1)'}`;
+        thetaLabelRef.current.style.opacity = isBehind ? '0.75' : '1.0';
         thetaLabelRef.current.style.visibility = 'visible';
-        thetaLabelRef.current.style.zIndex = isBehind ? '12' : '35';
+        thetaLabelRef.current.style.zIndex = isBehind ? '15' : '35';
       }
 
       // Project dynamic phi sweep label
@@ -448,10 +569,10 @@ export function BlochSphere3D({
         tempVec.copy(camSpaceVec).project(camera);
         const screenX = (tempVec.x * 0.5 + 0.5) * width;
         const screenY = (-tempVec.y * 0.5 + 0.5) * height;
-        phiLabelRef.current.style.transform = `translate3d(${screenX}px, ${screenY}px, 0) translate(-50%, -50%) ${isBehind ? 'scale(0.88)' : 'scale(1)'}`;
-        phiLabelRef.current.style.opacity = isBehind ? '0.35' : '1.0';
+        phiLabelRef.current.style.transform = `translate3d(${screenX}px, ${screenY}px, 0) translate(-50%, -50%) ${isBehind ? 'scale(0.92)' : 'scale(1)'}`;
+        phiLabelRef.current.style.opacity = isBehind ? '0.75' : '1.0';
         phiLabelRef.current.style.visibility = 'visible';
-        phiLabelRef.current.style.zIndex = isBehind ? '12' : '35';
+        phiLabelRef.current.style.zIndex = isBehind ? '15' : '35';
       }
     };
     animate();
@@ -523,7 +644,7 @@ export function BlochSphere3D({
         renderer.dispose();
       } catch {}
     };
-  }, [bloch, size, interactive, showSweepArcs, activeSweep]);
+  }, [bloch, size, interactive, showSweepArcs, activeSweep, selectedPole]);
 
   const resetView = () => {
     rotationRef.current = { x: 0.35, y: -0.6 };
@@ -580,40 +701,67 @@ export function BlochSphere3D({
           const py = c - r * (bz - by * 0.25);
           return (
             <svg width={size} height={size} className="absolute inset-0" aria-label={`Bloch Sphere for Qubit ${qubitIndex}`}>
-              <circle cx={c} cy={c} r={r} fill="rgba(129,140,248,0.12)" stroke="#818cf8" strokeWidth={1.2} />
-              <ellipse cx={c} cy={c} rx={r} ry={r * 0.3} fill="none" stroke="#818cf8" strokeDasharray="3 3" opacity={0.7} />
-              <line x1={c} y1={c - r} x2={c} y2={c + r} stroke="#94a3b8" strokeWidth={1} />
-              <line x1={c - r} y1={c} x2={c + r} y2={c} stroke="#94a3b8" strokeWidth={1} />
-              <text x={c} y={c - r - 4} textAnchor="middle" fontSize={10} fill="#4f46e5">|0⟩</text>
-              <text x={c} y={c + r + 11} textAnchor="middle" fontSize={10} fill="#0284c7">|1⟩</text>
+              <circle cx={c} cy={c} r={r} fill="rgba(99,102,241,0.12)" stroke="#6366f1" strokeWidth={1.5} />
+              <ellipse cx={c} cy={c} rx={r} ry={r * 0.3} fill="none" stroke="#818cf8" strokeDasharray="3 3" opacity={0.8} />
+              <line x1={c} y1={c - r} x2={c} y2={c + r} stroke="#2563eb" strokeWidth={2} />
+              <line x1={c - r} y1={c} x2={c + r} y2={c} stroke="#ef4444" strokeWidth={2} />
+              <text x={c} y={c - r - 6} textAnchor="middle" fontSize={11} fontWeight="bold" fill="#2563eb">|0⟩ (+Z)</text>
+              <text x={c} y={c + r + 13} textAnchor="middle" fontSize={11} fontWeight="bold" fill="#0284c7">|1⟩ (-Z)</text>
               {bloch && bloch.is_pure && (
                 <>
-                  <line x1={c} y1={c} x2={px} y2={py} stroke="#4f46e5" strokeWidth={2.5} strokeLinecap="round" />
-                  <circle cx={px} cy={py} r={4} fill="#4f46e5" />
+                  <line x1={c} y1={c} x2={px} y2={py} stroke="#6366f1" strokeWidth={3} strokeLinecap="round" />
+                  <circle cx={px} cy={py} r={5} fill="#f59e0b" stroke="#ffffff" strokeWidth={1.5} />
                 </>
               )}
             </svg>
           );
         })()}
 
-        {/* Dynamic 6-Axis Notations outside the sphere — track 3D rotation in real-time */}
-        {!webglFailed && AXIS_ANCHORS.map((anchor, idx) => (
-          <div
-            key={anchor.id}
-            ref={(el) => {
-              labelRefs.current[idx] = el;
-            }}
-            className="absolute top-0 left-0 pointer-events-none will-change-transform transition-all duration-150"
-            style={{ transform: 'translate3d(-999px, -999px, 0)' }}
-          >
-            <div className={`rounded-md font-semibold border shadow-xs flex items-center gap-1 notranslate whitespace-nowrap bg-white dark:bg-dark-900 select-none ${compact ? 'px-1 py-0.5 text-[10px]' : 'px-1.5 py-0.5 text-xs'} ${anchor.badgeClass}`} translate="no">
-              <span className={`font-semibold ${compact ? 'text-[10px]' : 'text-xs'}`}>
-                <MathRenderer text={anchor.label} />
-              </span>
-              <span className={`font-mono font-medium text-dark-600 dark:text-dark-300 ${compact ? 'text-[8px]' : 'text-[10px]'}`}>({anchor.axis})</span>
+        {/* Dynamic 6-Axis Highlighting Notations outside the sphere — track 3D rotation in real-time */}
+        {/* Rendered with clean solid borders only and zero drop-shadow/ring blur */}
+        {!webglFailed && AXIS_ANCHORS.map((anchor, idx) => {
+          const isSelected = selectedPole === anchor.id;
+          return (
+            <div
+              key={anchor.id}
+              ref={(el) => {
+                labelRefs.current[idx] = el;
+              }}
+              onClick={(e) => {
+                if (onSelectPole) {
+                  e.stopPropagation();
+                  onSelectPole(anchor.id);
+                }
+              }}
+              className={`absolute top-0 left-0 will-change-transform transition-all duration-150 ${
+                onSelectPole ? 'cursor-pointer' : 'pointer-events-none'
+              }`}
+              style={{ transform: 'translate3d(-999px, -999px, 0)' }}
+              title={onSelectPole ? `Snap to ${anchor.axis} preset` : undefined}
+            >
+              <div
+                className={`rounded-lg font-bold border-2 shadow-none flex items-center gap-1.5 notranslate whitespace-nowrap select-none transition-all ${
+                  compact ? 'px-1.5 py-0.5 text-[10px]' : 'px-2 py-0.5 text-xs'
+                } ${anchor.badgeClass} ${
+                  isSelected ? 'border-2 border-white scale-110 font-black' : ''
+                }`}
+                translate="no"
+              >
+                <span className={`font-bold ${compact ? 'text-[10px]' : 'text-xs'}`}>
+                  <MathRenderer text={anchor.label} />
+                </span>
+                <span className={`font-mono font-bold text-white/95 ${compact ? 'text-[8px]' : 'text-[10px]'}`}>
+                  ({anchor.axis})
+                </span>
+                {isSelected && (
+                  <span className="px-1 py-0.2 rounded bg-white text-dark-950 text-[8px] font-black uppercase tracking-wider">
+                    ACTIVE
+                  </span>
+                )}
+              </div>
             </div>
-          </div>
-        ))}
+          );
+        })}
 
         {/* Dynamic Theta (θ) Sweep Arc Label inside the sphere */}
         {isThetaSweepActive && (
@@ -622,7 +770,7 @@ export function BlochSphere3D({
             className="absolute top-0 left-0 pointer-events-none will-change-transform z-10"
             style={{ transform: 'translate3d(-999px, -999px, 0)' }}
           >
-            <div className="px-1.5 py-0.5 rounded-md bg-indigo-600 text-white text-[11px] font-mono font-medium shadow-xs border border-indigo-400/80 flex items-center gap-1 notranslate" translate="no">
+            <div className="px-1.5 py-0.5 rounded-md bg-indigo-600 text-white text-[11px] font-mono font-medium shadow-none border-2 border-indigo-300 flex items-center gap-1 notranslate" translate="no">
               <span>θ:</span>
               <span>{((bloch!.theta * 180) / Math.PI).toFixed(1)}°</span>
             </div>
@@ -636,7 +784,7 @@ export function BlochSphere3D({
             className="absolute top-0 left-0 pointer-events-none will-change-transform z-10"
             style={{ transform: 'translate3d(-999px, -999px, 0)' }}
           >
-            <div className="px-1.5 py-0.5 rounded-md bg-cyan-600 text-white text-[11px] font-mono font-medium shadow-xs border border-cyan-400/80 flex items-center gap-1 notranslate" translate="no">
+            <div className="px-1.5 py-0.5 rounded-md bg-cyan-600 text-white text-[11px] font-mono font-medium shadow-none border-2 border-cyan-300 flex items-center gap-1 notranslate" translate="no">
               <span>φ:</span>
               <span>{((bloch!.phi * 180) / Math.PI).toFixed(1)}°</span>
             </div>

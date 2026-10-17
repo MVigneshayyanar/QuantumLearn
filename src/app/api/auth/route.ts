@@ -80,17 +80,17 @@ export async function POST(req: NextRequest) {
       res.cookies.set('ql_user_id', user.id, {
         path: '/',
         sameSite: 'lax',
-        maxAge: 60 * 60 * 24 * 7,
+        maxAge: 60 * 60 * 24,
       });
       res.cookies.set('ql_user_role', user.role, {
         path: '/',
         sameSite: 'lax',
-        maxAge: 60 * 60 * 24 * 7,
+        maxAge: 60 * 60 * 24,
       });
       res.cookies.set('ql_user_premium', String(Boolean(user.isPremium)), {
         path: '/',
         sameSite: 'lax',
-        maxAge: 60 * 60 * 24 * 7,
+        maxAge: 60 * 60 * 24,
       });
 
       return res;
@@ -139,17 +139,17 @@ export async function POST(req: NextRequest) {
       res.cookies.set('ql_user_id', user.id, {
         path: '/',
         sameSite: 'lax',
-        maxAge: 60 * 60 * 24 * 7,
+        maxAge: 60 * 60 * 24,
       });
       res.cookies.set('ql_user_role', user.role, {
         path: '/',
         sameSite: 'lax',
-        maxAge: 60 * 60 * 24 * 7,
+        maxAge: 60 * 60 * 24,
       });
       res.cookies.set('ql_user_premium', String(Boolean(user.isPremium)), {
         path: '/',
         sameSite: 'lax',
-        maxAge: 60 * 60 * 24 * 7,
+        maxAge: 60 * 60 * 24,
       });
 
       return res;

@@ -69,6 +69,56 @@ const LS_STUDENT_NAME = 'ql_student_name';
 const LS_STUDENT_EMAIL = 'ql_student_email';
 const LS_STUDENT_ROLE = 'ql_student_role';
 const LS_STUDENT_PREMIUM = 'ql_is_premium';
+const LS_SESSION_EXPIRES_AT = 'ql_session_expires_at';
+
+// 24-hour rolling sliding session duration
+const SESSION_TTL_MS = 24 * 60 * 60 * 1000; // 24 hours in milliseconds
+const SESSION_COOKIE_MAX_AGE = 86400; // 24 hours in seconds
+
+function renewSessionCookies(userId: string, role: string, isPremium: boolean) {
+  if (typeof document !== 'undefined') {
+    document.cookie = `ql_user_id=${userId}; path=/; max-age=${SESSION_COOKIE_MAX_AGE}; SameSite=Lax`;
+    document.cookie = `ql_user_role=${role}; path=/; max-age=${SESSION_COOKIE_MAX_AGE}; SameSite=Lax`;
+    document.cookie = `ql_user_premium=${String(isPremium)}; path=/; max-age=${SESSION_COOKIE_MAX_AGE}; SameSite=Lax`;
+  }
+}
+
+function refreshSessionExpiry(): number {
+  const newExpiry = Date.now() + SESSION_TTL_MS;
+  try {
+    localStorage.setItem(LS_SESSION_EXPIRES_AT, String(newExpiry));
+  } catch {}
+  return newExpiry;
+}
+
+function isSessionValid(): boolean {
+  try {
+    const rawExpiry = localStorage.getItem(LS_SESSION_EXPIRES_AT);
+    if (!rawExpiry) return false;
+    const expiresAt = parseInt(rawExpiry, 10);
+    if (isNaN(expiresAt)) return false;
+    return Date.now() < expiresAt;
+  } catch {
+    return false;
+  }
+}
+
+function clearAuthStorage() {
+  try {
+    localStorage.removeItem(LS_STUDENT_ID);
+    localStorage.removeItem(LS_STUDENT_NAME);
+    localStorage.removeItem(LS_STUDENT_EMAIL);
+    localStorage.removeItem(LS_STUDENT_ROLE);
+    localStorage.removeItem(LS_STUDENT_PREMIUM);
+    localStorage.removeItem(LS_SESSION_EXPIRES_AT);
+  } catch {}
+
+  if (typeof document !== 'undefined') {
+    document.cookie = 'ql_user_id=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT;';
+    document.cookie = 'ql_user_role=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT;';
+    document.cookie = 'ql_user_premium=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT;';
+  }
+}
 
 async function syncUserProgressToStore(uid: string) {
   try {
@@ -107,7 +157,7 @@ export function StudentProvider({ children }: { children: React.ReactNode }) {
   // Stores any action to execute immediately after successful sign in / sign up
   const pendingActionRef = useRef<((id?: string) => void) | null>(null);
 
-  // On mount, check localStorage for existing identity
+  // On mount, check localStorage for existing identity and validate 24-hour window
   useEffect(() => {
     try {
       const storedId = localStorage.getItem(LS_STUDENT_ID);
@@ -119,19 +169,31 @@ export function StudentProvider({ children }: { children: React.ReactNode }) {
         storedRole === 'ADMIN' ||
         storedRole === 'EDUCATOR';
 
-      setIsPremium(storedPremium);
-
       if (storedId) {
-        userIdRef.current = storedId;
-        setUserId(storedId);
-        setStudentName(storedName || (storedEmail ? storedEmail.split('@')[0] : 'Student'));
-        setStudentEmail(storedEmail || '');
-        setRole(storedRole);
-        if (typeof document !== 'undefined') {
-          document.cookie = `ql_user_id=${storedId}; path=/; max-age=604800; SameSite=Lax`;
-          document.cookie = `ql_user_role=${storedRole}; path=/; max-age=604800; SameSite=Lax`;
+        if (!isSessionValid()) {
+          // More than 24 hours of inactivity elapsed: clear expired credentials
+          clearAuthStorage();
+          userIdRef.current = null;
+          setUserId(null);
+          setStudentName(null);
+          setStudentEmail(null);
+          setRole(null);
+          setIsPremium(false);
+        } else {
+          // Within 24 hours: user is active! Slide 24h expiration forward from this visit
+          refreshSessionExpiry();
+          renewSessionCookies(storedId, storedRole, storedPremium);
+
+          userIdRef.current = storedId;
+          setUserId(storedId);
+          setStudentName(storedName || (storedEmail ? storedEmail.split('@')[0] : 'Student'));
+          setStudentEmail(storedEmail || '');
+          setRole(storedRole);
+          setIsPremium(storedPremium);
+          syncUserProgressToStore(storedId);
         }
-        syncUserProgressToStore(storedId);
+      } else {
+        clearAuthStorage();
       }
     } catch {
       // localStorage not available
@@ -141,20 +203,33 @@ export function StudentProvider({ children }: { children: React.ReactNode }) {
   }, []);
 
   const openLoginModal = useCallback((callback?: (id?: string) => void) => {
-    // Only bypass if both state/ref AND localStorage agree user is logged in
+    // Only bypass if both state/ref AND localStorage agree user is logged in AND session is valid
     const storedId = typeof window !== 'undefined' ? localStorage.getItem(LS_STUDENT_ID) : null;
-    const currentId = storedId || userIdRef.current;
+    const valid = isSessionValid();
+    const currentId = (storedId && valid) ? (storedId || userIdRef.current) : null;
 
-    if (currentId && storedId) {
+    if (currentId && storedId && valid) {
+      refreshSessionExpiry();
+      const storedRole = (localStorage.getItem(LS_STUDENT_ROLE) as UserRole) || 'STUDENT';
+      const storedPremium = localStorage.getItem(LS_STUDENT_PREMIUM) === 'true';
+      renewSessionCookies(currentId, storedRole, storedPremium);
       if (callback) {
         callback(currentId);
       }
       return;
     }
 
-    // Ensure stale ref is cleared if localStorage has no ID
-    if (!storedId) {
+    // Ensure stale ref and expired auth data are cleared
+    if (!storedId || !valid) {
       userIdRef.current = null;
+      if (storedId && !valid) {
+        clearAuthStorage();
+        setUserId(null);
+        setStudentName(null);
+        setStudentEmail(null);
+        setRole(null);
+        setIsPremium(false);
+      }
     }
 
     if (callback) {
@@ -225,17 +300,15 @@ export function StudentProvider({ children }: { children: React.ReactNode }) {
       setIsPremium(false);
     }
 
+    // Initialize 24-hour rolling session & cookies
+    refreshSessionExpiry();
+    renewSessionCookies(returnedId, returnedRole || 'STUDENT', isPro);
+
     setUserId(returnedId);
     setStudentName(name || returnedEmail.split('@')[0]);
     setStudentEmail(returnedEmail);
     setRole(returnedRole || 'STUDENT');
     setShowIdentityModal(false);
-
-    if (typeof document !== 'undefined') {
-      document.cookie = `ql_user_id=${returnedId}; path=/; max-age=604800; SameSite=Lax`;
-      document.cookie = `ql_user_role=${returnedRole || 'STUDENT'}; path=/; max-age=604800; SameSite=Lax`;
-      document.cookie = `ql_user_premium=${String(isPro)}; path=/; max-age=604800; SameSite=Lax`;
-    }
 
     syncUserProgressToStore(returnedId);
     executePendingAction(returnedId);
@@ -270,25 +343,64 @@ export function StudentProvider({ children }: { children: React.ReactNode }) {
       setIsPremium(true);
     }
 
+    // Initialize 24-hour rolling session & cookies
+    refreshSessionExpiry();
+    renewSessionCookies(returnedId, returnedRole || 'STUDENT', isPro);
+
     setUserId(returnedId);
     setStudentName(returnedName || returnedEmail.split('@')[0]);
     setStudentEmail(returnedEmail);
     setRole(returnedRole || 'STUDENT');
     setShowIdentityModal(false);
 
-    if (typeof document !== 'undefined') {
-      document.cookie = `ql_user_id=${returnedId}; path=/; max-age=604800; SameSite=Lax`;
-      document.cookie = `ql_user_role=${returnedRole || 'STUDENT'}; path=/; max-age=604800; SameSite=Lax`;
-      document.cookie = `ql_user_premium=${String(isPro)}; path=/; max-age=604800; SameSite=Lax`;
-    }
-
     syncUserProgressToStore(returnedId);
     executePendingAction(returnedId);
     return { userId: returnedId };
   }, []);
 
+  // Sliding session extension: whenever user revisits, focuses tab, or stays active
+  useEffect(() => {
+    if (!userId) return;
+
+    const handleActivity = () => {
+      if (!isSessionValid()) {
+        clearAuthStorage();
+        userIdRef.current = null;
+        setUserId(null);
+        setStudentName(null);
+        setStudentEmail(null);
+        setRole(null);
+        setIsPremium(false);
+      } else {
+        // Slide 24-hour expiry forward from this active moment
+        refreshSessionExpiry();
+        const storedRole = (localStorage.getItem(LS_STUDENT_ROLE) as UserRole) || 'STUDENT';
+        renewSessionCookies(userId, storedRole, isPremium);
+      }
+    };
+
+    const onVisibilityChange = () => {
+      if (document.visibilityState === 'visible') {
+        handleActivity();
+      }
+    };
+
+    window.addEventListener('visibilitychange', onVisibilityChange);
+    window.addEventListener('focus', handleActivity);
+
+    // Periodic check every 15 minutes while active
+    const interval = setInterval(handleActivity, 15 * 60 * 1000);
+
+    return () => {
+      window.removeEventListener('visibilitychange', onVisibilityChange);
+      window.removeEventListener('focus', handleActivity);
+      clearInterval(interval);
+    };
+  }, [userId, isPremium]);
+
   const logout = useCallback(() => {
     // 1. Clear credentials & local preferences
+    clearAuthStorage();
     try {
       localStorage.clear();
     } catch {}

@@ -19,8 +19,31 @@ import {
   Flame,
   LayoutDashboard,
   ExternalLink,
-  BookOpen
+  BookOpen,
+  History,
+  Clock,
+  Filter,
+  RefreshCw,
+  CheckCircle,
+  HelpCircle,
+  UserCheck
 } from 'lucide-react';
+
+export interface AdminHistoryItem {
+  id: string;
+  timestamp: string;
+  category: 'learning' | 'auth';
+  type: 'quiz_attempt' | 'practice_submission' | 'ai_interaction' | 'user_registration' | 'user_login';
+  userName: string;
+  userEmail: string;
+  role: string;
+  title: string;
+  details: string;
+  badge: {
+    label: string;
+    variant: 'emerald' | 'indigo' | 'amber' | 'blue' | 'purple';
+  };
+}
 
 interface InstructorData {
   id: string;
@@ -54,7 +77,12 @@ export default function AdminPortalPage() {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  const [activeTab, setActiveTab] = useState<'instructors' | 'students'>('instructors');
+  // History Log State (on-demand database history, zero live polling)
+  const [historyItems, setHistoryItems] = useState<AdminHistoryItem[]>([]);
+  const [isHistoryLoading, setIsHistoryLoading] = useState(false);
+  const [historyCategoryFilter, setHistoryCategoryFilter] = useState<'all' | 'learning' | 'auth'>('all');
+
+  const [activeTab, setActiveTab] = useState<'instructors' | 'students' | 'history'>('instructors');
   const [searchQuery, setSearchQuery] = useState('');
 
   // Modals
@@ -88,10 +116,26 @@ export default function AdminPortalPage() {
     }
   };
 
+  const fetchHistory = async () => {
+    setIsHistoryLoading(true);
+    try {
+      const res = await fetch('/api/admin/history');
+      if (res.ok) {
+        const data = await res.json();
+        setHistoryItems(data.history || []);
+      }
+    } catch (err) {
+      console.error('Error fetching admin history:', err);
+    } finally {
+      setIsHistoryLoading(false);
+    }
+  };
+
   useEffect(() => {
     if (isAuthLoading) return;
     if (isAdmin) {
       fetchUsers();
+      fetchHistory(); // Loads once on-demand, zero live polling/heartbeat loops
     } else {
       setIsLoading(false);
     }
@@ -210,6 +254,16 @@ export default function AdminPortalPage() {
       s.email.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
+  const filteredHistory = historyItems.filter((h) => {
+    const matchesSearch =
+      h.userName.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      h.userEmail.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      h.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      h.details.toLowerCase().includes(searchQuery.toLowerCase());
+    const matchesCategory = historyCategoryFilter === 'all' || h.category === historyCategoryFilter;
+    return matchesSearch && matchesCategory;
+  });
+
   const totalAICalls = students.reduce((acc, s) => acc + s.aiInteractionCount, 0);
 
   return (
@@ -259,7 +313,7 @@ export default function AdminPortalPage() {
       </div>
 
       {/* Metrics Row */}
-      <div className="grid grid-cols-1 sm:grid-cols-4 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3.5">
         <div className="bg-white rounded-2xl border border-dark-200 p-4 shadow-xs flex items-center gap-3">
           <div className="w-10 h-10 rounded-xl bg-purple-50 text-purple-600 flex items-center justify-center shrink-0">
             <GraduationCap className="w-5 h-5" />
@@ -281,7 +335,7 @@ export default function AdminPortalPage() {
         </div>
 
         <div className="bg-white rounded-2xl border border-dark-200 p-4 shadow-xs flex items-center gap-3">
-          <div className="w-10 h-10 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center shrink-0">
+          <div className="w-10 h-10 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center shrink-0">
             <CheckCircle2 className="w-5 h-5" />
           </div>
           <div>
@@ -295,7 +349,7 @@ export default function AdminPortalPage() {
             <Bot className="w-5 h-5" />
           </div>
           <div>
-            <span className="text-[11px] text-dark-500 font-medium">AI Interactions Logged</span>
+            <span className="text-[11px] text-dark-500 font-medium">AI Interactions</span>
             <p className="text-xl font-bold text-dark-900">{totalAICalls}</p>
           </div>
         </div>
@@ -305,7 +359,7 @@ export default function AdminPortalPage() {
       <div className="bg-white rounded-2xl border border-dark-200 p-5 shadow-xs space-y-4">
         {/* Sub-Header / Search / Tabs */}
         <div className="flex flex-wrap items-center justify-between gap-3 pb-3 border-b border-dark-100">
-          <div className="inline-flex rounded-xl border border-dark-200 p-1 bg-dark-50 text-xs font-semibold">
+          <div className="inline-flex rounded-xl border border-dark-200 p-1 bg-dark-50 text-xs font-semibold flex-wrap gap-1">
             <button
               onClick={() => setActiveTab('instructors')}
               className={`px-3 py-1.5 rounded-lg transition-colors flex items-center gap-1.5 ${
@@ -328,17 +382,30 @@ export default function AdminPortalPage() {
               <Users className="w-3.5 h-3.5 text-primary-600" />
               <span>Students ({students.length})</span>
             </button>
+            <button
+              onClick={() => setActiveTab('history')}
+              className={`px-3 py-1.5 rounded-lg transition-colors flex items-center gap-1.5 ${
+                activeTab === 'history'
+                  ? 'bg-white text-dark-900 shadow-xs'
+                  : 'text-dark-600 hover:text-dark-900'
+              }`}
+            >
+              <History className="w-3.5 h-3.5 text-indigo-600" />
+              <span>Activity & Login History ({historyItems.length})</span>
+            </button>
           </div>
 
-          <div className="relative w-full sm:w-64">
-            <Search className="w-3.5 h-3.5 text-dark-400 absolute left-3 top-1/2 -translate-y-1/2" />
-            <input
-              type="text"
-              placeholder={`Search ${activeTab}...`}
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full pl-9 pr-3 py-1.5 rounded-xl border border-dark-200 text-xs text-dark-900 placeholder:text-dark-400 focus:outline-none focus:ring-2 focus:ring-purple-500/20 focus:border-purple-500"
-            />
+          <div className="flex items-center gap-2 w-full sm:w-auto">
+            <div className="relative w-full sm:w-64">
+              <Search className="w-3.5 h-3.5 text-dark-400 absolute left-3 top-1/2 -translate-y-1/2" />
+              <input
+                type="text"
+                placeholder={`Search ${activeTab}...`}
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="w-full pl-9 pr-3 py-1.5 rounded-xl border border-dark-200 text-xs text-dark-900 placeholder:text-dark-400 focus:outline-none focus:ring-2 focus:ring-purple-500/20 focus:border-purple-500"
+              />
+            </div>
           </div>
         </div>
 
@@ -491,6 +558,173 @@ export default function AdminPortalPage() {
                 )}
               </tbody>
             </table>
+          </div>
+        )}
+
+        {/* ACTIVITY & LOGIN HISTORY VIEW (DATABASE-BACKED, LATEST ON TOP) */}
+        {activeTab === 'history' && (
+          <div className="space-y-4 animate-fadeIn">
+            {/* Filter pills and manual refresh */}
+            <div className="flex flex-wrap items-center justify-between gap-3 p-3 rounded-xl bg-dark-50 border border-dark-200">
+              <div className="flex items-center gap-2 flex-wrap">
+                <span className="text-[11px] font-bold text-dark-500 uppercase tracking-wider mr-1">
+                  Filter Category:
+                </span>
+                <button
+                  onClick={() => setHistoryCategoryFilter('all')}
+                  className={`px-3 py-1 rounded-lg text-xs font-semibold transition-colors ${
+                    historyCategoryFilter === 'all'
+                      ? 'bg-dark-900 text-white shadow-xs'
+                      : 'bg-white border border-dark-200 text-dark-700 hover:bg-dark-100'
+                  }`}
+                >
+                  All History ({historyItems.length})
+                </button>
+                <button
+                  onClick={() => setHistoryCategoryFilter('learning')}
+                  className={`px-3 py-1 rounded-lg text-xs font-semibold transition-colors flex items-center gap-1.5 ${
+                    historyCategoryFilter === 'learning'
+                      ? 'bg-emerald-600 text-white shadow-xs'
+                      : 'bg-white border border-dark-200 text-dark-700 hover:bg-dark-100'
+                  }`}
+                >
+                  <Sparkles className="w-3.5 h-3.5 text-emerald-300" />
+                  <span>Student Learning ({historyItems.filter((h) => h.category === 'learning').length})</span>
+                </button>
+                <button
+                  onClick={() => setHistoryCategoryFilter('auth')}
+                  className={`px-3 py-1 rounded-lg text-xs font-semibold transition-colors flex items-center gap-1.5 ${
+                    historyCategoryFilter === 'auth'
+                      ? 'bg-indigo-600 text-white shadow-xs'
+                      : 'bg-white border border-dark-200 text-dark-700 hover:bg-dark-100'
+                  }`}
+                >
+                  <UserCheck className="w-3.5 h-3.5 text-indigo-300" />
+                  <span>Logins & Accounts ({historyItems.filter((h) => h.category === 'auth').length})</span>
+                </button>
+              </div>
+
+              <div className="flex items-center gap-2 text-[11px] text-dark-500">
+                <button
+                  onClick={fetchHistory}
+                  disabled={isHistoryLoading}
+                  title="Reload History"
+                  className="inline-flex items-center gap-1.5 px-3 py-1 rounded-lg border border-dark-200 bg-white hover:bg-dark-100 text-dark-700 font-medium transition-colors"
+                >
+                  <RefreshCw className={`w-3 h-3 ${isHistoryLoading ? 'animate-spin text-primary-600' : ''}`} />
+                  <span>Refresh Log</span>
+                </button>
+                <span className="hidden sm:inline font-mono">• Latest on top</span>
+              </div>
+            </div>
+
+            {/* History Table */}
+            <div className="overflow-x-auto">
+              <table className="w-full text-xs">
+                <thead>
+                  <tr className="border-b border-dark-200 text-dark-500 text-left">
+                    <th className="py-2.5 pr-4 font-semibold">Date & Time</th>
+                    <th className="py-2.5 pr-4 font-semibold">User / Email</th>
+                    <th className="py-2.5 pr-4 font-semibold">Role</th>
+                    <th className="py-2.5 pr-4 font-semibold">Activity</th>
+                    <th className="py-2.5 pr-4 font-semibold">Details</th>
+                    <th className="py-2.5 text-right font-semibold">Status Badge</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-dark-100">
+                  {filteredHistory.length === 0 ? (
+                    <tr>
+                      <td colSpan={6} className="py-8 text-center text-dark-400 font-medium">
+                        No activity or login history found matching your filters.
+                      </td>
+                    </tr>
+                  ) : (
+                    filteredHistory.map((item) => {
+                      const dateObj = new Date(item.timestamp);
+                      const formattedDate = dateObj.toLocaleDateString([], {
+                        month: 'short',
+                        day: 'numeric',
+                        year: 'numeric',
+                      });
+                      const formattedTime = dateObj.toLocaleTimeString([], {
+                        hour: '2-digit',
+                        minute: '2-digit',
+                        second: '2-digit',
+                      });
+
+                      return (
+                        <tr key={item.id} className="hover:bg-dark-50/50 transition-colors">
+                          <td className="py-3 pr-4 font-mono text-[11px] text-dark-600 whitespace-nowrap">
+                            <div className="font-bold text-dark-900">{formattedTime}</div>
+                            <div className="text-[10px] text-dark-400">{formattedDate}</div>
+                          </td>
+
+                          <td className="py-3 pr-4">
+                            <div className="flex items-center gap-2">
+                              <div
+                                className={`w-7 h-7 rounded-lg flex items-center justify-center font-bold text-[11px] ${
+                                  item.role === 'ADMIN'
+                                    ? 'bg-purple-100 text-purple-700'
+                                    : item.role === 'EDUCATOR'
+                                    ? 'bg-blue-100 text-blue-700'
+                                    : 'bg-primary-100 text-primary-700'
+                                }`}
+                              >
+                                {item.userName.charAt(0).toUpperCase()}
+                              </div>
+                              <div>
+                                <p className="font-bold text-dark-900 leading-tight">{item.userName}</p>
+                                <p className="text-[11px] text-dark-500 font-mono">{item.userEmail}</p>
+                              </div>
+                            </div>
+                          </td>
+
+                          <td className="py-3 pr-4">
+                            <span
+                              className={`px-2 py-0.5 rounded text-[10px] font-mono font-medium ${
+                                item.role === 'ADMIN'
+                                  ? 'bg-purple-50 text-purple-700 border border-purple-200'
+                                  : item.role === 'EDUCATOR'
+                                  ? 'bg-blue-50 text-blue-700 border border-blue-200'
+                                  : 'bg-dark-100 text-dark-700'
+                              }`}
+                            >
+                              {item.role}
+                            </span>
+                          </td>
+
+                          <td className="py-3 pr-4 font-bold text-dark-800">
+                            {item.title}
+                          </td>
+
+                          <td className="py-3 pr-4 text-dark-600 text-[11px]">
+                            {item.details}
+                          </td>
+
+                          <td className="py-3 text-right">
+                            <span
+                              className={`inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-bold border ${
+                                item.badge.variant === 'emerald'
+                                  ? 'bg-emerald-50 text-emerald-800 border-emerald-200'
+                                  : item.badge.variant === 'indigo'
+                                  ? 'bg-indigo-50 text-indigo-800 border-indigo-200'
+                                  : item.badge.variant === 'purple'
+                                  ? 'bg-purple-50 text-purple-800 border-purple-200'
+                                  : item.badge.variant === 'amber'
+                                  ? 'bg-amber-50 text-amber-800 border-amber-200'
+                                  : 'bg-blue-50 text-blue-800 border-blue-200'
+                              }`}
+                            >
+                              {item.badge.label}
+                            </span>
+                          </td>
+                        </tr>
+                      );
+                    })
+                  )}
+                </tbody>
+              </table>
+            </div>
           </div>
         )}
       </div>

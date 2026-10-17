@@ -188,10 +188,10 @@ export function ProgressDashboard() {
             Learner Profile
           </span>
           <h1 className="text-xl sm:text-2xl font-bold text-dark-900 mt-1.5">
-            {studentName ? `${studentName}'s Quantum Journey` : 'Quantum Mastery & Analytics'}
+            {studentName ? `${studentName} — ${t?.dashboard?.title || 'Quantum Journey'}` : (t?.dashboard?.title || 'Quantum Mastery & Analytics')}
           </h1>
           <p className="text-xs sm:text-sm text-dark-600 mt-0.5">
-            Track your understanding across quantum fundamentals, algorithms, and AI diagnostics.
+            {t?.dashboard?.subtitle || 'Track your understanding across quantum fundamentals, algorithms, and AI diagnostics.'}
           </p>
         </div>
 

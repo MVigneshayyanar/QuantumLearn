@@ -16,6 +16,7 @@ export default function BlochSpherePage() {
   const [theta, setTheta] = useState<number>(Math.PI / 2); // default |+> (pi/2)
   const [phi, setPhi] = useState<number>(0);
   const [isEntangledDemo, setIsEntangledDemo] = useState<boolean>(false);
+  const [selectedPresetId, setSelectedPresetId] = useState<string | null>('x-pos'); // Default snaps to |+> (Hadamard)
 
   // Sweep states
   const [isSweeping, setIsSweeping] = useState<boolean>(false);
@@ -80,12 +81,12 @@ export default function BlochSpherePage() {
   const prob1 = Math.sin(theta / 2) ** 2;
 
   const standardStates = [
-    { label: '$|0\\rangle$', name: 'North Pole (+Z)', t: 0, p: 0, mathDesc: '$|0\\rangle$' },
-    { label: '$|1\\rangle$', name: 'South Pole (-Z)', t: Math.PI, p: 0, mathDesc: '$|1\\rangle$' },
-    { label: '$|+\\rangle$', name: 'Hadamard (+X)', t: Math.PI / 2, p: 0, mathDesc: '$\\frac{|0\\rangle + |1\\rangle}{\\sqrt{2}}$' },
-    { label: '$|-\\rangle$', name: 'Phase Inverted (-X)', t: Math.PI / 2, p: Math.PI, mathDesc: '$\\frac{|0\\rangle - |1\\rangle}{\\sqrt{2}}$' },
-    { label: '$|i\\rangle$', name: 'Circular (+Y)', t: Math.PI / 2, p: Math.PI / 2, mathDesc: '$\\frac{|0\\rangle + i|1\\rangle}{\\sqrt{2}}$' },
-    { label: '$|-i\\rangle$', name: 'Circular (-Y)', t: Math.PI / 2, p: (3 * Math.PI) / 2, mathDesc: '$\\frac{|0\\rangle - i|1\\rangle}{\\sqrt{2}}$' }
+    { id: 'z-pos', label: '$|0\\rangle$', name: 'North Pole (+Z)', t: 0, p: 0, mathDesc: '$|0\\rangle$' },
+    { id: 'z-neg', label: '$|1\\rangle$', name: 'South Pole (-Z)', t: Math.PI, p: 0, mathDesc: '$|1\\rangle$' },
+    { id: 'x-pos', label: '$|+\\rangle$', name: 'Hadamard (+X)', t: Math.PI / 2, p: 0, mathDesc: '$\\frac{|0\\rangle + |1\\rangle}{\\sqrt{2}}$' },
+    { id: 'x-neg', label: '$|-\\rangle$', name: 'Phase Inverted (-X)', t: Math.PI / 2, p: Math.PI, mathDesc: '$\\frac{|0\\rangle - |1\\rangle}{\\sqrt{2}}$' },
+    { id: 'y-pos', label: '$|i\\rangle$', name: 'Circular (+Y)', t: Math.PI / 2, p: Math.PI / 2, mathDesc: '$\\frac{|0\\rangle + i|1\\rangle}{\\sqrt{2}}$' },
+    { id: 'y-neg', label: '$|-i\\rangle$', name: 'Circular (-Y)', t: Math.PI / 2, p: (3 * Math.PI) / 2, mathDesc: '$\\frac{|0\\rangle - i|1\\rangle}{\\sqrt{2}}$' }
   ];
 
   return (
@@ -110,14 +111,25 @@ export default function BlochSpherePage() {
             6-Axis Dynamic Tracking
           </span>
           <button
-            onClick={() => setIsEntangledDemo(!isEntangledDemo)}
+            onClick={() => {
+              const next = !isEntangledDemo;
+              setIsEntangledDemo(next);
+              if (next) setSelectedPresetId(null);
+            }}
             className={`px-2.5 sm:px-3 py-1.5 rounded-lg border text-[11px] sm:text-xs font-bold transition-all cursor-pointer ${
               isEntangledDemo
                 ? 'bg-amber-600 text-white border-amber-600 shadow-xs'
                 : 'bg-dark-50 border-dark-200 text-dark-700 hover:bg-dark-100'
             }`}
           >
-            {isEntangledDemo ? '✓ Entangled State' : 'Entanglement Demo'}
+            {isEntangledDemo ? (
+              <span className="flex items-center gap-1">
+                <Check className="w-3.5 h-3.5" />
+                <span>Entangled State</span>
+              </span>
+            ) : (
+              'Entanglement Demo'
+            )}
           </button>
         </div>
       </div>
@@ -132,8 +144,23 @@ export default function BlochSpherePage() {
               qubitIndex={0}
               warning={isEntangledDemo ? 'Entangled Bell state: purity Tr(ρ²) = 0.5 < 1.0, single-qubit Bloch vector undefined.' : undefined}
               size={sphereSize}
-              showSweepArcs={showSweepArcsToggle || isSweeping}
-              activeSweep={activeSweepAngle}
+              showSweepArcs={showSweepArcsToggle || isSweeping || selectedPresetId !== null}
+              activeSweep={activeSweepAngle || (selectedPresetId ? 'both' : null)}
+              selectedPole={selectedPresetId}
+              onSelectPole={(poleId) => {
+                const matched = standardStates.find((s) => s.id === poleId);
+                if (matched) {
+                  if (selectedPresetId === poleId) {
+                    setSelectedPresetId(null);
+                  } else {
+                    setIsEntangledDemo(false);
+                    setTheta(matched.t);
+                    setPhi(matched.p);
+                    setSelectedPresetId(matched.id);
+                    triggerSweep(matched.t !== theta ? 'theta' : 'phi');
+                  }
+                }
+              }}
               compact={false}
             />
           </div>
@@ -145,26 +172,61 @@ export default function BlochSpherePage() {
           <div className="bg-white rounded-2xl border border-dark-200 p-3.5 shadow-xs">
             <div className="flex items-center justify-between mb-2">
               <h3 className="font-bold text-xs text-dark-900">Standard Basis Presets (6 Poles)</h3>
-              <span className="text-[10px] text-dark-400 font-medium">Click to snap</span>
+              <div className="flex items-center gap-2">
+                {selectedPresetId && (
+                  <button
+                    onClick={() => setSelectedPresetId(null)}
+                    className="text-[10px] text-primary-600 hover:text-primary-800 font-semibold cursor-pointer underline underline-offset-2"
+                  >
+                    Unselect
+                  </button>
+                )}
+                <span className="text-[10px] text-dark-400 font-medium">Click to snap / toggle</span>
+              </div>
             </div>
             <div className="grid grid-cols-3 sm:grid-cols-6 gap-2">
-              {standardStates.map((s, idx) => (
-                <button
-                  key={idx}
-                  onClick={() => {
-                    setIsEntangledDemo(false);
-                    setTheta(s.t);
-                    setPhi(s.p);
-                    triggerSweep(s.t !== theta ? 'theta' : 'phi');
-                  }}
-                  className="p-2 rounded-xl border border-dark-200 hover:border-primary-400 hover:bg-primary-50/50 text-center transition-all group cursor-pointer"
-                >
-                  <span className="font-mono font-bold text-xs text-dark-900 group-hover:text-primary-700 block">
-                    <MathRenderer text={s.label} />
-                  </span>
-                  <span className="text-[9px] text-dark-500 font-mono block truncate mt-0.5">{s.name.split(' ')[0]}</span>
-                </button>
-              ))}
+              {standardStates.map((s) => {
+                const isSelected = selectedPresetId === s.id;
+                return (
+                  <button
+                    key={s.id}
+                    onClick={() => {
+                      if (isSelected) {
+                        setSelectedPresetId(null);
+                      } else {
+                        setIsEntangledDemo(false);
+                        setTheta(s.t);
+                        setPhi(s.p);
+                        setSelectedPresetId(s.id);
+                        triggerSweep(s.t !== theta ? 'theta' : 'phi');
+                      }
+                    }}
+                    className={`p-2 rounded-xl text-center transition-all group cursor-pointer relative ${
+                      isSelected
+                        ? 'border-2 border-primary-600 bg-primary-50 dark:bg-primary-950/60 shadow-xs'
+                        : 'border border-dark-200 hover:border-primary-400 hover:bg-primary-50/50'
+                    }`}
+                  >
+                    {isSelected && (
+                      <span className="absolute top-1.5 right-1.5 w-2 h-2 rounded-full bg-primary-600 ring-2 ring-white"></span>
+                    )}
+                    <span
+                      className={`font-mono font-bold text-xs block ${
+                        isSelected ? 'text-primary-800 dark:text-primary-200' : 'text-dark-900 group-hover:text-primary-700'
+                      }`}
+                    >
+                      <MathRenderer text={s.label} />
+                    </span>
+                    <span
+                      className={`text-[9px] font-mono block truncate mt-0.5 ${
+                        isSelected ? 'text-primary-700 font-bold' : 'text-dark-500'
+                      }`}
+                    >
+                      {s.name.split(' ')[0]}
+                    </span>
+                  </button>
+                );
+              })}
             </div>
           </div>
 
@@ -182,13 +244,21 @@ export default function BlochSpherePage() {
                         : 'bg-dark-50 text-dark-700 border-dark-200 hover:bg-dark-100'
                     }`}
                   >
-                    {showSweepArcsToggle ? '✓ Arcs' : 'Show Arcs'}
+                    {showSweepArcsToggle ? (
+                      <span className="flex items-center gap-1">
+                        <Check className="w-3 h-3" />
+                        <span>Arcs</span>
+                      </span>
+                    ) : (
+                      'Show Arcs'
+                    )}
                   </button>
                 </div>
                 <button
                   onClick={() => {
                     setTheta(0);
                     setPhi(0);
+                    setSelectedPresetId('z-pos');
                     triggerSweep('theta');
                   }}
                   className="text-[11px] text-dark-500 hover:text-dark-800 flex items-center gap-1 cursor-pointer"
@@ -219,6 +289,7 @@ export default function BlochSpherePage() {
                     onPointerDown={() => triggerSweep('theta')}
                     onChange={(e) => {
                       setTheta(Number(e.target.value));
+                      setSelectedPresetId(null);
                       triggerSweep('theta');
                     }}
                     className="w-full accent-primary-600 cursor-pointer h-2"
@@ -244,6 +315,7 @@ export default function BlochSpherePage() {
                     onPointerDown={() => triggerSweep('phi')}
                     onChange={(e) => {
                       setPhi(Number(e.target.value));
+                      setSelectedPresetId(null);
                       triggerSweep('phi');
                     }}
                     className="w-full accent-cyan-600 cursor-pointer h-2"

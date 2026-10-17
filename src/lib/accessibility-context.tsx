@@ -15,7 +15,7 @@ interface AccessibilityContextType {
   reducedMotion: boolean;
   setReducedMotion: (val: boolean) => void;
   language: Language;
-  setLanguage: (lang: Language) => void;
+  setLanguage: (lang: Language, reload?: boolean) => void;
   highContrast: boolean;
   setHighContrast: (val: boolean) => void;
   theme: ThemeMode;
@@ -29,6 +29,128 @@ interface AccessibilityContextType {
 
 const AccessibilityContext = createContext<AccessibilityContextType | undefined>(undefined);
 
+/**
+ * Completely remove googtrans cookies across all domain and path combinations
+ * so Google Translate never lingers on a previously selected language.
+ */
+export function clearGoogleTransCookies() {
+  if (typeof window === 'undefined') return;
+  const host = window.location.hostname;
+  const domainParts = host.split('.');
+  const rootDomain = domainParts.length > 1 ? '.' + domainParts.slice(-2).join('.') : host;
+
+  const domains = [
+    '',
+    host,
+    `.${host}`,
+    rootDomain,
+    `.${rootDomain}`,
+    'localhost',
+    '.localhost',
+    '127.0.0.1',
+    '.127.0.0.1'
+  ];
+
+  const paths = ['/', '', window.location.pathname];
+  for (const domain of domains) {
+    for (const path of paths) {
+      const dAttr = domain ? `; domain=${domain}` : '';
+      const pAttr = path ? `; path=${path}` : '; path=/';
+      document.cookie = `googtrans=; expires=Thu, 01 Jan 1970 00:00:00 GMT; max-age=0${pAttr}${dAttr}; SameSite=Lax`;
+      document.cookie = `googtrans=; expires=Thu, 01 Jan 1970 00:00:00 GMT; max-age=0${pAttr}${dAttr}`;
+      document.cookie = `googtrans=; expires=Thu, 01 Jan 1970 00:00:00 UTC; max-age=0${pAttr}${dAttr}`;
+    }
+  }
+
+  try {
+    sessionStorage.removeItem('googtrans');
+    localStorage.removeItem('googtrans');
+    for (let i = sessionStorage.length - 1; i >= 0; i--) {
+      const k = sessionStorage.key(i);
+      if (k && (k.includes('goog') || k.includes('trans'))) {
+        sessionStorage.removeItem(k);
+      }
+    }
+  } catch (e) {}
+}
+
+/**
+ * Configure googtrans cookies across localhost and live domain variations
+ * to ensure full-site translation can read and translate the entire site reliably.
+ */
+export function setGoogleTransCookie(targetLang: Language) {
+  if (typeof window === 'undefined') return;
+  const host = window.location.hostname;
+  const isLocalhost = host === 'localhost' || host === '127.0.0.1';
+
+  // 1. First clear any previous cookies
+  clearGoogleTransCookies();
+
+  // 2. Set new cookies only if foreign language
+  if (targetLang && targetLang !== 'en') {
+    document.cookie = `googtrans=/en/${targetLang}; path=/; SameSite=Lax;`;
+    document.cookie = `googtrans=/auto/${targetLang}; path=/; SameSite=Lax;`;
+    if (!isLocalhost) {
+      document.cookie = `googtrans=/en/${targetLang}; path=/; domain=${host}; SameSite=Lax;`;
+      document.cookie = `googtrans=/auto/${targetLang}; path=/; domain=.${host}; SameSite=Lax;`;
+    }
+  }
+}
+
+/**
+ * Immediately restore Google Translate to original English in DOM.
+ */
+export function restoreGoogleTranslateOriginal() {
+  if (typeof window === 'undefined') return;
+
+  clearGoogleTransCookies();
+
+  // 1. Reset .goog-te-combo dropdown to empty ("")
+  const select = document.querySelector('.goog-te-combo') as HTMLSelectElement | null;
+  if (select) {
+    select.value = '';
+    select.dispatchEvent(new Event('change', { bubbles: true }));
+    select.dispatchEvent(new Event('input', { bubbles: true }));
+  }
+
+  // 2. Click restore / show original inside Google Translate iframe if present
+  try {
+    const iframes = document.querySelectorAll('iframe.goog-te-banner-frame');
+    iframes.forEach((iframe: any) => {
+      try {
+        const doc = iframe.contentDocument || iframe.contentWindow?.document;
+        if (doc) {
+          const buttons = doc.querySelectorAll('button, a, .goog-close-link');
+          buttons.forEach((btn: any) => {
+            const txt = (btn.innerText || btn.textContent || '').toLowerCase();
+            const id = (btn.id || '').toLowerCase();
+            const cls = (btn.className || '').toLowerCase();
+            if (
+              id.includes('restore') ||
+              cls.includes('close') ||
+              cls.includes('restore') ||
+              txt.includes('original') ||
+              txt.includes('restore')
+            ) {
+              btn.click();
+            }
+          });
+        }
+      } catch (e) {}
+    });
+  } catch (e) {}
+
+  // 3. Click any document-level close or restore links
+  const closeBtn = document.querySelector('.goog-close-link, [id*="restore"]') as HTMLElement | null;
+  if (closeBtn) closeBtn.click();
+
+  // 4. Reset body positioning
+  if (document.body) {
+    document.body.style.top = '0px';
+    document.body.style.position = 'static';
+  }
+}
+
 export function AccessibilityProvider({ children }: { children: ReactNode }) {
   const [fontSize, setFontSizeState] = useState<FontSizeOption>('md');
   const [explanationMode, setExplanationModeState] = useState<ExplanationMode>('simple');
@@ -41,10 +163,6 @@ export function AccessibilityProvider({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     if (typeof window !== 'undefined') {
-      // Clear any legacy Google Translate cookies
-      document.cookie = 'googtrans=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;';
-      document.cookie = 'googtrans=; expires=Thu, 01 Jan 1970 00:00:00 UTC;';
-
       const savedFontSize = localStorage.getItem('ql_font_size') as FontSizeOption;
       if (savedFontSize) setFontSizeState(savedFontSize);
 
@@ -62,12 +180,24 @@ export function AccessibilityProvider({ children }: { children: ReactNode }) {
         localStorage.setItem('ql_language', urlLang);
         document.cookie = `NEXT_LOCALE=${urlLang}; path=/; max-age=31536000; SameSite=Lax`;
         document.documentElement.lang = urlLang;
+        document.documentElement.setAttribute('data-lang', urlLang);
+        if (urlLang === 'en') {
+          clearGoogleTransCookies();
+        } else {
+          setGoogleTransCookie(urlLang as Language);
+        }
       } else {
         const savedLang = localStorage.getItem('ql_language') as Language;
         if (savedLang && supportedList.includes(savedLang)) {
           setLanguageState(savedLang);
           document.cookie = `NEXT_LOCALE=${savedLang}; path=/; max-age=31536000; SameSite=Lax`;
           document.documentElement.lang = savedLang;
+          document.documentElement.setAttribute('data-lang', savedLang);
+          if (savedLang === 'en') {
+            clearGoogleTransCookies();
+          } else {
+            setGoogleTransCookie(savedLang);
+          }
         }
       }
 
@@ -140,13 +270,43 @@ export function AccessibilityProvider({ children }: { children: ReactNode }) {
     announce(`Reduced motion ${val ? 'enabled' : 'disabled'}`);
   };
 
-  const setLanguage = (lang: Language) => {
+  const setLanguage = (lang: Language, reload = false) => {
     setLanguageState(lang);
     if (typeof window !== 'undefined') {
       localStorage.setItem('ql_language', lang);
       document.cookie = `NEXT_LOCALE=${lang}; path=/; max-age=31536000; SameSite=Lax`;
       document.documentElement.lang = lang;
       document.documentElement.setAttribute('data-lang', lang);
+
+      if (lang === 'en') {
+        clearGoogleTransCookies();
+        restoreGoogleTranslateOriginal();
+      } else {
+        setGoogleTransCookie(lang);
+      }
+
+      window.dispatchEvent(new CustomEvent('quanbit:language-change', { detail: { language: lang } }));
+
+      if (reload) {
+        const url = new URL(window.location.href);
+        if (lang === 'en') {
+          // Remove ?lang= or ?locale= params so the page loads in clean native English
+          url.searchParams.delete('lang');
+          url.searchParams.delete('locale');
+          const cleanTarget = url.pathname + (url.search ? url.search : '') + url.hash;
+          window.location.href = cleanTarget;
+        } else {
+          if (url.searchParams.has('lang')) {
+            url.searchParams.set('lang', lang);
+            window.location.href = url.toString();
+          } else if (url.searchParams.has('locale')) {
+            url.searchParams.set('locale', lang);
+            window.location.href = url.toString();
+          } else {
+            window.location.reload();
+          }
+        }
+      }
     }
     announce(`Language set to ${lang}`);
   };

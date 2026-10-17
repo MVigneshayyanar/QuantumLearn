@@ -891,7 +891,7 @@ export function AlgorithmModuleView({
                                         )}
                                         {isExecuted && !isCurrent && (
                                           <span className="absolute -top-1 -right-1 w-3.5 h-3.5 bg-emerald-500 text-white rounded-full flex items-center justify-center text-[8px] font-bold shadow-xs z-20">
-                                            ✓
+                                            <Check className="w-2.5 h-2.5 text-white" />
                                           </span>
                                         )}
                                       </div>

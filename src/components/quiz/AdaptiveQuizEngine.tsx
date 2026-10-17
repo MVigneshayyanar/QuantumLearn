@@ -19,6 +19,8 @@ import {
   HelpCircle,
   X,
   Award,
+  Check,
+  Lightbulb,
 } from 'lucide-react';
 import confetti from 'canvas-confetti';
 import { QuantumCertificateModal } from '@/components/certificate/QuantumCertificateModal';
@@ -336,7 +338,17 @@ Could you teach me the core quantum principles behind these mistakes in simple t
                         : 'bg-red-100 dark:bg-red-900/80 text-red-800 dark:text-red-200'
                     }`}
                   >
-                    {correct === undefined ? 'Skipped' : correct ? 'Correct ✓' : 'Incorrect ✗'}
+                    {correct === undefined ? (
+                      'Skipped'
+                    ) : correct ? (
+                      <span className="inline-flex items-center gap-1">
+                        Correct <Check className="w-3 h-3 text-emerald-600 dark:text-emerald-400" />
+                      </span>
+                    ) : (
+                      <span className="inline-flex items-center gap-1">
+                        Incorrect <X className="w-3 h-3 text-red-600 dark:text-red-400" />
+                      </span>
+                    )}
                   </span>
                 </div>
 
@@ -409,8 +421,8 @@ Could you teach me the core quantum principles behind these mistakes in simple t
         {/* Perfect score banner */}
         {scorePercent === 100 && (
           <div className="p-2 rounded-xl bg-emerald-50 border border-emerald-200 flex items-center justify-center gap-2 text-[11px] text-emerald-900 font-bold animate-fadeIn">
-            <Sparkles className="w-4 h-4 text-emerald-600" />
-            <span>🎉 Perfect 100% Score! You have fully mastered this stage!</span>
+            <Trophy className="w-4 h-4 text-amber-500 shrink-0" />
+            <span>Perfect 100% Score! You have fully mastered this stage!</span>
           </div>
         )}
 
@@ -533,7 +545,10 @@ Could you teach me the core quantum principles behind these mistakes in simple t
                 {/* Socratic Hint */}
                 {reviewingQuestion.hint && (
                   <div className="p-2.5 rounded-xl bg-amber-50 border border-amber-200 text-xs text-amber-900 flex items-start gap-2">
-                    <span className="font-bold">💡 Clue:</span>
+                    <span className="font-bold inline-flex items-center gap-1">
+                      <Lightbulb className="w-3.5 h-3.5 text-amber-600 shrink-0" />
+                      Clue:
+                    </span>
                     <span>{reviewingQuestion.hint}</span>
                   </div>
                 )}
@@ -643,7 +658,15 @@ Could you teach me the core quantum principles behind these mistakes in simple t
               }`}
               title={`Question ${idx + 1}`}
             >
-              {idx < currentIdx ? (answers[q.id] ? '✓' : '✗') : `Q${idx + 1}`}
+              {idx < currentIdx ? (
+                answers[q.id] ? (
+                  <Check className="w-3.5 h-3.5 text-white stroke-[2.5]" />
+                ) : (
+                  <X className="w-3.5 h-3.5 text-white stroke-[2.5]" />
+                )
+              ) : (
+                `Q${idx + 1}`
+              )}
             </div>
           ))}
           <span className="ml-1 text-[11px] font-mono font-bold text-dark-600">
@@ -800,8 +823,9 @@ Could you teach me the core quantum principles behind these mistakes in simple t
             </button>
           )}
           {showHint && !isSubmitted && currentQ.hint && (
-            <span className="text-xs text-amber-800 bg-amber-50 border border-amber-200 px-2.5 py-0.5 rounded-lg animate-fadeIn">
-              💡 {currentQ.hint}
+            <span className="text-xs text-amber-800 bg-amber-50 border border-amber-200 px-2.5 py-0.5 rounded-lg animate-fadeIn inline-flex items-center gap-1.5">
+              <Lightbulb className="w-3.5 h-3.5 text-amber-600 shrink-0" />
+              <span>{currentQ.hint}</span>
             </span>
           )}
         </div>
