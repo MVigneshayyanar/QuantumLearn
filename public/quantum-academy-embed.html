@@ -37,8 +37,436 @@
     </style>
     <link rel="stylesheet" href="/sirraya_assets/index-DNxJtfNo.css">
     <link rel="stylesheet" href="/sirraya_assets/QuantumAcademy-B1p-9dS3.css">
+    <style id="light-theme-overrides">
+      html, body {
+        margin: 0;
+        padding: 0;
+        background: #fafafa !important;
+        color: #0f172a !important;
+        height: 100%;
+        overflow-x: hidden;
+      }
+      #root {
+        min-height: 100vh;
+        background: #fafafa !important;
+      }
+
+      /* Core Design Tokens Overrides */
+      .qa {
+        --bg: #fafafa !important;
+        --s1: #ffffff !important;
+        --s2: #f8fafc !important;
+        --s3: #f1f5f9 !important;
+        --line: #e2e8f0 !important;
+        --line2: #cbd5e1 !important;
+        --tx: #0f172a !important;
+        --mu: #475569 !important;
+        --fa: #64748b !important;
+        --ac: #0284c7 !important;
+        --ac2: #7c3aed !important;
+        background: var(--bg) !important;
+        color: var(--tx) !important;
+      }
+
+      /* Top Navigation Bar */
+      .qa-top {
+        background: #ffffff !important;
+        border-bottom: 1px solid #e2e8f0 !important;
+      }
+      .qa-brand small {
+        color: #64748b !important;
+      }
+      .qa-tabs.main button {
+        color: #475569 !important;
+      }
+      .qa-tabs.main button:hover {
+        background: #f1f5f9 !important;
+        color: #0f172a !important;
+      }
+      .qa-tabs button.on {
+        color: #0284c7 !important;
+        background: #e0f2fe !important;
+      }
+      .qa-tabs:not(.main) button.on {
+        background: none !important;
+        border-bottom: 2px solid #0284c7 !important;
+        color: #0284c7 !important;
+      }
+
+      /* Sidebar & Lesson Index */
+      .qa-side {
+        background: #ffffff !important;
+        border-right: 1px solid #e2e8f0 !important;
+      }
+      .qa-part h4 {
+        color: #64748b !important;
+      }
+      .qa-item {
+        color: #334155 !important;
+      }
+      .qa-item:hover {
+        background: #f1f5f9 !important;
+        color: #0f172a !important;
+      }
+      .qa-item.on {
+        background: #e0f2fe !important;
+        color: #0369a1 !important;
+        box-shadow: inset 0 0 0 1px #7dd3fc !important;
+        font-weight: 600 !important;
+      }
+      .qa-item.on small {
+        color: #0284c7 !important;
+      }
+      .qa-dot {
+        border-color: #cbd5e1 !important;
+        color: #64748b !important;
+        background: #f8fafc !important;
+      }
+      .qa-dot.done {
+        background: #dcfce7 !important;
+        border-color: #86efac !important;
+        color: #15803d !important;
+      }
+
+      /* Main Reading Surface */
+      .qa-main {
+        background: #fafafa !important;
+        color: #0f172a !important;
+      }
+      .qa-lesson h1, .qa-page h1 {
+        color: #0f172a !important;
+      }
+      .qa-kicker {
+        color: #0284c7 !important;
+      }
+      .qa-lead {
+        color: #475569 !important;
+      }
+      .qa-obj {
+        background: #ffffff !important;
+        border: 1px solid #e2e8f0 !important;
+        box-shadow: 0 1px 3px 0 rgb(0 0 0 / 0.04) !important;
+      }
+      .qa-obj ul {
+        color: #334155 !important;
+      }
+      .qa-prose {
+        color: #1e293b !important;
+      }
+      .qa-prose h2, .qa-prose h3, .qa-prose h4, .qa-prose strong {
+        color: #0f172a !important;
+      }
+      .qa-prose p, .qa-prose li {
+        color: #334155 !important;
+      }
+      .qa-prose a {
+        color: #0284c7 !important;
+      }
+      .qa-prose code {
+        background: #f1f5f9 !important;
+        border: 1px solid #e2e8f0 !important;
+        color: #0f172a !important;
+      }
+      .qa-prose pre {
+        background: #0f172a !important;
+        color: #f8fafc !important;
+        border: 1px solid #1e293b !important;
+      }
+      .qa-prose pre code {
+        background: none !important;
+        border: none !important;
+        color: inherit !important;
+      }
+      .qa-prose blockquote {
+        border-left-color: #7c3aed !important;
+        color: #475569 !important;
+      }
+      .qa-prose th {
+        background: #f1f5f9 !important;
+        color: #0f172a !important;
+        border-color: #cbd5e1 !important;
+      }
+      .qa-prose td {
+        border-color: #e2e8f0 !important;
+        color: #334155 !important;
+      }
+      .qa-prose .katex, .qa-inline .katex {
+        color: #0f172a !important;
+      }
+
+      /* Callouts */
+      .qa-callout {
+        background: #ffffff !important;
+        border: 1px solid #e2e8f0 !important;
+        color: #1e293b !important;
+      }
+      .qa-callout.tip {
+        background: #f0fdf4 !important;
+        border-color: #bbf7d0 !important;
+      }
+      .qa-callout.warn {
+        background: #fffbeb !important;
+        border-color: #fde68a !important;
+      }
+      .qa-callout.math {
+        background: #f5f3ff !important;
+        border-color: #ddd6fe !important;
+      }
+      .qa-callout.note {
+        background: #f0f9ff !important;
+        border-color: #bae6fd !important;
+      }
+      .qa-callout.history {
+        background: #fffbeb !important;
+        border-color: #fde68a !important;
+      }
+
+      /* Panels, Interactive Widgets & Controls */
+      .qa-panel {
+        background: #ffffff !important;
+        border-color: #e2e8f0 !important;
+        box-shadow: 0 1px 3px 0 rgb(0 0 0 / 0.04) !important;
+      }
+      .qa-panel-h {
+        color: #475569 !important;
+      }
+      .qa-fig {
+        background: #ffffff !important;
+        border-color: #e2e8f0 !important;
+      }
+      .qa-fig-bar {
+        background: #f8fafc !important;
+        border-bottom-color: #e2e8f0 !important;
+        color: #475569 !important;
+      }
+      .qa-fig figcaption {
+        background: #ffffff !important;
+        border-top-color: #e2e8f0 !important;
+        color: #475569 !important;
+      }
+      .qa-page .qa-widget {
+        background: #ffffff !important;
+        border-color: #e2e8f0 !important;
+      }
+      .qa-btn {
+        background: #f8fafc !important;
+        border-color: #cbd5e1 !important;
+        color: #0f172a !important;
+      }
+      .qa-btn:hover:not(:disabled) {
+        background: #f1f5f9 !important;
+        border-color: #94a3b8 !important;
+      }
+      .qa-btn.on {
+        background: #e0f2fe !important;
+        border-color: #0284c7 !important;
+        color: #0369a1 !important;
+      }
+      .qa-select {
+        background: #ffffff !important;
+        color: #0f172a !important;
+        border-color: #cbd5e1 !important;
+      }
+      .qa-ket, .qa-stat {
+        background: #f8fafc !important;
+        border-color: #e2e8f0 !important;
+        color: #0f172a !important;
+      }
+      .qa-stat span {
+        color: #64748b !important;
+      }
+      .qa-bloch {
+        background: #ffffff !important;
+        border: 1px solid #e2e8f0 !important;
+        border-radius: 14px !important;
+        box-shadow: 0 4px 16px -2px rgba(15, 23, 42, 0.05), 0 1px 2px rgba(15, 23, 42, 0.03) !important;
+        position: relative !important;
+        overflow: hidden !important;
+        display: block !important;
+      }
+      .qa-bloch canvas {
+        width: 100% !important;
+        height: 100% !important;
+        display: block !important;
+      }
+      .qa-grid2 .qa-bloch {
+        min-height: 360px !important;
+      }
+      .qa-circuit-scroll {
+        background: #f8fafc !important;
+        border-color: #e2e8f0 !important;
+      }
+      .qa-qchip {
+        background: #ffffff !important;
+        border-color: #cbd5e1 !important;
+        color: #0f172a !important;
+      }
+      .qa-qchip.on {
+        background: #e0f2fe !important;
+        border-color: #0284c7 !important;
+      }
+      .qa-qchip span {
+        color: #64748b !important;
+      }
+      .qa-amptable th {
+        background: #f1f5f9 !important;
+        color: #475569 !important;
+      }
+      .qa-amptable td {
+        border-top-color: #e2e8f0 !important;
+        color: #0f172a !important;
+      }
+      .qa-opt {
+        background: #ffffff !important;
+        border-color: #e2e8f0 !important;
+        color: #0f172a !important;
+      }
+      .qa-opt span:first-child {
+        background: #f1f5f9 !important;
+        color: #475569 !important;
+      }
+      .qa-opt:hover:not(:disabled) {
+        background: #f0f9ff !important;
+        border-color: #0284c7 !important;
+      }
+      .qa-quiz {
+        background: #ffffff !important;
+        border-color: #e2e8f0 !important;
+      }
+      .qa-take {
+        background: #f0f9ff !important;
+        border-color: #bae6fd !important;
+      }
+      .qa-nav button {
+        background: #ffffff !important;
+        border-color: #cbd5e1 !important;
+        color: #0f172a !important;
+      }
+      .qa-nav button:hover {
+        background: #f1f5f9 !important;
+      }
+      .qa-card {
+        background: #ffffff !important;
+        border-color: #e2e8f0 !important;
+        color: #0f172a !important;
+      }
+      .qa-card p {
+        color: #475569 !important;
+      }
+      .qa-card .katex {
+        color: #0f172a !important;
+      }
+      .qa-search {
+        background: #ffffff !important;
+        border-color: #cbd5e1 !important;
+        color: #0f172a !important;
+      }
+      .qa-gloss dt {
+        color: #0f172a !important;
+      }
+      .qa-gloss dd {
+        color: #475569 !important;
+      }
+
+      /* Hardware Lab */
+      .hw-transport {
+        background: #ffffffed !important;
+        border-bottom-color: #e2e8f0 !important;
+      }
+      .hw-tab {
+        background: #ffffff !important;
+        border-color: #e2e8f0 !important;
+        color: #0f172a !important;
+      }
+      .hw-tab.on {
+        background: #f0f9ff !important;
+        border-color: #0284c7 !important;
+      }
+      .hw-sections {
+        background: #ffffff !important;
+        border-color: #e2e8f0 !important;
+      }
+      .hw-sec {
+        border-top-color: #e2e8f0 !important;
+      }
+      .hw-sec>header span {
+        color: #0f172a !important;
+      }
+      .hw-svg {
+        background: #f8fafc !important;
+        border-color: #e2e8f0 !important;
+      }
+      .hw-wire {
+        stroke: #cbd5e1 !important;
+      }
+      .hw-cur {
+        background: #f0f9ff !important;
+        border-color: #bae6fd !important;
+        color: #0369a1 !important;
+      }
+      .hw-cur b {
+        color: #0f172a !important;
+      }
+      .hw-stage {
+        background: #ffffff !important;
+        border-color: #e2e8f0 !important;
+      }
+      .hw-stage-h {
+        color: #0f172a !important;
+      }
+      .hw-step {
+        background: #f1f5f9 !important;
+        border-color: #cbd5e1 !important;
+        color: #334155 !important;
+      }
+      .hw-step.on {
+        background: #0284c7 !important;
+        color: #ffffff !important;
+      }
+      .hw-step.done {
+        border-color: #22c55e !important;
+      }
+      .hw-table th {
+        background: #f1f5f9 !important;
+        color: #334155 !important;
+        border-color: #e2e8f0 !important;
+      }
+      .hw-table td, .hw-table2 td, .hw-table2 th {
+        border-color: #e2e8f0 !important;
+      }
+      .hw-table2 thead th {
+        background: #f1f5f9 !important;
+        color: #0f172a !important;
+      }
+      .hw-table2 tbody th {
+        background: #ffffff !important;
+        color: #475569 !important;
+      }
+      .hw-list {
+        color: #334155 !important;
+      }
+      .hw-chip {
+        background: #f1f5f9 !important;
+        border-color: #cbd5e1 !important;
+        color: #6d28d9 !important;
+      }
+      .hw-check {
+        background: #f8fafc !important;
+        border-color: #e2e8f0 !important;
+      }
+      .hw-eqs dd {
+        background: #f8fafc !important;
+        border-color: #e2e8f0 !important;
+        color: #0f172a !important;
+      }
+      .hw-ta {
+        background: #ffffff !important;
+        border-color: #cbd5e1 !important;
+        color: #0f172a !important;
+      }
+    </style>
   </head>
-  <body style="background:#000">
+  <body style="background:#fafafa">
     <div id="root"></div>
     <script type="module">
       import { a as G } from '/sirraya_assets/three-DJLfiW-l.js';
