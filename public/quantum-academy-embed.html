@@ -5,6 +5,25 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Quantum Academy</title>
     <meta name="theme-color" content="#fafafa" />
+    <script>
+      (function() {
+        var params = new URLSearchParams(window.location.search);
+        var saved = null;
+        try { saved = localStorage.getItem('ql_theme'); } catch(e) {}
+        var theme = params.get('theme') || saved || (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+        if (theme === 'dark') {
+          document.documentElement.classList.add('dark');
+          document.documentElement.classList.remove('light');
+          document.documentElement.setAttribute('data-theme', 'dark');
+          document.documentElement.style.colorScheme = 'dark';
+        } else {
+          document.documentElement.classList.remove('dark');
+          document.documentElement.classList.add('light');
+          document.documentElement.setAttribute('data-theme', 'light');
+          document.documentElement.style.colorScheme = 'light';
+        }
+      })();
+    </script>
     <style>
       html, body {
         margin: 0;
@@ -14,14 +33,19 @@
         height: 100%;
         overflow-x: hidden;
       }
+      html.dark, html.dark body {
+        background: #0B0F19;
+        color: #F9FAFB;
+      }
       #root {
         min-height: 100vh;
-        background: #fafafa;
+        background: inherit;
       }
       .prose { max-width: none; }
       .prose h1 { font-size: 2.5em; margin-bottom: 1rem; font-weight: 700; }
       .prose h2 { font-size: 2em; margin-top: 2rem; margin-bottom: 1rem; font-weight: 600; }
       .prose pre { background-color: #f1f5f9; border-radius: 0.5rem; }
+      html.dark .prose pre { background-color: #070B14; }
     </style>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -248,341 +272,842 @@
       .qa-main::-webkit-scrollbar-thumb:hover, .qa-side::-webkit-scrollbar-thumb:hover {
         background: #94a3b8;
       }
-      .qa-lesson h1, .qa-page h1 {
+      /* ========================================================= */
+      /* QUANBIT LIGHT THEME OVERRIDES                             */
+      /* ========================================================= */
+      html:not(.dark) .qa-main {
+        background: #fafafa !important;
         color: #0f172a !important;
       }
-      .qa-kicker {
+      html:not(.dark) .qa-lesson h1, html:not(.dark) .qa-page h1 {
+        color: #0f172a !important;
+      }
+      html:not(.dark) .qa-kicker {
         color: #4F46E5 !important;
       }
-      .qa-lead {
+      html:not(.dark) .qa-lead {
         color: #475569 !important;
       }
-      .qa-obj {
+      html:not(.dark) .qa-obj {
         background: #ffffff !important;
         border: 1px solid #e2e8f0 !important;
         box-shadow: 0 1px 3px 0 rgb(0 0 0 / 0.04) !important;
       }
-      .qa-obj ul {
+      html:not(.dark) .qa-obj ul {
         color: #334155 !important;
       }
-      .qa-prose {
+      html:not(.dark) .qa-prose {
         color: #1e293b !important;
       }
-      .qa-prose h2, .qa-prose h3, .qa-prose h4, .qa-prose strong {
+      html:not(.dark) .qa-prose h2, html:not(.dark) .qa-prose h3, html:not(.dark) .qa-prose h4, html:not(.dark) .qa-prose strong {
         color: #0f172a !important;
       }
-      .qa-prose p, .qa-prose li {
+      html:not(.dark) .qa-prose p, html:not(.dark) .qa-prose li {
         color: #334155 !important;
       }
-      .qa-prose a {
+      html:not(.dark) .qa-prose a {
         color: #4F46E5 !important;
       }
-      .qa-prose code {
+      html:not(.dark) .qa-prose code {
         background: #f1f5f9 !important;
         border: 1px solid #e2e8f0 !important;
         color: #0f172a !important;
       }
-      .qa-prose pre {
+      html:not(.dark) .qa-prose pre {
         background: #0f172a !important;
         color: #f8fafc !important;
         border: 1px solid #1e293b !important;
       }
-      .qa-prose pre code {
+      html:not(.dark) .qa-prose pre code {
         background: none !important;
         border: none !important;
         color: inherit !important;
       }
-      .qa-prose blockquote {
+      html:not(.dark) .qa-prose blockquote {
         border-left-color: #7c3aed !important;
         color: #475569 !important;
       }
-      .qa-prose th {
+      html:not(.dark) .qa-prose th {
         background: #f1f5f9 !important;
         color: #0f172a !important;
         border-color: #cbd5e1 !important;
       }
-      .qa-prose td {
+      html:not(.dark) .qa-prose td {
         border-color: #e2e8f0 !important;
         color: #334155 !important;
       }
-      .qa-prose .katex, .qa-inline .katex {
+      html:not(.dark) .qa-prose .katex, html:not(.dark) .qa-inline .katex {
         color: #0f172a !important;
       }
-
-      /* Callouts */
-      .qa-callout {
+      html:not(.dark) .qa-callout {
         background: #ffffff !important;
         border: 1px solid #e2e8f0 !important;
         color: #1e293b !important;
       }
-      .qa-callout.tip {
+      html:not(.dark) .qa-callout.tip {
         background: #f0fdf4 !important;
         border-color: #bbf7d0 !important;
       }
-      .qa-callout.warn {
+      html:not(.dark) .qa-callout.warn {
         background: #fffbeb !important;
         border-color: #fde68a !important;
       }
-      .qa-callout.math {
+      html:not(.dark) .qa-callout.math {
         background: #f5f3ff !important;
         border-color: #ddd6fe !important;
       }
-      .qa-callout.note {
+      html:not(.dark) .qa-callout.note {
         background: #f0f9ff !important;
         border-color: #bae6fd !important;
       }
-      .qa-callout.history {
+      html:not(.dark) .qa-callout.history {
         background: #fffbeb !important;
         border-color: #fde68a !important;
       }
-
-      /* Panels, Interactive Widgets & Controls */
-      .qa-panel {
+      html:not(.dark) .qa-panel {
         background: #ffffff !important;
         border-color: #e2e8f0 !important;
         box-shadow: 0 1px 3px 0 rgb(0 0 0 / 0.04) !important;
       }
-      .qa-panel-h {
+      html:not(.dark) .qa-panel-h {
         color: #475569 !important;
       }
-      .qa-fig {
+      html:not(.dark) .qa-fig {
         background: #ffffff !important;
         border-color: #e2e8f0 !important;
       }
-      .qa-fig-bar {
+      html:not(.dark) .qa-fig-bar {
         background: #f8fafc !important;
         border-bottom-color: #e2e8f0 !important;
         color: #475569 !important;
       }
-      .qa-fig figcaption {
+      html:not(.dark) .qa-fig figcaption {
         background: #ffffff !important;
         border-top-color: #e2e8f0 !important;
         color: #475569 !important;
       }
-      .qa-page .qa-widget {
+      html:not(.dark) .qa-page .qa-widget {
         background: #ffffff !important;
         border-color: #e2e8f0 !important;
       }
-      .qa-btn {
+      html:not(.dark) .qa-btn {
         background: #f8fafc !important;
         border-color: #cbd5e1 !important;
         color: #0f172a !important;
       }
-      .qa-btn:hover:not(:disabled) {
+      html:not(.dark) .qa-btn:hover:not(:disabled) {
         background: #f1f5f9 !important;
         border-color: #94a3b8 !important;
       }
-      .qa-btn.on {
+      html:not(.dark) .qa-btn.on {
         background: #EEF2FF !important;
         border-color: #4F46E5 !important;
         color: #4F46E5 !important;
       }
-      .qa-select {
+      html:not(.dark) .qa-select {
         background: #ffffff !important;
         color: #0f172a !important;
         border-color: #cbd5e1 !important;
       }
-      .qa-ket, .qa-stat {
+      html:not(.dark) .qa-ket, html:not(.dark) .qa-stat {
         background: #f8fafc !important;
         border-color: #e2e8f0 !important;
         color: #0f172a !important;
       }
-      .qa-stat span {
+      html:not(.dark) .qa-stat span {
         color: #64748b !important;
       }
-      .qa-bloch {
+      html:not(.dark) .qa-bloch {
         background: #ffffff !important;
         border: 1px solid #e2e8f0 !important;
         border-radius: 14px !important;
         box-shadow: 0 4px 16px -2px rgba(15, 23, 42, 0.05), 0 1px 2px rgba(15, 23, 42, 0.03) !important;
-        position: relative !important;
-        overflow: hidden !important;
-        display: block !important;
       }
-      .qa-bloch canvas {
-        width: 100% !important;
-        height: 100% !important;
-        display: block !important;
-      }
-      .qa-grid2 .qa-bloch {
-        min-height: 360px !important;
-      }
-      .qa-circuit-scroll {
+      html:not(.dark) .qa-circuit-scroll {
         background: #f8fafc !important;
         border-color: #e2e8f0 !important;
       }
-      .qa-qchip {
+      html:not(.dark) .qa-qchip {
         background: #ffffff !important;
         border-color: #cbd5e1 !important;
         color: #0f172a !important;
       }
-      .qa-qchip.on {
+      html:not(.dark) .qa-qchip.on {
         background: #EEF2FF !important;
         border-color: #4F46E5 !important;
       }
-      .qa-qchip span {
+      html:not(.dark) .qa-qchip span {
         color: #64748b !important;
       }
-      .qa-amptable th {
+      html:not(.dark) .qa-amptable th {
         background: #f1f5f9 !important;
         color: #475569 !important;
       }
-      .qa-amptable td {
+      html:not(.dark) .qa-amptable td {
         border-top-color: #e2e8f0 !important;
         color: #0f172a !important;
       }
-      .qa-opt {
+      html:not(.dark) .qa-opt {
         background: #ffffff !important;
         border-color: #e2e8f0 !important;
         color: #0f172a !important;
       }
-      .qa-opt span:first-child {
+      html:not(.dark) .qa-opt span:first-child {
         background: #f1f5f9 !important;
         color: #475569 !important;
       }
-      .qa-opt:hover:not(:disabled) {
+      html:not(.dark) .qa-opt:hover:not(:disabled) {
         background: #f0f9ff !important;
         border-color: #4F46E5 !important;
       }
-      .qa-quiz {
+      html:not(.dark) .qa-quiz {
         background: #ffffff !important;
         border-color: #e2e8f0 !important;
       }
-      .qa-take {
+      html:not(.dark) .qa-take {
         background: #f0f9ff !important;
         border-color: #bae6fd !important;
       }
-      .qa-nav button {
+      html:not(.dark) .qa-nav button {
         background: #ffffff !important;
         border-color: #cbd5e1 !important;
         color: #0f172a !important;
       }
-      .qa-nav button:hover {
+      html:not(.dark) .qa-nav button:hover {
         background: #f1f5f9 !important;
       }
-      .qa-card {
+      html:not(.dark) .qa-card {
         background: #ffffff !important;
         border-color: #e2e8f0 !important;
         color: #0f172a !important;
       }
-      .qa-card p {
+      html:not(.dark) .qa-card p {
         color: #475569 !important;
       }
-      .qa-card .katex {
+      html:not(.dark) .qa-card .katex {
         color: #0f172a !important;
       }
-      .qa-search {
+      html:not(.dark) .qa-search {
         background: #ffffff !important;
         border-color: #cbd5e1 !important;
         color: #0f172a !important;
       }
-      .qa-gloss dt {
+      html:not(.dark) .qa-gloss dt {
         color: #0f172a !important;
       }
-      .qa-gloss dd {
+      html:not(.dark) .qa-gloss dd {
         color: #475569 !important;
       }
-
-      /* Hardware Lab */
-      .hw-transport {
+      html:not(.dark) .hw-transport {
         background: #ffffffed !important;
         border-bottom-color: #e2e8f0 !important;
       }
-      .hw-tab {
+      html:not(.dark) .hw-tab {
         background: #ffffff !important;
         border-color: #e2e8f0 !important;
         color: #0f172a !important;
       }
-      .hw-tab.on {
+      html:not(.dark) .hw-tab.on {
         background: #f0f9ff !important;
         border-color: #4F46E5 !important;
       }
-      .hw-sections {
+      html:not(.dark) .hw-sections {
         background: #ffffff !important;
         border-color: #e2e8f0 !important;
       }
-      .hw-sec {
+      html:not(.dark) .hw-sec {
         border-top-color: #e2e8f0 !important;
       }
-      .hw-sec>header span {
+      html:not(.dark) .hw-sec>header span {
         color: #0f172a !important;
       }
-      .hw-svg {
+      html:not(.dark) .hw-svg {
         background: #f8fafc !important;
         border-color: #e2e8f0 !important;
       }
-      .hw-wire {
+      html:not(.dark) .hw-wire {
         stroke: #cbd5e1 !important;
       }
-      .hw-cur {
+      html:not(.dark) .hw-cur {
         background: #f0f9ff !important;
         border-color: #bae6fd !important;
         color: #4F46E5 !important;
       }
-      .hw-cur b {
+      html:not(.dark) .hw-cur b {
         color: #0f172a !important;
       }
-      .hw-stage {
+      html:not(.dark) .hw-stage {
         background: #ffffff !important;
         border-color: #e2e8f0 !important;
       }
-      .hw-stage-h {
+      html:not(.dark) .hw-stage-h {
         color: #0f172a !important;
       }
-      .hw-step {
+      html:not(.dark) .hw-step {
         background: #f1f5f9 !important;
         border-color: #cbd5e1 !important;
         color: #334155 !important;
       }
-      .hw-step.on {
+      html:not(.dark) .hw-step.on {
         background: #4F46E5 !important;
         color: #ffffff !important;
       }
-      .hw-step.done {
+      html:not(.dark) .hw-step.done {
         border-color: #22c55e !important;
       }
-      .hw-table th {
+      html:not(.dark) .hw-table th {
         background: #f1f5f9 !important;
         color: #334155 !important;
         border-color: #e2e8f0 !important;
       }
-      .hw-table td, .hw-table2 td, .hw-table2 th {
+      html:not(.dark) .hw-table td, html:not(.dark) .hw-table2 td, html:not(.dark) .hw-table2 th {
         border-color: #e2e8f0 !important;
       }
-      .hw-table2 thead th {
+      html:not(.dark) .hw-table2 thead th {
         background: #f1f5f9 !important;
         color: #0f172a !important;
       }
-      .hw-table2 tbody th {
+      html:not(.dark) .hw-table2 tbody th {
         background: #ffffff !important;
         color: #475569 !important;
       }
-      .hw-list {
+      html:not(.dark) .hw-list {
         color: #334155 !important;
       }
-      .hw-chip {
+      html:not(.dark) .hw-chip {
         background: #f1f5f9 !important;
         border-color: #cbd5e1 !important;
         color: #6d28d9 !important;
       }
-      .hw-check {
+      html:not(.dark) .hw-check {
         background: #f8fafc !important;
         border-color: #e2e8f0 !important;
       }
-      .hw-eqs dd {
+      html:not(.dark) .hw-eqs dd {
         background: #f8fafc !important;
         border-color: #e2e8f0 !important;
         color: #0f172a !important;
       }
-      .hw-ta {
+      html:not(.dark) .hw-ta {
         background: #ffffff !important;
         border-color: #cbd5e1 !important;
         color: #0f172a !important;
       }
+
+      /* ========================================================= */
+      /* QUANBIT DARK THEME OVERRIDES (#0B0F19 / #111827 / #1E293B) */
+      /* ========================================================= */
+      html.dark, html.dark body {
+        background: #0B0F19 !important;
+        color: #F9FAFB !important;
+        color-scheme: dark !important;
+      }
+      html.dark #root {
+        background: #0B0F19 !important;
+      }
+      html.dark .qa {
+        --bg: #0B0F19 !important;
+        --s1: #111827 !important;
+        --s2: #161F30 !important;
+        --s3: #1E293B !important;
+        --line: #1E293B !important;
+        --line2: #334155 !important;
+        --tx: #F9FAFB !important;
+        --mu: #CBD5E1 !important;
+        --fa: #94A3B8 !important;
+        --ac: #6366F1 !important;
+        --ac2: #818CF8 !important;
+        background: var(--bg) !important;
+        color: var(--tx) !important;
+      }
+
+      /* Dark Navigation & Tabs */
+      html.dark .qa-top {
+        background: #111827 !important;
+        border-bottom: 1px solid #1E293B !important;
+      }
+      html.dark .qa-tabs.main button {
+        color: #94A3B8 !important;
+      }
+      html.dark .qa-tabs.main button:hover {
+        background: #1E293B !important;
+        color: #F9FAFB !important;
+      }
+      html.dark .qa-tabs button.on {
+        color: #818CF8 !important;
+        background: #1E1B4B !important;
+      }
+      html.dark .qa-tabs:not(.main) button.on {
+        background: none !important;
+        border-bottom: 2px solid #6366F1 !important;
+        color: #818CF8 !important;
+      }
+
+      /* Dark Sidebar */
+      html.dark .qa-side {
+        background: #0B0F19 !important;
+        border-right: 1px solid #1E293B !important;
+      }
+      html.dark .qa-part h4 {
+        color: #94A3B8 !important;
+      }
+      html.dark .qa-item {
+        color: #CBD5E1 !important;
+      }
+      html.dark .qa-item:hover {
+        background: #1E293B !important;
+        color: #FFFFFF !important;
+      }
+      html.dark .qa-item.on {
+        background: #1E1B4B !important;
+        color: #A5B4FC !important;
+        box-shadow: inset 0 0 0 1px #4338CA !important;
+      }
+      html.dark .qa-item small {
+        color: #94A3B8 !important;
+      }
+      html.dark .qa-dot {
+        border-color: #334155 !important;
+        color: #CBD5E1 !important;
+      }
+      html.dark .qa-dot.done {
+        background: #14532d !important;
+        border-color: #166534 !important;
+        color: #bbf7d0 !important;
+      }
+      html.dark .qa-item.on .qa-dot {
+        border-color: #6366F1 !important;
+        color: #A5B4FC !important;
+      }
+
+      /* Dark Main View & Lesson Headers */
+      html.dark .qa-main {
+        background: #0B0F19 !important;
+        color: #F9FAFB !important;
+      }
+      html.dark .qa-lesson h1,
+      html.dark .qa-page h1,
+      html.dark .qa-prose h1,
+      html.dark .qa-prose h2,
+      html.dark .qa-prose h3,
+      html.dark .qa-prose h4,
+      html.dark .qa-page h2,
+      html.dark .hw-stage-h,
+      html.dark .hw-sec > header span,
+      html.dark .hw-cur b {
+        color: #FFFFFF !important;
+        font-weight: 700 !important;
+      }
+      html.dark .qa-kicker {
+        color: #818CF8 !important;
+      }
+      html.dark .qa-lead {
+        color: #CBD5E1 !important;
+      }
+
+      /* Dark Prose, Paragraphs & Lists - Crisp High-Contrast White/Slate Readability */
+      html.dark .qa-prose,
+      html.dark .qa-prose p,
+      html.dark .qa-prose li,
+      html.dark .qa-prose ul,
+      html.dark .qa-prose ol,
+      html.dark .qa-prose dd,
+      html.dark .hw-blurb,
+      html.dark .hw-list,
+      html.dark .hw-list li,
+      html.dark .hw-stage p,
+      html.dark .hw-stage li,
+      html.dark .hw-stage ul {
+        color: #E2E8F0 !important;
+        line-height: 1.75 !important;
+      }
+      html.dark .qa-prose strong,
+      html.dark .qa-prose b,
+      html.dark .qa-card b,
+      html.dark .qa-obj strong,
+      html.dark .qa-obj b {
+        color: #FFFFFF !important;
+      }
+
+      /* Dark Objectives Box */
+      html.dark .qa-obj {
+        border: 1px solid #1E293B !important;
+        background: #111827 !important;
+        box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3) !important;
+      }
+      html.dark .qa-obj ul {
+        color: #E2E8F0 !important;
+      }
+      html.dark .qa-obj li {
+        color: #E2E8F0 !important;
+        margin: 6px 0 !important;
+      }
+      html.dark .qa-obj h4,
+      html.dark .qa-obj span,
+      html.dark .qa-obj small,
+      html.dark .qa-obj b {
+        color: #A5B4FC !important;
+      }
+
+      /* Dark KaTeX Math Expressions */
+      html.dark .katex,
+      html.dark .katex-display,
+      html.dark .qa-prose .katex,
+      html.dark .qa-inline .katex,
+      html.dark .qa-card .katex {
+        color: #F8FAFC !important;
+      }
+
+      /* Dark Code Blocks & Inline Code */
+      html.dark .qa-prose code {
+        background: #1E293B !important;
+        border: 1px solid #334155 !important;
+        color: #A5B4FC !important;
+      }
+      html.dark .qa-prose pre {
+        background: #070B14 !important;
+        border-color: #1E293B !important;
+        color: #E2E8F0 !important;
+      }
+      html.dark .qa-prose pre code {
+        background: none !important;
+        border: none !important;
+        color: inherit !important;
+      }
+      html.dark .qa-prose a,
+      html.dark .qa-card a,
+      html.dark .qa-link {
+        color: #818CF8 !important;
+      }
+      html.dark .qa-prose blockquote {
+        border-left-color: #6366F1 !important;
+        color: #CBD5E1 !important;
+        background: rgba(99, 102, 241, 0.08) !important;
+      }
+
+      /* Dark Tables */
+      html.dark .qa-prose table th,
+      html.dark .qa-table th,
+      html.dark .hw-table th,
+      html.dark .hw-table2 thead th {
+        background: #1E293B !important;
+        border-color: #334155 !important;
+        color: #F1F5F9 !important;
+      }
+      html.dark .qa-prose table td,
+      html.dark .qa-table td,
+      html.dark .hw-table td,
+      html.dark .hw-table2 td {
+        border-color: #1E293B !important;
+        color: #E2E8F0 !important;
+      }
+      html.dark .hw-table2 tbody th {
+        background: #111827 !important;
+        color: #CBD5E1 !important;
+        border-color: #1E293B !important;
+      }
+
+      /* Dark Callouts */
+      html.dark .qa-callout {
+        border-color: #1E293B !important;
+        background: #111827 !important;
+        color: #E2E8F0 !important;
+      }
+      html.dark .qa-callout b,
+      html.dark .qa-callout strong,
+      html.dark .qa-callout h4 {
+        color: #FFFFFF !important;
+      }
+      html.dark .qa-callout p,
+      html.dark .qa-callout li,
+      html.dark .qa-callout div {
+        color: #E2E8F0 !important;
+      }
+      html.dark .qa-callout.note {
+        border-color: #1E3A8A !important;
+        background: #0F172A !important;
+      }
+      html.dark .qa-callout.tip {
+        border-color: #166534 !important;
+        background: #052E16 !important;
+      }
+      html.dark .qa-callout.warn {
+        border-color: #92400E !important;
+        background: #2E1005 !important;
+      }
+      html.dark .qa-callout.math {
+        border-color: #3730A3 !important;
+        background: #1E1B4B !important;
+      }
+      html.dark .qa-callout.history {
+        border-color: #854D0E !important;
+        background: #231B08 !important;
+      }
+
+      /* Dark Figures & Panels */
+      html.dark .qa-fig {
+        border-color: #1E293B !important;
+        background: #070B14 !important;
+      }
+      html.dark .qa-fig-bar {
+        border-bottom: 1px solid #1E293B !important;
+        color: #94A3B8 !important;
+        background: #111827 !important;
+      }
+      html.dark .qa-fig figcaption {
+        border-top: 1px solid #1E293B !important;
+        color: #CBD5E1 !important;
+      }
+      html.dark .qa-panel {
+        border-color: #1E293B !important;
+        background: #111827 !important;
+      }
+      html.dark .qa-panel-h {
+        color: #94A3B8 !important;
+      }
+      html.dark .qa-bloch {
+        border-color: #1E293B !important;
+        background: #0B0F19 !important;
+      }
+      html.dark .qa-btn {
+        background: #1E293B !important;
+        border-color: #334155 !important;
+        color: #F1F5F9 !important;
+      }
+      html.dark .qa-btn:hover:not(:disabled) {
+        background: #334155 !important;
+        border-color: #475569 !important;
+      }
+      html.dark .qa-btn.on {
+        background: #1E1B4B !important;
+        border-color: #6366F1 !important;
+        color: #A5B4FC !important;
+      }
+
+      /* Dark Cards, Takeaways & Glossary */
+      html.dark .qa-card {
+        border-color: #1E293B !important;
+        background: #111827 !important;
+        color: #E2E8F0 !important;
+      }
+      html.dark .qa-card b,
+      html.dark .qa-card h3,
+      html.dark .qa-card h4 {
+        color: #FFFFFF !important;
+      }
+      html.dark .qa-card p {
+        color: #CBD5E1 !important;
+      }
+      html.dark .qa-take {
+        border-color: #1E3A8A !important;
+        background: #0D1629 !important;
+        color: #E2E8F0 !important;
+      }
+      html.dark .qa-take li {
+        color: #E2E8F0 !important;
+      }
+      html.dark .qa-gloss dt {
+        color: #FFFFFF !important;
+      }
+      html.dark .qa-gloss dd {
+        color: #E2E8F0 !important;
+      }
+
+      /* Dark Quizzes */
+      html.dark .qa-quiz {
+        border-color: #1E293B !important;
+        background: #111827 !important;
+      }
+      html.dark .qa-q p {
+        color: #FFFFFF !important;
+      }
+      html.dark .qa-opt {
+        border-color: #1E293B !important;
+        background: #0B0F19 !important;
+        color: #F1F5F9 !important;
+      }
+      html.dark .qa-opt:hover:not(:disabled) {
+        border-color: #6366F1 !important;
+        background: #161F30 !important;
+      }
+      html.dark .qa-opt span:first-child {
+        background: #1E293B !important;
+        color: #94A3B8 !important;
+      }
+      html.dark .qa-opt.right {
+        border-color: #166534 !important;
+        background: #052E16 !important;
+        color: #bbf7d0 !important;
+      }
+      html.dark .qa-opt.wrong {
+        border-color: #991B1B !important;
+        background: #2E0B0B !important;
+        color: #fecaca !important;
+      }
+      html.dark .qa-explain.good {
+        background: #052E16 !important;
+        color: #86EFAC !important;
+        border: 1px solid #166534 !important;
+      }
+      html.dark .qa-explain.bad {
+        background: #2E0B0B !important;
+        color: #FCA5A5 !important;
+        border: 1px solid #991B1B !important;
+      }
+
+      /* Dark Navigation Buttons */
+      html.dark .qa-nav button {
+        border-color: #1E293B !important;
+        background: #111827 !important;
+        color: #F1F5F9 !important;
+      }
+      html.dark .qa-nav button:hover {
+        background: #1E293B !important;
+      }
+      html.dark .qa-nav .primary {
+        background: #4F46E5 !important;
+        border-color: #4F46E5 !important;
+        color: #FFFFFF !important;
+      }
+
+      /* Dark Widgets & Controls */
+      html.dark .qa-search {
+        background: #111827 !important;
+        border-color: #1E293B !important;
+        color: #F1F5F9 !important;
+      }
+      html.dark .qa-select {
+        background: #111827 !important;
+        border-color: #1E293B !important;
+        color: #F1F5F9 !important;
+      }
+      html.dark .qa-ket {
+        background: #070B14 !important;
+        border-color: #1E293B !important;
+        color: #93C5FD !important;
+      }
+      html.dark .qa-stat {
+        background: #0B0F19 !important;
+        border-color: #1E293B !important;
+      }
+      html.dark .qa-stat span {
+        color: #64748B !important;
+      }
+      html.dark .qa-stat b {
+        color: #F9FAFB !important;
+      }
+      html.dark .qa-slider-top {
+        color: #94A3B8 !important;
+      }
+      html.dark .qa-slider-top b {
+        color: #F9FAFB !important;
+      }
+      html.dark .qa-hint, html.dark .qa-small {
+        color: #94A3B8 !important;
+      }
+
+      /* Dark Hardware Lab */
+      html.dark .hw {
+        background: #0B0F19 !important;
+        color: #F9FAFB !important;
+      }
+      html.dark .hw-tab {
+        background: #111827 !important;
+        border-color: #1E293B !important;
+        color: #F1F5F9 !important;
+      }
+      html.dark .hw-tab.on {
+        background: #1E1B4B !important;
+        border-color: #6366F1 !important;
+        color: #A5B4FC !important;
+      }
+      html.dark .hw-transport {
+        background: #0B0F19E6 !important;
+        border-bottom: 1px solid #1E293B !important;
+      }
+      html.dark .hw-sections {
+        background: #0B0F19 !important;
+        border-color: #1E293B !important;
+      }
+      html.dark .hw-sec {
+        border-color: #1E293B !important;
+      }
+      html.dark .hw-svg {
+        background: #070B14 !important;
+        border-color: #1E293B !important;
+      }
+      html.dark .hw-cur {
+        background: #0F172A !important;
+        border-color: #1E3A8A !important;
+        color: #93C5FD !important;
+      }
+      html.dark .hw-stage {
+        border-color: #1E293B !important;
+        background: #111827 !important;
+        color: #CBD5E1 !important;
+      }
+      html.dark .hw-chip {
+        background: #1E293B !important;
+        border-color: #334155 !important;
+        color: #C084FC !important;
+      }
+      html.dark .hw-check {
+        background: #111827 !important;
+        border-color: #1E293B !important;
+      }
+      html.dark .hw-eqs dd {
+        background: #070B14 !important;
+        border-color: #1E293B !important;
+        color: #F9FAFB !important;
+      }
+      html.dark .hw-ta {
+        background: #070B14 !important;
+        border-color: #1E293B !important;
+        color: #F9FAFB !important;
+      }
+      html.dark .hw-ctrl label {
+        color: #94A3B8 !important;
+      }
+      html.dark .hw-step {
+        background: #111827 !important;
+        border-color: #1E293B !important;
+        color: #94A3B8 !important;
+      }
+      html.dark .hw-step.on {
+        background: #1E1B4B !important;
+        border-color: #6366F1 !important;
+        color: #A5B4FC !important;
+      }
     </style>
   </head>
-  <body style="background:#fafafa">
+  <body>
     <script>
+      function applyTheme(theme) {
+        var isDark = theme === 'dark';
+        document.documentElement.classList.toggle('dark', isDark);
+        document.documentElement.classList.toggle('light', !isDark);
+        document.documentElement.setAttribute('data-theme', isDark ? 'dark' : 'light');
+        document.documentElement.style.colorScheme = isDark ? 'dark' : 'light';
+        var bg = isDark ? '#0B0F19' : '#fafafa';
+        if (document.body) document.body.style.background = bg;
+        var placeholder = document.getElementById('suspense-fallback');
+        if (placeholder) placeholder.style.background = bg;
+        var metaTheme = document.querySelector('meta[name="theme-color"]');
+        if (metaTheme) metaTheme.setAttribute('content', bg);
+      }
+
+      window.addEventListener('message', function(e) {
+        if (e.data && e.data.type === 'THEME_CHANGE') {
+          applyTheme(e.data.theme);
+        }
+      });
+
+      window.addEventListener('storage', function(e) {
+        if (e.key === 'ql_theme' && e.newValue) {
+          applyTheme(e.newValue);
+        }
+      });
+
       // Keep scroll self-contained to iframe reading area; never scroll parent window
       window.addEventListener('load', function() {
         window.scrollTo(0, 0);
@@ -600,10 +1125,11 @@
       import { R as O, r as d } from '/sirraya_assets/react-KfUPlHYY.js';
       import QuantumAcademy from '/sirraya_assets/QuantumAcademy-BVA8r0g7.js';
 
+      const isDarkInit = document.documentElement.classList.contains('dark');
       const root = G.createRoot(document.getElementById('root'));
       root.render(
         d.createElement(O.StrictMode, null,
-          d.createElement(d.Suspense, { fallback: d.createElement('div', { style: { width: '100%', height: '100vh', background: '#fafafa' } }) },
+          d.createElement(d.Suspense, { fallback: d.createElement('div', { id: 'suspense-fallback', style: { width: '100%', height: '100vh', background: isDarkInit ? '#0B0F19' : '#fafafa' } }) },
             d.createElement(QuantumAcademy, null)
           )
         )
