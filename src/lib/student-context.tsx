@@ -23,6 +23,8 @@ interface StudentContextValue {
   isAdmin: boolean;
   isInstructor: boolean;
   isPremium: boolean;
+  planType: string;
+  premiumExpiresAt: string | null;
   isLoading: boolean;
   showIdentityModal: boolean;
   showSubscriptionModal: boolean;
@@ -30,8 +32,9 @@ interface StudentContextValue {
   closeLoginModal: () => void;
   openSubscriptionModal: () => void;
   closeSubscriptionModal: () => void;
-  upgradeToPremium: () => void;
+  upgradeToPremium: (plan?: 'PRO_MONTHLY' | 'PRO_YEARLY') => void;
   downgradeToFree: () => void;
+  refreshSubscription: () => Promise<void>;
   login: (email: string, password: string) => Promise<{ isInstructor: boolean; isAdmin: boolean; userId: string }>;
   register: (name: string, email: string, password: string) => Promise<{ userId: string }>;
   logout: () => void;
@@ -46,6 +49,8 @@ const StudentContext = createContext<StudentContextValue>({
   isAdmin: false,
   isInstructor: false,
   isPremium: false,
+  planType: 'FREE',
+  premiumExpiresAt: null,
   isLoading: true,
   showIdentityModal: false,
   showSubscriptionModal: false,
@@ -55,6 +60,7 @@ const StudentContext = createContext<StudentContextValue>({
   closeSubscriptionModal: () => {},
   upgradeToPremium: () => {},
   downgradeToFree: () => {},
+  refreshSubscription: async () => {},
   login: async () => ({ isInstructor: false, isAdmin: false, userId: '' }),
   register: async () => ({ userId: '' }),
   logout: () => {},
@@ -69,6 +75,8 @@ const LS_STUDENT_NAME = 'ql_student_name';
 const LS_STUDENT_EMAIL = 'ql_student_email';
 const LS_STUDENT_ROLE = 'ql_student_role';
 const LS_STUDENT_PREMIUM = 'ql_is_premium';
+const LS_PLAN_TYPE = 'ql_plan_type';
+const LS_PREMIUM_EXPIRES_AT = 'ql_premium_expires_at';
 const LS_SESSION_EXPIRES_AT = 'ql_session_expires_at';
 
 // 24-hour rolling sliding session duration
@@ -110,6 +118,8 @@ function clearAuthStorage() {
     localStorage.removeItem(LS_STUDENT_EMAIL);
     localStorage.removeItem(LS_STUDENT_ROLE);
     localStorage.removeItem(LS_STUDENT_PREMIUM);
+    localStorage.removeItem(LS_PLAN_TYPE);
+    localStorage.removeItem(LS_PREMIUM_EXPIRES_AT);
     localStorage.removeItem(LS_SESSION_EXPIRES_AT);
   } catch {}
 
@@ -137,8 +147,10 @@ async function syncUserProgressToStore(uid: string) {
         },
         streakDays: summary.student?.streakDays || 0,
       });
+      return summary;
     }
   } catch {}
+  return null;
 }
 
 export function StudentProvider({ children }: { children: React.ReactNode }) {
@@ -147,6 +159,8 @@ export function StudentProvider({ children }: { children: React.ReactNode }) {
   const [studentEmail, setStudentEmail] = useState<string | null>(null);
   const [role, setRole] = useState<UserRole | null>(null);
   const [isPremium, setIsPremium] = useState<boolean>(false);
+  const [planType, setPlanType] = useState<string>('FREE');
+  const [premiumExpiresAt, setPremiumExpiresAt] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [showIdentityModal, setShowIdentityModal] = useState(false);
   const [showSubscriptionModal, setShowSubscriptionModal] = useState(false);
@@ -164,10 +178,21 @@ export function StudentProvider({ children }: { children: React.ReactNode }) {
       const storedName = localStorage.getItem(LS_STUDENT_NAME);
       const storedEmail = localStorage.getItem(LS_STUDENT_EMAIL);
       const storedRole = (localStorage.getItem(LS_STUDENT_ROLE) as UserRole) || 'STUDENT';
+      const storedPlanType = localStorage.getItem(LS_PLAN_TYPE) || 'FREE';
+      const storedExpiry = localStorage.getItem(LS_PREMIUM_EXPIRES_AT);
+
+      // Check if subscription has expired
+      let isSubExpired = false;
+      if (storedExpiry) {
+        const expTime = new Date(storedExpiry).getTime();
+        if (!isNaN(expTime) && expTime <= Date.now()) {
+          isSubExpired = true;
+        }
+      }
+
       const storedPremium =
-        localStorage.getItem(LS_STUDENT_PREMIUM) === 'true' ||
-        storedRole === 'ADMIN' ||
-        storedRole === 'EDUCATOR';
+        (localStorage.getItem(LS_STUDENT_PREMIUM) === 'true' && !isSubExpired) ||
+        storedRole === 'ADMIN';
 
       if (storedId) {
         if (!isSessionValid()) {
@@ -179,6 +204,8 @@ export function StudentProvider({ children }: { children: React.ReactNode }) {
           setStudentEmail(null);
           setRole(null);
           setIsPremium(false);
+          setPlanType('FREE');
+          setPremiumExpiresAt(null);
         } else {
           // Within 24 hours: user is active! Slide 24h expiration forward from this visit
           refreshSessionExpiry();
@@ -190,7 +217,32 @@ export function StudentProvider({ children }: { children: React.ReactNode }) {
           setStudentEmail(storedEmail || '');
           setRole(storedRole);
           setIsPremium(storedPremium);
-          syncUserProgressToStore(storedId);
+          setPlanType(storedPremium ? storedPlanType : 'FREE');
+          setPremiumExpiresAt(storedExpiry || null);
+
+          // Background sync to verify with database state
+          syncUserProgressToStore(storedId).then((summary) => {
+            if (summary?.student) {
+              const dbUser = summary.student;
+              const dbExpiry = dbUser.premiumExpiresAt ? new Date(dbUser.premiumExpiresAt).toISOString() : null;
+              const dbExpired = dbExpiry ? new Date(dbExpiry).getTime() <= Date.now() : false;
+              const dbPremium = Boolean(dbUser.isPremium && !dbExpired) || storedRole === 'ADMIN';
+              const dbPlan = dbPremium ? (dbUser.planType || 'PRO_MONTHLY') : 'FREE';
+
+              setIsPremium(dbPremium);
+              setPlanType(dbPlan);
+              setPremiumExpiresAt(dbExpiry);
+
+              if (dbPremium) {
+                localStorage.setItem(LS_STUDENT_PREMIUM, 'true');
+                localStorage.setItem(LS_PLAN_TYPE, dbPlan);
+                if (dbExpiry) localStorage.setItem(LS_PREMIUM_EXPIRES_AT, dbExpiry);
+              } else {
+                localStorage.removeItem(LS_STUDENT_PREMIUM);
+                localStorage.setItem(LS_PLAN_TYPE, 'FREE');
+              }
+            }
+          });
         }
       } else {
         clearAuthStorage();
@@ -251,15 +303,59 @@ export function StudentProvider({ children }: { children: React.ReactNode }) {
     setShowSubscriptionModal(false);
   }, []);
 
-  const upgradeToPremium = useCallback(() => {
+  const refreshSubscription = useCallback(async () => {
+    if (!userId) return;
+    try {
+      const summary = await syncUserProgressToStore(userId);
+      if (summary?.student) {
+        const dbUser = summary.student;
+        const dbExpiry = dbUser.premiumExpiresAt ? new Date(dbUser.premiumExpiresAt).toISOString() : null;
+        const dbExpired = dbExpiry ? new Date(dbExpiry).getTime() <= Date.now() : false;
+        const dbPremium = Boolean(dbUser.isPremium && !dbExpired) || role === 'ADMIN' || role === 'EDUCATOR';
+        const dbPlan = dbPremium ? (dbUser.planType || 'PRO_MONTHLY') : 'FREE';
+
+        setIsPremium(dbPremium);
+        setPlanType(dbPlan);
+        setPremiumExpiresAt(dbExpiry);
+
+        if (dbPremium) {
+          localStorage.setItem(LS_STUDENT_PREMIUM, 'true');
+          localStorage.setItem(LS_PLAN_TYPE, dbPlan);
+          if (dbExpiry) localStorage.setItem(LS_PREMIUM_EXPIRES_AT, dbExpiry);
+        } else {
+          localStorage.removeItem(LS_STUDENT_PREMIUM);
+          localStorage.setItem(LS_PLAN_TYPE, 'FREE');
+        }
+      }
+    } catch {}
+  }, [userId, role]);
+
+  const upgradeToPremium = useCallback((selectedPlan: 'PRO_MONTHLY' | 'PRO_YEARLY' = 'PRO_YEARLY') => {
+    const now = new Date();
+    if (selectedPlan === 'PRO_MONTHLY') {
+      now.setMonth(now.getMonth() + 1);
+    } else {
+      now.setFullYear(now.getFullYear() + 1);
+    }
+    const expiryIso = now.toISOString();
+
     setIsPremium(true);
+    setPlanType(selectedPlan);
+    setPremiumExpiresAt(expiryIso);
+
     localStorage.setItem(LS_STUDENT_PREMIUM, 'true');
+    localStorage.setItem(LS_PLAN_TYPE, selectedPlan);
+    localStorage.setItem(LS_PREMIUM_EXPIRES_AT, expiryIso);
     setShowSubscriptionModal(false);
   }, []);
 
   const downgradeToFree = useCallback(() => {
     setIsPremium(false);
+    setPlanType('FREE');
+    setPremiumExpiresAt(null);
     localStorage.removeItem(LS_STUDENT_PREMIUM);
+    localStorage.setItem(LS_PLAN_TYPE, 'FREE');
+    localStorage.removeItem(LS_PREMIUM_EXPIRES_AT);
   }, []);
 
   const executePendingAction = (newUserId?: string) => {
@@ -282,8 +378,17 @@ export function StudentProvider({ children }: { children: React.ReactNode }) {
       throw new Error(data.error || 'Failed to sign in.');
     }
 
-    const { userId: returnedId, name, email: returnedEmail, role: returnedRole, isInstructor, isPremium: returnedPremium } = data;
-    const isPro = Boolean(returnedPremium || returnedRole === 'ADMIN' || returnedRole === 'EDUCATOR');
+    const {
+      userId: returnedId,
+      name,
+      email: returnedEmail,
+      role: returnedRole,
+      isInstructor,
+      isPremium: returnedPremium,
+      planType: returnedPlanType,
+      premiumExpiresAt: returnedExpiresAt,
+    } = data;
+    const isPro = Boolean(returnedPremium || returnedRole === 'ADMIN');
 
     // Immediately persist and sync ref before executing any callback
     userIdRef.current = returnedId;
@@ -294,10 +399,20 @@ export function StudentProvider({ children }: { children: React.ReactNode }) {
 
     if (isPro) {
       localStorage.setItem(LS_STUDENT_PREMIUM, 'true');
+      localStorage.setItem(LS_PLAN_TYPE, returnedPlanType || 'PRO_MONTHLY');
+      if (returnedExpiresAt) {
+        localStorage.setItem(LS_PREMIUM_EXPIRES_AT, returnedExpiresAt);
+      }
       setIsPremium(true);
+      setPlanType(returnedPlanType || 'PRO_MONTHLY');
+      setPremiumExpiresAt(returnedExpiresAt || null);
     } else {
       localStorage.removeItem(LS_STUDENT_PREMIUM);
+      localStorage.setItem(LS_PLAN_TYPE, 'FREE');
+      localStorage.removeItem(LS_PREMIUM_EXPIRES_AT);
       setIsPremium(false);
+      setPlanType('FREE');
+      setPremiumExpiresAt(null);
     }
 
     // Initialize 24-hour rolling session & cookies
@@ -329,7 +444,15 @@ export function StudentProvider({ children }: { children: React.ReactNode }) {
       throw new Error(data.error || 'Failed to register.');
     }
 
-    const { userId: returnedId, name: returnedName, email: returnedEmail, role: returnedRole, isPremium: returnedPremium } = data;
+    const {
+      userId: returnedId,
+      name: returnedName,
+      email: returnedEmail,
+      role: returnedRole,
+      isPremium: returnedPremium,
+      planType: returnedPlanType,
+      premiumExpiresAt: returnedExpiresAt,
+    } = data;
     const isPro = Boolean(returnedPremium || returnedRole === 'ADMIN' || returnedRole === 'EDUCATOR');
 
     userIdRef.current = returnedId;
@@ -340,7 +463,20 @@ export function StudentProvider({ children }: { children: React.ReactNode }) {
 
     if (isPro) {
       localStorage.setItem(LS_STUDENT_PREMIUM, 'true');
+      localStorage.setItem(LS_PLAN_TYPE, returnedPlanType || 'PRO_MONTHLY');
+      if (returnedExpiresAt) {
+        localStorage.setItem(LS_PREMIUM_EXPIRES_AT, returnedExpiresAt);
+      }
       setIsPremium(true);
+      setPlanType(returnedPlanType || 'PRO_MONTHLY');
+      setPremiumExpiresAt(returnedExpiresAt || null);
+    } else {
+      localStorage.removeItem(LS_STUDENT_PREMIUM);
+      localStorage.setItem(LS_PLAN_TYPE, 'FREE');
+      localStorage.removeItem(LS_PREMIUM_EXPIRES_AT);
+      setIsPremium(false);
+      setPlanType('FREE');
+      setPremiumExpiresAt(null);
     }
 
     // Initialize 24-hour rolling session & cookies
@@ -465,7 +601,7 @@ export function StudentProvider({ children }: { children: React.ReactNode }) {
 
   const isInstructor = role === 'EDUCATOR' || role === 'ADMIN' || (role as string) === 'INSTRUCTOR';
   const isAdmin = role === 'ADMIN';
-  const effectiveIsPremium = isPremium || isAdmin || isInstructor;
+  const effectiveIsPremium = isPremium || isAdmin;
 
   return (
     <StudentContext.Provider
@@ -478,6 +614,8 @@ export function StudentProvider({ children }: { children: React.ReactNode }) {
         isAdmin,
         isInstructor,
         isPremium: effectiveIsPremium,
+        planType,
+        premiumExpiresAt,
         isLoading,
         showIdentityModal,
         showSubscriptionModal,
@@ -487,6 +625,7 @@ export function StudentProvider({ children }: { children: React.ReactNode }) {
         closeSubscriptionModal,
         upgradeToPremium,
         downgradeToFree,
+        refreshSubscription,
         login,
         register,
         logout,

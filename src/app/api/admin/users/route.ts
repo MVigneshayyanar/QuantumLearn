@@ -27,6 +27,9 @@ export async function GET(req: NextRequest) {
           id: true,
           name: true,
           email: true,
+          isPremium: true,
+          planType: true,
+          premiumExpiresAt: true,
           createdAt: true,
           lastActiveAt: true,
           instructorMappings: {
@@ -46,6 +49,9 @@ export async function GET(req: NextRequest) {
           name: true,
           email: true,
           streakDays: true,
+          isPremium: true,
+          planType: true,
+          premiumExpiresAt: true,
           createdAt: true,
           lastActiveAt: true,
           studentMappings: {
@@ -69,18 +75,32 @@ export async function GET(req: NextRequest) {
     ]);
 
     return NextResponse.json({
-      instructors: instructors.map(inst => ({
-        ...inst,
-        assignedStudentCount: inst.instructorMappings.length,
-        assignedStudents: inst.instructorMappings.map(m => m.student)
-      })),
-      students: students.map(s => ({
-        ...s,
-        assignedInstructors: s.studentMappings.map(m => m.instructor),
-        isAssigned: s.studentMappings.length > 0,
-        activityCount: s._count.quizAttempts + s._count.practiceSubmissions,
-        aiInteractionCount: s._count.aiInteractions,
-      })),
+      instructors: instructors.map(inst => {
+        const isSubExpired = inst.premiumExpiresAt ? new Date(inst.premiumExpiresAt).getTime() <= Date.now() : false;
+        const effectivePremium = Boolean(inst.isPremium && !isSubExpired);
+        return {
+          ...inst,
+          isPremium: effectivePremium,
+          planType: effectivePremium ? (inst.planType || 'PRO') : 'FREE',
+          premiumExpiresAt: inst.premiumExpiresAt ? inst.premiumExpiresAt.toISOString() : null,
+          assignedStudentCount: inst.instructorMappings.length,
+          assignedStudents: inst.instructorMappings.map(m => m.student)
+        };
+      }),
+      students: students.map(s => {
+        const isSubExpired = s.premiumExpiresAt ? new Date(s.premiumExpiresAt).getTime() <= Date.now() : false;
+        const effectivePremium = Boolean(s.isPremium && !isSubExpired);
+        return {
+          ...s,
+          isPremium: effectivePremium,
+          planType: effectivePremium ? (s.planType || 'PRO') : 'FREE',
+          premiumExpiresAt: s.premiumExpiresAt ? s.premiumExpiresAt.toISOString() : null,
+          assignedInstructors: s.studentMappings.map(m => m.instructor),
+          isAssigned: s.studentMappings.length > 0,
+          activityCount: s._count.quizAttempts + s._count.practiceSubmissions,
+          aiInteractionCount: s._count.aiInteractions,
+        };
+      }),
       totalMappings: mappings,
     });
   } catch (err: any) {
@@ -161,5 +181,82 @@ export async function POST(req: NextRequest) {
   } catch (err: any) {
     console.error('[POST /api/admin/users] Error:', err);
     return NextResponse.json({ error: 'Failed to create user.' }, { status: 500 });
+  }
+}
+
+/**
+ * PATCH /api/admin/users
+ * Update a user's subscription plan and expiration date
+ */
+export async function PATCH(req: NextRequest) {
+  try {
+    const auth = await verifyAdminAccess(req);
+    if (!auth.authorized) {
+      return NextResponse.json({ error: auth.error || 'Unauthorized.' }, { status: 403 });
+    }
+
+    const body = await req.json();
+    const { userId, planType, premiumExpiresAt, isPremium } = body;
+
+    if (!userId) {
+      return NextResponse.json({ error: 'userId is required.' }, { status: 400 });
+    }
+
+    const user = await prisma.user.findUnique({
+      where: { id: userId },
+    });
+
+    if (!user) {
+      return NextResponse.json({ error: 'User not found.' }, { status: 404 });
+    }
+
+    let resolvedIsPremium = Boolean(isPremium);
+    let resolvedPlanType = planType || 'FREE';
+    let resolvedExpiresAt: Date | null = null;
+
+    if (premiumExpiresAt) {
+      const parsedDate = new Date(premiumExpiresAt);
+      if (!isNaN(parsedDate.getTime())) {
+        resolvedExpiresAt = parsedDate;
+      }
+    }
+
+    if (resolvedPlanType === 'FREE') {
+      resolvedIsPremium = false;
+      resolvedExpiresAt = null;
+    } else {
+      resolvedIsPremium = true;
+      resolvedPlanType = 'PRO';
+      // If no explicit expiration date provided, calculate 1 month default
+      if (!resolvedExpiresAt) {
+        const now = new Date();
+        now.setMonth(now.getMonth() + 1);
+        resolvedExpiresAt = now;
+      }
+    }
+
+    const updated = await prisma.user.update({
+      where: { id: userId },
+      data: {
+        isPremium: resolvedIsPremium,
+        planType: resolvedPlanType,
+        premiumExpiresAt: resolvedExpiresAt,
+      },
+    });
+
+    return NextResponse.json({
+      success: true,
+      user: {
+        id: updated.id,
+        name: updated.name,
+        email: updated.email,
+        isPremium: updated.isPremium,
+        planType: updated.planType,
+        premiumExpiresAt: updated.premiumExpiresAt ? updated.premiumExpiresAt.toISOString() : null,
+      },
+    });
+  } catch (err: any) {
+    console.error('[PATCH /api/admin/users] Error:', err);
+    return NextResponse.json({ error: 'Failed to update user subscription.' }, { status: 500 });
   }
 }

@@ -791,7 +791,7 @@ export default function AboutPage() {
             </div>
             <ul className="text-xs text-dark-600 space-y-1.5 list-disc pl-4">
               <li>Sign in to the <strong>Instructor Dashboard</strong> with authorized educator credentials.</li>
-              <li>Map students to your class cohort, seed sample test rosters, and diagnose common misconceptions.</li>
+              <li>Map students to your class cohort, manage student rosters, and diagnose common misconceptions.</li>
               <li>Monitor real-time completion rates across all curriculum modules.</li>
             </ul>
           </div>

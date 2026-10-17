@@ -24,8 +24,11 @@ import {
   ShieldCheck,
   UserCheck,
   Crown,
-  Info
+  Info,
+  Clock,
+  AlertCircle
 } from 'lucide-react';
+import { getPlanExpiryInfo } from '@/lib/subscription-utils';
 
 export function Navbar() {
   const pathname = usePathname();
@@ -39,6 +42,8 @@ export function Navbar() {
     isAdmin,
     isInstructor,
     isPremium,
+    planType,
+    premiumExpiresAt,
     openSubscriptionModal,
     logout,
     openLoginModal
@@ -257,7 +262,7 @@ export function Navbar() {
                           : 'text-primary-700 dark:text-primary-400'
                       }`}
                     >
-                      {isAdmin ? 'Admin' : isInstructor ? 'Instructor' : isPremium ? 'Pro Student' : 'Student'}
+                      {isAdmin ? 'Admin' : isInstructor ? 'Instructor' : isPremium ? 'QuanBit Pro' : 'Student'}
                     </span>
                   </div>
 
@@ -310,8 +315,8 @@ export function Navbar() {
                             'Verified Instructor'
                           ) : isPremium ? (
                             <span className="inline-flex items-center gap-1">
-                              <Crown className="w-3 h-3 text-amber-500" />
-                              <span>Pro Student Learner</span>
+                              <Crown className="w-3 h-3 text-amber-500 fill-amber-400" />
+                              <span>QuanBit Pro</span>
                             </span>
                           ) : (
                             'Student Learner'
@@ -417,20 +422,41 @@ export function Navbar() {
                           </span>
                         </button>
                       ) : (
-                        <button
-                          type="button"
+                        <div
                           onClick={() => {
                             setProfileDropdownOpen(false);
                             openSubscriptionModal();
                           }}
-                          className="w-full flex items-center justify-between px-3 py-2 rounded-xl bg-amber-500/10 dark:bg-amber-950/40 border border-amber-300/80 dark:border-amber-600/40 hover:bg-amber-500/20 dark:hover:bg-amber-950/60 transition-colors text-[11px] font-bold cursor-pointer"
+                          className="w-full flex flex-col p-2.5 rounded-xl bg-gradient-to-r from-amber-500/10 to-amber-400/5 dark:bg-amber-950/40 border border-amber-300/80 dark:border-amber-600/40 hover:bg-amber-500/20 dark:hover:bg-amber-950/60 transition-colors text-[11px] cursor-pointer gap-1.5"
                         >
-                          <div className="flex items-center gap-1.5">
-                            <Crown className="w-3.5 h-3.5 text-amber-600 dark:text-amber-400 fill-amber-400" />
-                            <span className="text-amber-950 dark:text-amber-200 font-bold">QuanBit Pro Member</span>
+                          <div className="flex items-center justify-between">
+                            <div className="flex items-center gap-1.5">
+                              <Crown className="w-3.5 h-3.5 text-amber-600 dark:text-amber-400 fill-amber-400 shrink-0" />
+                              <span className="text-amber-950 dark:text-amber-200 font-bold">QuanBit Pro Member</span>
+                            </div>
+                            <span className="text-[10px] text-amber-700 dark:text-amber-400 underline font-semibold">Manage</span>
                           </div>
-                          <span className="text-[10px] text-amber-700 dark:text-amber-400 underline font-semibold">Manage</span>
-                        </button>
+                          {(() => {
+                            const expiry = getPlanExpiryInfo(premiumExpiresAt);
+                            if (!expiry) return null;
+                            return (
+                              <div className={`flex items-center justify-between px-2 py-1 rounded-lg text-[10px] font-bold ${
+                                expiry.isUrgent
+                                  ? 'bg-rose-100 dark:bg-rose-950/80 text-rose-800 dark:text-rose-200 border border-rose-300 dark:border-rose-700'
+                                  : 'bg-white/80 dark:bg-dark-800/80 text-amber-900 dark:text-amber-300 border border-amber-200/60 dark:border-amber-700/50'
+                              }`}>
+                                <span className="flex items-center gap-1 font-medium">
+                                  {expiry.isUrgent ? (
+                                    <AlertCircle className="w-3 h-3 text-rose-600 dark:text-rose-400 shrink-0" />
+                                  ) : (
+                                    <Clock className="w-3 h-3 text-amber-600 dark:text-amber-400 shrink-0" />
+                                  )}
+                                  <span>{expiry.badgeText}</span>
+                                </span>
+                              </div>
+                            );
+                          })()}
+                        </div>
                       )}
                     </div>
 

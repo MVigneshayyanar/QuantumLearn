@@ -34,7 +34,17 @@ export async function GET(
     const [user, progressRecords, quizAttempts, misconceptions] = await Promise.all([
       prisma.user.findUnique({
         where: { id: userId },
-        select: { id: true, name: true, email: true, streakDays: true, lastActiveAt: true },
+        select: {
+          id: true,
+          name: true,
+          email: true,
+          role: true,
+          streakDays: true,
+          isPremium: true,
+          planType: true,
+          premiumExpiresAt: true,
+          lastActiveAt: true,
+        },
       }),
       prisma.userProgress.findMany({
         where: { userId },

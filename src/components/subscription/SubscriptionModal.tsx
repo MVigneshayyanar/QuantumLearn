@@ -13,15 +13,21 @@ import {
   ShieldCheck,
   Award,
   Cpu,
-  Bot
+  Bot,
+  Clock,
+  AlertCircle,
+  Mail
 } from 'lucide-react';
 import confetti from 'canvas-confetti';
+import { getPlanExpiryInfo } from '@/lib/subscription-utils';
 
 export function SubscriptionModal() {
   const {
     showSubscriptionModal,
     closeSubscriptionModal,
     isPremium,
+    planType,
+    premiumExpiresAt,
     upgradeToPremium,
     downgradeToFree
   } = useStudentContext();
@@ -33,10 +39,12 @@ export function SubscriptionModal() {
 
   if (!showSubscriptionModal) return null;
 
+  const expiry = getPlanExpiryInfo(premiumExpiresAt);
+
   const handleSubscribe = () => {
     setIsProcessing(true);
     setTimeout(() => {
-      upgradeToPremium();
+      upgradeToPremium(billingCycle === 'annual' ? 'PRO_YEARLY' : 'PRO_MONTHLY');
       setIsProcessing(false);
       try {
         confetti({
@@ -113,29 +121,29 @@ export function SubscriptionModal() {
         {/* Scrollable Body */}
         <div className="flex-1 overflow-y-auto px-5 sm:px-6 py-2 space-y-3.5">
           {/* Billing Cycle Toggle */}
-          <div className="flex items-center justify-center gap-2 p-1 bg-dark-100 dark:bg-dark-800/90 rounded-2xl text-xs font-semibold max-w-xs mx-auto border border-dark-200/50 dark:border-dark-700/70">
+          <div className="flex items-center justify-center gap-1.5 p-1 bg-dark-100 dark:bg-dark-800/90 rounded-2xl text-xs font-semibold max-w-sm mx-auto border border-dark-200/50 dark:border-dark-700/70">
             <button
               type="button"
               onClick={() => setBillingCycle('monthly')}
-              className={`flex-1 py-1.5 px-3 rounded-xl transition-all cursor-pointer ${
+              className={`flex-1 py-1.5 px-3 rounded-xl transition-all cursor-pointer whitespace-nowrap text-center ${
                 billingCycle === 'monthly'
                   ? 'bg-white dark:bg-dark-700 text-dark-900 dark:text-white shadow-xs'
                   : 'text-dark-600 dark:text-dark-400 hover:text-dark-900 dark:hover:text-white'
               }`}
             >
-              Monthly
+              Monthly (1 Mo)
             </button>
             <button
               type="button"
               onClick={() => setBillingCycle('annual')}
-              className={`flex-1 py-1.5 px-3 rounded-xl transition-all flex items-center justify-center gap-1.5 cursor-pointer ${
+              className={`flex-1 py-1.5 px-3 rounded-xl transition-all flex items-center justify-center gap-1.5 cursor-pointer whitespace-nowrap ${
                 billingCycle === 'annual'
                   ? 'bg-amber-500 text-white shadow-xs font-bold'
                   : 'text-dark-600 dark:text-dark-400 hover:text-dark-900 dark:hover:text-white'
               }`}
             >
-              <span>Annual</span>
-              <span className="text-[10px] px-1.5 py-0.2 bg-white/20 rounded-md font-bold">
+              <span>Yearly (1 Yr)</span>
+              <span className="text-[10px] px-1.5 py-0.5 bg-white/20 rounded-md font-bold shrink-0">
                 Save 30%
               </span>
             </button>
@@ -145,7 +153,7 @@ export function SubscriptionModal() {
           <div className="p-3.5 sm:p-4 rounded-2xl border-2 border-amber-400 dark:border-amber-500/50 bg-gradient-to-b from-amber-50/70 to-white dark:from-amber-950/40 dark:to-dark-800/90 flex items-center justify-between shadow-2xs">
             <div>
               <span className="text-[11px] font-bold uppercase tracking-wider text-amber-800 dark:text-amber-300">
-                {billingCycle === 'annual' ? 'Annual Plan' : 'Monthly Plan'}
+                {billingCycle === 'annual' ? 'Annual Plan (1 Year)' : 'Monthly Plan (1 Month)'}
               </span>
               <div className="flex items-baseline gap-1 mt-0.5">
                 <span className="text-2xl sm:text-3xl font-black text-dark-900 dark:text-white">
@@ -157,8 +165,8 @@ export function SubscriptionModal() {
               </div>
             </div>
             <div className="text-right">
-              <span className="text-[11px] font-bold text-emerald-700 dark:text-emerald-300 bg-emerald-100/80 dark:bg-emerald-950/80 px-2.5 py-1 rounded-full border border-emerald-300 dark:border-emerald-700/60 shadow-2xs">
-                {billingCycle === 'annual' ? '7-Day Free Trial' : 'Cancel Anytime'}
+              <span className="text-[11px] font-bold text-amber-800 dark:text-amber-300 bg-amber-100/80 dark:bg-amber-950/80 px-2.5 py-1 rounded-full border border-amber-300 dark:border-amber-700/60 shadow-2xs">
+                QuanBit Pro
               </span>
             </div>
           </div>
@@ -191,15 +199,35 @@ export function SubscriptionModal() {
                 <Sparkles className="w-4 h-4 text-amber-600 dark:text-amber-400" />
                 <span>QuanBit Pro — Coming Soon</span>
               </button>
-              <p className="text-[11px] text-center text-dark-500 dark:text-dark-400">
-                Self-serve subscriptions are launching soon. Pre-activated accounts can sign in with authorized credentials.
-              </p>
+              <div className="p-2.5 rounded-xl bg-dark-50 dark:bg-dark-800/60 border border-dark-200/60 dark:border-dark-750 text-center">
+                <p className="text-[11px] text-dark-600 dark:text-dark-400 flex items-center justify-center gap-1.5 flex-wrap">
+                  <span>For early access, email us at:</span>
+                  <a
+                    href="mailto:info@reversun.com?subject=QuanBit%20Pro%20Early%20Access%20Request"
+                    className="inline-flex items-center gap-1 text-primary-600 dark:text-primary-400 font-bold hover:underline"
+                  >
+                    <Mail className="w-3 h-3" />
+                    <span>info@reversun.com</span>
+                  </a>
+                </p>
+              </div>
             </>
           ) : (
             <div className="space-y-1.5 text-center">
-              <div className="p-3 rounded-xl bg-emerald-50 dark:bg-emerald-950/60 border border-emerald-200 dark:border-emerald-800/80 text-emerald-800 dark:text-emerald-300 text-xs font-semibold flex items-center justify-center gap-2">
-                <CheckCircle2 className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />
-                <span>You currently have active QuanBit Pro status!</span>
+              <div className="p-3 rounded-xl bg-emerald-50 dark:bg-emerald-950/60 border border-emerald-200 dark:border-emerald-800/80 text-emerald-800 dark:text-emerald-300 text-xs font-semibold flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <CheckCircle2 className="w-4 h-4 text-emerald-600 dark:text-emerald-400 shrink-0" />
+                  <span>Active QuanBit Pro</span>
+                </div>
+                {expiry && (
+                  <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold ${
+                    expiry.isUrgent
+                      ? 'bg-rose-100 text-rose-800 border border-rose-300 animate-pulse'
+                      : 'bg-white dark:bg-dark-800 text-emerald-900 dark:text-emerald-200 border border-emerald-200'
+                  }`}>
+                    {expiry.badgeText}
+                  </span>
+                )}
               </div>
             </div>
           )}

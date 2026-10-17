@@ -27,7 +27,7 @@ export function QuantumAcademyExact() {
     <div className={`w-full h-[calc(100vh-6.25rem)] ${isDark ? 'bg-[#0B0F19]' : 'bg-[#fafafa]'} overflow-hidden relative transition-colors duration-200`}>
       <iframe
         ref={iframeRef}
-        src={`/quantum-academy-embed.html?v=darktextv16&theme=${initialThemeRef.current}`}
+        src={`/quantum-academy-embed.html?v=darktextv17&theme=${initialThemeRef.current}`}
         title="Quantum Academy"
         className={`w-full h-full border-0 block ${isDark ? 'bg-[#0B0F19]' : 'bg-[#fafafa]'}`}
         style={{ colorScheme: isDark ? 'dark' : 'light' }}

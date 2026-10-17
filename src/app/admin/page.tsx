@@ -26,8 +26,12 @@ import {
   RefreshCw,
   CheckCircle,
   HelpCircle,
-  UserCheck
+  UserCheck,
+  Crown,
+  Calendar,
+  Edit3
 } from 'lucide-react';
+import { getPlanExpiryInfo } from '@/lib/subscription-utils';
 
 export interface AdminHistoryItem {
   id: string;
@@ -49,6 +53,9 @@ interface InstructorData {
   id: string;
   name: string;
   email: string;
+  isPremium?: boolean;
+  planType?: string;
+  premiumExpiresAt?: string | null;
   createdAt: string;
   lastActiveAt: string;
   assignedStudentCount: number;
@@ -60,6 +67,9 @@ interface StudentData {
   name: string;
   email: string;
   streakDays: number;
+  isPremium?: boolean;
+  planType?: string;
+  premiumExpiresAt?: string | null;
   createdAt: string;
   lastActiveAt: string;
   assignedInstructors: Array<{ id: string; name: string; email: string }>;
@@ -94,6 +104,14 @@ export default function AdminPortalPage() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [modalError, setModalError] = useState<string | null>(null);
   const [modalSuccess, setModalSuccess] = useState<string | null>(null);
+
+  // Subscription Edit Modal for Students & Instructors
+  const [editingUserSub, setEditingUserSub] = useState<{ id: string; name: string; email: string; isPremium?: boolean; planType?: string; premiumExpiresAt?: string | null } | null>(null);
+  const [subPlanType, setSubPlanType] = useState<string>('FREE');
+  const [subExpiresAt, setSubExpiresAt] = useState<string>('');
+  const [subModalError, setSubModalError] = useState<string | null>(null);
+  const [subModalSuccess, setSubModalSuccess] = useState<string | null>(null);
+  const [isUpdatingSub, setIsUpdatingSub] = useState(false);
 
   // Mapping Modal
   const [mappingInstructor, setMappingInstructor] = useState<InstructorData | null>(null);
@@ -199,6 +217,80 @@ export default function AdminPortalPage() {
       }
     } catch (err) {
       console.error('Failed to update assignment:', err);
+    }
+  };
+
+  const handleOpenEditSub = (user: { id: string; name: string; email: string; isPremium?: boolean; planType?: string; premiumExpiresAt?: string | null }) => {
+    setEditingUserSub(user);
+    setSubPlanType(user.isPremium ? 'PRO' : 'FREE');
+    // Format YYYY-MM-DD for date input
+    if (user.premiumExpiresAt) {
+      const d = new Date(user.premiumExpiresAt);
+      if (!isNaN(d.getTime())) {
+        const year = d.getFullYear();
+        const month = String(d.getMonth() + 1).padStart(2, '0');
+        const day = String(d.getDate()).padStart(2, '0');
+        setSubExpiresAt(`${year}-${month}-${day}`);
+      } else {
+        setSubExpiresAt('');
+      }
+    } else {
+      setSubExpiresAt('');
+    }
+    setSubModalError(null);
+    setSubModalSuccess(null);
+  };
+
+  const handleSaveSubscription = async () => {
+    if (!editingUserSub) return;
+    setIsUpdatingSub(true);
+    setSubModalError(null);
+    setSubModalSuccess(null);
+
+    try {
+      let finalExpiresAt: string | null = null;
+      if (subPlanType !== 'FREE') {
+        if (subExpiresAt) {
+          // Set to end of day in local time
+          const parsed = new Date(`${subExpiresAt}T23:59:59`);
+          if (isNaN(parsed.getTime())) {
+            throw new Error('Please enter a valid expiration date.');
+          }
+          finalExpiresAt = parsed.toISOString();
+        } else {
+          // Default: 1 month from now
+          const now = new Date();
+          now.setMonth(now.getMonth() + 1);
+          finalExpiresAt = now.toISOString();
+        }
+      }
+
+      const res = await fetch('/api/admin/users', {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          userId: editingUserSub.id,
+          planType: subPlanType === 'FREE' ? 'FREE' : 'PRO',
+          isPremium: subPlanType !== 'FREE',
+          premiumExpiresAt: finalExpiresAt,
+        }),
+      });
+
+      const data = await res.json();
+      if (!res.ok) {
+        throw new Error(data.error || 'Failed to update subscription.');
+      }
+
+      setSubModalSuccess(`Subscription updated for ${editingUserSub.name}!`);
+      await fetchUsers();
+      setTimeout(() => {
+        setEditingUserSub(null);
+        setSubModalSuccess(null);
+      }, 1000);
+    } catch (err: any) {
+      setSubModalError(err.message || 'Error updating subscription.');
+    } finally {
+      setIsUpdatingSub(false);
     }
   };
 
@@ -417,6 +509,7 @@ export default function AdminPortalPage() {
                 <tr className="border-b border-dark-200 text-dark-500 text-left">
                   <th className="py-2.5 pr-4 font-semibold">Instructor</th>
                   <th className="py-2.5 pr-4 font-semibold">Email</th>
+                  <th className="py-2.5 pr-4 font-semibold">Subscription Plan</th>
                   <th className="py-2.5 pr-4 font-semibold">Mapped Students</th>
                   <th className="py-2.5 pr-4 font-semibold">Registered</th>
                   <th className="py-2.5 text-right font-semibold">Actions</th>
@@ -425,51 +518,95 @@ export default function AdminPortalPage() {
               <tbody className="divide-y divide-dark-100">
                 {filteredInstructors.length === 0 ? (
                   <tr>
-                    <td colSpan={5} className="py-8 text-center text-dark-500">
+                    <td colSpan={6} className="py-8 text-center text-dark-500">
                       No instructors match your query.
                     </td>
                   </tr>
                 ) : (
-                  filteredInstructors.map((inst) => (
-                    <tr key={inst.id} className="hover:bg-dark-50/50 transition-colors">
-                      <td className="py-3 pr-4 font-bold text-dark-900 flex items-center gap-2">
-                        <div className="w-7 h-7 rounded-lg bg-purple-100 text-purple-700 flex items-center justify-center font-bold text-[11px]">
-                          {inst.name.charAt(0).toUpperCase()}
-                        </div>
-                        <span>{inst.name}</span>
-                      </td>
-                      <td className="py-3 pr-4 text-dark-600 font-mono text-[11px]">{inst.email}</td>
-                      <td className="py-3 pr-4">
-                        <div className="flex items-center gap-1.5 flex-wrap">
-                          <span className="px-2 py-0.5 rounded-full bg-purple-50 text-purple-700 font-semibold text-[11px] border border-purple-100">
-                            {inst.assignedStudentCount} Students
-                          </span>
-                          {inst.assignedStudents.slice(0, 3).map((st) => (
-                            <span
-                              key={st.id}
-                              className="px-1.5 py-0.5 rounded bg-dark-100 text-dark-700 text-[10px]"
-                            >
-                              {st.name.split(' ')[0]}
+                  filteredInstructors.map((inst) => {
+                    const expiry = getPlanExpiryInfo(inst.premiumExpiresAt);
+                    return (
+                      <tr key={inst.id} className="hover:bg-dark-50/50 transition-colors">
+                        <td className="py-3 pr-4 font-bold text-dark-900 flex items-center gap-2">
+                          <div className="w-7 h-7 rounded-lg bg-purple-100 text-purple-700 flex items-center justify-center font-bold text-[11px]">
+                            {inst.name.charAt(0).toUpperCase()}
+                          </div>
+                          <span>{inst.name}</span>
+                        </td>
+                        <td className="py-3 pr-4 text-dark-600 font-mono text-[11px]">{inst.email}</td>
+                        <td className="py-3 pr-4">
+                          <div className="flex flex-col gap-1 items-start">
+                            <div className="flex items-center gap-1.5">
+                              {inst.isPremium ? (
+                                <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-amber-100 text-amber-900 font-bold text-[10px] border border-amber-300">
+                                  <Crown className="w-3 h-3 text-amber-600 fill-amber-400" />
+                                  <span>Pro</span>
+                                </span>
+                              ) : (
+                                <span className="px-2 py-0.5 rounded-full bg-dark-100 text-dark-600 font-medium text-[10px]">
+                                  Free
+                                </span>
+                              )}
+                              <button
+                                onClick={() => handleOpenEditSub(inst)}
+                                title="Edit Plan & Expiration Date"
+                                className="p-1 rounded hover:bg-dark-100 text-dark-500 hover:text-dark-900 transition-colors cursor-pointer"
+                              >
+                                <Edit3 className="w-3 h-3" />
+                              </button>
+                            </div>
+                            {inst.isPremium && expiry && (
+                              <span className={`text-[10px] font-semibold px-1.5 py-0.2 rounded ${
+                                expiry.isUrgent
+                                  ? 'bg-rose-100 text-rose-700 font-bold animate-pulse'
+                                  : 'text-dark-500'
+                              }`}>
+                                {expiry.badgeText}
+                              </span>
+                            )}
+                          </div>
+                        </td>
+                        <td className="py-3 pr-4">
+                          <div className="flex items-center gap-1.5 flex-wrap">
+                            <span className="px-2 py-0.5 rounded-full bg-purple-50 text-purple-700 font-semibold text-[11px] border border-purple-100">
+                              {inst.assignedStudentCount} Students
                             </span>
-                          ))}
-                          {inst.assignedStudentCount > 3 && (
-                            <span className="text-[10px] text-dark-400">+{inst.assignedStudentCount - 3}</span>
-                          )}
-                        </div>
-                      </td>
-                      <td className="py-3 pr-4 text-dark-500 text-[11px]">
-                        {new Date(inst.createdAt).toLocaleDateString()}
-                      </td>
-                      <td className="py-3 text-right">
-                        <button
-                          onClick={() => setMappingInstructor(inst)}
-                          className="px-2.5 py-1 rounded-lg bg-purple-50 hover:bg-purple-100 text-purple-700 font-semibold text-[11px] border border-purple-200 transition-colors"
-                        >
-                          Manage Cohort
-                        </button>
-                      </td>
-                    </tr>
-                  ))
+                            {inst.assignedStudents.slice(0, 3).map((st) => (
+                              <span
+                                key={st.id}
+                                className="px-1.5 py-0.5 rounded bg-dark-100 text-dark-700 text-[10px]"
+                              >
+                                {st.name.split(' ')[0]}
+                              </span>
+                            ))}
+                            {inst.assignedStudentCount > 3 && (
+                              <span className="text-[10px] text-dark-400">+{inst.assignedStudentCount - 3}</span>
+                            )}
+                          </div>
+                        </td>
+                        <td className="py-3 pr-4 text-dark-500 text-[11px]">
+                          {new Date(inst.createdAt).toLocaleDateString()}
+                        </td>
+                        <td className="py-3 text-right">
+                          <div className="flex items-center justify-end gap-1.5">
+                            <button
+                              onClick={() => handleOpenEditSub(inst)}
+                              className="px-2 py-1 rounded-lg bg-amber-50 hover:bg-amber-100 text-amber-800 font-semibold text-[11px] border border-amber-200 transition-colors cursor-pointer flex items-center gap-1"
+                            >
+                              <Crown className="w-3 h-3 text-amber-600" />
+                              <span>Plan</span>
+                            </button>
+                            <button
+                              onClick={() => setMappingInstructor(inst)}
+                              className="px-2.5 py-1 rounded-lg bg-purple-50 hover:bg-purple-100 text-purple-700 font-semibold text-[11px] border border-purple-200 transition-colors"
+                            >
+                              Cohort
+                            </button>
+                          </div>
+                        </td>
+                      </tr>
+                    );
+                  })
                 )}
               </tbody>
             </table>
@@ -484,77 +621,122 @@ export default function AdminPortalPage() {
                 <tr className="border-b border-dark-200 text-dark-500 text-left">
                   <th className="py-2.5 pr-4 font-semibold">Student</th>
                   <th className="py-2.5 pr-4 font-semibold">Email</th>
+                  <th className="py-2.5 pr-4 font-semibold">Subscription Plan</th>
                   <th className="py-2.5 pr-4 font-semibold">Assigned Faculty</th>
                   <th className="py-2.5 pr-4 font-semibold text-center">AI Queries</th>
                   <th className="py-2.5 pr-4 font-semibold text-center">Streak</th>
-                  <th className="py-2.5 text-right font-semibold">Assign Instructor</th>
+                  <th className="py-2.5 text-right font-semibold">Actions</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-dark-100">
                 {filteredStudents.length === 0 ? (
                   <tr>
-                    <td colSpan={6} className="py-8 text-center text-dark-500">
+                    <td colSpan={7} className="py-8 text-center text-dark-500">
                       No students match your query.
                     </td>
                   </tr>
                 ) : (
-                  filteredStudents.map((st) => (
-                    <tr key={st.id} className="hover:bg-dark-50/50 transition-colors">
-                      <td className="py-3 pr-4 font-bold text-dark-900 flex items-center gap-2">
-                        <div className="w-7 h-7 rounded-lg bg-primary-100 text-primary-700 flex items-center justify-center font-bold text-[11px]">
-                          {st.name.charAt(0).toUpperCase()}
-                        </div>
-                        <span>{st.name}</span>
-                      </td>
-                      <td className="py-3 pr-4 text-dark-600 font-mono text-[11px]">{st.email}</td>
-                      <td className="py-3 pr-4">
-                        {st.assignedInstructors.length === 0 ? (
-                          <span className="px-2 py-0.5 rounded-full bg-dark-100 text-dark-500 text-[10px]">
-                            Unassigned
-                          </span>
-                        ) : (
-                          <div className="flex gap-1 flex-wrap">
-                            {st.assignedInstructors.map((inst) => (
-                              <span
-                                key={inst.id}
-                                className="px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-800 text-[10px] font-semibold border border-emerald-200"
-                              >
-                                {inst.name}
-                              </span>
-                            ))}
+                  filteredStudents.map((st) => {
+                    const expiry = getPlanExpiryInfo(st.premiumExpiresAt);
+                    return (
+                      <tr key={st.id} className="hover:bg-dark-50/50 transition-colors">
+                        <td className="py-3 pr-4 font-bold text-dark-900 flex items-center gap-2">
+                          <div className="w-7 h-7 rounded-lg bg-primary-100 text-primary-700 flex items-center justify-center font-bold text-[11px]">
+                            {st.name.charAt(0).toUpperCase()}
                           </div>
-                        )}
-                      </td>
-                      <td className="py-3 pr-4 text-center">
-                        <span className="inline-flex items-center gap-1 font-mono text-[11px] font-bold text-amber-700 bg-amber-50 px-2 py-0.5 rounded">
-                          <Bot className="w-3 h-3" />
-                          {st.aiInteractionCount}
-                        </span>
-                      </td>
-                      <td className="py-3 pr-4 text-center font-bold text-dark-700">
-                        {st.streakDays}d
-                      </td>
-                      <td className="py-3 text-right">
-                        <select
-                          className="bg-dark-50 border border-dark-200 text-dark-800 rounded-lg px-2 py-1 text-[11px] cursor-pointer"
-                          value={st.assignedInstructors[0]?.id || ''}
-                          onChange={(e) => {
-                            const newInstId = e.target.value;
-                            if (newInstId) {
-                              handleToggleAssignment(newInstId, st.id, false);
-                            }
-                          }}
-                        >
-                          <option value="">-- Assign Instructor --</option>
-                          {instructors.map((i) => (
-                            <option key={i.id} value={i.id}>
-                              {i.name} ({i.email})
-                            </option>
-                          ))}
-                        </select>
-                      </td>
-                    </tr>
-                  ))
+                          <span>{st.name}</span>
+                        </td>
+                        <td className="py-3 pr-4 text-dark-600 font-mono text-[11px]">{st.email}</td>
+                        <td className="py-3 pr-4">
+                          <div className="flex flex-col gap-1 items-start">
+                            <div className="flex items-center gap-1.5">
+                              {st.isPremium ? (
+                                <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-amber-100 text-amber-900 font-bold text-[10px] border border-amber-300">
+                                  <Crown className="w-3 h-3 text-amber-600 fill-amber-400" />
+                                  <span>Pro</span>
+                                </span>
+                              ) : (
+                                <span className="px-2 py-0.5 rounded-full bg-dark-100 text-dark-600 font-medium text-[10px]">
+                                  Free
+                                </span>
+                              )}
+                              <button
+                                onClick={() => handleOpenEditSub(st)}
+                                title="Edit Plan & Expiration Date"
+                                className="p-1 rounded hover:bg-dark-100 text-dark-500 hover:text-dark-900 transition-colors cursor-pointer"
+                              >
+                                <Edit3 className="w-3 h-3" />
+                              </button>
+                            </div>
+                            {st.isPremium && expiry && (
+                              <span className={`text-[10px] font-semibold px-1.5 py-0.2 rounded ${
+                                expiry.isUrgent
+                                  ? 'bg-rose-100 text-rose-700 font-bold animate-pulse'
+                                  : 'text-dark-500'
+                              }`}>
+                                {expiry.badgeText}
+                              </span>
+                            )}
+                          </div>
+                        </td>
+                        <td className="py-3 pr-4">
+                          {st.assignedInstructors.length === 0 ? (
+                            <span className="px-2 py-0.5 rounded-full bg-dark-100 text-dark-500 text-[10px]">
+                              Unassigned
+                            </span>
+                          ) : (
+                            <div className="flex gap-1 flex-wrap">
+                              {st.assignedInstructors.map((inst) => (
+                                <span
+                                  key={inst.id}
+                                  className="px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-800 text-[10px] font-semibold border border-emerald-200"
+                                >
+                                  {inst.name}
+                                </span>
+                              ))}
+                            </div>
+                          )}
+                        </td>
+                        <td className="py-3 pr-4 text-center">
+                          <span className="inline-flex items-center gap-1 font-mono text-[11px] font-bold text-amber-700 bg-amber-50 px-2 py-0.5 rounded">
+                            <Bot className="w-3 h-3" />
+                            {st.aiInteractionCount}
+                          </span>
+                        </td>
+                        <td className="py-3 pr-4 text-center font-bold text-dark-700">
+                          {st.streakDays}d
+                        </td>
+                        <td className="py-3 text-right">
+                          <div className="flex items-center justify-end gap-1.5">
+                            <button
+                              onClick={() => handleOpenEditSub(st)}
+                              className="px-2 py-1 rounded-lg bg-amber-50 hover:bg-amber-100 text-amber-800 font-semibold text-[11px] border border-amber-200 transition-colors cursor-pointer flex items-center gap-1"
+                            >
+                              <Crown className="w-3 h-3 text-amber-600" />
+                              <span>Plan</span>
+                            </button>
+                            <select
+                              className="bg-dark-50 border border-dark-200 text-dark-800 rounded-lg px-2 py-1 text-[11px] cursor-pointer"
+                              value={st.assignedInstructors[0]?.id || ''}
+                              onChange={(e) => {
+                                const newInstId = e.target.value;
+                                if (newInstId) {
+                                  handleToggleAssignment(newInstId, st.id, false);
+                                }
+                              }}
+                            >
+                              <option value="">-- Faculty --</option>
+                              {instructors.map((i) => (
+                                <option key={i.id} value={i.id}>
+                                  {i.name}
+                                </option>
+                              ))}
+                            </select>
+                          </div>
+                        </td>
+                      </tr>
+                    );
+                  })
                 )}
               </tbody>
             </table>
@@ -917,6 +1099,154 @@ export default function AdminPortalPage() {
                 className="px-4 py-2 rounded-xl bg-dark-900 text-white font-semibold text-xs hover:bg-dark-800 transition-colors"
               >
                 Done
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* EDIT SUBSCRIPTION & EXPIRATION MODAL (STUDENTS & INSTRUCTORS) */}
+      {editingUserSub && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-xs p-4 animate-fadeIn">
+          <div className="bg-white rounded-2xl border border-dark-200 shadow-2xl w-full max-w-md p-6 space-y-4">
+            <div className="flex items-center justify-between pb-3 border-b border-dark-100">
+              <div className="flex items-center gap-2.5">
+                <div className="w-9 h-9 rounded-xl bg-amber-100 text-amber-700 flex items-center justify-center font-bold">
+                  <Crown className="w-5 h-5 text-amber-600" />
+                </div>
+                <div>
+                  <h2 className="text-base font-bold text-dark-900">Manage Subscription</h2>
+                  <p className="text-xs text-dark-500 font-mono">{editingUserSub.email}</p>
+                </div>
+              </div>
+              <button
+                onClick={() => setEditingUserSub(null)}
+                className="p-1 rounded-lg hover:bg-dark-100 text-dark-400 hover:text-dark-700"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            {subModalError && (
+              <div className="p-3 rounded-xl bg-red-50 text-red-700 text-xs border border-red-200 flex items-center gap-2">
+                <AlertTriangle className="w-4 h-4 shrink-0" />
+                <span>{subModalError}</span>
+              </div>
+            )}
+
+            {subModalSuccess && (
+              <div className="p-3 rounded-xl bg-emerald-50 text-emerald-700 text-xs border border-emerald-200 flex items-center gap-2">
+                <CheckCircle2 className="w-4 h-4 shrink-0" />
+                <span>{subModalSuccess}</span>
+              </div>
+            )}
+
+            <div className="space-y-3.5 text-xs">
+              <div>
+                <label className="block font-semibold text-dark-700 mb-1">Select Plan Tier</label>
+                <select
+                  value={subPlanType}
+                  onChange={(e) => {
+                    const newPlan = e.target.value;
+                    setSubPlanType(newPlan);
+                    if (newPlan === 'FREE') {
+                      setSubExpiresAt('');
+                    } else if (!subExpiresAt) {
+                      const now = new Date();
+                      now.setMonth(now.getMonth() + 1);
+                      const year = now.getFullYear();
+                      const month = String(now.getMonth() + 1).padStart(2, '0');
+                      const day = String(now.getDate()).padStart(2, '0');
+                      setSubExpiresAt(`${year}-${month}-${day}`);
+                    }
+                  }}
+                  className="w-full px-3 py-2 rounded-xl border border-dark-200 text-dark-900 font-medium bg-white focus:outline-none focus:ring-2 focus:ring-amber-500"
+                >
+                  <option value="FREE">Free Tier (No active pro status)</option>
+                  <option value="PRO">Pro Plan</option>
+                </select>
+              </div>
+
+              {subPlanType !== 'FREE' && (
+                <div>
+                  <div className="flex items-center justify-between mb-1">
+                    <label className="block font-semibold text-dark-700">Expiration Date</label>
+                    <div className="flex gap-1.5">
+                      <button
+                        type="button"
+                        onClick={() => {
+                          const now = new Date();
+                          now.setDate(now.getDate() + 3);
+                          const y = now.getFullYear();
+                          const m = String(now.getMonth() + 1).padStart(2, '0');
+                          const d = String(now.getDate()).padStart(2, '0');
+                          setSubExpiresAt(`${y}-${m}-${d}`);
+                        }}
+                        className="text-[10px] text-amber-700 hover:underline font-bold"
+                      >
+                        +3 Days
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          const now = new Date();
+                          now.setMonth(now.getMonth() + 1);
+                          const y = now.getFullYear();
+                          const m = String(now.getMonth() + 1).padStart(2, '0');
+                          const d = String(now.getDate()).padStart(2, '0');
+                          setSubExpiresAt(`${y}-${m}-${d}`);
+                        }}
+                        className="text-[10px] text-primary-600 hover:underline font-bold"
+                      >
+                        +1 Month
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          const now = new Date();
+                          now.setFullYear(now.getFullYear() + 1);
+                          const y = now.getFullYear();
+                          const m = String(now.getMonth() + 1).padStart(2, '0');
+                          const d = String(now.getDate()).padStart(2, '0');
+                          setSubExpiresAt(`${y}-${m}-${d}`);
+                        }}
+                        className="text-[10px] text-primary-600 hover:underline font-bold"
+                      >
+                        +1 Year
+                      </button>
+                    </div>
+                  </div>
+                  <div className="relative">
+                    <input
+                      type="date"
+                      value={subExpiresAt}
+                      onChange={(e) => setSubExpiresAt(e.target.value)}
+                      className="w-full px-3 py-2 rounded-xl border border-dark-200 text-dark-900 font-mono bg-white focus:outline-none focus:ring-2 focus:ring-amber-500"
+                    />
+                  </div>
+                  <p className="text-[11px] text-dark-500 mt-1">
+                    After this date, the user will be automatically downgraded to the Free tier. If fewer than 3 days remain, an urgent alert countdown will be displayed.
+                  </p>
+                </div>
+              )}
+            </div>
+
+            <div className="pt-3 border-t border-dark-100 flex items-center justify-end gap-2">
+              <button
+                type="button"
+                onClick={() => setEditingUserSub(null)}
+                className="px-4 py-2 rounded-xl border border-dark-200 text-dark-700 font-semibold text-xs hover:bg-dark-50 transition-colors"
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                onClick={handleSaveSubscription}
+                disabled={isUpdatingSub}
+                className="px-4 py-2 rounded-xl bg-amber-500 hover:bg-amber-600 text-white font-bold text-xs transition-colors flex items-center gap-1.5 shadow-xs disabled:opacity-50"
+              >
+                {isUpdatingSub ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <CheckCircle className="w-3.5 h-3.5" />}
+                <span>Save Changes</span>
               </button>
             </div>
           </div>

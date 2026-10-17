@@ -106,6 +106,40 @@ export interface ChatMessage {
   practiceQuestion?: QuizQuestion;
 }
 
+export interface StudentSummary {
+  student: {
+    id: string;
+    name: string | null;
+    email: string;
+    role?: string;
+    streakDays: number;
+    isPremium?: boolean;
+    planType?: string;
+    premiumExpiresAt?: string | Date | null;
+    lastActiveAt?: string | Date;
+  };
+  completedModules: Record<string, boolean>;
+  moduleScores: Record<string, number>;
+  moduleStages?: Record<string, number>;
+  quizStats: {
+    total: number;
+    correct: number;
+    accuracy: number;
+  };
+  misconceptions: Array<{
+    tag: string;
+    count: number;
+    isResolved: boolean;
+  }>;
+  recentQuizAttempts: Array<{
+    moduleSlug: string;
+    questionId: string;
+    isCorrect: boolean;
+    misconceptionTag?: string;
+    createdAt: string | Date;
+  }>;
+}
+
 export interface ConceptMastery {
   superposition: number; // 0-100
   entanglement: number;

@@ -61,11 +61,15 @@ export async function POST(req: NextRequest) {
               passwordHash,
               role: 'STUDENT',
               isPremium: false,
+              planType: 'FREE',
               lastActiveAt: new Date(),
             },
           });
         }
       });
+
+      const isSubExpired = user.premiumExpiresAt ? new Date(user.premiumExpiresAt).getTime() <= Date.now() : false;
+      const effectivePremium = Boolean(user.isPremium && !isSubExpired);
 
       const res = NextResponse.json({
         userId: user.id,
@@ -74,7 +78,9 @@ export async function POST(req: NextRequest) {
         role: user.role,
         isAdmin: user.role === 'ADMIN',
         isInstructor: user.role === 'EDUCATOR' || user.role === 'ADMIN',
-        isPremium: Boolean(user.isPremium),
+        isPremium: effectivePremium,
+        planType: effectivePremium ? (user.planType || 'PRO_MONTHLY') : 'FREE',
+        premiumExpiresAt: user.premiumExpiresAt ? user.premiumExpiresAt.toISOString() : null,
       });
 
       res.cookies.set('ql_user_id', user.id, {
@@ -87,7 +93,7 @@ export async function POST(req: NextRequest) {
         sameSite: 'lax',
         maxAge: 60 * 60 * 24,
       });
-      res.cookies.set('ql_user_premium', String(Boolean(user.isPremium)), {
+      res.cookies.set('ql_user_premium', String(effectivePremium), {
         path: '/',
         sameSite: 'lax',
         maxAge: 60 * 60 * 24,
@@ -112,19 +118,27 @@ export async function POST(req: NextRequest) {
           throw new Error('INVALID_PASSWORD');
         }
 
-        // Set password for legacy account if missing
+        // Check if subscription has expired
+        const isExpired = found.isPremium && found.premiumExpiresAt && new Date(found.premiumExpiresAt).getTime() <= Date.now();
+        const updateData: any = { lastActiveAt: new Date() };
+
+        if (isExpired) {
+          updateData.isPremium = false;
+          updateData.planType = 'FREE';
+        }
+
         if (!found.passwordHash) {
-          return await prisma.user.update({
-            where: { id: found.id },
-            data: { passwordHash, lastActiveAt: new Date() },
-          });
+          updateData.passwordHash = passwordHash;
         }
 
         return await prisma.user.update({
           where: { id: found.id },
-          data: { lastActiveAt: new Date() },
+          data: updateData,
         });
       });
+
+      const isSubExpired = user.premiumExpiresAt ? new Date(user.premiumExpiresAt).getTime() <= Date.now() : false;
+      const effectivePremium = Boolean(user.isPremium && !isSubExpired);
 
       const res = NextResponse.json({
         userId: user.id,
@@ -133,7 +147,9 @@ export async function POST(req: NextRequest) {
         role: user.role,
         isAdmin: user.role === 'ADMIN',
         isInstructor: user.role === 'EDUCATOR' || user.role === 'ADMIN',
-        isPremium: Boolean(user.isPremium),
+        isPremium: effectivePremium,
+        planType: effectivePremium ? (user.planType || 'PRO_MONTHLY') : 'FREE',
+        premiumExpiresAt: user.premiumExpiresAt ? user.premiumExpiresAt.toISOString() : null,
       });
 
       res.cookies.set('ql_user_id', user.id, {
@@ -146,7 +162,7 @@ export async function POST(req: NextRequest) {
         sameSite: 'lax',
         maxAge: 60 * 60 * 24,
       });
-      res.cookies.set('ql_user_premium', String(Boolean(user.isPremium)), {
+      res.cookies.set('ql_user_premium', String(effectivePremium), {
         path: '/',
         sameSite: 'lax',
         maxAge: 60 * 60 * 24,

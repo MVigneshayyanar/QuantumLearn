@@ -378,21 +378,6 @@ export default function InstructorDashboard() {
               <span>Map / Add Students</span>
             </button>
 
-            {/* Seed Cohort Button */}
-            <button
-              onClick={handleSeedCohort}
-              disabled={isSeeding}
-              className="flex items-center gap-1.5 px-3 py-2 rounded-xl border border-primary-200 bg-primary-50 hover:bg-primary-100 text-primary-700 font-semibold text-xs transition-colors shadow-2xs"
-              title="Populate database with 5 demo students"
-            >
-              {isSeeding ? (
-                <Loader2 className="w-3.5 h-3.5 animate-spin" />
-              ) : (
-                <Sparkles className="w-3.5 h-3.5 text-primary-600" />
-              )}
-              <span>{isSeeding ? 'Seeding...' : 'Seed Demo Cohort'}</span>
-            </button>
-
             {/* Tab Navigation */}
             <div className="inline-flex rounded-xl border border-dark-200 p-1 bg-dark-50">
               {(['overview', 'misconceptions', 'students'] as const).map((tab) => (
@@ -609,7 +594,7 @@ export default function InstructorDashboard() {
               <p className="text-xs text-dark-500 max-w-sm mx-auto">
                 {scope === 'mapped'
                   ? 'You do not have any students mapped to your class yet. Click "Add / Map" to assign existing students or create new student accounts.'
-                  : 'No student accounts found. Click "Seed Demo Cohort" to populate test data.'}
+                  : 'No student accounts found yet. Use the "Add / Map" option above to enroll students.'}
               </p>
               <div className="flex items-center justify-center gap-2 pt-1">
                 <button
@@ -618,14 +603,6 @@ export default function InstructorDashboard() {
                 >
                   <UserPlus className="w-3.5 h-3.5" />
                   <span>Map Students Now</span>
-                </button>
-                <button
-                  onClick={handleSeedCohort}
-                  disabled={isSeeding}
-                  className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl border border-dark-200 hover:bg-dark-100 text-dark-700 font-semibold text-xs transition-colors"
-                >
-                  <Sparkles className="w-3.5 h-3.5 text-primary-600" />
-                  <span>Seed Demo Cohort</span>
                 </button>
               </div>
             </div>

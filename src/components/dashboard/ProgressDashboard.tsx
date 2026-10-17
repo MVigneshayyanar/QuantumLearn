@@ -19,15 +19,28 @@ import {
   BarChart3,
   Users,
   UserCheck,
-  Loader2
+  Loader2,
+  Crown,
+  Clock,
+  AlertCircle
 } from 'lucide-react';
 import { ResponsiveContainer, PolarGrid, PolarAngleAxis, PolarRadiusAxis, Radar, RadarChart } from 'recharts';
 import { MISCONCEPTION_GUIDES } from '@/lib/ai-engine';
 import { MisconceptionTag } from '@/lib/types';
+import { getPlanExpiryInfo } from '@/lib/subscription-utils';
 
 // Shape returned by GET /api/students/[id]/summary
 interface StudentSummary {
-  student: { id: string; name: string; email: string; streakDays: number; lastActiveAt: string };
+  student: {
+    id: string;
+    name: string;
+    email: string;
+    streakDays: number;
+    isPremium?: boolean;
+    planType?: string;
+    premiumExpiresAt?: string | null;
+    lastActiveAt: string;
+  };
   completedModules: Record<string, boolean>;
   moduleScores: Record<string, number>;
   moduleStages: Record<string, number>; // stageReached (1–6) per module
@@ -50,7 +63,17 @@ interface StudentSummary {
 }
 
 export function ProgressDashboard() {
-  const { userId, studentName, isIdentified, isInstructor, isAdmin } = useStudentContext();
+  const {
+    userId,
+    studentName,
+    isIdentified,
+    isInstructor,
+    isAdmin,
+    isPremium,
+    planType,
+    premiumExpiresAt,
+    openSubscriptionModal
+  } = useStudentContext();
   const { askTutor } = useAITutorStore();
   const { language, explanationMode } = useAccessibility();
   const t = translations[language];
@@ -181,45 +204,104 @@ export function ProgressDashboard() {
 
   return (
     <div className="w-full mx-auto px-3 sm:px-6 lg:px-8 py-3 pb-24 md:pb-6 space-y-3.5 animate-fadeIn">
-      {/* Dashboard Top Banner */}
-      <div className="bg-white rounded-2xl border border-dark-200 p-5 sm:p-6 shadow-xs flex flex-wrap items-center justify-between gap-4">
-        <div>
-          <span className="text-xs font-semibold px-2.5 py-0.5 rounded-full bg-primary-50 text-primary-700 border border-primary-100">
-            Learner Profile
-          </span>
-          <h1 className="text-xl sm:text-2xl font-bold text-dark-900 mt-1.5">
-            {studentName ? `${studentName} — ${t?.dashboard?.title || 'Quantum Journey'}` : (t?.dashboard?.title || 'Quantum Mastery & Analytics')}
-          </h1>
-          <p className="text-xs sm:text-sm text-dark-600 mt-0.5">
-            {t?.dashboard?.subtitle || 'Track your understanding across quantum fundamentals, algorithms, and AI diagnostics.'}
-          </p>
-        </div>
+      {/* Unified Dashboard Header & Plan Banner */}
+      {(() => {
+        const effectiveExpiry = summary?.student?.premiumExpiresAt || premiumExpiresAt;
+        const expiry = getPlanExpiryInfo(effectiveExpiry);
+        const currentPlan = summary?.student?.planType || planType;
 
-        {/* Role switcher (Only visible to Instructor or Admin) */}
-        {(isInstructor || isAdmin) && (
-          <div className="inline-flex rounded-xl border border-dark-200 p-1 bg-dark-50">
-            <button
-              onClick={() => setRoleView('student')}
-              aria-pressed={roleView === 'student'}
-              className={`flex items-center gap-2 px-3 py-1.5 rounded-lg text-xs font-semibold transition-colors ${
-                roleView === 'student'
-                  ? 'bg-white text-dark-900 shadow-xs'
-                  : 'text-dark-600 hover:text-dark-900'
-              }`}
-            >
-              <UserCheck className="w-3.5 h-3.5 text-primary-600" />
-              <span>Student View</span>
-            </button>
-            <Link
-              href="/instructor"
-              className={`flex items-center gap-2 px-3 py-1.5 rounded-lg text-xs font-semibold transition-colors text-dark-600 hover:text-dark-900`}
-            >
-              <Users className="w-3.5 h-3.5 text-primary-600" />
-              <span>Educator / Class View</span>
-            </Link>
+        return (
+          <div className="bg-white dark:bg-dark-900 rounded-2xl border border-dark-200 dark:border-dark-800 p-4 sm:p-5 shadow-xs flex flex-wrap items-center justify-between gap-4">
+            {/* Left: Learner Profile & Subtitle */}
+            <div className="flex-1 min-w-[280px]">
+              <div className="flex items-center gap-2 flex-wrap">
+                <span className="text-[11px] font-semibold px-2.5 py-0.5 rounded-full bg-primary-50 dark:bg-primary-950/60 text-primary-700 dark:text-primary-300 border border-primary-100 dark:border-primary-800/60">
+                  Learner Profile
+                </span>
+                {isPremium && !isAdmin && !isInstructor && (
+                  <span className="inline-flex items-center gap-1 text-[11px] font-bold px-2 py-0.5 rounded-full bg-amber-50 dark:bg-amber-950/70 text-amber-900 dark:text-amber-300 border border-amber-300 dark:border-amber-700/60">
+                    <Crown className="w-3 h-3 text-amber-500 fill-amber-400" />
+                    <span>QuanBit Pro</span>
+                  </span>
+                )}
+              </div>
+              <h1 className="text-lg sm:text-xl font-bold text-dark-900 dark:text-white mt-1">
+                {studentName ? `${studentName} — ${t?.dashboard?.title || 'Quantum Learning Dashboard'}` : (t?.dashboard?.title || 'Quantum Mastery & Analytics')}
+              </h1>
+              <p className="text-xs text-dark-500 dark:text-dark-400 mt-0.5 line-clamp-1">
+                {t?.dashboard?.subtitle || 'Track your concept mastery, daily study streak, algorithm progress, and targeted AI recommendations.'}
+              </p>
+            </div>
+
+            {/* Right: Plan Expiry Badge, CTA, and Role Switcher */}
+            <div className="flex items-center gap-2.5 flex-wrap">
+              {/* If user is Pro */}
+              {isPremium && !isAdmin && !isInstructor && (
+                <>
+                  {expiry && (
+                    <div className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold border ${
+                      expiry.isUrgent
+                        ? 'bg-rose-100 dark:bg-rose-950/80 text-rose-800 dark:text-rose-200 border-rose-300 dark:border-rose-700 animate-pulse'
+                        : 'bg-amber-50/80 dark:bg-amber-950/50 text-amber-900 dark:text-amber-200 border-amber-200 dark:border-amber-700/70'
+                    }`}>
+                      {expiry.isUrgent ? (
+                        <AlertCircle className="w-3.5 h-3.5 text-rose-600 dark:text-rose-400 shrink-0" />
+                      ) : (
+                        <Clock className="w-3.5 h-3.5 text-amber-600 dark:text-amber-400 shrink-0" />
+                      )}
+                      <span>{expiry.badgeText}</span>
+                    </div>
+                  )}
+                  <button
+                    type="button"
+                    onClick={openSubscriptionModal}
+                    className="px-3.5 py-1.5 rounded-xl bg-amber-500 hover:bg-amber-600 text-white text-xs font-bold transition-colors cursor-pointer shadow-xs active:scale-[0.98]"
+                  >
+                    Manage Plan
+                  </button>
+                </>
+              )}
+
+              {/* If Free student */}
+              {!isPremium && !isAdmin && !isInstructor && (
+                <button
+                  type="button"
+                  onClick={openSubscriptionModal}
+                  className="px-3.5 py-1.5 rounded-xl bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 text-white text-xs font-bold transition-all shadow-xs cursor-pointer flex items-center gap-1.5 active:scale-[0.98]"
+                >
+                  <Crown className="w-3.5 h-3.5 fill-amber-200 text-amber-100" />
+                  <span>Upgrade to Pro</span>
+                </button>
+              )}
+
+              {/* Role switcher (Only visible to Instructor or Admin) */}
+              {(isInstructor || isAdmin) && (
+                <div className="inline-flex rounded-xl border border-dark-200 dark:border-dark-700 p-1 bg-dark-50 dark:bg-dark-800">
+                  <button
+                    onClick={() => setRoleView('student')}
+                    aria-pressed={roleView === 'student'}
+                    className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition-colors ${
+                      roleView === 'student'
+                        ? 'bg-white dark:bg-dark-700 text-dark-900 dark:text-white shadow-xs'
+                        : 'text-dark-600 dark:text-dark-400 hover:text-dark-900 dark:hover:text-white'
+                    }`}
+                  >
+                    <UserCheck className="w-3.5 h-3.5 text-primary-600 dark:text-primary-400" />
+                    <span>Student View</span>
+                  </button>
+                  <Link
+                    href="/instructor"
+                    className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition-colors text-dark-600 dark:text-dark-400 hover:text-dark-900 dark:hover:text-white`}
+                  >
+                    <Users className="w-3.5 h-3.5 text-primary-600 dark:text-primary-400" />
+                    <span>Educator View</span>
+                  </Link>
+                </div>
+              )}
+            </div>
           </div>
-        )}
-      </div>
+        );
+      })()}
 
       {/* Quick Stats Grid */}
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
