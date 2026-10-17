@@ -11,7 +11,7 @@ export function QuantumAcademyExact() {
   return (
     <div className="w-full h-[calc(100vh-6.25rem)] bg-[#fafafa] overflow-hidden relative">
       <iframe
-        src="/quantum-academy-embed.html?v=noblink10"
+        src="/quantum-academy-embed.html?v=fontfix11"
         title="Quantum Academy"
         className="w-full h-full border-0 block bg-[#fafafa]"
         style={{ colorScheme: 'light' }}
