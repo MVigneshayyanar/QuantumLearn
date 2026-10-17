@@ -4,36 +4,24 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Quantum Academy</title>
-    <meta name="theme-color" content="#000000" />
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script>
-      tailwind.config = {
-        theme: {
-          extend: {
-            colors: {
-              background: '#0f172a',
-              primary: '#3b82f6',
-            }
-          }
-        }
-      }
-    </script>
+    <meta name="theme-color" content="#fafafa" />
     <style>
       html, body {
         margin: 0;
         padding: 0;
-        background: #000;
-        color: #fff;
+        background: #fafafa;
+        color: #0f172a;
         height: 100%;
         overflow-x: hidden;
       }
       #root {
         min-height: 100vh;
+        background: #fafafa;
       }
       .prose { max-width: none; }
       .prose h1 { font-size: 2.5em; margin-bottom: 1rem; font-weight: 700; }
       .prose h2 { font-size: 2em; margin-top: 2rem; margin-bottom: 1rem; font-weight: 600; }
-      .prose pre { background-color: #1e293b; border-radius: 0.5rem; }
+      .prose pre { background-color: #f1f5f9; border-radius: 0.5rem; }
     </style>
     <link rel="stylesheet" href="/sirraya_assets/index-DNxJtfNo.css">
     <link rel="stylesheet" href="/sirraya_assets/QuantumAcademy-B1p-9dS3.css">
@@ -597,7 +585,7 @@
       const root = G.createRoot(document.getElementById('root'));
       root.render(
         d.createElement(O.StrictMode, null,
-          d.createElement(d.Suspense, { fallback: d.createElement('div', { style: { padding: '40px', color: '#888' } }, 'Loading Quantum Academy...') },
+          d.createElement(d.Suspense, { fallback: d.createElement('div', { style: { width: '100%', height: '100vh', background: '#fafafa' } }) },
             d.createElement(QuantumAcademy, null)
           )
         )

@@ -4,20 +4,17 @@ import React, { useEffect } from 'react';
 
 export function QuantumAcademyExact() {
   useEffect(() => {
-    // Ensure the outer window is pinned at the top so navigation headers are fully visible
+    // Ensure the outer window is pinned at the top immediately without delay
     window.scrollTo({ top: 0, left: 0, behavior: 'instant' });
-    const timer = setTimeout(() => {
-      window.scrollTo({ top: 0, left: 0, behavior: 'instant' });
-    }, 150);
-    return () => clearTimeout(timer);
   }, []);
 
   return (
     <div className="w-full h-[calc(100vh-6.25rem)] bg-[#fafafa] overflow-hidden relative">
       <iframe
-        src="/quantum-academy-embed.html?v=topfix6"
+        src="/quantum-academy-embed.html?v=noblink8"
         title="Quantum Academy"
-        className="w-full h-full border-0 block"
+        className="w-full h-full border-0 block bg-[#fafafa]"
+        style={{ colorScheme: 'light' }}
       />
     </div>
   );
