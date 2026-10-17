@@ -70,7 +70,7 @@ export default function FAQPage() {
         {
           q: 'How does QuanBit handle qubit endianness between Qiskit and Cirq?',
           a: 'QuanBit automatically normalizes endianness conversions in real-time. IBM Qiskit uses little-endian ordering (|q_n ... q_0⟩) while Google Cirq and standard Dirac math use big-endian ordering (|q_0 ... q_n⟩). QuanBit provides side-by-side annotations showing learners exactly how basis state indices map across different frameworks.',
-          link: { label: 'Learn in Masterclass', href: '/about#quantum-guide' },
+          link: { label: 'Learn in Masterclass', href: '/concepts' },
         },
       ],
     },
@@ -87,7 +87,7 @@ export default function FAQPage() {
         {
           q: 'Can I learn quantum computing on QuanBit with no physics background?',
           a: 'Yes! QuanBit features a Dual-Explanation Mode: "Simple Mode" explains concepts using everyday analogies (light switches, polarized sunglasses, coin tosses), while "Technical Mode" presents formal Dirac bra-ket notations, complex statevector amplitudes, and unitary matrices. The Schrödinger AI tutor adapts to your knowledge level.',
-          link: { label: 'Read Concept Guide', href: '/about' },
+          link: { label: 'Read Concept Guide in Quantum Academy', href: '/concepts' },
         },
       ],
     },

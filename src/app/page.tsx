@@ -343,7 +343,7 @@ export default function HomePage() {
             </div>
           )}
 
-          {/* Action Banner: More Button going to /about */}
+          {/* Action Banner: More Button going to /concepts */}
           <div className="p-5 rounded-2xl bg-gradient-to-r from-primary-50 via-indigo-50 to-white dark:from-dark-800 dark:via-indigo-950/40 dark:to-dark-800 border border-primary-200 dark:border-dark-700 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
             <div className="space-y-1">
               <h3 className="font-bold text-sm text-primary-950 dark:text-primary-200 flex items-center gap-2">
@@ -351,14 +351,14 @@ export default function HomePage() {
                 Want to learn all the quantum concepts in detail?
               </h3>
               <p className="text-xs text-dark-600 dark:text-dark-300">
-                Explore Qubits, Superposition, Entanglement, Quantum Speedup, and the Classical vs Quantum Comparison Matrix with full explanations in our About guide.
+                Explore our full self-contained Quantum Academy: 22 lessons, 5 hardware platforms, characterization bench, 21 interactive mini-labs, and glossary.
               </p>
             </div>
             <Link
-              href="/about#quantum-guide"
+              href="/concepts"
               className="px-5 py-2.5 rounded-xl bg-primary-600 hover:bg-primary-700 text-white font-bold text-xs flex items-center gap-2 shadow-sm transition-all shrink-0 self-start sm:self-auto group"
             >
-              <span>Explore Complete Guide in About</span>
+              <span>Explore Quantum Academy in Concepts</span>
               <ArrowRight className="w-4 h-4 group-hover:translate-x-0.5 transition-transform" />
             </Link>
           </div>

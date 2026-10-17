@@ -107,8 +107,8 @@ export function Footer() {
                 </Link>
               </li>
               <li>
-                <Link href="/about" className="hover:text-primary-600 dark:hover:text-primary-400 transition-colors font-medium text-primary-700 dark:text-primary-400">
-                  {t.nav.about}
+                <Link href="/concepts" className="hover:text-primary-600 dark:hover:text-primary-400 transition-colors font-medium text-primary-700 dark:text-primary-400">
+                  {t.nav.concepts || 'Concepts'}
                 </Link>
               </li>
             </ul>

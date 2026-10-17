@@ -14,7 +14,8 @@
     "contact": "Contact",
     "faq": "FAQ",
     "moreAlgorithms": "More Algorithms",
-    "multiSimulator": "Multi-Simulator"
+    "multiSimulator": "Multi-Simulator",
+    "concepts": "Concepts"
   },
   "a11y": {
     "fontSize": "Text Size",

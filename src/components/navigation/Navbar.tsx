@@ -67,9 +67,8 @@ export function Navbar() {
   const navLinks = [
     { href: '/', label: t.nav.home, icon: Atom },
     { href: '/bloch-sphere', label: t.nav.blochSphere, icon: Globe },
-    { href: '/practice', label: t.nav.practice, icon: Terminal },
     { href: '/simulator', label: t.nav.simulator, icon: Cpu },
-    { href: '/about', label: t.nav.about || 'About', icon: Info },
+    { href: '/concepts', label: t.nav.concepts || 'Concepts', icon: BookOpen },
   ];
 
   const algoLinks = [
@@ -514,15 +513,15 @@ export function Navbar() {
       </Link>
 
       <Link
-        href="/practice"
+        href="/concepts"
         className={`flex flex-col items-center justify-center w-full h-full gap-1 transition-colors ${
-          pathname.startsWith('/practice')
+          pathname.startsWith('/concepts')
             ? 'text-primary-600 dark:text-primary-400 font-bold'
             : 'text-dark-500 dark:text-dark-400 hover:text-dark-800 dark:hover:text-dark-200'
         }`}
       >
-        <Terminal className="w-5 h-5" />
-        <span className="text-[10px] font-medium">{t.nav.practice}</span>
+        <BookOpen className="w-5 h-5" />
+        <span className="text-[10px] font-medium">{t.nav.concepts || 'Concepts'}</span>
       </Link>
     </nav>
     </>

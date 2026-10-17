@@ -14,7 +14,8 @@
     "contact": "联系我们",
     "faq": "FAQ",
     "moreAlgorithms": "更多算法",
-    "multiSimulator": "Multi-Simulator"
+    "multiSimulator": "Multi-Simulator",
+    "concepts": "核心概念 (Concepts)"
   },
   "a11y": {
     "fontSize": "字体大小",
