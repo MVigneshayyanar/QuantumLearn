@@ -1,10 +1,6 @@
 'use client';
 
-<<<<<<< HEAD
-import { useEffect } from 'react';
-import { useRouter } from 'next/navigation';
-=======
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import Link from 'next/link';
 import { useAccessibility } from '@/lib/accessibility-context';
 import { translations } from '@/lib/i18n';
@@ -37,23 +33,13 @@ import {
   X
 } from 'lucide-react';
 import { MathRenderer } from '@/components/math/MathRenderer';
->>>>>>> 59ff7279a36e5ad62fdf6e9153b1677a0867f057
 
-export default function AboutRedirect() {
-  const router = useRouter();
-
-  useEffect(() => {
-    router.replace('/concepts');
-  }, [router]);
+export default function AboutPage() {
+  const { language, explanationMode } = useAccessibility();
+  const t = translations[language];
+  const [activeTab, setActiveTab] = useState<'what-is-quantum' | 'qubit' | 'superposition' | 'entanglement' | 'computing' | 'comparison'>('what-is-quantum');
 
   return (
-<<<<<<< HEAD
-    <div className="min-h-[60vh] flex flex-col items-center justify-center p-6 text-center">
-      <div className="w-8 h-8 border-2 border-indigo-500 border-t-transparent rounded-full animate-spin mb-4" />
-      <p className="text-sm text-slate-400 font-mono">
-        Redirecting to Quantum Academy & Concepts...
-      </p>
-=======
     <div className="w-full mx-auto px-3 sm:px-6 lg:px-8 py-4 sm:py-6 pb-24 md:pb-8 space-y-8 sm:space-y-10 animate-fadeIn max-w-7xl">
       {/* Top Hero Banner: The Origin Story */}
       <div className="bg-gradient-to-br from-indigo-950 via-primary-900 to-indigo-900 text-white rounded-3xl p-5 sm:p-8 md:p-12 shadow-xl relative overflow-hidden">
@@ -926,7 +912,6 @@ export default function AboutRedirect() {
           </span>
         </div>
       </section>
->>>>>>> 59ff7279a36e5ad62fdf6e9153b1677a0867f057
     </div>
   );
 }

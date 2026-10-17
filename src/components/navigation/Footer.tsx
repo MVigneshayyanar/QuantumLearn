@@ -107,13 +107,13 @@ export function Footer() {
                 </Link>
               </li>
               <li>
-<<<<<<< HEAD
-                <Link href="/concepts" className="hover:text-primary-600 dark:hover:text-primary-400 transition-colors font-medium text-primary-700 dark:text-primary-400">
+                <Link href="/concepts" prefetch={false} className="hover:text-primary-600 dark:hover:text-primary-400 transition-colors font-medium text-primary-700 dark:text-primary-400">
                   {t.nav.concepts || 'Concepts'}
-=======
-                <Link href="/about" prefetch={false} className="hover:text-primary-600 dark:hover:text-primary-400 transition-colors font-medium text-primary-700 dark:text-primary-400">
-                  {t.nav.about}
->>>>>>> 59ff7279a36e5ad62fdf6e9153b1677a0867f057
+                </Link>
+              </li>
+              <li>
+                <Link href="/about" prefetch={false} className="hover:text-primary-600 dark:hover:text-primary-400 transition-colors">
+                  {t.nav.about || 'About'}
                 </Link>
               </li>
             </ul>

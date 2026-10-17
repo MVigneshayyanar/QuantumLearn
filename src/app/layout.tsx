@@ -32,9 +32,7 @@ import { AITutorDrawer } from '@/components/ai-tutor/AITutorDrawer';
 import { StudentProvider } from '@/lib/student-context';
 import { StudentIdentityModal } from '@/components/identity/StudentIdentityModal';
 import { SubscriptionModal } from '@/components/subscription/SubscriptionModal';
-import { GoogleTranslator } from '@/components/accessibility/GoogleTranslator';
-import { Analytics } from '@vercel/analytics/next';
-import { SpeedInsights } from '@vercel/speed-insights/next';
+
 import {
   websiteSchema,
   organizationSchema,
@@ -258,7 +256,6 @@ export default function RootLayout({
       </head>
       <body className="font-sans min-h-screen flex flex-col bg-[#FAFAFA] text-[#111827] antialiased pb-16 md:pb-0">
         <AccessibilityProvider>
-          <GoogleTranslator />
           <IntlClientWrapper>
             <StudentProvider>
               {/* Skip link for keyboard accessibility WCAG 2.1 AA */}
@@ -301,9 +298,7 @@ export default function RootLayout({
           </IntlClientWrapper>
         </AccessibilityProvider>
 
-        {/* Vercel Web Analytics & Core Web Vitals Speed Insights */}
-        <Analytics />
-        <SpeedInsights />
+
       </body>
     </html>
   );
