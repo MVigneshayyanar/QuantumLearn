@@ -8,7 +8,11 @@ __pycache__/
 
 # testing
 /coverage
-
+/founder/*
+/agents/skills/*
+/agents/sub-agents/*
+/agent-evaluation/* 
+/.agents
 # next.js
 /.next/
 /out/
@@ -19,6 +23,7 @@ __pycache__/
 # misc
 .DS_Store
 *.pem
+~$*
 
 # debug
 npm-debug.log*

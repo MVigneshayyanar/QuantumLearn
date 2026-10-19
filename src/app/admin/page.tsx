@@ -49,6 +49,24 @@ export interface AdminHistoryItem {
   };
 }
 
+function formatRelativeTime(isoString: string): string {
+  try {
+    const diffMs = Date.now() - new Date(isoString).getTime();
+    if (diffMs < 0) return 'Just now';
+    const diffSec = Math.floor(diffMs / 1000);
+    if (diffSec < 15) return 'Just now';
+    if (diffSec < 60) return `${diffSec}s ago`;
+    const diffMin = Math.floor(diffSec / 60);
+    if (diffMin < 60) return `${diffMin}m ago`;
+    const diffHr = Math.floor(diffMin / 60);
+    if (diffHr < 24) return `${diffHr}h ago`;
+    const diffDays = Math.floor(diffHr / 24);
+    return `${diffDays}d ago`;
+  } catch {
+    return '';
+  }
+}
+
 interface InstructorData {
   id: string;
   name: string;
@@ -79,7 +97,7 @@ interface StudentData {
 }
 
 export default function AdminPortalPage() {
-  const { isAdmin, isInstructor, openLoginModal, isLoading: isAuthLoading } = useStudentContext();
+  const { isAdmin, isInstructor, openLoginModal, isLoading: isAuthLoading, userId, role } = useStudentContext();
 
   const [instructors, setInstructors] = useState<InstructorData[]>([]);
   const [students, setStudents] = useState<StudentData[]>([]);
@@ -87,10 +105,13 @@ export default function AdminPortalPage() {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  // History Log State (on-demand database history, zero live polling)
+  // History Log State & Live Streaming Updates
   const [historyItems, setHistoryItems] = useState<AdminHistoryItem[]>([]);
   const [isHistoryLoading, setIsHistoryLoading] = useState(false);
   const [historyCategoryFilter, setHistoryCategoryFilter] = useState<'all' | 'learning' | 'auth'>('all');
+  const [lastHistorySync, setLastHistorySync] = useState<Date | null>(null);
+  const [autoRefreshEnabled, setAutoRefreshEnabled] = useState(true);
+  const [historyFetchError, setHistoryFetchError] = useState<string | null>(null);
 
   const [activeTab, setActiveTab] = useState<'instructors' | 'students' | 'history'>('instructors');
   const [searchQuery, setSearchQuery] = useState('');
@@ -116,10 +137,16 @@ export default function AdminPortalPage() {
   // Mapping Modal
   const [mappingInstructor, setMappingInstructor] = useState<InstructorData | null>(null);
 
-  const fetchUsers = async () => {
-    setIsLoading(true);
+  const fetchUsers = async (silent = false) => {
+    if (!silent) setIsLoading(true);
     try {
-      const res = await fetch('/api/admin/users');
+      const res = await fetch('/api/admin/users', {
+        cache: 'no-store',
+        headers: {
+          'x-user-id': userId || '',
+          'x-user-role': role || 'ADMIN',
+        },
+      });
       if (!res.ok) {
         throw new Error('Failed to load administrative user directory.');
       }
@@ -127,37 +154,94 @@ export default function AdminPortalPage() {
       setInstructors(data.instructors || []);
       setStudents(data.students || []);
       setTotalMappings(data.totalMappings || 0);
+      setError(null);
     } catch (err: any) {
-      setError(err?.message || 'Error fetching users');
+      if (!silent) setError(err?.message || 'Error fetching users');
     } finally {
-      setIsLoading(false);
+      if (!silent) setIsLoading(false);
     }
   };
 
-  const fetchHistory = async () => {
-    setIsHistoryLoading(true);
+  const fetchHistory = async (silent = false) => {
+    if (!silent) setIsHistoryLoading(true);
     try {
-      const res = await fetch('/api/admin/history');
-      if (res.ok) {
-        const data = await res.json();
-        setHistoryItems(data.history || []);
+      const res = await fetch('/api/admin/history', {
+        cache: 'no-store',
+        headers: {
+          'x-user-id': userId || '',
+          'x-user-role': role || 'ADMIN',
+        },
+      });
+      if (!res.ok) {
+        const errorData = await res.json().catch(() => ({}));
+        throw new Error(errorData.error || `Server returned HTTP ${res.status}`);
       }
-    } catch (err) {
+      const data = await res.json();
+      setHistoryItems(data.history || []);
+      setLastHistorySync(new Date());
+      setHistoryFetchError(null);
+    } catch (err: any) {
       console.error('Error fetching admin history:', err);
+      if (!silent) setHistoryFetchError(err?.message || 'Failed to update activity log.');
     } finally {
-      setIsHistoryLoading(false);
+      if (!silent) setIsHistoryLoading(false);
     }
   };
 
+  // Initial load on mount or auth change
   useEffect(() => {
     if (isAuthLoading) return;
     if (isAdmin) {
       fetchUsers();
-      fetchHistory(); // Loads once on-demand, zero live polling/heartbeat loops
+      fetchHistory();
     } else {
       setIsLoading(false);
     }
-  }, [isAdmin, isAuthLoading]);
+  }, [isAdmin, isAuthLoading, userId]);
+
+  // Tab switch effect: Immediately re-fetch the latest data for the newly selected tab
+  useEffect(() => {
+    if (!isAdmin) return;
+    if (activeTab === 'history') {
+      fetchHistory(true);
+    } else {
+      fetchUsers(true);
+    }
+  }, [activeTab, isAdmin]);
+
+  // Live Auto-Refresh (every 12 seconds) & window visibility change listener
+  useEffect(() => {
+    if (!isAdmin || !autoRefreshEnabled) return;
+
+    const interval = setInterval(() => {
+      // Pause polling if user has minimized or switched away from the browser tab
+      if (typeof document !== 'undefined' && document.visibilityState !== 'visible') {
+        return;
+      }
+      if (activeTab === 'history') {
+        fetchHistory(true);
+      } else {
+        fetchUsers(true);
+      }
+    }, 12000);
+
+    const handleVisibilityChange = () => {
+      if (document.visibilityState === 'visible') {
+        if (activeTab === 'history') {
+          fetchHistory(true);
+        } else {
+          fetchUsers(true);
+        }
+      }
+    };
+
+    window.addEventListener('visibilitychange', handleVisibilityChange);
+
+    return () => {
+      clearInterval(interval);
+      window.removeEventListener('visibilitychange', handleVisibilityChange);
+    };
+  }, [isAdmin, activeTab, autoRefreshEnabled, userId]);
 
   const handleCreateUser = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -475,7 +559,10 @@ export default function AdminPortalPage() {
               <span>Students ({students.length})</span>
             </button>
             <button
-              onClick={() => setActiveTab('history')}
+              onClick={() => {
+                setActiveTab('history');
+                fetchHistory();
+              }}
               className={`px-3 py-1.5 rounded-lg transition-colors flex items-center gap-1.5 ${
                 activeTab === 'history'
                   ? 'bg-white text-dark-900 shadow-xs'
@@ -484,6 +571,9 @@ export default function AdminPortalPage() {
             >
               <History className="w-3.5 h-3.5 text-indigo-600" />
               <span>Activity & Login History ({historyItems.length})</span>
+              {autoRefreshEnabled && (
+                <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" title="Live Auto-Sync Active" />
+              )}
             </button>
           </div>
 
@@ -746,6 +836,22 @@ export default function AdminPortalPage() {
         {/* ACTIVITY & LOGIN HISTORY VIEW (DATABASE-BACKED, LATEST ON TOP) */}
         {activeTab === 'history' && (
           <div className="space-y-4 animate-fadeIn">
+            {/* Sync Error Alert Banner */}
+            {historyFetchError && (
+              <div className="p-3 rounded-xl bg-amber-50 border border-amber-200 text-amber-900 text-xs flex items-center justify-between gap-2">
+                <div className="flex items-center gap-2">
+                  <AlertTriangle className="w-4 h-4 text-amber-600 shrink-0" />
+                  <span>{historyFetchError}</span>
+                </div>
+                <button
+                  onClick={() => fetchHistory(false)}
+                  className="px-2.5 py-1 rounded-lg bg-amber-200 hover:bg-amber-300 font-semibold text-[11px] transition-colors cursor-pointer"
+                >
+                  Retry Sync
+                </button>
+              </div>
+            )}
+
             {/* Filter pills and manual refresh */}
             <div className="flex flex-wrap items-center justify-between gap-3 p-3 rounded-xl bg-dark-50 border border-dark-200">
               <div className="flex items-center gap-2 flex-wrap">
@@ -782,21 +888,40 @@ export default function AdminPortalPage() {
                   }`}
                 >
                   <UserCheck className="w-3.5 h-3.5 text-indigo-300" />
-                  <span>Logins & Accounts ({historyItems.filter((h) => h.category === 'auth').length})</span>
+                  <span>Logins & Sessions ({historyItems.filter((h) => h.category === 'auth').length})</span>
                 </button>
               </div>
 
-              <div className="flex items-center gap-2 text-[11px] text-dark-500">
+              <div className="flex items-center gap-2.5 text-[11px] text-dark-500 flex-wrap">
+                {/* Auto-Refresh Toggle */}
                 <button
-                  onClick={fetchHistory}
+                  onClick={() => setAutoRefreshEnabled(!autoRefreshEnabled)}
+                  title={autoRefreshEnabled ? 'Click to pause auto-updates' : 'Click to enable auto-updates'}
+                  className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg font-medium transition-colors border cursor-pointer ${
+                    autoRefreshEnabled
+                      ? 'bg-emerald-50 text-emerald-700 border-emerald-200 hover:bg-emerald-100'
+                      : 'bg-dark-100 text-dark-600 border-dark-200 hover:bg-dark-200'
+                  }`}
+                >
+                  <span className={`w-2 h-2 rounded-full ${autoRefreshEnabled ? 'bg-emerald-500 animate-pulse' : 'bg-dark-400'}`} />
+                  <span>{autoRefreshEnabled ? 'Live: Auto-Sync On (12s)' : 'Auto-Sync Paused'}</span>
+                </button>
+
+                {lastHistorySync && (
+                  <span className="hidden md:inline font-mono text-[10px] text-dark-400">
+                    Synced {lastHistorySync.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' })}
+                  </span>
+                )}
+
+                <button
+                  onClick={() => fetchHistory(false)}
                   disabled={isHistoryLoading}
-                  title="Reload History"
-                  className="inline-flex items-center gap-1.5 px-3 py-1 rounded-lg border border-dark-200 bg-white hover:bg-dark-100 text-dark-700 font-medium transition-colors"
+                  title="Reload History Log"
+                  className="inline-flex items-center gap-1.5 px-3 py-1 rounded-lg border border-dark-200 bg-white hover:bg-dark-100 text-dark-700 font-medium transition-colors cursor-pointer"
                 >
                   <RefreshCw className={`w-3 h-3 ${isHistoryLoading ? 'animate-spin text-primary-600' : ''}`} />
-                  <span>Refresh Log</span>
+                  <span>Refresh Now</span>
                 </button>
-                <span className="hidden sm:inline font-mono">• Latest on top</span>
               </div>
             </div>
 
@@ -833,11 +958,19 @@ export default function AdminPortalPage() {
                         minute: '2-digit',
                         second: '2-digit',
                       });
+                      const relTime = formatRelativeTime(item.timestamp);
 
                       return (
                         <tr key={item.id} className="hover:bg-dark-50/50 transition-colors">
                           <td className="py-3 pr-4 font-mono text-[11px] text-dark-600 whitespace-nowrap">
-                            <div className="font-bold text-dark-900">{formattedTime}</div>
+                            <div className="flex items-center gap-1.5">
+                              <span className="font-bold text-dark-900">{formattedTime}</span>
+                              {relTime && (
+                                <span className="text-[9px] font-semibold text-primary-700 bg-primary-50 border border-primary-100 px-1 py-0.2 rounded">
+                                  {relTime}
+                                </span>
+                              )}
+                            </div>
                             <div className="text-[10px] text-dark-400">{formattedDate}</div>
                           </td>
 

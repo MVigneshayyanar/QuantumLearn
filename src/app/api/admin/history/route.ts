@@ -1,8 +1,10 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { verifyAdminAccess } from '@/lib/auth-server';
+import { getPresenceStats } from '@/lib/presence-store';
 
 export const dynamic = 'force-dynamic';
+export const revalidate = 0;
 
 export interface AdminHistoryItem {
   id: string;
@@ -22,8 +24,8 @@ export interface AdminHistoryItem {
 
 /**
  * GET /api/admin/history
- * Fetches persistent historical logs of student learning activities and user registrations/logins.
- * Loaded on demand on admin page load or manual refresh (zero background polling/heartbeats).
+ * Fetches real-time and persistent historical logs of student learning activities,
+ * live user presence/navigation sessions, and user registrations/logins.
  */
 export async function GET(req: NextRequest) {
   try {
@@ -32,8 +34,15 @@ export async function GET(req: NextRequest) {
       return NextResponse.json({ error: auth.error || 'Unauthorized admin access.' }, { status: 403 });
     }
 
-    // Query historical records in parallel from database
-    const [quizzes, practices, aiInteractions, progresses, users] = await Promise.all([
+    // Query historical records with Promise.allSettled so no single table failure crashes the history stream
+    const [
+      quizzesRes,
+      practicesRes,
+      aiInteractionsRes,
+      progressesRes,
+      usersCreatedRes,
+      usersActiveRes,
+    ] = await Promise.allSettled([
       // 1. Quizzes
       prisma.quizAttempt.findMany({
         take: 100,
@@ -78,7 +87,7 @@ export async function GET(req: NextRequest) {
         },
       }),
 
-      // 5. User Registrations & Active Logins
+      // 5. User Registrations (Latest registered users)
       prisma.user.findMany({
         take: 100,
         orderBy: { createdAt: 'desc' },
@@ -91,7 +100,28 @@ export async function GET(req: NextRequest) {
           lastActiveAt: true,
         },
       }),
+
+      // 6. User Active Sessions (Latest active users)
+      prisma.user.findMany({
+        take: 100,
+        orderBy: { lastActiveAt: 'desc' },
+        select: {
+          id: true,
+          name: true,
+          email: true,
+          role: true,
+          createdAt: true,
+          lastActiveAt: true,
+        },
+      }),
     ]);
+
+    const quizzes = quizzesRes.status === 'fulfilled' ? quizzesRes.value : [];
+    const practices = practicesRes.status === 'fulfilled' ? practicesRes.value : [];
+    const aiInteractions = aiInteractionsRes.status === 'fulfilled' ? aiInteractionsRes.value : [];
+    const progresses = progressesRes.status === 'fulfilled' ? progressesRes.value : [];
+    const usersCreated = usersCreatedRes.status === 'fulfilled' ? usersCreatedRes.value : [];
+    const usersActive = usersActiveRes.status === 'fulfilled' ? usersActiveRes.value : [];
 
     const items: AdminHistoryItem[] = [];
 
@@ -172,24 +202,33 @@ export async function GET(req: NextRequest) {
       });
     }
 
-    // Map Registrations and Logins for ALL users
-    for (const u of users) {
+    // Deduplicate Users across created and active lists
+    const userMap = new Map<string, typeof usersCreated[0]>();
+    for (const u of [...usersCreated, ...usersActive]) {
+      userMap.set(u.id, u);
+    }
+    const allUsers = Array.from(userMap.values());
+
+    // Map Registrations and Logins for users
+    for (const u of allUsers) {
       // 1. Account Created Event
-      items.push({
-        id: `reg_${u.id}`,
-        timestamp: u.createdAt.toISOString(),
-        category: 'auth',
-        type: 'user_registration',
-        userName: u.name || 'User',
-        userEmail: u.email,
-        role: u.role,
-        title: `Account Registered`,
-        details: `New ${u.role.toLowerCase()} account created for ${u.email}`,
-        badge: {
-          label: 'New Account',
-          variant: 'purple',
-        },
-      });
+      if (u.createdAt) {
+        items.push({
+          id: `reg_${u.id}`,
+          timestamp: u.createdAt.toISOString(),
+          category: 'auth',
+          type: 'user_registration',
+          userName: u.name || 'User',
+          userEmail: u.email,
+          role: u.role,
+          title: `Account Registered`,
+          details: `New ${u.role.toLowerCase()} account created for ${u.email}`,
+          badge: {
+            label: 'New Account',
+            variant: 'purple',
+          },
+        });
+      }
 
       // 2. Last Login / Session Event
       if (u.lastActiveAt) {
@@ -211,12 +250,79 @@ export async function GET(req: NextRequest) {
       }
     }
 
+    // Map Live Real-Time Presence & Mode Events from in-memory presence store
+    try {
+      const presenceStats = getPresenceStats();
+      if (presenceStats?.historyLogs?.length) {
+        for (const ev of presenceStats.historyLogs) {
+          let title = 'Active Online Session';
+          let badgeLabel = 'Online';
+          let variant: 'emerald' | 'indigo' | 'amber' | 'blue' | 'purple' = 'blue';
+          let category: 'learning' | 'auth' = 'auth';
+          let type: AdminHistoryItem['type'] = 'user_login';
+
+          if (ev.type === 'joined') {
+            title = `User Session Started`;
+            badgeLabel = 'Online Now';
+            variant = 'emerald';
+            category = 'auth';
+            type = 'user_login';
+          } else if (ev.type === 'mode_switch') {
+            title = `Mode Switched: ${ev.mode === 'technical' ? 'Technical' : 'Simple'} Mode`;
+            badgeLabel = 'Mode Switch';
+            variant = 'purple';
+            category = 'learning';
+            type = 'ai_interaction';
+          } else if (ev.type === 'navigated') {
+            title = `Navigated to ${ev.page}`;
+            badgeLabel = 'Page View';
+            variant = 'indigo';
+            category = 'learning';
+            type = 'practice_submission';
+          } else {
+            title = `Active on ${ev.page}`;
+            badgeLabel = 'Active Session';
+            variant = 'blue';
+            category = 'auth';
+            type = 'user_login';
+          }
+
+          items.push({
+            id: `presence_${ev.id}`,
+            timestamp: new Date(ev.timestamp).toISOString(),
+            category,
+            type,
+            userName: ev.name || 'Student',
+            userEmail: ev.email || (ev.userId ? `User #${ev.userId.slice(0, 8)}` : 'Guest Session'),
+            role: ev.role || 'GUEST',
+            title,
+            details: ev.details || `Active on ${ev.page} (${ev.mode} mode, ${ev.language.toUpperCase()})`,
+            badge: {
+              label: badgeLabel,
+              variant,
+            },
+          });
+        }
+      }
+    } catch (presenceErr) {
+      console.warn('[GET /api/admin/history] presence stats fetch non-fatal error:', presenceErr);
+    }
+
     // Sort all records chronologically: LATEST ON TOP
     items.sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime());
 
-    return NextResponse.json({
-      history: items.slice(0, 150), // Top 150 latest chronological records
-    });
+    return NextResponse.json(
+      {
+        history: items.slice(0, 200), // Top 200 latest chronological records
+        serverTime: new Date().toISOString(),
+        total: items.length,
+      },
+      {
+        headers: {
+          'Cache-Control': 'no-store, no-cache, must-revalidate, proxy-revalidate',
+        },
+      }
+    );
   } catch (err: any) {
     console.error('[GET /api/admin/history] Error:', err);
     return NextResponse.json({ error: err?.message || 'Failed to fetch history logs' }, { status: 500 });
