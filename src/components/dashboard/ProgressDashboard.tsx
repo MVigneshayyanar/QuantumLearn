@@ -161,6 +161,30 @@ export function ProgressDashboard() {
       title: t.algorithms.superdenseCoding.title,
       category: t.algorithms.superdenseCoding.category,
       href: '/learn/superdense-coding'
+    },
+    {
+      slug: 'qft',
+      title: t.algorithms?.qft?.title || 'Quantum Fourier Transform (QFT)',
+      category: t.algorithms?.qft?.category || 'Frequency Domain',
+      href: '/learn/qft'
+    },
+    {
+      slug: 'quantum-phase-estimation',
+      title: t.algorithms?.quantumPhaseEstimation?.title || 'Quantum Phase Estimation',
+      category: t.algorithms?.quantumPhaseEstimation?.category || 'Eigenvalue Extraction',
+      href: '/learn/quantum-phase-estimation'
+    },
+    {
+      slug: 'shor',
+      title: t.algorithms?.shor?.title || "Shor's Factoring Algorithm",
+      category: t.algorithms?.shor?.category || 'Number Theory & Cryptography',
+      href: '/learn/shor'
+    },
+    {
+      slug: 'vqe',
+      title: t.algorithms?.vqe?.title || 'Variational Quantum Eigensolver (VQE)',
+      category: t.algorithms?.vqe?.category || 'Quantum Chemistry & NISQ',
+      href: '/learn/vqe'
     }
   ];
 

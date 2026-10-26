@@ -115,6 +115,65 @@ function getDefaultGatesForAlgorithm(algoId: string): PlacedGate[] {
       { id: 'sd8', type: 'measure', qubits: [1], step: 6 }
     ];
   }
+  if (norm.includes('qft') || norm.includes('fourier')) {
+    return [
+      { id: 'qft1', type: 'h', qubits: [0], step: 0 },
+      { id: 'qft2', type: 's', qubits: [0], step: 1 },
+      { id: 'qft3', type: 'cz', qubits: [0, 1], step: 2 },
+      { id: 'qft4', type: 'h', qubits: [1], step: 3 },
+      { id: 'qft5', type: 's', qubits: [1], step: 4 },
+      { id: 'qft6', type: 'cz', qubits: [1, 2], step: 5 },
+      { id: 'qft7', type: 'h', qubits: [2], step: 6 },
+      { id: 'qft8', type: 'swap', qubits: [0, 2], step: 7 },
+      { id: 'qft9', type: 'measure', qubits: [0], step: 8 },
+      { id: 'qft10', type: 'measure', qubits: [1], step: 8 },
+      { id: 'qft11', type: 'measure', qubits: [2], step: 8 }
+    ];
+  }
+  if (norm.includes('phaseestimation') || norm.includes('qpe')) {
+    return [
+      { id: 'qpe1', type: 'x', qubits: [2], step: 0 },
+      { id: 'qpe2', type: 'h', qubits: [0], step: 1 },
+      { id: 'qpe3', type: 'h', qubits: [1], step: 1 },
+      { id: 'qpe4', type: 'cz', qubits: [1, 2], step: 2 },
+      { id: 'qpe5', type: 'cz', qubits: [0, 2], step: 3 },
+      { id: 'qpe6', type: 's', qubits: [0], step: 4 },
+      { id: 'qpe7', type: 'h', qubits: [0], step: 5 },
+      { id: 'qpe8', type: 'cz', qubits: [0, 1], step: 6 },
+      { id: 'qpe9', type: 'h', qubits: [1], step: 7 },
+      { id: 'qpe10', type: 'swap', qubits: [0, 1], step: 8 },
+      { id: 'qpe11', type: 'measure', qubits: [0], step: 9 },
+      { id: 'qpe12', type: 'measure', qubits: [1], step: 9 }
+    ];
+  }
+  if (norm.includes('shor')) {
+    return [
+      { id: 'sh1', type: 'x', qubits: [3], step: 0 },
+      { id: 'sh2', type: 'h', qubits: [0], step: 1 },
+      { id: 'sh3', type: 'h', qubits: [1], step: 1 },
+      { id: 'sh4', type: 'cx', qubits: [1, 2], step: 2 },
+      { id: 'sh5', type: 'cx', qubits: [0, 3], step: 3 },
+      { id: 'sh6', type: 'h', qubits: [0], step: 4 },
+      { id: 'sh7', type: 'cz', qubits: [0, 1], step: 5 },
+      { id: 'sh8', type: 'h', qubits: [1], step: 6 },
+      { id: 'sh9', type: 'swap', qubits: [0, 1], step: 7 },
+      { id: 'sh10', type: 'measure', qubits: [0], step: 8 },
+      { id: 'sh11', type: 'measure', qubits: [1], step: 8 }
+    ];
+  }
+  if (norm.includes('vqe') || norm.includes('eigensolver')) {
+    return [
+      { id: 'vqe1', type: 'x', qubits: [0], step: 0 },
+      { id: 'vqe2', type: 'h', qubits: [0], step: 1 },
+      { id: 'vqe3', type: 'h', qubits: [1], step: 1 },
+      { id: 'vqe4', type: 'cx', qubits: [0, 1], step: 2 },
+      { id: 'vqe5', type: 'z', qubits: [0], step: 3 },
+      { id: 'vqe6', type: 's', qubits: [1], step: 3 },
+      { id: 'vqe7', type: 'cx', qubits: [0, 1], step: 4 },
+      { id: 'vqe8', type: 'measure', qubits: [0], step: 5 },
+      { id: 'vqe9', type: 'measure', qubits: [1], step: 5 }
+    ];
+  }
   return [];
 }
 

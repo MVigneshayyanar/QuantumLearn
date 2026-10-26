@@ -90,6 +90,46 @@ export default function HomePage() {
       speedup: t.algorithms.superdenseCoding.speedup,
       href: '/learn/superdense-coding',
       tagColor: 'bg-violet-50 text-violet-700 border-violet-100 dark:bg-violet-950/60 dark:text-violet-300 dark:border-violet-800/60'
+    },
+    {
+      slug: 'qft',
+      title: t.algorithms?.qft?.title || 'Quantum Fourier Transform (QFT)',
+      category: t.algorithms?.qft?.category || 'Frequency Domain',
+      summary: t.algorithms?.qft?.summary || 'Transforms computational basis amplitudes into frequency phase rotations with exponential speedup.',
+      qubits: t.algorithms?.qft?.qubits || '3 Qubits',
+      speedup: t.algorithms?.qft?.speedup || 'Exponential O(n²) vs O(n·2ⁿ)',
+      href: '/learn/qft',
+      tagColor: 'bg-cyan-50 text-cyan-700 border-cyan-100 dark:bg-cyan-950/60 dark:text-cyan-300 dark:border-cyan-800/60'
+    },
+    {
+      slug: 'quantum-phase-estimation',
+      title: t.algorithms?.quantumPhaseEstimation?.title || 'Quantum Phase Estimation',
+      category: t.algorithms?.quantumPhaseEstimation?.category || 'Eigenvalue Extraction',
+      summary: t.algorithms?.quantumPhaseEstimation?.summary || 'Estimates the unknown phase eigenvalue θ of an arbitrary unitary operator U using inverse QFT.',
+      qubits: t.algorithms?.quantumPhaseEstimation?.qubits || '3 Qubits',
+      speedup: t.algorithms?.quantumPhaseEstimation?.speedup || 'Exponential Precision Scaling',
+      href: '/learn/quantum-phase-estimation',
+      tagColor: 'bg-amber-50 text-amber-700 border-amber-100 dark:bg-amber-950/60 dark:text-amber-300 dark:border-amber-800/60'
+    },
+    {
+      slug: 'shor',
+      title: t.algorithms?.shor?.title || "Shor's Factoring Algorithm",
+      category: t.algorithms?.shor?.category || 'Number Theory & Cryptography',
+      summary: t.algorithms?.shor?.summary || 'Breaks RSA encryption by reducing prime factorization to quantum modular order finding in polynomial time.',
+      qubits: t.algorithms?.shor?.qubits || '4 Qubits',
+      speedup: t.algorithms?.shor?.speedup || 'Polynomial O(log³ N) vs Subexponential',
+      href: '/learn/shor',
+      tagColor: 'bg-rose-50 text-rose-700 border-rose-100 dark:bg-rose-950/60 dark:text-rose-300 dark:border-rose-800/60'
+    },
+    {
+      slug: 'vqe',
+      title: t.algorithms?.vqe?.title || 'Variational Quantum Eigensolver (VQE)',
+      category: t.algorithms?.vqe?.category || 'Quantum Chemistry & NISQ',
+      summary: t.algorithms?.vqe?.summary || 'Finds molecular ground state energies on NISQ quantum hardware via hybrid quantum-classical optimization.',
+      qubits: t.algorithms?.vqe?.qubits || '2 Qubits',
+      speedup: t.algorithms?.vqe?.speedup || 'NISQ-Tolerant Molecular Simulation',
+      href: '/learn/vqe',
+      tagColor: 'bg-teal-50 text-teal-700 border-teal-100 dark:bg-teal-950/60 dark:text-teal-300 dark:border-teal-800/60'
     }
   ];
 
@@ -374,10 +414,10 @@ export default function HomePage() {
               Curriculum Roadmap
             </span>
             <h2 className="text-2xl sm:text-3xl font-bold text-dark-900 dark:text-white mt-2 tracking-tight">
-              4 Guided Quantum Algorithm Modules
+              8 Guided Quantum Algorithm Modules
             </h2>
             <p className="text-sm text-dark-600 dark:text-dark-300 mt-1">
-              Each module follows our structured Intuition → Math → Circuit → Simulation → Quiz flow.
+              Each module follows our structured Intuition → Math → Circuit → Build It → Quiz → Skill Base flow.
             </p>
           </div>
         </div>
@@ -405,7 +445,7 @@ export default function HomePage() {
               </div>
 
               <div className="pt-4 border-t border-dark-100 dark:border-dark-800 flex items-center justify-between">
-                <span className="text-xs text-dark-500 dark:text-dark-400">4-Stage Guided Pedagogy</span>
+                <span className="text-xs text-dark-500 dark:text-dark-400">6-Stage Guided Pedagogy</span>
                 <Link
                   href={algo.href}
                   className="flex items-center gap-1.5 text-xs font-bold text-primary-600 hover:text-primary-700 dark:text-primary-400 dark:hover:text-primary-300 transition-colors"
@@ -424,16 +464,16 @@ export default function HomePage() {
                 <span className="text-xs font-semibold px-3 py-1 rounded-full border bg-amber-50 dark:bg-amber-950/60 text-amber-700 dark:text-amber-300 border-amber-100 dark:border-amber-800/60">
                   Coming Soon
                 </span>
-                <span className="text-xs font-mono text-dark-400">In Development</span>
+                <span className="text-xs font-mono text-dark-400">Next Wave in Development</span>
               </div>
 
-              <h3 className="text-xl font-bold text-dark-700 dark:text-white">More Quantum Algorithms</h3>
+              <h3 className="text-xl font-bold text-dark-700 dark:text-white">Advanced Frontier Algorithms</h3>
               <p className="text-sm text-dark-500 dark:text-dark-300 leading-relaxed">
-                We are actively building more algorithm modules with the same 6-stage pedagogy (Intuition → Math → Circuit → Build It → Quiz → Assessment).
+                We are actively building additional interactive modules with the same 6-stage pedagogy (Intuition → Math → Circuit → Build It → Quiz → Assessment).
               </p>
 
               <div className="flex flex-wrap gap-2 pt-1">
-                {["Shor's Algorithm", "Quantum Phase Estimation", "VQE", "Quantum Fourier Transform"].map((name) => (
+                {["QAOA (Combinatorial Optimization)", "HHL (Quantum Linear Systems)", "Quantum Walk", "Grover Adaptive Search"].map((name) => (
                   <span key={name} className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-white dark:bg-dark-800 border border-dark-200 dark:border-dark-700 text-xs text-dark-600 dark:text-dark-200 font-medium">
                     <span className="w-1.5 h-1.5 rounded-full bg-amber-400 inline-block" />
                     {name}

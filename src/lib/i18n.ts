@@ -27,7 +27,7 @@ export const supportedLanguages: LanguageOption[] = [
   { code: 'zh-CN', label: '中文 (Chinese)' },
 ];
 
-export const allMessages: Record<SupportedLocale, typeof en> = {
+export const allMessages: Record<SupportedLocale, any> = {
   en,
   hi,
   es,

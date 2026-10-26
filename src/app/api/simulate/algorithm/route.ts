@@ -65,7 +65,7 @@ export async function POST(req: NextRequest) {
         { id: 'tp6', type: 'cx', qubits: [1, 2], step: 5 },
         { id: 'tp7', type: 'cz', qubits: [0, 2], step: 6 }
       ];
-    } else if (algo === 'superdense_coding') {
+    } else if (algo === 'superdense_coding' || algo === 'superdense-coding') {
       numQubits = 2;
       gates = [
         { id: 'sd1', type: 'h', qubits: [0], step: 0 },
@@ -73,6 +73,56 @@ export async function POST(req: NextRequest) {
         { id: 'sd3', type: 'z', qubits: [0], step: 2 },
         { id: 'sd4', type: 'cx', qubits: [0, 1], step: 3 },
         { id: 'sd5', type: 'h', qubits: [0], step: 4 }
+      ];
+    } else if (algo === 'qft') {
+      numQubits = 3;
+      gates = [
+        { id: 'qft1', type: 'h', qubits: [0], step: 0 },
+        { id: 'qft2', type: 's', qubits: [0], step: 1 },
+        { id: 'qft3', type: 'cz', qubits: [0, 1], step: 2 },
+        { id: 'qft4', type: 'h', qubits: [1], step: 3 },
+        { id: 'qft5', type: 's', qubits: [1], step: 4 },
+        { id: 'qft6', type: 'cz', qubits: [1, 2], step: 5 },
+        { id: 'qft7', type: 'h', qubits: [2], step: 6 },
+        { id: 'qft8', type: 'swap', qubits: [0, 2], step: 7 }
+      ];
+    } else if (algo === 'quantum_phase_estimation' || algo === 'quantum-phase-estimation' || algo === 'qpe') {
+      numQubits = 3;
+      gates = [
+        { id: 'qpe1', type: 'x', qubits: [2], step: 0 },
+        { id: 'qpe2', type: 'h', qubits: [0], step: 1 },
+        { id: 'qpe3', type: 'h', qubits: [1], step: 1 },
+        { id: 'qpe4', type: 'cz', qubits: [1, 2], step: 2 },
+        { id: 'qpe5', type: 'cz', qubits: [0, 2], step: 3 },
+        { id: 'qpe6', type: 's', qubits: [0], step: 4 },
+        { id: 'qpe7', type: 'h', qubits: [0], step: 5 },
+        { id: 'qpe8', type: 'cz', qubits: [0, 1], step: 6 },
+        { id: 'qpe9', type: 'h', qubits: [1], step: 7 },
+        { id: 'qpe10', type: 'swap', qubits: [0, 1], step: 8 }
+      ];
+    } else if (algo === 'shor' || algo === 'shors_algorithm') {
+      numQubits = 4;
+      gates = [
+        { id: 'sh1', type: 'x', qubits: [3], step: 0 },
+        { id: 'sh2', type: 'h', qubits: [0], step: 1 },
+        { id: 'sh3', type: 'h', qubits: [1], step: 1 },
+        { id: 'sh4', type: 'cx', qubits: [1, 2], step: 2 },
+        { id: 'sh5', type: 'cx', qubits: [0, 3], step: 3 },
+        { id: 'sh6', type: 'h', qubits: [0], step: 4 },
+        { id: 'sh7', type: 'cz', qubits: [0, 1], step: 5 },
+        { id: 'sh8', type: 'h', qubits: [1], step: 6 },
+        { id: 'sh9', type: 'swap', qubits: [0, 1], step: 7 }
+      ];
+    } else if (algo === 'vqe') {
+      numQubits = 2;
+      gates = [
+        { id: 'vqe1', type: 'x', qubits: [0], step: 0 },
+        { id: 'vqe2', type: 'h', qubits: [0], step: 1 },
+        { id: 'vqe3', type: 'h', qubits: [1], step: 1 },
+        { id: 'vqe4', type: 'cx', qubits: [0, 1], step: 2 },
+        { id: 'vqe5', type: 'z', qubits: [0], step: 3 },
+        { id: 'vqe6', type: 's', qubits: [1], step: 3 },
+        { id: 'vqe7', type: 'cx', qubits: [0, 1], step: 4 }
       ];
     }
 

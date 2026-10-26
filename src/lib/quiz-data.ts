@@ -124,6 +124,130 @@ export const ALGORITHM_SKILL_SECTIONS: Record<string, SkillSection[]> = {
       isPremium: true,
       questionIds: ['sd-q4']
     }
+  ],
+  'qft': [
+    {
+      id: 'qft-sec-1',
+      title: 'Fourier Basis & Relative Phase Mapping',
+      description: 'Mapping computational basis states |j⟩ to frequency phase rotations e^(2πijk/2ⁿ).',
+      weightPercent: 25,
+      questionIds: ['qft-q1']
+    },
+    {
+      id: 'qft-sec-2',
+      title: 'Controlled Phase Rotations (R_k)',
+      description: 'Unitary decomposition with Hadamard and conditional R_k = diag(1, e^(2πi/2^k)) gates.',
+      weightPercent: 25,
+      questionIds: ['qft-q2']
+    },
+    {
+      id: 'qft-sec-3',
+      title: 'Bit Reversal & SWAP Network',
+      description: 'Restoring standard bit-significance endianness using O(n) SWAP gates.',
+      weightPercent: 25,
+      questionIds: ['qft-q3']
+    },
+    {
+      id: 'qft-sec-4',
+      title: 'Algorithmic Complexity & Approximate QFT',
+      description: 'O(n²) gate scaling vs classical FFT O(n·2ⁿ) and truncation thresholds for NISQ circuits.',
+      weightPercent: 25,
+      isPremium: true,
+      questionIds: ['qft-q4']
+    }
+  ],
+  'quantum-phase-estimation': [
+    {
+      id: 'qpe-sec-1',
+      title: 'Eigenphase Extraction Framework',
+      description: 'Encoding unitary eigenvalue U|u⟩ = e^(2πiθ)|u⟩ into phase kickback amplitudes.',
+      weightPercent: 25,
+      questionIds: ['qpe-q1']
+    },
+    {
+      id: 'qpe-sec-2',
+      title: 'Controlled Unitary Powers (U^(2^j))',
+      description: 'Imprinting successive binary fraction digits of θ via binary exponentiation.',
+      weightPercent: 25,
+      questionIds: ['qpe-q2']
+    },
+    {
+      id: 'qpe-sec-3',
+      title: 'Inverse QFT & Measurement Precision',
+      description: 'Decoding phase into computational basis states with success probability and error bounds.',
+      weightPercent: 25,
+      questionIds: ['qpe-q3']
+    },
+    {
+      id: 'qpe-sec-4',
+      title: 'Hamiltonian Simulation & NISQ Coherence',
+      description: 'Estimating ground state energies exp(-iHt) and quantum resource budgeting.',
+      weightPercent: 25,
+      isPremium: true,
+      questionIds: ['qpe-q4']
+    }
+  ],
+  'shor': [
+    {
+      id: 'sh-sec-1',
+      title: 'Classical Reduction to Order Finding',
+      description: 'Reducing integer factorization N = pq to finding the modular period of f(x) = a^x mod N.',
+      weightPercent: 25,
+      questionIds: ['sh-q1']
+    },
+    {
+      id: 'sh-sec-2',
+      title: 'Quantum Modular Exponentiation',
+      description: 'Evaluating a superposition of powers a^x mod N using reversible modular arithmetic.',
+      weightPercent: 25,
+      questionIds: ['sh-q2']
+    },
+    {
+      id: 'sh-sec-3',
+      title: 'Period Extraction via Continued Fractions',
+      description: 'Extracting period r from phase measurement s/r using classical convergents.',
+      weightPercent: 25,
+      questionIds: ['sh-q3']
+    },
+    {
+      id: 'sh-sec-4',
+      title: 'Cryptographic Implications & RSA Breaking',
+      description: 'Polynomial-time O(log³ N) factoring vs classical subexponential GNFS and post-quantum cryptography.',
+      weightPercent: 25,
+      isPremium: true,
+      questionIds: ['sh-q4']
+    }
+  ],
+  'vqe': [
+    {
+      id: 'vqe-sec-1',
+      title: 'Variational Quantum-Classical Principle',
+      description: 'Rayleigh-Ritz theorem guarantee ⟨ψ(θ)|H|ψ(θ)⟩ ≥ E₀ for molecular ground states.',
+      weightPercent: 25,
+      questionIds: ['vqe-q1']
+    },
+    {
+      id: 'vqe-sec-2',
+      title: 'Ansatz Circuit Design (Hardware vs UCC)',
+      description: 'Unitary Coupled Cluster (UCCSD) vs hardware-efficient parameterized rotation circuits.',
+      weightPercent: 25,
+      questionIds: ['vqe-q2']
+    },
+    {
+      id: 'vqe-sec-3',
+      title: 'Hamiltonian Pauli Decomposition & Measurement',
+      description: 'Measuring fermionic operators Jordan-Wigner mapped to weighted sums of Pauli strings.',
+      weightPercent: 25,
+      questionIds: ['vqe-q3']
+    },
+    {
+      id: 'vqe-sec-4',
+      title: 'Barren Plateaus & Gradient Optimization',
+      description: 'Exponential gradient vanishing in random parameterized unitaries and classical optimizers.',
+      weightPercent: 25,
+      isPremium: true,
+      questionIds: ['vqe-q4']
+    }
   ]
 };
 
@@ -642,6 +766,482 @@ export const ALGORITHM_QUIZZES: Record<string, QuizQuestion[]> = {
           text: "d classical states (no enhancement over classical)",
           is_correct: false,
           explanation: "Incorrect: Prior entanglement doubles the capacity from d to d² states."
+        }
+      ]
+    }
+  ],
+  'qft': [
+    {
+      id: 'qft-q1',
+      module_slug: 'qft',
+      skillSectionId: 'qft-sec-1',
+      difficulty: 'intermediate',
+      concept_tag: 'Fourier Basis & Relative Phase Mapping',
+      question: 'How does the Quantum Fourier Transform (QFT) act on a computational basis state |j⟩ in an n-qubit register?',
+      hint: 'Recall the definition of discrete Fourier transform on amplitudes.',
+      options: [
+        {
+          id: 'qft-q1-opt1',
+          text: 'It maps |j⟩ to (1/√2ⁿ) ∑_{k=0}^{2ⁿ-1} e^(2πijk/2ⁿ) |k⟩',
+          is_correct: true,
+          explanation: 'Correct! The QFT maps computational basis states into uniform superpositions with linearly progressive relative phases e^(2πijk/2ⁿ).'
+        },
+        {
+          id: 'qft-q1-opt2',
+          text: 'It permutes |j⟩ to |2ⁿ - 1 - j⟩ deterministically',
+          is_correct: false,
+          explanation: 'Incorrect: Permuting bitstrings is done by bit-flip gates, not the Fourier transform.'
+        },
+        {
+          id: 'qft-q1-opt3',
+          text: 'It creates equal probability amplitudes with zero relative phases',
+          is_correct: false,
+          explanation: 'Incorrect: That is what Hadamard H^{\\otimes n} produces from |0⟩, not general QFT on state |j⟩.'
+        }
+      ]
+    },
+    {
+      id: 'qft-q2',
+      module_slug: 'qft',
+      skillSectionId: 'qft-sec-2',
+      difficulty: 'intermediate',
+      concept_tag: 'Controlled Phase Rotations (R_k)',
+      question: 'In an exact n-qubit QFT circuit, how many total 1-qubit and 2-qubit gates are required?',
+      hint: 'Count the gates on wire 1 (1 H + n-1 controlled rotations), wire 2 (1 H + n-2 rotations), etc.',
+      options: [
+        {
+          id: 'qft-q2-opt1',
+          text: 'O(n²) gates (specifically n(n+1)/2 gates plus ⌊n/2⌋ SWAP gates)',
+          is_correct: true,
+          explanation: 'Correct! The QFT requires n Hadamard gates and n(n-1)/2 controlled phase gates, giving O(n²) scaling — an exponential speedup over classical FFT O(n·2ⁿ).'
+        },
+        {
+          id: 'qft-q2-opt2',
+          text: 'O(2ⁿ) gates',
+          is_correct: false,
+          explanation: 'Incorrect: The classical Discrete Fourier Transform requires O(2ⁿ log 2ⁿ) operations, but quantum circuits only need O(n²).'
+        },
+        {
+          id: 'qft-q2-opt3',
+          text: 'Exactly n gates',
+          is_correct: false,
+          explanation: 'Incorrect: n gates only applies single-qubit Hadamards without the crucial entangling phase rotations.'
+        }
+      ]
+    },
+    {
+      id: 'qft-q3',
+      module_slug: 'qft',
+      skillSectionId: 'qft-sec-3',
+      difficulty: 'beginner',
+      concept_tag: 'Bit Reversal & SWAP Network',
+      question: 'Why are SWAP gates necessary at the end of the standard Quantum Fourier Transform circuit?',
+      hint: 'Look at the indices of the output product state after sequential controlled rotations.',
+      options: [
+        {
+          id: 'qft-q3-opt1',
+          text: 'Because the sequential rotation formulation naturally outputs qubits in bit-reversed order',
+          is_correct: true,
+          explanation: 'Correct! The circuit derives the most significant phase bits on the lowest wire index, so reversing the register with SWAP restores conventional bit order.'
+        },
+        {
+          id: 'qft-q3-opt2',
+          text: 'To undo unwanted entanglement with the environment',
+          is_correct: false,
+          explanation: 'Incorrect: SWAP gates are unitary swaps within the register, not environmental decoupling.'
+        },
+        {
+          id: 'qft-q3-opt3',
+          text: 'Because measurement is physically impossible without SWAP gates',
+          is_correct: false,
+          explanation: 'Incorrect: Any qubit can be measured directly; SWAP is simply for correct binary index ordering.'
+        }
+      ]
+    },
+    {
+      id: 'qft-q4',
+      module_slug: 'qft',
+      skillSectionId: 'qft-sec-4',
+      difficulty: 'advanced',
+      concept_tag: 'Algorithmic Complexity & Approximate QFT',
+      isPremium: true,
+      question: 'In Approximate QFT (AQFT), controlled phase rotations R_k where k > m are dropped. Why does this benefit NISQ hardware without destroying algorithmic utility?',
+      hint: 'Recall R_k applies a phase shift of 2π/2^k.',
+      options: [
+        {
+          id: 'qft-q4-opt1',
+          text: 'For large k, phase angle 2π/2^k is exponentially smaller than physical gate noise, so dropping them decreases depth while retaining high state fidelity',
+          is_correct: true,
+          explanation: 'Correct! When k is large, 2π/2^k is tiny compared to gate error rates. Pruning high-k rotations bounds total trace distance error while reducing circuit depth from O(n²) to O(n log n).'
+        },
+        {
+          id: 'qft-q4-opt2',
+          text: 'Dropping gates makes the circuit classical',
+          is_correct: false,
+          explanation: 'Incorrect: The circuit remains fully quantum and coherent.'
+        },
+        {
+          id: 'qft-q4-opt3',
+          text: 'It eliminates the need for Hadamard gates entirely',
+          is_correct: false,
+          explanation: 'Incorrect: Hadamard gates remain essential for basis transformation in every wire.'
+        }
+      ]
+    }
+  ],
+  'quantum-phase-estimation': [
+    {
+      id: 'qpe-q1',
+      module_slug: 'quantum-phase-estimation',
+      skillSectionId: 'qpe-sec-1',
+      difficulty: 'intermediate',
+      concept_tag: 'Eigenphase Extraction Framework',
+      question: 'Given a unitary operator U with eigenvector |u⟩ such that U|u⟩ = e^(2πiθ)|u⟩, what is the core goal of Quantum Phase Estimation (QPE)?',
+      hint: 'Focus on where the unknown scalar θ ends up.',
+      options: [
+        {
+          id: 'qpe-q1-opt1',
+          text: 'To estimate the unknown phase parameter θ to t bits of binary precision in a counting register',
+          is_correct: true,
+          explanation: 'Correct! QPE transfers the eigenphase θ from the exponential eigenvalue of U into computational basis states |2^t · θ⟩ for deterministic measurement.'
+        },
+        {
+          id: 'qpe-q1-opt2',
+          text: 'To clone the unknown quantum state |u⟩',
+          is_correct: false,
+          explanation: 'Incorrect: Cloning an unknown quantum state is strictly prohibited by the No-Cloning Theorem.'
+        },
+        {
+          id: 'qpe-q1-opt3',
+          text: 'To invert the matrix U without applying it',
+          is_correct: false,
+          explanation: 'Incorrect: QPE executes controlled powers of U to measure its eigenvalue phase.'
+        }
+      ]
+    },
+    {
+      id: 'qpe-q2',
+      module_slug: 'quantum-phase-estimation',
+      skillSectionId: 'qpe-sec-2',
+      difficulty: 'intermediate',
+      concept_tag: 'Controlled Unitary Powers (U^(2^j))',
+      question: 'Why does QPE apply successive controlled operations U^(2^j) with powers of 2 rather than simple repetitions of U?',
+      hint: 'Think about how a fraction 0.θ₁θ₂θ₃... is written in binary.',
+      options: [
+        {
+          id: 'qpe-q2-opt1',
+          text: 'Because each successive power shifts the phase by 2^j, directly aligning with the binary fraction digits of θ in the Fourier basis',
+          is_correct: true,
+          explanation: 'Correct! Applying U^(2^j) multiplies the phase by 2^j, allowing the inverse QFT to isolate binary bit θ_j on qubit j.'
+        },
+        {
+          id: 'qpe-q2-opt2',
+          text: 'Because quantum computers can only evaluate powers of 2',
+          is_correct: false,
+          explanation: 'Incorrect: Any unitary can be compiled, but powers of 2 correspond to binary expansion digits.'
+        },
+        {
+          id: 'qpe-q2-opt3',
+          text: 'To cancel out quantum noise',
+          is_correct: false,
+          explanation: 'Incorrect: Higher powers increase circuit depth, which classical and NISQ compilers optimize.'
+        }
+      ]
+    },
+    {
+      id: 'qpe-q3',
+      module_slug: 'quantum-phase-estimation',
+      skillSectionId: 'qpe-sec-3',
+      difficulty: 'intermediate',
+      concept_tag: 'Inverse QFT & Measurement Precision',
+      question: 'If the exact phase θ is not an exact binary rational (i.e. θ cannot be written as m/2^t), what happens when the counting register is measured?',
+      hint: 'Consider the sinc-like amplitude distribution around the true phase.',
+      options: [
+        {
+          id: 'qpe-q3-opt1',
+          text: 'The measurement peaks with high probability at the nearest binary fraction ⌊2^t θ⌉, with probability decaying as a sinc² distribution away from it',
+          is_correct: true,
+          explanation: 'Correct! Destructive interference concentrates >81% of probability amplitude in the two nearest integers to 2^t θ, and adding a few ancilla bits drives success probability arbitrarily close to 1.'
+        },
+        {
+          id: 'qpe-q3-opt2',
+          text: 'The algorithm fails completely with a uniform random outcome across all 2^t states',
+          is_correct: false,
+          explanation: 'Incorrect: Interference still creates a sharp peak centered around the true continuous phase.'
+        },
+        {
+          id: 'qpe-q3-opt3',
+          text: 'The quantum state explodes due to non-unitary evolution',
+          is_correct: false,
+          explanation: 'Incorrect: All operations in QPE are strictly unitary and preserve norm.'
+        }
+      ]
+    },
+    {
+      id: 'qpe-q4',
+      module_slug: 'quantum-phase-estimation',
+      skillSectionId: 'qpe-sec-4',
+      difficulty: 'advanced',
+      concept_tag: 'Hamiltonian Simulation & NISQ Coherence',
+      isPremium: true,
+      question: 'In quantum chemistry, QPE is applied to U = e^(-i H t) to extract molecular ground state energies E₀. What is the primary bottleneck preventing standard QPE on current NISQ devices?',
+      hint: 'Consider the coherence time needed to apply high powers of U.',
+      options: [
+        {
+          id: 'qpe-q4-opt1',
+          text: 'Executing deep circuits of controlled-U^(2^j) requires circuit depths far exceeding current physical qubit coherence times T₂ and fault-tolerance thresholds',
+          is_correct: true,
+          explanation: 'Correct! Exact QPE requires thousands to millions of coherent entangling gates, which is why NISQ algorithms like VQE are used today until fault-tolerant QPUs mature.'
+        },
+        {
+          id: 'qpe-q4-opt2',
+          text: 'Hamiltonian matrices cannot be written on digital computers',
+          is_correct: false,
+          explanation: 'Incorrect: Molecular Hamiltonians are easily mapped to Pauli operators via Jordan-Wigner transformations.'
+        },
+        {
+          id: 'qpe-q4-opt3',
+          text: 'Molecules do not have energy eigenvalues',
+          is_correct: false,
+          explanation: 'Incorrect: Ground state energies are fundamental physical eigenvalues of molecular Hamiltonians.'
+        }
+      ]
+    }
+  ],
+  'shor': [
+    {
+      id: 'sh-q1',
+      module_slug: 'shor',
+      skillSectionId: 'sh-sec-1',
+      difficulty: 'intermediate',
+      concept_tag: 'Classical Reduction to Order Finding',
+      question: 'How does Shor’s Algorithm reduce the difficult problem of factoring a composite integer N = p·q to order finding?',
+      hint: 'Recall Euler’s theorem and difference of squares: a^r - 1 = (a^(r/2) - 1)(a^(r/2) + 1).',
+      options: [
+        {
+          id: 'sh-q1-opt1',
+          text: 'Finding the period r where a^r ≡ 1 (mod N) allows computing non-trivial factors via gcd(a^(r/2) ± 1, N) whenever r is even and a^(r/2) ≢ -1 (mod N)',
+          is_correct: true,
+          explanation: 'Correct! By number theory, if period r is even, then (a^(r/2) - 1)(a^(r/2) + 1) = k·N, so taking gcd with N efficiently extracts prime factors p and q with probability ≥ 1/2.'
+        },
+        {
+          id: 'sh-q1-opt2',
+          text: 'By checking every prime number sequentially up to √N using Grover search',
+          is_correct: false,
+          explanation: 'Incorrect: That would still be exponential/subexponential. Shor’s algorithm is fundamentally based on period finding via QFT.'
+        },
+        {
+          id: 'sh-q1-opt3',
+          text: 'By inverting modular division using quantum teleportation',
+          is_correct: false,
+          explanation: 'Incorrect: Teleportation transmits quantum states, it does not factor integers.'
+        }
+      ]
+    },
+    {
+      id: 'sh-q2',
+      module_slug: 'shor',
+      skillSectionId: 'sh-sec-2',
+      difficulty: 'intermediate',
+      concept_tag: 'Quantum Modular Exponentiation',
+      question: 'What is the role of the quantum register in the modular exponentiation stage |x⟩|0⟩ ↦ |x⟩|a^x mod N⟩?',
+      hint: 'Think about quantum parallelism across all values of x simultaneously.',
+      options: [
+        {
+          id: 'sh-q2-opt1',
+          text: 'It evaluates all powers a^x mod N simultaneously in quantum superposition across the control register',
+          is_correct: true,
+          explanation: 'Correct! Thanks to quantum superposition, all 2^m powers of a^x mod N are computed simultaneously, entangling control exponent values with periodic modular outputs.'
+        },
+        {
+          id: 'sh-q2-opt2',
+          text: 'It calculates the prime factors directly without any measurement',
+          is_correct: false,
+          explanation: 'Incorrect: Modular exponentiation creates the periodic state; the inverse QFT and continued fractions extract the actual period.'
+        },
+        {
+          id: 'sh-q2-opt3',
+          text: 'It encrypts the message with a secret quantum key',
+          is_correct: false,
+          explanation: 'Incorrect: Shor’s algorithm is a cryptanalytic factoring tool, not an encryption cipher.'
+        }
+      ]
+    },
+    {
+      id: 'sh-q3',
+      module_slug: 'shor',
+      skillSectionId: 'sh-sec-3',
+      difficulty: 'intermediate',
+      concept_tag: 'Period Extraction via Continued Fractions',
+      question: 'After applying the inverse QFT in Shor’s algorithm, measurement yields an integer s. How is the true period r obtained from s / 2^m?',
+      hint: 'Recall the classical algorithm for rational approximation.',
+      options: [
+        {
+          id: 'sh-q3-opt1',
+          text: 'By using the classical Continued Fractions algorithm to find the unique rational convergent d/r closest to s/2^m with r < N',
+          is_correct: true,
+          explanation: 'Correct! The measured phase approximates s/r. The continued fractions algorithm efficiently reconstructs the denominator r in polynomial time O(log³ N).'
+        },
+        {
+          id: 'sh-q3-opt2',
+          text: 'By multiplying s by the speed of light',
+          is_correct: false,
+          explanation: 'Incorrect: Continued fractions is an efficient classical mathematical algorithm.'
+        },
+        {
+          id: 'sh-q3-opt3',
+          text: 'By guessing random numbers until r works',
+          is_correct: false,
+          explanation: 'Incorrect: Continued fractions deterministically extracts the optimal convergent in logarithmic time.'
+        }
+      ]
+    },
+    {
+      id: 'sh-q4',
+      module_slug: 'shor',
+      skillSectionId: 'sh-sec-4',
+      difficulty: 'advanced',
+      concept_tag: 'Cryptographic Implications & RSA Breaking',
+      isPremium: true,
+      question: 'Why does Shor’s Algorithm pose an existential threat to modern RSA and Elliptic Curve Cryptography (ECC), but not to symmetric AES-256?',
+      hint: 'Compare exponential speedup (Shor) vs quadratic speedup (Grover).',
+      options: [
+        {
+          id: 'shor-q4-opt1',
+          text: 'Shor provides an exponential polynomial-time speedup O(n³) against hidden subgroup / discrete log problems breaking RSA/ECC, whereas AES-256 only faces quadratic speedup (Grover), which is countered simply by doubling key length',
+          is_correct: true,
+          explanation: 'Correct! RSA, Diffie-Hellman, and ECC rely on integer factoring and discrete logarithms, which Shor solves in polynomial time. Symmetric ciphers like AES-256 only face quadratic speedup from Grover (effective security 128 bits), which remains unbreakable.'
+        },
+        {
+          id: 'shor-q4-opt2',
+          text: 'Because AES uses quantum keys that cannot be copied',
+          is_correct: false,
+          explanation: 'Incorrect: AES is a purely classical symmetric cipher.'
+        },
+        {
+          id: 'shor-q4-opt3',
+          text: 'Because Shor’s algorithm only works on prime numbers smaller than 10',
+          is_correct: false,
+          explanation: 'Incorrect: Shor asymptotically scales to numbers with thousands of digits.'
+        }
+      ]
+    }
+  ],
+  'vqe': [
+    {
+      id: 'vqe-q1',
+      module_slug: 'vqe',
+      skillSectionId: 'vqe-sec-1',
+      difficulty: 'intermediate',
+      concept_tag: 'Variational Quantum-Classical Principle',
+      question: 'What mathematical theorem guarantees that the expectation value measured in VQE satisfies ⟨ψ(θ)|H|ψ(θ)⟩ ≥ E₀?',
+      hint: 'Named after two classical physicists and forms the basis of quantum variational methods.',
+      options: [
+        {
+          id: 'vqe-q1-opt1',
+          text: 'The Rayleigh-Ritz Variational Principle',
+          is_correct: true,
+          explanation: 'Correct! The variational principle guarantees that the energy expectation value for any trial wavefunction |ψ(θ)⟩ is strictly greater than or equal to the exact ground state energy E₀.'
+        },
+        {
+          id: 'vqe-q1-opt2',
+          text: 'Heisenberg Uncertainty Principle',
+          is_correct: false,
+          explanation: 'Incorrect: Heisenberg uncertainty bounds complementary observables (Δx Δp ≥ ℏ/2).'
+        },
+        {
+          id: 'vqe-q1-opt3',
+          text: 'No-Cloning Theorem',
+          is_correct: false,
+          explanation: 'Incorrect: The No-Cloning theorem prohibits copying unknown quantum states.'
+        }
+      ]
+    },
+    {
+      id: 'vqe-q2',
+      module_slug: 'vqe',
+      skillSectionId: 'vqe-sec-2',
+      difficulty: 'intermediate',
+      concept_tag: 'Ansatz Circuit Design (Hardware vs UCC)',
+      question: 'In VQE, why is the choice of Parameterized Quantum Circuit (ansatz) critical on current NISQ hardware?',
+      hint: 'Consider the tradeoff between physical noise, gate depth, and chemical accuracy.',
+      options: [
+        {
+          id: 'vqe-q2-opt1',
+          text: 'Hardware-efficient ansätze minimize two-qubit gate depth to avoid decoherence, whereas physically motivated ansätze (like UCCSD) guarantee physical states but require deeper circuits',
+          is_correct: true,
+          explanation: 'Correct! Circuit depth is severely constrained by T₂ coherence times on NISQ devices. Hardware-efficient ansätze trade physical chemical structure for shallow depth.'
+        },
+        {
+          id: 'vqe-q2-opt2',
+          text: 'Because an ansatz determines how fast the classical computer calculates gradients',
+          is_correct: false,
+          explanation: 'Incorrect: The ansatz is executed on the quantum processor; classical computers only update parameters.'
+        },
+        {
+          id: 'vqe-q2-opt3',
+          text: 'Because only one ansatz exists for all chemical molecules',
+          is_correct: false,
+          explanation: 'Incorrect: There are dozens of ansatz families (UCCSD, RyRz, ADAPT-VQE, etc.).'
+        }
+      ]
+    },
+    {
+      id: 'vqe-q3',
+      module_slug: 'vqe',
+      skillSectionId: 'vqe-sec-3',
+      difficulty: 'intermediate',
+      concept_tag: 'Hamiltonian Pauli Decomposition & Measurement',
+      question: 'How is a molecular electronic Hamiltonian H evaluated on a quantum computer in VQE?',
+      hint: 'Fermionic creation/annihilation operators must be translated into qubit Pauli gates.',
+      options: [
+        {
+          id: 'vqe-q3-opt1',
+          text: 'It is mapped via Jordan-Wigner or Bravyi-Kitaev into a linear combination of Pauli strings ∑ c_i P_i, and each Pauli string is measured independently',
+          is_correct: true,
+          explanation: 'Correct! Transforming fermionic operators into sums of Pauli tensor products (I, X, Y, Z) allows estimating ⟨H⟩ by summing the measured expectation values of each Pauli string.'
+        },
+        {
+          id: 'vqe-q3-opt2',
+          text: 'By measuring the temperature of the dilution refrigerator',
+          is_correct: false,
+          explanation: 'Incorrect: Cryogenic temperature is not an eigenvalue of the molecular Hamiltonian.'
+        },
+        {
+          id: 'vqe-q3-opt3',
+          text: 'By inverting the density matrix using classical matrix diagonalization',
+          is_correct: false,
+          explanation: 'Incorrect: Classical diagonalization has exponential O(4ⁿ) complexity, which VQE avoids.'
+        }
+      ]
+    },
+    {
+      id: 'vqe-q4',
+      module_slug: 'vqe',
+      skillSectionId: 'vqe-sec-4',
+      difficulty: 'advanced',
+      concept_tag: 'Barren Plateaus & Gradient Optimization',
+      isPremium: true,
+      question: 'What is the "Barren Plateau" problem in variational quantum algorithms, and what causes it?',
+      hint: 'Consider the variance of cost function gradients as system size grows.',
+      options: [
+        {
+          id: 'vqe-q4-opt1',
+          text: 'For sufficiently deep or random ansätze, the variance of the gradients vanishes exponentially in the number of qubits (Var[∂E/∂θ] ∈ O(2⁻ⁿ)), making gradient descent training impossible without exponential measurement shots',
+          is_correct: true,
+          explanation: 'Correct! McClean et al. (2018) proved that random parameterized quantum circuits form 2-designs, causing gradients to concentrate exponentially around zero — a major obstacle in scaling VQE.'
+        },
+        {
+          id: 'vqe-q4-opt2',
+          text: 'It means the quantum computer runs out of liquid helium and overheats',
+          is_correct: false,
+          explanation: 'Incorrect: Barren plateaus are a fundamental geometric phenomenon in parameter Hilbert space.'
+        },
+        {
+          id: 'vqe-q4-opt3',
+          text: 'It is a state where all measurement probabilities equal 1',
+          is_correct: false,
+          explanation: 'Incorrect: Probabilities must sum to 1, they cannot each be 1.'
         }
       ]
     }

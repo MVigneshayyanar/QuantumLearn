@@ -51,7 +51,15 @@ export interface SimulationResult {
   execution_time_ms: number;
 }
 
-export type AlgorithmId = 'deutsch-jozsa' | 'grover' | 'teleportation' | 'superdense-coding';
+export type AlgorithmId =
+  | 'deutsch-jozsa'
+  | 'grover'
+  | 'teleportation'
+  | 'superdense-coding'
+  | 'qft'
+  | 'quantum-phase-estimation'
+  | 'shor'
+  | 'vqe';
 
 export type MisconceptionTag =
   | 'SUPERPOSITION_VS_CLASSICAL_PROB'
@@ -61,7 +69,11 @@ export type MisconceptionTag =
   | 'MEASUREMENT_COLLAPSE'
   | 'DEUTSCH_ORACLE_QUERY'
   | 'GROVER_AMPLITUDE_MEAN'
-  | 'SUPERDENSE_BIT_CAPACITY';
+  | 'SUPERDENSE_BIT_CAPACITY'
+  | 'QFT_PHASE_RELATION'
+  | 'QPE_PRECISION_LIMIT'
+  | 'SHOR_PERIOD_CLASSICAL_REDUCTION'
+  | 'VQE_ANSAETZE_DEPTH';
 
 export interface QuizOption {
   id: string;
