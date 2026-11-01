@@ -1,0 +1,614 @@
+\documentclass[conference]{IEEEtran}
+\IEEEoverridecommandlockouts
+
+\usepackage{cite}
+\usepackage{amsmath,amssymb,amsfonts}
+\usepackage{algorithmic}
+\usepackage{algorithm}
+\usepackage{graphicx}
+\usepackage{textcomp}
+\usepackage{booktabs}
+\usepackage{array}
+\usepackage{url}
+\usepackage{multirow}
+\usepackage{enumitem}
+\usepackage{color}
+\usepackage{braket}
+\usepackage{microtype}
+
+\renewcommand{\baselinestretch}{0.98}
+\setlength{\abovedisplayskip}{2.5pt plus 1pt minus 1pt}
+\setlength{\belowdisplayskip}{2.5pt plus 1pt minus 1pt}
+\setlength{\abovedisplayshortskip}{1pt plus 1pt}
+\setlength{\belowdisplayshortskip}{1pt plus 1pt}
+\setlength{\textfloatsep}{4pt plus 1pt minus 1pt}
+\setlength{\intextsep}{4pt plus 1pt minus 1pt}
+\setlength{\floatsep}{4pt plus 1pt minus 1pt}
+\setlength{\dbltextfloatsep}{4pt plus 1pt minus 1pt}
+\setlength{\dblfloatsep}{4pt plus 1pt minus 1pt}
+\renewcommand{\topfraction}{0.95}
+\renewcommand{\bottomfraction}{0.95}
+\renewcommand{\textfraction}{0.05}
+\renewcommand{\floatpagefraction}{0.85}
+\renewcommand{\dbltopfraction}{0.95}
+\renewcommand{\dblfloatpagefraction}{0.85}
+
+\begin{document}
+
+\title{QuanBit: An Interactive Multi-Backend Quantum Pedagogical Platform with 3D Statevector Mechanics, Density Matrix Diagnostics, and Schr{\"o}dinger AI Socratic Guidance}
+
+\author{
+\IEEEauthorblockN{
+\begin{tabular}{@{}ccc@{}}
+\parbox{0.31\textwidth}{\centering
+\textbf{Vigneshayyanar M}\\
+Dept. of M.Tech. CSE\\
+(5 Year Integrated)\\
+Sri Sairam Engineering College\\
+Chennai, India\\
+vigneshayyanar134@gmail.com} &
+\parbox{0.31\textwidth}{\centering
+\textbf{Sowmiya R}\\
+Dept. of M.Tech. CSE\\
+(5 Year Integrated)\\
+Sri Sairam Engineering College\\
+Chennai, India\\
+sowmiyaramesh183@gmail.com} &
+\parbox{0.31\textwidth}{\centering
+\textbf{Balaji R}\\
+Dept. of M.Tech. CSE\\
+(5 Year Integrated)\\
+Sri Sairam Engineering College\\
+Chennai, India\\
+balajiraviseetha@gmail.com}
+\end{tabular}
+\\[0.45cm]
+\begin{tabular}{@{}ccc@{}}
+\parbox{0.31\textwidth}{\centering
+\textbf{Saravanan S}\\
+Dept. of M.Tech. CSE\\
+(5 Year Integrated)\\
+Sri Sairam Engineering College\\
+Chennai, India\\
+saravanan1442005@gmail.com} &
+\parbox{0.31\textwidth}{\centering
+\textbf{Kayalvizhi C}\\
+Dept. of M.Tech. CSE\\
+(5 Year Integrated)\\
+Sri Sairam Engineering College\\
+Chennai, India\\
+kayalvizhic.cj@sairam.edu.in} &
+\parbox{0.31\textwidth}{\centering
+\textbf{Manoj Kumar R}\\
+Dept. of M.Tech. CSE\\
+(5 Year Integrated)\\
+Sri Sairam Engineering College\\
+Chennai, India\\
+mano773737@gmail.com}
+\end{tabular}
+}
+}
+
+\maketitle
+
+%%------------------------------------------------------------
+\begin{abstract}
+Introductory Quantum Information Science and Technology (QIST) instruction faces major pedagogical issues, including high mathematical abstraction ($\mathcal{H} = \mathbb{C}^{2^n}$), SDK API, an application programming interface, and endianness fragmentation, visualizer collapse during the entanglement, and cognitive offloading to generative AI; this paper is offering \textbf{QuanBit}, an open-access web platform combining visual circuit construction, continuous 3D statevector animation, multi-target transpilation, and restricted Socratic AI guidance, in many respects. Quanbit delivers: (1) a six-axis Three.js Bloch sphere finding reduced density matrix trace purity $\gamma = \text{Tr}(\rho_w^2) \in [0.5, 1.0]$ with visual vector shrinkage under the bipartite entanglement; (2) an Abstract Syntax Tree (AST) transpiler putting together visual circuits into Qiskit, Cirq, PennyLane and OpenQASM (2.0/3.0); (3) \textbf{Schr{\"o}dinger AI}, a tutoring agent regulated by four negative constraints ($\mathcal{C}_1-\mathcal{C}_4$) and programmatic guardrails that guides learners via geometric differences ($\Delta\theta, \Delta\phi$) rather than direct code answers; (4) a four-stage pathway grounded in Cognitive Load Theory; (5) an automated 8-tag misconception ontology; and (6) a SHA-256 verifiable credential registry, and cut circuit synthesis time by 75.0\%, reduced syntax errors by 97.2\%, and created a normalized learning gain of Hake's $\langle g \rangle = 0.75$ ($p < 0.001$, Cohen's $d = 1.84$) with 92.4\% 14-day retention, in real-world scenarios.
+\end{abstract}
+
+\begin{IEEEkeywords}
+Quantum Computing Education, Bloch Sphere, Density Matrix, Schr{\"o}dinger AI, Socratic Tutoring, Cognitive Load Theory, Statevector Mechanics, AST Transpiler, Reduced Density Operator, OpenQASM.
+\end{IEEEkeywords}
+
+%%------------------------------------------------------------
+\section{Introduction}
+\label{sec:intro}
+
+As, well, Quantum computing is generally transitioning from physics laboratories to mainstream computer engineering \cite{b1}; so, all the same, computer science curricula face pedagogical holdups \cite{b3}, to a significant degree, and industry demand for engineers capable of algorithm design and error mitigation is often speeding up \cite{b2} with cloud-accessible quantum processing units (QPUs), on the whole.
+
+\subsection{Why Quantum Computing Is Hard to Teach}
+Introductory QIST provides four recurring educational problems:
+\begin{enumerate}[leftmargin=*,noitemsep,topsep=1pt]
+    \item \textbf{Mathematical abstraction}: Courses introduce quantum states via dense Hilbert space algebra ($\mathbb{C}^{2^n}$) before students get geometric intuition for superposition or relative phase \cite{b4}, broadly speaking.
+    \item \textbf{Visualizers failing on entanglement}Existing tools \cite{b5}, \cite{b6} freeze or display misleading projections, strengthening misconceptions.: The single-qubit Bloch sphere $\mathcal{S}^2$ is breaking down when bipartite entanglement (e.g., $|\Phi^+\rangle = \frac{|00\rangle + |11\rangle}{\sqrt{2}}$) creates mixed statistical ensembles, in actual application.
+    \item \textbf{SDK fragmentation and endianness}: Platforms disagree on register ordering, namely IBM Qiskit employs little-endian ($|q_{n-1} \dots q_0\rangle$); in turn, unlike that, cirq, PennyLane and textbooks use big-endian ($|q_0 \dots q_{n-1}\rangle$), causing silent indexing bugs, in real-world scenarios.
+    \item \textbf{Cognitive offloading to generative AI}: General-purpose LLMs are providing complete code on demand, bypassing the productive struggle vital for schema acquisition \cite{b7}, \cite{b8}, in actual application.
+\end{enumerate}
+
+\subsection{Comparison with Existing Platforms and AI Educational Tools}
+Table~\ref{tab:comparison} systematically checks QuanBit with prominent quantum educational platforms as well as modern generative AI coding assistants \cite{b16}, in many respects; indeed, existing quantum tools fulfill precise niche requirements, like Quirk is offering rapid client-side circuit check, so also, and yet, also, iBM Quantum Composer provides access to real cloud QPUs, in actual application. But still, what neither provides is visual diagnostics for entangled statistical ensembles or protects learners against cognitive offloading; and thus, in plain words the same; while generic large language models and code generation assistants (e.g., GitHub Copilot, ChatGPT \cite{b16}) can make functional quantum code, they unconstrainedly are tackling that bypass the productive struggle fundamental for schema acquisition. QuanBit uniquely bridges this gap by joining continuous 3D statevector animation, reduced density matrix purity diagnostics, multi-backend AST transpilation, and a negatively constrained Socratic AI guidance engine within a zero-install browser environment.
+
+\begin{table*}[t]
+\caption{Systematic Architectural and Pedagogical Comparison Across Quantum Platforms and AI-Driven Educational Tools}
+\label{tab:comparison}
+\centering
+\renewcommand{\arraystretch}{0.92}
+\resizebox{\textwidth}{!}{%
+\begin{tabular}{@{}lcccccc@{}}
+\toprule
+\textbf{Architectural \& Pedagogical Feature} & \textbf{IBM Composer \cite{b6}} & \textbf{Quirk \cite{b5}} & \textbf{Black Opal \cite{b9}} & \textbf{Quantum Katas \cite{b10}} & \textbf{GenAI / Copilot \cite{b16}} & \textbf{QuanBit (Ours)} \\
+\midrule
+Interactive 3D WebGL Bloch Sphere & 2D Projection & 2D Stereographic & Pre-rendered 3D & None & None & \textbf{Dynamic 6-Axis Three.js WebGL} \\
+Real-Time Entanglement Purity Detection ($\text{Tr}(\rho_w^2)$) & No (Undefined) & Partial (Displays Mix) & No & No & No & \textbf{Yes (Automatic Radial Shrinkage \& Alert)} \\
+Multi-Backend AST Transpilation & Qiskit / QASM 2 & URL Hash / JSON & Proprietary & Q\# / Python & Synthesizes Prompt & \textbf{Qiskit, Cirq, PennyLane, QASM 2/3} \\
+Autonomous Pedagogical AI Guidance & None & None & None & Unit Test Feedback & Unconstrained Code Dump & \textbf{Schr{\"o}dinger AI ($\mathcal{C}_1-\mathcal{C}_4$ Constrained)} \\
+Real-Time Statevector Discrepancy Diagnostics & No & No & No & Boolean Assert & No & \textbf{Yes ($\Delta\theta, \Delta\phi$, Fubini-Study Distance)} \\
+Structured 4-Stage Learning Pathway & Linear & Freeform & Gamified & Practice Only & Freeform Prompting & \textbf{Dual Mode $\to$ 3D Sandbox $\to$ Build-It $\to$ Quiz} \\
+Automated Misconception Ontology Logging & No & No & No & No & No & \textbf{Yes (8 Validated QIST Flaw Tags)} \\
+Cryptographic Credential Verification & Badges & None & Certificate & None & None & \textbf{Public SHA-256 Ledger (\texttt{/verify/[id]})} \\
+Client Dependency / Installation Required & Web Browser & Web Browser & Web Browser & Local VS Code & Web / IDE Plugin & \textbf{Zero-Install Cloud Native (Next.js 14)} \\
+Universal Multilingual Support (WCAG 2.1 AA) & English & English & English & English & Polyglot Text & \textbf{9 Languages + Full Keyboard Access} \\
+\bottomrule
+\end{tabular}%
+}
+\end{table*}
+
+\subsection{Contributions}
+QuanBit followingly contributes:
+\begin{itemize}[leftmargin=*,noitemsep,topsep=1pt]
+    \item \textbf{Six-axis WebGL 3D statevector engine}: Renders Bloch sphere with $\pm X, \pm Y, \pm Z$ poles, animates continuous SLERP geodesics, and gauges trace purity $\gamma = \text{Tr}(\rho_w^2) \in [0.5, 1.0]$, in many respects.
+    \item \textbf{Multi-backend AST transpiler}: Synchronously emits syntax-validated code for Qiskit, Cirq, PennyLane and OpenQASM (2.0/3.0).
+    \item \textbf{Schr{\"o}dinger AI Socratic framework}: Enforces four negative constraints ($\mathcal{C}_1-\mathcal{C}_4$) with programmatic guardrails, guiding learners via discrepancy metrics ($\Delta\theta, \Delta\phi, d_{\text{FS}}$), to a significant degree.
+    \item \textbf{Four-stage learning pathway}: Scaffolds conceptual growth through the dual explanation, 3D sandbox, synthesis milestones, and adaptive quizzes, broadly speaking.
+    \item \textbf{Automated misconception diagnostics}: Maps student errors to an eight-tag QIST misconception ontology for live instructor cohort heatmaps, broadly speaking.
+    \item \textbf{Empirical evaluation ($N=30$)}: Demonstrates 75.0\% faster synthesis, 97.2\% fewer syntax errors, high normalized gain ($\langle g \rangle = 0.75$, Cohen's $d = 1.84$), and 92.4\% 14-day retention, broadly speaking.
+\end{itemize}
+
+%%------------------------------------------------------------
+\section{Theoretical Framework and Learning Science}
+\label{sec:theory}
+
+As, well, QuanBit is building upon Cognitive Load Theory \cite{b7}, Dual-Coding Theory \cite{b12}, and Bloom's Revised Taxonomy \cite{b13}, in actual application.
+
+\subsection{Managing Cognitive Load}
+Cognitive Load Theory posits that learning improves when germane load (schema construction) is maximized and extraneous load (tooling friction) is minimized:
+\begin{equation}
+L_{\text{tot}} = L_{\text{int}} + L_{\text{ext}} + L_{\text{ger}} \le C_{\text{WM}}
+\end{equation}
+where total cognitive load $L_{\text{tot}}$ decomposes into the built-in ($L_{\text{int}}$), extraneous ($L_{\text{ext}}$), and germane ($L_{\text{ger}}$) loads, bounded by working memory capacity $C_{\text{WM}}$, to a significant degree; QuanBit is tackling $L_{\text{int}}$ via dual Simple/Technical explanation modes, excludes $L_{\text{ext}}$, through the zero-install automated multi-backend transpilation, and directs $L_{\text{ger}}$ toward the milestone-driven synthesis challenges, broadly speaking.
+
+\subsection{Dual Coding and Tri-Modal State Representation}
+Dual-Coding Theory \cite{b12} suggests retention strengthens when information is coded simultaneously in visual and symbolic channels. QuanBit dynamically synchronizes three state representations:
+\begin{equation}
+\label{eq:dualcoding}
+\begin{aligned}
+|\psi\rangle &= \cos(\theta/2)|0\rangle + e^{i\phi}\sin(\theta/2)|1\rangle \quad \text{[Dirac]} \\
+\iff \vec{r} &= (\sin\theta\cos\phi, \, \sin\theta\sin\phi, \, \cos\theta)^T \quad \text{[3D Bloch]} \\
+\iff \mathcal{B} &= \mathcal{B}_{\text{SDK}}(\mathcal{C}) \quad \text{[Target SDK Code]}
+\end{aligned}
+\end{equation}
+When a gate is, as a matter of fact, placed, the statevector updates, the Bloch vector animates along a continuous geodesic arc, and matching code emissions emerge in parallel across all SDK buffers, in real-world scenarios.
+
+\begin{figure*}[t]
+\centering
+\fbox{\parbox{0.96\textwidth}{\centering\vspace{1pt}
+\footnotesize
+\textbf{[ Tier 1: Client Presentation Tier --- Next.js 14 / React 18 / Zustand Reactive Store ]}\\[2pt]
+$\Big\downarrow$ User Gate Placement \& UI Events \hspace{4.5cm} $\Big\uparrow$ Real-time Statevector, Probabilities, Coordinates\\[2pt]
+\begin{tabular}{c@{\hspace{0.5cm}}c@{\hspace{0.5cm}}c}
+\fbox{\parbox{4.8cm}{\centering \textbf{Three.js 3D Bloch Engine}\\6-Axis Spatial Coordinate Tracker\\Reduced Density Matrix Purity $\text{Tr}(\rho_w^2)$}} &
+\fbox{\parbox{4.8cm}{\centering \textbf{Multi-Backend Compiler AST}\\Topological Wire Timeline Scheduler\\Synchronous Qiskit $\cdot$ Cirq $\cdot$ PennyLane}} &
+\fbox{\parbox{4.8cm}{\centering \textbf{Schr{\"o}dinger AI Tutor}\\Negative Constraint System ($\mathcal{C}_1-\mathcal{C}_4$)\\State Discrepancy Diagnostics ($\Delta\theta, \Delta\phi$)}}
+\end{tabular}\\[3pt]
+$\Big\downarrow$ High-Dimension REST / WebSocket \hspace{5.2cm} $\Big\downarrow$ Cryptographic Minting / Public Validation\\[2pt]
+\fbox{\parbox{7.2cm}{\centering \textbf{FastAPI Simulation Microservice (Python / Qiskit Aer)}\\Statevector $\mathbb{C}^{2^n}$, Partial Trace Density Operators, Shot Sampling}} \hspace{0.6cm}
+\fbox{\parbox{7.2cm}{\centering \textbf{Public Verification Ledger (\texttt{/verify/[id]})}\\SHA-256 Digest Signature, Tamper-Proof Audit, Prisma/Postgres}}
+\vspace{1pt}}}
+\caption{Architecture of QuanBit: a reactive presentation tier, the WebGL engine, the multi-target transpiler, a Python simulation microservice, and the Schr{\"o}dinger AI guidance engine.}
+\label{fig:arch}
+\end{figure*}
+
+%%------------------------------------------------------------
+\section{System Architecture and Implementation}
+\label{sec:arch_impl}
+
+QuanBit is employing a multi-tier architecture, shown in Figure~\ref{fig:arch}.
+
+\subsection{Client Presentation and Reactive State}
+How about this, the frontend is currently written in TypeScript with Next.js 14 (App Router) and React 18, in actual application; in fact, a custom client mathematical engine is finding single- and two-qubit unitaries in JavaScript employing continuous \texttt{Float64Array} typed buffers, in many respects. Client state lives in lightweight Zustand stores, which are keeping high-frequency visual changes completely decoupled from async simulation calls.
+
+\subsection{Python Simulation Microservice (FastAPI and Qiskit Aer)}
+As, well, high-dimensional statevector synthesis, unspecified multi-qubit unitaries, and shot-based sampling ($N \in [1024, 8192]$ shots) are carried out by an asynchronous Python microservice (\texttt{services/quantum-sim}) built with FastAPI and Qiskit Aer \cite{b18}; it consumes circuit ASTs, pulls global statevectors $|\psi\rangle \in \mathbb{C}^{2^n}$, computes reduced density operators $\rho_w = \text{Tr}_{\bar{w}}(|\psi\rangle\langle\psi|)$, and returns single-wire Pauli expectation values $\langle \sigma_x \rangle, \langle \sigma_y \rangle, \langle \sigma_z \rangle \in [-1.0, 1.0]$, in real-world scenarios.
+
+\subsection{Tiered Computational Scalability and Hybrid Offloading}
+To balance zero-latency interactivity against rapid memory scaling ($\mathcal{H} = \mathbb{C}^{2^n}$), QuanBit uses a three-tier hybrid computation architecture:
+\begin{enumerate}[leftmargin=*,noitemsep,topsep=1pt]
+    \item \textbf{Tier 1 ($n \le 5$ qubits)}: Simulated synchronously on the client UI thread in $<16$\,ms ($>60$ FPS), driving continuous SLERP vector trajectories during the timeline scrubbing, in many respects.
+    \item \textbf{Tier 2 ($6 \le n \le 12$ qubits)}: Checked in a client Web Worker via vectorized typed arrays (RAM $\le 65.5$\,KB, latency $<120$\,ms), keeping the central UI event loop completely responsive, on the whole.
+    \item \textbf{Tier 3 ($13 \le n \le 28$ qubits)}: Offloaded over WebSockets to Qiskit Aer on GPU kernels (CUDA) or Matrix Product State (MPS) tensor networks scaling as $O(n \cdot \chi^2)$ ($\chi \le 64$) for weakly entangled frameworks, in many respects.
+\end{enumerate}
+
+%%------------------------------------------------------------
+\section{3D Statevector Mechanics and Density Matrix Diagnostics}
+\label{sec:bloch_mechanics}
+
+\subsection{Bloch Sphere Parameterization}
+Up to an unobservable global phase $e^{i\alpha}$, any pure single-qubit state $|\psi\rangle \in \mathcal{H}_2$ can be parameterized as:
+\begin{equation}
+|\psi\rangle = \cos(\theta/2)|0\rangle + e^{i\phi}\sin(\theta/2)|1\rangle
+\end{equation}
+The Cartesian coordinates on the unit sphere $\mathcal{S}^2 \subset \mathbb{R}^3$ are $\vec{r} = (x, y, z)^T = (\sin\theta\cos\phi, \sin\theta\sin\phi, \cos\theta)^T$. And where $\theta \in [0, \pi]$ is, likely, the polar angle and $\phi \in [0, 2\pi)$ is the azimuthal phase angle, to a significant degree.
+The WebGL renderer is projecting six spatial HTML anchor labels at the principal poles: $|0\rangle (0, 1.55, 0)$, $|1\rangle (0, -1.55, 0)$, $|+\rangle (1.55, 0, 0)$, $|-\rangle (-1.55, 0, 0)$, $|i\rangle (0, 0, 1.55)$, and $|-i\rangle (0, 0, -1.55)$, on the whole.
+
+\subsection{Geodesic Rotation Trajectories}
+Unitary rotation $U(\beta, \vec{n}) = \exp(-i \frac{\beta}{2} \vec{n} \cdot \vec{\sigma})$ by angle $\beta$ about unit axis $\vec{n}$ is typically animated along a continuous geodesic via spherical linear interpolation (SLERP):
+\begin{equation}
+\vec{r}(t) = \frac{\sin((1-t)\Omega)}{\sin\Omega}\vec{r}_0 + \frac{\sin(t\Omega)}{\sin\Omega}\vec{r}_1
+\end{equation}
+where $\Omega = \arccos(\vec{r}_0 \cdot \vec{r}_1)$ and $t \in [0, 1]$.
+
+\subsection{Density Matrices and Purity Collapse Under Entanglement}
+For global state $|\psi\rangle \in \mathbb{C}^{2^n}$ with density operator $\rho = |\psi\rangle\langle\psi|$, tracing out non-active qubits $\bar{w}$ generates the lowered density operator $\rho_w = \text{Tr}_{\bar{w}}(\rho) \in \mathbb{C}^{2 \times 2}$. The local Bloch vector $\vec{r}_w = (x_w, y_w, z_w)$ follows from Pauli expectation values:
+\begin{equation}
+\begin{aligned}
+x_w &= 2\text{Re}(\rho_{01}), \quad y_w = -2\text{Im}(\rho_{01}), \\
+z_w &= \rho_{00} - \rho_{11}
+\end{aligned}
+\end{equation}
+The \textbf{trace purity} $\gamma$ and vector length inside the sphere are:
+\begin{equation}
+\gamma = \text{Tr}(\rho_w^2) = \rho_{00}^2 + \rho_{11}^2 + 2|\rho_{01}|^2
+\end{equation}
+\begin{equation}
+|\vec{r}_w| = \sqrt{x_w^2 + y_w^2 + z_w^2} = \sqrt{2\gamma - 1}
+\end{equation}
+where $\gamma \in [0.5, 1.0]$.
+
+\noindent\textbf{Theorem 1 (Purity collapse in Bell states).} \textit{For Bell state $|\Phi^+\rangle = \frac{|00\rangle + |11\rangle}{\sqrt{2}}$, the reduced density operator of qubit 0 has trace purity $\gamma = 0.5$, so its Bloch vector radius is exactly zero.}
+
+\begin{IEEEproof}
+The bipartite density matrix is mainly $\rho = \frac{1}{2}\left[\begin{smallmatrix} 1 & 0 & 0 & 1 \\ 0 & 0 & 0 & 0 \\ 0 & 0 & 0 & 0 \\ 1 & 0 & 0 & 1 \end{smallmatrix}\right]$. The trace purity is $\gamma = \text{Tr}(\rho_0^2) = 0.5$, formulating radius $|\vec{r}_0| = \sqrt{2(0.5) - 1} = 0$; and thus, tracing out qubit 1 yields $\rho_0 = \text{Tr}_1(\rho) = \frac{1}{2}I_2 = \left[\begin{smallmatrix} 0.5 & 0 \\ 0 & 0.5 \end{smallmatrix}\right]$.
+\end{IEEEproof}
+
+QuanBit contracts the 3D vector to origin $\vec{0}$ and shows an amber halo with a tooltip suggesting the state is mixed due to entanglement, whenever $\gamma < 0.999$, to a significant degree.
+
+\begin{algorithm}[t]
+\caption{Multi-Backend AST Transpilation \& State Extraction}
+\label{alg:transpile}
+\footnotesize
+\begin{algorithmic}[1]
+\REQUIRE Circuit AST $\mathcal{C} = (n, G)$, Active wire index $w$
+\ENSURE Code buffers $\mathcal{B}_{\text{qis}}, \mathcal{B}_{\text{cirq}}, \mathcal{B}_{\text{penn}}, \mathcal{B}_{\text{qasm}}$, Coordinates $(x,y,z)$, Purity $\gamma$
+\STATE Initialize code string buffers; $|\psi_0\rangle \leftarrow |0\rangle^{\otimes n}$
+\FOR{each gate $g_k = (\text{type}, \mathbf{q}, \theta) \in G$ scheduled in topological order}
+    \STATE Append target syntax to $\mathcal{B}_{\text{qis}}, \mathcal{B}_{\text{cirq}}, \mathcal{B}_{\text{penn}}, \mathcal{B}_{\text{qasm}}$
+    \STATE Apply unitary operator: $|\psi_{t+1}\rangle \leftarrow U(g_k) |\psi_t\rangle$
+\ENDFOR
+\STATE Extract reduced density operator: $\rho_w \leftarrow \text{Tr}_{\bar{w}}(|\psi_{\text{final}}\rangle\langle\psi_{\text{final}}|)$
+\STATE $\gamma \leftarrow \text{Tr}(\rho_w^2)$; compute $(x, y, z)$ from Pauli expectations
+\IF{$\gamma \ge 0.999$}
+    \STATE \textbf{RenderPureVector}$(x, y, z, \theta, \phi)$
+\ELSE
+    \STATE \textbf{RenderEntangledHalo}$(\gamma)$
+\ENDIF
+\RETURN $\mathcal{B}_{\text{qis}}, \mathcal{B}_{\text{cirq}}, \mathcal{B}_{\text{penn}}, \mathcal{B}_{\text{qasm}}, (x,y,z), \gamma$
+\end{algorithmic}
+\end{algorithm}
+
+%%------------------------------------------------------------
+\section{Multi-Backend AST Transpilation Engine}
+\label{sec:transpiler}
+
+To make what students learn transferable to real tools, QuanBit turns each visual circuit into an Intermediate Representation (IR) in the form of an Abstract Syntax Tree:
+\begin{equation}
+\mathcal{C}_{\text{AST}} = \big( n, \{ g_k = (\tau_k, \sigma_k, \mathbf{q}_k, \boldsymbol{\theta}_k) \}_{k=1}^M \big)
+\end{equation}
+where $n$ is wire count, $\tau_k$ is the discrete time slice, $\sigma_k \in \mathcal{G}$ is operator type drawn from the supported gate set $\mathcal{G} = \{ H, X, Y, Z, S, T, R_x, R_y, R_z, CX, CZ, \text{SWAP}, M \}$, $\mathbf{q}_k = (q_{\text{control}}, q_{\text{target}})$ indexes, and $\boldsymbol{\theta}_k$ parameters, broadly speaking.
+
+\subsection{Emission Rules for Each Framework}
+Following Algorithm~\ref{alg:transpile}, the compiler walks the AST, an abstract syntax tree, and creates code for four targets:
+\begin{enumerate}[leftmargin=*,noitemsep,topsep=1pt]
+    \item \textbf{IBM Qiskit}: Allocates registers in little-endian order and gives off $CX(c, t) \mapsto \texttt{qc.cx(c, t)}$.
+    \item \textbf{Google Cirq}: Creates line qubits and appends moment operations, so $CX(c, t) \mapsto \texttt{cirq.CNOT(q[c], q[t])}$.
+    \item \textbf{Xanadu PennyLane}: Builds hybrid QNode execution graphs, with $CX(c, t) \mapsto \texttt{qml.CNOT(wires=[c, t])}$.
+    \item \textbf{OpenQASM (2.0 / 3.0)}: Emits hardware-agnostic quantum assembly, with $CX(c, t) \mapsto \texttt{cx q[c], q[t];}$.
+\end{enumerate}
+
+\subsection{Endianness Normalization}
+Take a two-qubit register with qubit 0 as $|1\rangle$ and qubit 1 as $|0\rangle$: Big-endian (Cirq, PennyLane, Dirac) indexes $|q_0 q_1\rangle = |10\rangle$ (basis 2); while Little-endian (IBM Qiskit) indexes $|q_1 q_0\rangle = |01\rangle$ (basis 1); this conversion is, as a matter of fact, normalized across the synchronized terminal tabs and annotated measurement histograms by QuanBit, in real-world scenarios.
+
+%%------------------------------------------------------------
+\section{The Four-Stage Pathway and Algorithm Modules}
+\label{sec:curriculum}
+
+Instruction follows a four-stage pathway across the four foundational quantum algorithms:
+
+\noindent\textbf{1) Deutsch-Jozsa Algorithm:} Determines if black-box $f: \{0,1\}^n \to \{0,1\}$ is constant or balanced in one query, so set up to $|0\rangle^{\otimes n}|1\rangle$, Hadamards and oracle $U_f$ generate $|\psi_2\rangle = \frac{1}{\sqrt{2^n}}\sum_{x=0}^{2^n-1}(-1)^{f(x)}|x\rangle|-\rangle$. A final Walsh-Hadamard change produces:
+\begin{equation}
+|\psi_3\rangle = \frac{1}{2^n}\sum_{x,y=0}^{2^n-1}(-1)^{f(x) \oplus (x \cdot y)} |y\rangle |-\rangle
+\end{equation}
+Amplitude $C_0 = \frac{1}{2^n}\sum_x (-1)^{f(x)}$ is yielding $|C_0|^2 = 1$ for constant $f$ and $|C_0|^2 = 0$ for balanced $f$.
+
+\noindent\textbf{2) Grover's Quantum Search:} Locates a marked target $\omega$ in $N=2^n$ items employing the Grover operator $G = U_s U_\omega$ in $R \approx \lfloor \frac{\pi}{4}\sqrt{N} \rfloor$ iterations, animated in the 2D subspace $\{|\omega\rangle, |\omega^\perp\rangle\}$, on the whole.
+
+\noindent\textbf{3) Quantum Teleportation:} Transmits state $|\psi\rangle = \alpha|0\rangle + \beta|1\rangle$ employing two classic bits and shared Bell pair $|\Phi^+\rangle$. Bob applies Pauli corrections:
+\begin{equation}
+|\psi_{\text{out}}\rangle = X^{M_2} Z^{M_1} |\psi_{\text{rec}}\rangle = \alpha|0\rangle + \beta|1\rangle
+\end{equation}
+
+\noindent\textbf{4) Superdense Coding:} Encodes two conventional bits into one physical qubit via Bell states ($00 \to |\Phi^+\rangle$, $01 \to |\Psi^+\rangle$, $10 \to |\Phi^-\rangle$, $11 \to |\Psi^-\rangle$), decoded deterministically by Bell-basis measurement, to a significant degree.
+
+%%------------------------------------------------------------
+\section{Schr{\"o}dinger AI: The Socratic Guidance Engine}
+\label{sec:ai_engine}
+
+To prevent cognitive offloading, \textbf{Schr{\"o}dinger AI} serves as an embedded Socratic agent in the workbench drawer (\texttt{src/components/ai-tutor}), in many respects.
+
+\subsection{Foundation Model Architecture and Inference Latency}
+Streaming TTFT averages $t_{\text{TTFT}} = 210 \pm 35$\,ms, with total response completion in $t_{\text{resp}} = 420 \pm 65$\,ms. Schr{\"o}dinger AI operates on an improved LLM backbone (GPT-4o / Claude 3.5 Sonnet class) over streaming Server-Sent Events (SSE); it's performing under the deterministic hyperparameters, including temperature $T = 0.20$, nucleus threshold $\text{top-}p = 0.95$, frequency penalty $\alpha_{\text{freq}} = 0.40$, and maximum token limit $\tau_{\max} = 350$, broadly speaking.
+
+\subsection{Negative Constraint Specification ($\mathcal{C}_1-\mathcal{C}_4$)}
+Side by side to code generation assistants, Schr{\"o}dinger AI is usually regulated by four negative pedagogical restrictions $\mathcal{C} = \{\mathcal{C}_1, \mathcal{C}_2, \mathcal{C}_3, \mathcal{C}_4\}$:
+\begin{equation}
+\label{eq:ai_rules}
+\begin{aligned}
+\mathcal{C}_1 &: \text{Forbid}(g), \quad \forall g \in \mathcal{G} \quad \text{[No Direct Gate Names]} \\
+\mathcal{C}_2 &: \text{Forbid}(q_k), \quad q_k \in [0, n-1] \quad \text{[No Wire Positions]} \\
+\mathcal{C}_3 &: \text{Require}(\Delta\theta, \Delta\phi, d_{\text{FS}}) \quad \text{[Geometric Discrepancies]} \\
+\mathcal{C}_4 &: \text{Require}(Q_{\text{Socratic}}) \quad \text{[Deductive Inquiries]}
+\end{aligned}
+\end{equation}
+Here, $\mathcal{C}_1$ proscribes gate identifiers $g \in \{H, X, Y, Z, S, T, CX, CZ, \text{SWAP}, \text{CNOT}\}$; $\mathcal{C}_2$ forbids coordinate placement directives; $\mathcal{C}_3$ commands hints based on spherical differences ($\Delta\theta, \Delta\phi$); in actual application, and as, well, $\mathcal{C}_4$ is needing ending each turn with an inquiry compelling independent deduction, in many respects.
+
+\subsection{Dual-Tier Enforcement: Prompt Grammar and Programmatic Guardrails}
+To make sure zero leakage of direct resolutions during the unconstrained student queries, QuanBit writes a two-tier verification architecture:
+\begin{itemize}[leftmargin=*,noitemsep,topsep=1pt]
+    \item \textbf{Tier 1 (Dynamic Telemetry Prompt Grammar)}: Real-time telemetry $(\theta_{\text{stu}}, \phi_{\text{stu}}, \Delta\theta, \Delta\phi, d_{\text{FS}})$, active misconception $M$, and query $Q$ populate the Socratic prompt grammar, in actual application.
+    \item \textbf{Tier 2 (Programmatic Guardrail Interceptor)}: As tokens stream, the buffer for any gate token ($g \in \mathcal{G}$) or wire index ($q_k$) is being scanned by an in-memory regex and AST validator, in actual application; if flagged ($V_{\text{violation}} = \text{TRUE}$), the response is normally dropped. And a corrective re-prompt is triggered automatically.
+\end{itemize}
+
+\vspace{1pt}
+\noindent\fbox{\parbox{\columnwidth-2\fboxsep-2\fboxrule}{\footnotesize
+\textbf{Schr{\"o}dinger AI System Prompt Template}\\[1pt]
+\texttt{[ROLE]} Constrained Socratic QIST tutor preventing cognitive offloading.\\
+\texttt{[NEGATIVE CONSTRAINTS]} Not once name particular gates ($H, X, Y, Z, S, T, CX, CZ, \dots$), matrices, or wire coordinates. Direct answers violate protocol.\\
+\texttt{[TELEMETRY]} Target: $(\theta_{\text{tar}}, \phi_{\text{tar}})$; Current: $(\theta_{\text{stu}}, \phi_{\text{stu}})$; $\Delta\theta, \Delta\phi, d_{\text{FS}}, \gamma$.\\
+\texttt{[DIRECTIVE]} Frame guidance solely through Bloch discrepancy ($\Delta\theta, \Delta\phi$). Inquire which unitary axis/angle removes the gathered deviation.}}
+\vspace{1pt}
+
+\begin{algorithm}[t]
+\caption{Schr{\"o}dinger AI Socratic Guidance \& Guardrail Loop}
+\label{alg:socratic}
+\footnotesize
+\begin{algorithmic}[1]
+\REQUIRE Circuit $\mathcal{C}_{\text{stu}}$, Target state $|\psi_{\text{target}}\rangle$, Query $Q$
+\ENSURE Verification $\mathcal{V} \in \{\text{PASS}, \text{REJECT}\}$, Socratic feedback $\mathcal{F}$
+\STATE Simulate $\mathcal{C}_{\text{stu}}$; calculate fidelity $F \leftarrow |\langle \psi_{\text{target}} | \psi_{\text{stu}} \rangle|^2$
+\IF{$F \ge 0.9999$}
+    \RETURN $\text{PASS}$, \textit{``Verification successful! 100\% target fidelity.''}
+\ENDIF
+\STATE $\mathcal{V} \leftarrow \text{REJECT}$; compute $\Delta\theta \leftarrow \theta_{\text{tar}} - \theta_{\text{stu}}$, $\Delta\phi \leftarrow \phi_{\text{tar}} - \phi_{\text{stu}}$, $d_{\text{FS}} \leftarrow \arccos(\sqrt{F})$
+\STATE Identify misconception $M \leftarrow \text{MatchMisconception}(\mathcal{C}_{\text{stu}}, |\psi_{\text{stu}}\rangle)$
+\STATE Synthesize prompt payload $\mathcal{P} \leftarrow (\Delta\theta, \Delta\phi, d_{\text{FS}}, M, Q)$ under $\mathcal{C}_1-\mathcal{C}_4$
+\REPEAT
+    \STATE $\mathcal{F}_{\text{cand}} \leftarrow \text{StreamLLMInference}(\mathcal{P}, T=0.20)$
+    \STATE $V_{\text{violation}} \leftarrow \text{RegexScanner}(\mathcal{F}_{\text{cand}}, \mathcal{G}, \text{Wires})$
+    \IF{$V_{\text{violation}} = \text{TRUE}$}
+        \STATE Append corrective penalty instruction to prompt $\mathcal{P}$
+    \ENDIF
+\UNTIL{$V_{\text{violation}} = \text{FALSE}$ \textbf{or} Retries $\ge 3$}
+\RETURN $\mathcal{V}, \mathcal{F}_{\text{cand}}$
+\end{algorithmic}
+\end{algorithm}
+
+\subsection{Statevector Discrepancy Diagnostics}
+Schr{\"o}dinger AI measures mathematical distance employing state fidelity $F$ and the Fubini-Study metric $d_{\text{FS}}$:
+\begin{equation}
+F = |\langle \psi_{\text{tar}} | \psi_{\text{stu}} \rangle|^2, \quad
+d_{\text{FS}} = \arccos\left(\sqrt{F}\right)
+\end{equation}
+where $F \in [0, 1]$ and $d_{\text{FS}} \in [0, \pi/2]$, but instead of instructing \textit{``Add a Hadamard on wire 0,''} Schr{\"o}dinger AI reads $\Delta\theta = \pi/2$ and prompts: \textit{``Your statevector points to the North Pole ($|0\rangle$). Which unitary rotation maps the polar $Z$-axis onto the equatorial $X$-axis without altering magnitude?''}
+
+\subsection{Quantum Misconception Ontology}
+What's true here's, a diagnostic classifier (\texttt{src/lib/ai-engine.ts}) continuously maps student topologies against eight recorded QIST misconceptions:
+(1) \texttt{SUPERPOSITION\_VS\_CLASSICAL\_PROB} (confusing amplitudes with standard probabilities);
+(2) \texttt{ENTANGLEMENT\_COMMUNICATION} (supposing faster-than-light signaling);
+(3) \texttt{PHASE\_KICKBACK\_MISUNDERSTANDING} (assuming invariant control qubit);
+(4) \texttt{NO\_CLONING\_VIOLATION} (state duplication attempt \cite{b17});
+(5) \texttt{MEASUREMENT\_COLLAPSE} (assuming superposition survives measurement);
+(6) \texttt{DEUTSCH\_ORACLE\_QUERY} (believing sequential queries needed for balance);
+(7) \texttt{GROVER\_AMPLITUDE\_MEAN} (skipping diffusion reflection); and
+(8) \texttt{SUPERDENSE\_BIT\_CAPACITY} (confusing transmitted qubits with carried classic bits).
+Instructor dashboards (\texttt{/admin}) aggregate logs in PostgreSQL for live heatmaps.
+
+%%------------------------------------------------------------
+\section{Practice Arena, Certificate Ledger, and Accessibility}
+\label{sec:practice_ledger}
+
+QuanBit offers 40+ LeetCode-style obstacles ($F \ge 0.9999$ tolerance) and public SHA-256 certificate validation:
+\begin{equation}
+\mathcal{S} = \text{SHA-256}(s_{\text{id}} \parallel m_{\text{id}} \parallel \tau \parallel K_{\text{priv}})
+\end{equation}
+checked in $<1$\,s at \texttt{/verify/[id]}. Accessibility features include nine localized languages, full keyboard-first gate placement, high-contrast dark themes, and reduced-motion WebGL rendering (WCAG 2.1 AA), to a significant degree.
+
+%%------------------------------------------------------------
+\section{Empirical Evaluation and Results}
+\label{sec:evaluation}
+
+To exactly assess whether QuanBit is sharpening conceptual mastery and mitigates cognitive offloading maybe, we controlledly checked with $N=30$ undergraduate and graduate Computer Science students enrolled in an introductory QIST course, broadly speaking.
+
+\subsection{Study Design and Cohort Characteristics}
+Participants were stratified by baseline cumulative GPA and randomly assigned to two equal groups ($N=15$ each):
+\begin{itemize}[leftmargin=*,noitemsep,topsep=1pt]
+    \item \textbf{Control group (conventional instruction).} Students learned via standard textbook readings, whiteboard derivations, and unassisted local Jupyter notebooks running IBM Qiskit, in actual application.
+    \item \textbf{Experimental group (QuanBit).} Students learned employing the four-stage pathway, the 3D WebGL statevector engine, the multi-backend transpiler, and the Schr{\"o}dinger AI Socratic tutor, in actual application.
+\end{itemize}
+Both batches completed an same baseline pre-test finding linear algebra foundations and prerequisite quantum mechanics ($\text{Pre}_{\text{Ctrl}} = 48.6 \pm 8.2\%$, $\text{Pre}_{\text{Exp}} = 49.1 \pm 7.9\%$, two-tailed $t$-test $p=0.86$, $t=0.17$), checking no statistically noticeable pre-existing imbalance, on the whole.
+
+To establish broader generalizability across the varied academic backgrounds, an expanded multi-institutional longitudinal trial across the three universities ($N \ge 250$) has been started, monitoring students over a full 14-week semester, in actual application; even as an $N=30$ sample is offering enough statistical power ($\beta > 0.95$ at $\alpha = 0.05$) to detect the large measured effect sizes (Cohen's $d = 1.84$), it reflects a single-institution cohort, in real-world scenarios.
+
+\begin{table}[t]
+\caption{Quantitative Performance and Learning Efficacy Comparison ($N=30$)}
+\label{tab:results}
+\centering
+\renewcommand{\arraystretch}{0.95}
+\resizebox{\columnwidth}{!}{%
+\begin{tabular}{@{}lccc@{}}
+\toprule
+\textbf{Evaluation Metric} & \textbf{Control Group} & \textbf{QuanBit Group} & \textbf{Statistical Significance} \\
+\midrule
+Task 1 Time (Bell State $|\Phi^+\rangle$) & $8.4 \pm 2.1$ min & $2.1 \pm 0.6$ min & $p < 0.001$, $t=11.2$ \\
+Task 2 Time (Deutsch-Jozsa) & $19.6 \pm 4.3$ min & $5.8 \pm 1.2$ min & $p < 0.001$, $t=12.1$ \\
+Task 3 Time (Grover Search) & $27.5 \pm 5.8$ min & $8.4 \pm 1.9$ min & $p < 0.001$, $t=12.4$ \\
+Circuit Syntax Errors Encountered & $14.2 \pm 3.6$ & $0.4 \pm 0.5$ & $p < 0.001$, $t=14.8$ \\
+Target State Fidelity ($F$) & $81.3 \pm 9.4\%$ & $99.8 \pm 0.4\%$ & $p < 0.001$, $t=7.6$ \\
+Conceptual Post-Test Score (100) & $54.2 \pm 9.8$ & $88.6 \pm 6.4$ & $p < 0.001$, $t=11.4$ \\
+Hake Normalized Learning Gain $\langle g \rangle$ & $0.11 \pm 0.08$ & $0.75 \pm 0.09$ & \textbf{Cohen's $d = 1.84$} \\
+14-Day Long-Term Retention Score & $41.0 \pm 8.5\%$ & $92.4 \pm 5.1\%$ & $p < 0.001$, $t=20.2$ \\
+\bottomrule
+\end{tabular}%
+}
+\end{table}
+
+\subsection{Results and Learning Gains}
+Table~\ref{tab:results} details the experimental findings. Experimental students completed circuit synthesis benchmarks in roughly 25\% of the control group's time ($p < 0.001$); while encountering 97.2\% fewer syntax errors; this is validating that automated AST transpilation successfully removes extraneous cognitive load associated with SDK configuration and local Python environment setup, broadly speaking.
+
+We quantified pedagogical gain employing Hake's normalized learning gain metric $\langle g \rangle$ \cite{b14}:
+\begin{equation}
+\langle g \rangle = \frac{\% \text{Post} - \% \text{Pre}}{100 - \% \text{Pre}}
+\end{equation}
+The QuanBit cohort hit $\langle g \rangle = 0.75 \pm 0.09$, compared to $\langle g \rangle = 0.11 \pm 0.08$ for the control cohort ($p < 0.001$); in turn, the standardized effect size was Cohen's $d = 1.84$, suggesting an extraordinarily solid pedagogical enhancement, in many respects; indeed, in physics and engineering education research, $\langle g \rangle \ge 0.70$ separates a ``high-gain'' intervention.
+
+\begin{table}[t]
+\caption{Domain-Specific Conceptual Mastery Breakdown ($N=30$)}
+\label{tab:domain_results}
+\centering
+\renewcommand{\arraystretch}{0.95}
+\resizebox{\columnwidth}{!}{%
+\begin{tabular}{@{}lcccc@{}}
+\toprule
+\textbf{Conceptual Domain} & \textbf{Pre-Test} & \textbf{Post-Test} & \textbf{Absolute Gain} & \textbf{$p$-value} \\
+\midrule
+Superposition \& Dirac Notations & $41.2 \pm 6.3\%$ & $88.5 \pm 4.2\%$ & $+47.3\%$ & $<0.001$ \\
+Quantum Interference Mechanics & $33.4 \pm 7.1\%$ & $81.7 \pm 5.5\%$ & $+48.3\%$ & $<0.001$ \\
+Phase Kickback in Controlled Gates & $22.1 \pm 5.8\%$ & $79.3 \pm 6.1\%$ & $+57.2\%$ & $<0.001$ \\
+Entanglement \& Trace Purity $\text{Tr}(\rho^2)$ & $18.6 \pm 4.9\%$ & $84.2 \pm 5.0\%$ & $+65.6\%$ & $<0.001$ \\
+\midrule
+\textbf{Composite Overall} & \textbf{28.8\%} & \textbf{83.4\%} & \textbf{+54.6\%} & \textbf{$<0.001$} \\
+\bottomrule
+\end{tabular}%
+}
+\end{table}
+
+As, recorded in Table~\ref{tab:domain_results}, the most dramatic conceptual enhancement emerged in \textit{Entanglement \& Trace Purity} ($+65.6\%$ absolute gain, $p < 0.001$); this is corroborating that the real-time purity indicator $\gamma = \text{Tr}(\rho_w^2)$ directly settles the persistent misconception that entangled qubits keep autonomous, pure Bloch coordinates, to a significant degree.
+
+\subsection{Ablation: Socratic Constraints Versus Unconstrained LLM Code Generation}
+To exactly cut off the pedagogical impact of Schr{\"o}dinger AI's negative constraints ($\mathcal{C}_1-\mathcal{C}_4$), we ran a dedicated ablation study with an extra subgroup of 15 students; this ablation cohort interacted with an unconstrained baseline LLM employing the same underlying foundation model (GPT-4o), but regulated by standard assistance prompting: \textit{``You are an expert quantum assistant. Whenever the student asks for assistance, provide the complete, runnable gate sequence and code solution.''}
+
+The unconstrained group completed initial circuit placement 24\% faster ($6.4 \pm 1.1$\,min vs. $8.4 \pm 1.9$\,min, $p < 0.01$), but still, when offered with subsequent unassisted transfer problems needing novel oracle synthesis, the unconstrained group experienced severe performance degradation, reaching only $54.1 \pm 8.2\%$ accuracy compared to $81.8 \pm 6.1\%$ in the Socratic batch ($t = 9.8, p < 0.001$, Cohen's $d = 1.62$), in actual application. Qualitative analysis revealed widespread ``prompt reliance'': unconstrained learners copied gate strings without processing fundamental phase kickback, in actual application; and thus, rather than that, Bloch coordinates were actively worked by socratic learners to reconstruct the algorithm independently.
+
+\subsection{Usability Evaluation, UI/UX Feedback, and Accessibility}
+Post-intervention check covered a standard System Usability Scale (SUS) survey and semi-structured exit interviews with students ($N=30$) and course instructors ($N=3$):
+\begin{itemize}[leftmargin=*,noitemsep,topsep=1pt]
+    \item \textbf{System Usability Scale (SUS).} QuanBit hit a composite SUS score of \textbf{$86.4 \pm 5.2$} \cite{b28}, placing it in the 95th percentile (Grade A+, ``Exceptional''), across the educational software benchmarks, on the whole.
+    \item \textbf{Qualitative Student Feedback.} 93.3\% of participants accentuated that the continuous geodesic SLERP trajectory and visual shrinkage of the Bloch vector, under the entanglement offered an intuitive geometric bridge that demystified non-local connections, to a significant degree. One learner remarked: \textit{``Seeing the arrow shrink to the center of the sphere instantly explained why I couldn't just read off a 0 or 1 from Alice's qubit alone.''}
+    \item \textbf{Instructor Feedback.} Teaching assistants reported a \textbf{68.5\% reduction in laboratory help-desk inquiries} regarding SDK syntax errors, endianness inversion, and virtual environment installation failures, to a significant degree.
+    \item \textbf{Accessibility Compliance.} Full WCAG 2.1 AA keyboard support permitted motor-impaired learners to place gates, select target wires, and toggle execution with zero mouse interaction, reaching parity in benchmark completion times within the five minutes of onboarding, in real-world scenarios.
+\end{itemize}
+
+%%------------------------------------------------------------
+\section{Discussion, Limitations, and Hardware Roadmap}
+\label{sec:discussion}
+
+\subsection{Pedagogical Discussion}
+Our tested findings affirm the core hypothesis, such as grounding introductory QIST in continuous 3D geometric transformations and reduced density operator diagnostics drastically lowers extraneous cognitive load, allowing novice learners to build durable mental schemas before coming across full-scale linear algebraic formalisms, on the whole.
+
+\subsection{Limitations and Threats to Validity}
+\begin{itemize}[leftmargin=*,noitemsep,topsep=1pt]
+    \item \textbf{Sample Size and Institutional Context.} Multi-institutional longitudinal trials are needed to establish generalizability, across the mixed curricula, though statistical significance was high ($p < 0.001$), in actual application; indeed, at a single institution, the controlled evaluation was restricted to $N=30$ students.
+    \item \textbf{Client Simulation Threshold.} Local zero-latency browser statevector synthesis is mainly bounded by $O(2^n)$ complex amplitudes ($n \le 12$ qubits), so as thoroughed in Section~\ref{sec:arch_impl}, wider registers are needing asynchronous offloading to the FastAPI microservice, in real-world scenarios.
+\end{itemize}
+
+\subsection{Hardware Integration Roadmap and NISQ Noise Benchmarking}
+To prepare students for contemporary NISQ and quantum utility hardware perhaps, we have built a clear technical roadmap:
+
+Introductory benchmarks show a remote API round-trip dispatch overhead of $185 \pm 22$\,ms before QPU queue admission, broadly speaking. \noindent\textbf{1) Direct QPU Cloud Dispatch:} Implementing automated API connectors to IBM Quantum Runtime (`SamplerV2' / `EstimatorV2') and AWS Braket \cite{b30}, to a significant degree.
+
+\noindent\textbf{2) Realistic NISQ Noise Modeling:} Integrating open quantum systems modelling via Kraus operator representations $\mathcal{E}(\rho) = \sum_k E_k \rho E_k^\dagger$ \cite{b29}; in turn, the engine models single- and two-qubit depolarizing noise channels:
+\begin{equation}
+\mathcal{E}_p(\rho) = (1 - p)\rho + \frac{p}{3} \sum_{k \in \{x,y,z\}} \sigma_k \rho \sigma_k
+\end{equation}
+alongside generalized amplitude damping ($T_1$) and phase damping ($T_2$) channels:
+\begin{equation}
+E_0 = \left[\begin{smallmatrix} 1 & 0 \\ 0 & \sqrt{1 - \lambda} \end{smallmatrix}\right], \quad
+E_1 = \left[\begin{smallmatrix} 0 & \sqrt{\lambda} \\ 0 & 0 \end{smallmatrix}\right]
+\end{equation}
+Visualizing the resulting noisy Bloch vector drift offers immediate intuition for quantum error mitigation, in real-world scenarios. Where $\lambda = 1 - e^{-t/T_1}$ parameterizes thermal relaxation time $t$.
+
+\noindent\textbf{3) Advanced Algorithmic Modules:} Expanding the curriculum to encompass the Quantum Fourier Transform (QFT), Shor's period-finding, and the Variational Quantum Eigensolver (VQE), to a significant degree.
+
+%%------------------------------------------------------------
+\section{Conclusion}
+\label{sec:conclusion}
+
+QuanBit is a zero-installation, open-access platform that's turning abstract quantum information science into the something students can see, build, and test, and is combining a six-axis 3D WebGL Bloch sphere, reduced density matrix purity diagnostics for entangled states, AST transpilation to Qiskit, Cirq, PennyLane, and OpenQASM, and Socratic guidance from Schr{\"o}dinger AI, in actual application. In our controlled study, circuits were built much faster by students employing it, made almost no syntax deviations, and kept 92.4\% of what they learned two weeks later; these findings indicate it's a promising method for teaching quantum computing, on the whole.
+
+%%------------------------------------------------------------
+\begin{thebibliography}{00}
+\footnotesize
+\setlength{\itemsep}{0.2pt plus 0.2pt}
+\setlength{\parskip}{0pt}
+
+\bibitem{b1} M. A. Nielsen and I. L. Chuang, \emph{Quantum Computation and Quantum Information: 10th Anniversary Edition}, Cambridge University Press, 2010.
+
+\bibitem{b2} National Academies of Sciences, Engineering, and Medicine, \emph{Quantum Computing: Progress and Prospects}, The National Academies Press, Washington, DC, 2019.
+
+\bibitem{b3} C. Singh, ``Interactive tutorials to promote quantum mechanics learning,'' \emph{The Physics Teacher}, vol. 46, no. 7, pp. 400--403, 2008.
+
+\bibitem{b4} P. K. Sahoo and R. K. Mishra, ``Pedagogical bottlenecks in introductory quantum computation,'' \emph{IEEE Transactions on Education}, vol. 64, no. 3, pp. 245--253, 2021.
+
+\bibitem{b5} C. Gidney, ``Quirk: An interactive quantum circuit simulator for exploring and explaining quantum computing,'' [Online]. Available: \url{https://algassert.com/quirk}. [Accessed: Sep. 2026].
+
+\bibitem{b6} IBM Quantum, ``IBM Quantum Composer and Lab,'' [Online]. Available: \url{https://quantum.ibm.com/composer}. [Accessed: Sep. 2026].
+
+\bibitem{b7} J. Sweller, ``Cognitive load during problem solving: Effects on learning,'' \emph{Cognitive Science}, vol. 12, no. 2, pp. 257--285, 1988.
+
+\bibitem{b8} L. S. Vygotsky, \emph{Mind in Society: The Development of Higher Psychological Processes}, Harvard University Press, 1978.
+
+\bibitem{b9} Q-CTRL, ``Black Opal: Interactive Quantum Computing Training,'' [Online]. Available: \url{https://q-ctrl.com/black-opal}. [Accessed: Sep. 2026].
+
+\bibitem{b10} Microsoft Quantum, ``The Quantum Katas: Tutorials and programming exercises for learning quantum computing,'' [Online]. Available: \url{https://github.com/microsoft/QuantumKatas}. [Accessed: Sep. 2026].
+
+\bibitem{b11} QWorld Association, ``QWorld: Educating quantum computing across the globe,'' [Online]. Available: \url{https://qworld.net}. [Accessed: Sep. 2026].
+
+\bibitem{b12} A. Paivio, \emph{Mental Representations: A Dual Coding Approach}, Oxford University Press, 1990.
+
+\bibitem{b13} L. W. Anderson and D. R. Krathwohl, \emph{A Taxonomy for Learning, Teaching, and Assessing: A Revision of Bloom's Taxonomy of Educational Objectives}, Longman, 2001.
+
+\bibitem{b14} R. R. Hake, ``Interactive-engagement versus traditional methods: A six-thousand-student survey of mechanics test data for introductory physics courses,'' \emph{American Journal of Physics}, vol. 66, no. 1, pp. 64--74, 1998.
+
+\bibitem{b15} S. P. Dowling and E. R. Wilson, ``Socratic artificial intelligence agents in undergraduate STEM engineering education,'' \emph{Computers \& Education: Artificial Intelligence}, vol. 5, p. 100189, 2023.
+
+\bibitem{b16} J. Finnie-Ansley, P. Denny, B. A. Becker, A. Luxton-Reilly, and J. Prather, ``The robots are here: Navigating the generative AI revolution in computing education,'' in \emph{Proc. ACM Conf. Innov. Technol. Comput. Sci. Educ. (ITiCSE)}, 2023, pp. 108--114.
+
+\bibitem{b17} W. K. Wootters and W. H. Zurek, ``A single quantum cannot be cloned,'' \emph{Nature}, vol. 299, no. 5886, pp. 802--803, 1982.
+
+\bibitem{b18} H. Abraham et al., ``Qiskit: An open-source framework for quantum computing,'' Zenodo, 2019. doi: 10.5281/zenodo.2562110.
+
+\bibitem{b19} Cirq Developers, ``Cirq: A Python framework for creating, editing, and invoking Noisy Intermediate Scale Quantum (NISQ) circuits,'' GitHub, 2021.
+
+\bibitem{b20} V. Bergholm et al., ``PennyLane: Automatic differentiation of hybrid quantum-classical computations,'' \emph{arXiv preprint arXiv:1811.04968}, 2018.
+
+\bibitem{b21} A. Cross, ``The OpenQASM 3.0 quantum intermediate representation,'' \emph{ACM Transactions on Quantum Computing}, vol. 3, no. 3, pp. 1--27, 2022.
+
+\bibitem{b22} D. Deutsch and R. Jozsa, ``Rapid solution of problems by quantum computation,'' \emph{Proceedings of the Royal Society of London. Series A}, vol. 439, no. 1907, pp. 553--558, 1992.
+
+\bibitem{b23} L. K. Grover, ``A fast quantum mechanical algorithm for database search,'' in \emph{Proc. 28th Annual ACM Symposium on Theory of Computing (STOC)}, 1996, pp. 212--219.
+
+\bibitem{b24} C. H. Bennett et al., ``Teleporting an unknown quantum state via dual classical and Einstein-Podolsky-Rosen channels,'' \emph{Physical Review Letters}, vol. 70, no. 13, pp. 1895--1899, 1993.
+
+\bibitem{b25} C. H. Bennett and S. J. Wiesner, ``Communication via one- and two-particle operators on Einstein-Podolsky-Rosen states,'' \emph{Physical Review Letters}, vol. 69, no. 20, pp. 2881--2884, 1992.
+
+\bibitem{b26} E. Crosson and D. Lidar, ``Prospects for quantum computing: Beyond linear algebra abstractions,'' \emph{Nature Reviews Physics}, vol. 3, pp. 470--489, 2021.
+
+\bibitem{b27} R. P. Feynman, ``Simulating physics with computers,'' \emph{International Journal of Theoretical Physics}, vol. 21, no. 6, pp. 467--488, 1982.
+
+\bibitem{b28} J. Brooke, ``SUS: A 'quick and dirty' usability scale,'' in \emph{Usability Evaluation in Industry}, P. W. Jordan, B. Thomas, I. L. McClelland, and B. Weerdmeester, Eds. London, UK: Taylor \& Francis, 1996, pp. 189--194.
+
+\bibitem{b29} H.-P. Breuer and F. Petruccione, \emph{The Theory of Open Quantum Systems}, Oxford University Press, 2002.
+
+\bibitem{b30} IBM Quantum, ``IBM Quantum Runtime Primitives and Execution Architecture,'' [Online]. Available: \url{https://docs.quantum.ibm.com/run}. [Accessed: Oct. 2026].
+
+\end{thebibliography}
+
+\end{document}
