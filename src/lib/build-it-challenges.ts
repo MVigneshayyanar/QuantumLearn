@@ -265,6 +265,233 @@ export const BUILD_IT_CHALLENGES: Record<string, BuildItChallenge> = {
         minStep: 4
       }
     ]
+  },
+  'qft': {
+    moduleSlug: 'qft',
+    title: 'Construct the Quantum Fourier Transform',
+    objective: 'Synthesize the 3-qubit QFT circuit mapping computational basis states to Fourier relative phases.',
+    taskDescription: '1. Apply Hadamard on Qubit 0, followed by controlled phase rotations from Q1 and Q2.\n2. Apply Hadamard on Qubit 1 and controlled phase rotation from Q2.\n3. Apply Hadamard on Qubit 2.\n4. Complete the transform with a SWAP gate between Q0 and Q2.',
+    numQubits: 3,
+    scaffoldGates: [
+      { id: 'scaffold-h0', type: 'h', qubits: [0], step: 0 }
+    ],
+    solutionGates: [
+      { id: 'sol-h0', type: 'h', qubits: [0], step: 0 },
+      { id: 'sol-s0', type: 's', qubits: [0], step: 1 },
+      { id: 'sol-cz01', type: 'cz', qubits: [0, 1], step: 2 },
+      { id: 'sol-h1', type: 'h', qubits: [1], step: 3 },
+      { id: 'sol-s1', type: 's', qubits: [1], step: 4 },
+      { id: 'sol-cz12', type: 'cz', qubits: [1, 2], step: 5 },
+      { id: 'sol-h2', type: 'h', qubits: [2], step: 6 },
+      { id: 'sol-swap', type: 'swap', qubits: [0, 2], step: 7 }
+    ],
+    checkerType: 'fidelity',
+    hints: [
+      'Each qubit requires a Hadamard followed by successively smaller controlled phase rotations.',
+      'Controlled phase gates couple each qubit to subsequent qubits.',
+      'A final SWAP gate reverses qubit ordering to match standard binary frequency order.'
+    ],
+    milestones: [
+      {
+        id: 'qft-q0-hadamard',
+        label: 'Hadamard Q0',
+        shortAction: 'Initialize first Fourier register stage',
+        simpleClue: 'Which single-qubit gate creates the equal superposition foundation on Q0?',
+        requiredGateSignatures: ['H(Q0)'],
+        minStep: 0
+      },
+      {
+        id: 'qft-phase-rotations',
+        label: 'Entangling Rotations',
+        shortAction: 'Apply controlled phase interactions between qubits',
+        simpleClue: 'Apply the controlled phase operations coupling Q0, Q1, and Q2.',
+        requiredGateSignatures: ['CZ(Q0,1)', 'CZ(Q1,2)'],
+        minStep: 2
+      },
+      {
+        id: 'qft-qubit-reversal',
+        label: 'Register Reversal',
+        shortAction: 'Reorder qubits to restore conventional bit-significance order',
+        simpleClue: 'What gate exchanges Q0 and Q2 to finish the Fourier transform?',
+        requiredGateSignatures: ['SWAP(Q0,2)'],
+        minStep: 7
+      }
+    ]
+  },
+  'quantum-phase-estimation': {
+    moduleSlug: 'quantum-phase-estimation',
+    title: 'Construct Quantum Phase Estimation',
+    objective: 'Extract the eigenphase eigenvalue of a unitary operator into a 2-qubit measurement register.',
+    taskDescription: '1. Prepare the target qubit in eigenstate |1⟩.\n2. Create equal superposition across counting qubits Q0 and Q1.\n3. Apply controlled unitary operations with powers 2⁰ and 2¹.\n4. Apply the inverse QFT on the counting register to read out the phase.',
+    numQubits: 3,
+    scaffoldGates: [
+      { id: 'scaffold-prep', type: 'x', qubits: [2], step: 0 }
+    ],
+    solutionGates: [
+      { id: 'sol-x', type: 'x', qubits: [2], step: 0 },
+      { id: 'sol-h0', type: 'h', qubits: [0], step: 1 },
+      { id: 'sol-h1', type: 'h', qubits: [1], step: 1 },
+      { id: 'sol-cu1', type: 'cz', qubits: [1, 2], step: 2 },
+      { id: 'sol-cu2', type: 'cz', qubits: [0, 2], step: 3 },
+      { id: 'sol-iqft-h0', type: 'h', qubits: [0], step: 4 },
+      { id: 'sol-iqft-cz', type: 'cz', qubits: [0, 1], step: 5 },
+      { id: 'sol-iqft-h1', type: 'h', qubits: [1], step: 6 },
+      { id: 'sol-iqft-swap', type: 'swap', qubits: [0, 1], step: 7 }
+    ],
+    checkerType: 'measurement',
+    targetOutcome: '11',
+    hints: [
+      'The target register must start in an eigenstate of the unitary U.',
+      'Controlled-U operations imprint powers of the phase 2^k θ onto the counting qubits.',
+      'Inverse QFT converts the geometric phase rotations into computational basis binary fractions.'
+    ],
+    milestones: [
+      {
+        id: 'qpe-target-eigenstate',
+        label: 'Eigenstate Prep',
+        shortAction: 'Initialize target qubit into an eigenstate',
+        simpleClue: 'Which gate flips Q2 from |0⟩ into computational eigenstate |1⟩?',
+        requiredGateSignatures: ['X(Q2)'],
+        minStep: 0
+      },
+      {
+        id: 'qpe-counting-superposition',
+        label: 'Counting Superposition',
+        shortAction: 'Put counting register into uniform superposition',
+        simpleClue: 'Which parallel gates create equal amplitude over Q0 and Q1?',
+        requiredGateSignatures: ['H(Q0)', 'H(Q1)'],
+        minStep: 1
+      },
+      {
+        id: 'qpe-controlled-u',
+        label: 'Controlled Powers',
+        shortAction: 'Apply controlled unitary gates onto target qubit',
+        simpleClue: 'Apply the controlled phase operations that imprint the phase onto counting qubits.',
+        requiredGateSignatures: ['CZ(Q1,2)', 'CZ(Q0,2)'],
+        minStep: 2
+      },
+      {
+        id: 'qpe-iqft-readout',
+        label: 'Inverse QFT',
+        shortAction: 'Interferometrically decode phase into binary readout',
+        simpleClue: 'Invert the Fourier transformation across the counting register.',
+        requiredGateSignatures: ['H(Q0)', 'H(Q1)', 'SWAP(Q0,1)'],
+        minStep: 4
+      }
+    ]
+  },
+  'shor': {
+    moduleSlug: 'shor',
+    title: "Construct Shor's Period Finding Circuit",
+    objective: 'Implement quantum order finding for modular exponentiation to extract the period r of a coprime base.',
+    taskDescription: '1. Prepare target register in state |1⟩ (Q3).\n2. Place control qubits Q0 and Q1 into equal superposition.\n3. Apply modular multiplication oracle operations.\n4. Apply inverse QFT to control register to detect the interference peaks.',
+    numQubits: 4,
+    scaffoldGates: [
+      { id: 'scaffold-sh-x', type: 'x', qubits: [3], step: 0 }
+    ],
+    solutionGates: [
+      { id: 'sol-sh-x', type: 'x', qubits: [3], step: 0 },
+      { id: 'sol-sh-h0', type: 'h', qubits: [0], step: 1 },
+      { id: 'sol-sh-h1', type: 'h', qubits: [1], step: 1 },
+      { id: 'sol-sh-cx1', type: 'cx', qubits: [1, 2], step: 2 },
+      { id: 'sol-sh-cx2', type: 'cx', qubits: [0, 3], step: 3 },
+      { id: 'sol-sh-h0-iqft', type: 'h', qubits: [0], step: 4 },
+      { id: 'sol-sh-cz', type: 'cz', qubits: [0, 1], step: 5 },
+      { id: 'sol-sh-h1-iqft', type: 'h', qubits: [1], step: 6 },
+      { id: 'sol-sh-swap', type: 'swap', qubits: [0, 1], step: 7 }
+    ],
+    checkerType: 'measurement',
+    targetOutcome: '10',
+    hints: [
+      'The modular multiplication register starts in identity state |1⟩.',
+      'Control qubits evaluate a superposition of powers a^x mod N.',
+      'Constructive interference in the inverse QFT isolates multiples of 1/r.'
+    ],
+    milestones: [
+      {
+        id: 'shor-target-init',
+        label: 'Target Init',
+        shortAction: 'Initialize modular register to |1⟩',
+        simpleClue: 'Which gate prepares the target register in computational basis state |0...01⟩?',
+        requiredGateSignatures: ['X(Q3)'],
+        minStep: 0
+      },
+      {
+        id: 'shor-control-superposition',
+        label: 'Control Superposition',
+        shortAction: 'Prepare control register in equal superposition',
+        simpleClue: 'Which gates create the simultaneous evaluation register over all powers x?',
+        requiredGateSignatures: ['H(Q0)', 'H(Q1)'],
+        minStep: 1
+      },
+      {
+        id: 'shor-modular-oracle',
+        label: 'Modular Oracle',
+        shortAction: 'Apply controlled modular multiplication',
+        simpleClue: 'Couple the control register to target bits via entangling CNOT operations.',
+        requiredGateSignatures: ['CX(Q1,2)', 'CX(Q0,3)'],
+        minStep: 2
+      },
+      {
+        id: 'shor-period-readout',
+        label: 'Period Readout',
+        shortAction: 'Inverse QFT on control register',
+        simpleClue: 'Apply the inverse Fourier transform to extract the peak frequencies yielding period r.',
+        requiredGateSignatures: ['H(Q0)', 'H(Q1)', 'SWAP(Q0,1)'],
+        minStep: 4
+      }
+    ]
+  },
+  'vqe': {
+    moduleSlug: 'vqe',
+    title: 'Construct the Variational Quantum Eigensolver (VQE)',
+    objective: 'Build a parameterized molecular ansatz to find the ground state energy eigenvalue of a 2-qubit Hamiltonian.',
+    taskDescription: '1. Prepare Hartree-Fock reference state |10⟩.\n2. Apply parameterized rotation gates (Hadamard/R_y layers).\n3. Apply entangling CNOT to model electron correlation.\n4. Apply variational phase tuning and final entangling readout.',
+    numQubits: 2,
+    scaffoldGates: [
+      { id: 'scaffold-vqe-hf', type: 'x', qubits: [0], step: 0 }
+    ],
+    solutionGates: [
+      { id: 'sol-vqe-hf', type: 'x', qubits: [0], step: 0 },
+      { id: 'sol-vqe-h0', type: 'h', qubits: [0], step: 1 },
+      { id: 'sol-vqe-h1', type: 'h', qubits: [1], step: 1 },
+      { id: 'sol-vqe-cx1', type: 'cx', qubits: [0, 1], step: 2 },
+      { id: 'sol-vqe-z0', type: 'z', qubits: [0], step: 3 },
+      { id: 'sol-vqe-s1', type: 's', qubits: [1], step: 3 },
+      { id: 'sol-vqe-cx2', type: 'cx', qubits: [0, 1], step: 4 }
+    ],
+    checkerType: 'fidelity',
+    hints: [
+      'Hartree-Fock initialization prepares the closest classical mean-field electron configuration.',
+      'Single-qubit rotation layers generate variational parameter freedom.',
+      'Entangling CNOT gates create the quantum electron correlation that classical computers struggle to simulate.'
+    ],
+    milestones: [
+      {
+        id: 'vqe-hartree-fock',
+        label: 'Hartree-Fock State',
+        shortAction: 'Initialize reference electronic configuration',
+        simpleClue: 'Which gate flips Q0 to establish the reference electronic occupation state |10⟩?',
+        requiredGateSignatures: ['X(Q0)'],
+        minStep: 0
+      },
+      {
+        id: 'vqe-ansatz-superposition',
+        label: 'Variational Layers',
+        shortAction: 'Apply parameterized single-qubit rotations',
+        simpleClue: 'Rotate both qubits into coherent superposition.',
+        requiredGateSignatures: ['H(Q0)', 'H(Q1)'],
+        minStep: 1
+      },
+      {
+        id: 'vqe-electron-entanglement',
+        label: 'Correlation Entangler',
+        shortAction: 'Entangle electron orbitals via CNOT',
+        simpleClue: 'Which 2-qubit unitary creates quantum entanglement between both molecular orbitals?',
+        requiredGateSignatures: ['CX(Q0,1)'],
+        minStep: 2
+      }
+    ]
   }
 };
 

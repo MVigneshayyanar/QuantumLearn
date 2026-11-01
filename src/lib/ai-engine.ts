@@ -62,6 +62,34 @@ export const MISCONCEPTION_GUIDES: Record<MisconceptionTag, {
     socraticPrompt: "Ask how many orthogonal Bell states exist in a 2-qubit Hilbert space.",
     hintSimple: "With 2 entangled qubits, there are exactly 4 distinct Bell states (|Φ+⟩, |Φ-⟩, |Ψ+⟩, |Ψ-⟩), which encode exactly 2 classical bits (00, 01, 10, 11).",
     hintTechnical: "Holevo's Bound limits the accessible classical information of an unentangled qubit to 1 bit. Prior entanglement doubles this capacity to log2(dim(H_A ⊗ H_B)) = 2 classical bits per transmitted qubit."
+  },
+  QFT_PHASE_RELATION: {
+    name: "QFT Phase Relationship",
+    flaw: "Confusing frequency domain phases with classical probabilities.",
+    socraticPrompt: "Guide the student to see how QFT maps state indices into geometric phase angles e^(2πijk/2ⁿ).",
+    hintSimple: "QFT doesn't change which numbers exist; it translates numbers into the rotation angles of clock hands across your qubits!",
+    hintTechnical: "QFT is an exact unitary rotation in 2ⁿ-dimensional Hilbert space mapping |j⟩ to N^(-1/2) ∑_k e^(2πijk/N)|k⟩."
+  },
+  QPE_PRECISION_LIMIT: {
+    name: "QPE Precision & Sinc Distribution",
+    flaw: "Believing QPE fails completely if the true eigenphase is not an exact power of 2 fraction.",
+    socraticPrompt: "Ask what happens around non-exact phases — does destructive interference eliminate everything or form a sharp sinc peak?",
+    hintSimple: "Even if the phase isn't an exact binary fraction, quantum interference creates a sharp mountain centered right at the nearest answer!",
+    hintTechnical: "Non-rational phases produce a sinc² probability distribution peaking at the closest integer ⌊2^t θ⌉ with bounded error probability."
+  },
+  SHOR_PERIOD_CLASSICAL_REDUCTION: {
+    name: "Shor's Classical-Quantum Boundary",
+    flaw: "Thinking quantum computers factor numbers directly without classical number theory reduction.",
+    socraticPrompt: "Ask the student what the quantum part computes (the period r) and how Euclid's gcd algorithm finishes the factoring classically.",
+    hintSimple: "The quantum chip only finds how often a pattern repeats (the period). Once you know the period, a classical laptop takes fractions of a second to find the factors!",
+    hintTechnical: "The quantum speedup is strictly isolated to modular order finding via QFT; finding factors from period r uses classical gcd(a^(r/2) ± 1, N)."
+  },
+  VQE_ANSAETZE_DEPTH: {
+    name: "VQE Variational Principle",
+    flaw: "Believing VQE can accidentally calculate an energy lower than the true physical ground state.",
+    socraticPrompt: "Remind the user of the Rayleigh-Ritz theorem: why can ⟨ψ(θ)|H|ψ(θ)⟩ never drop below E₀?",
+    hintSimple: "The ground state is the absolute lowest floor in physics. Downhill optimization can never accidentally tunnel beneath the ground!",
+    hintTechnical: "By the Rayleigh-Ritz variational principle, ⟨ψ|H|ψ⟩/⟨ψ|ψ⟩ ≥ min_i(E_i) = E₀ for any valid quantum statevector in Hilbert space."
   }
 };
 

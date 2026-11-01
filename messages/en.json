@@ -80,6 +80,34 @@
       "summary": "Sends two classical bits of information (00, 01, 10, or 11) by physically transmitting only a single quantum qubit through an entangled channel.",
       "qubits": "2 Qubits",
       "speedup": "2x Classical Channel Capacity"
+    },
+    "qft": {
+      "title": "Quantum Fourier Transform (QFT)",
+      "category": "Frequency Domain",
+      "summary": "Transforms computational basis amplitudes into frequency phase rotations with exponential speedup (O(n²) gates vs classical FFT O(n·2ⁿ)).",
+      "qubits": "3 Qubits",
+      "speedup": "Exponential O(n²) vs O(n·2ⁿ)"
+    },
+    "quantumPhaseEstimation": {
+      "title": "Quantum Phase Estimation",
+      "category": "Eigenvalue Extraction",
+      "summary": "Estimates the unknown phase eigenvalue θ of an arbitrary unitary operator U using controlled powers of U and an inverse QFT register.",
+      "qubits": "3-4 Qubits",
+      "speedup": "Exponential Precision per Query"
+    },
+    "shor": {
+      "title": "Shor's Factoring Algorithm",
+      "category": "Number Theory & Cryptography",
+      "summary": "Breaks RSA encryption by reducing prime factorization to quantum modular order finding, solving in polynomial time what takes classical supercomputers billions of years.",
+      "qubits": "4 Qubits",
+      "speedup": "Exponential (Polynomial O(n³) vs Subexponential)"
+    },
+    "vqe": {
+      "title": "Variational Quantum Eigensolver (VQE)",
+      "category": "Quantum Chemistry & NISQ",
+      "summary": "Finds molecular ground state energies on noisy quantum hardware via hybrid quantum parameterized ansatz state preparation and classical gradient descent.",
+      "qubits": "2 Qubits",
+      "speedup": "NISQ-Friendly Molecular Simulation"
     }
   },
   "simulator": {

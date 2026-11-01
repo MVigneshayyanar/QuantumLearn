@@ -74,6 +74,26 @@ export function Footer() {
                   {t.algorithms.superdenseCoding.title} — {t.algorithms.superdenseCoding.category}
                 </Link>
               </li>
+              <li>
+                <Link href="/learn/qft" prefetch={false} className="hover:text-primary-600 transition-colors">
+                  {t.algorithms?.qft?.title || 'Quantum Fourier Transform (QFT)'} — {t.algorithms?.qft?.category || 'Frequency Domain'}
+                </Link>
+              </li>
+              <li>
+                <Link href="/learn/quantum-phase-estimation" prefetch={false} className="hover:text-primary-600 transition-colors">
+                  {t.algorithms?.quantumPhaseEstimation?.title || 'Quantum Phase Estimation'} — {t.algorithms?.quantumPhaseEstimation?.category || 'Eigenvalue Extraction'}
+                </Link>
+              </li>
+              <li>
+                <Link href="/learn/shor" prefetch={false} className="hover:text-primary-600 transition-colors">
+                  {t.algorithms?.shor?.title || "Shor's Factoring Algorithm"} — {t.algorithms?.shor?.category || 'Number Theory'}
+                </Link>
+              </li>
+              <li>
+                <Link href="/learn/vqe" prefetch={false} className="hover:text-primary-600 transition-colors">
+                  {t.algorithms?.vqe?.title || 'Variational Quantum Eigensolver'} — {t.algorithms?.vqe?.category || 'Quantum Chemistry'}
+                </Link>
+              </li>
             </ul>
           </nav>
 

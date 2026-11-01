@@ -26,7 +26,11 @@ import {
   Crown,
   Info,
   Clock,
-  AlertCircle
+  AlertCircle,
+  Activity,
+  Binary,
+  Key,
+  FlaskConical
 } from 'lucide-react';
 import { getPlanExpiryInfo } from '@/lib/subscription-utils';
 
@@ -81,6 +85,10 @@ export function Navbar() {
     { href: '/learn/grover', label: 'Grover', icon: Sparkles },
     { href: '/learn/teleportation', label: 'Teleportation', icon: Layers },
     { href: '/learn/superdense-coding', label: 'Superdense', icon: Layers },
+    { href: '/learn/qft', label: 'Quantum Fourier (QFT)', icon: Activity },
+    { href: '/learn/quantum-phase-estimation', label: 'Phase Estimation (QPE)', icon: Binary },
+    { href: '/learn/shor', label: "Shor's Algorithm", icon: Key },
+    { href: '/learn/vqe', label: 'VQE (Chemistry)', icon: FlaskConical },
   ];
 
   // Hide Navbar on full-screen practice solve workbench
